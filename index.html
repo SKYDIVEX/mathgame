@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>Matematik Oyunu</title>
+<style>
+body { font-family: Arial; text-align: center; background: #222; color: #eee; }
+input { font-size: 20px; padding: 5px; margin: 10px; }
+button { font-size: 20px; padding: 5px 15px; cursor: pointer; }
+</style>
+</head>
+<body>
+<h1>Matematik Oyunu</h1>
+<p id="question"></p>
+<input type="text" id="answer" placeholder="Cevabın?">
+<button onclick="checkAnswer()">Gönder</button>
+<p id="result"></p>
+
+<script>
+function randomInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+function askQuestion() {
+  let a = randomInt(1, 10);
+  let b = randomInt(1, 10);
+  let op = ["+","-","*","/"][randomInt(0,3)];
+  question = `${a} ${op} ${b}`;
+  document.getElementById("question").innerText = `${question} kaçtır?`;
+  correct = Math.round(eval(question) * 100) / 100;
+}
+function checkAnswer() {
+  let user = document.getElementById("answer").value;
+  let result = document.getElementById("result");
+  if (parseFloat(user) === correct) {
+    result.innerText = "Aferin, doğru!";
+    result.style.color = "lime";
+  } else {
+    result.innerText = `Yanlış! Doğrusu ${correct}`;
+    result.style.color = "red";
+  }
+  document.getElementById("answer").value = "";
+  askQuestion();
+}
+let question, correct;
+askQuestion();
+</script>
+</body>
+</html>
