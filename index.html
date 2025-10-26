@@ -2,45 +2,112 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<title>Matematik Oyunu</title>
+<title>Matematik Oyunu v1.0.2</title>
 <style>
-body { font-family: Arial; text-align: center; background: #222; color: #eee; }
-input { font-size: 20px; padding: 5px; margin: 10px; }
-button { font-size: 20px; padding: 5px 15px; cursor: pointer; }
+body { font-family: Arial; text-align: center; background: #222; color: #eee; transition: background 0.5s; }
+input, select { font-size: 18px; padding: 5px; margin: 5px; }
+button { font-size: 18px; padding: 5px 10px; cursor: pointer; }
+#leaderboard { margin-top: 20px; text-align: left; display: inline-block; }
 </style>
 </head>
 <body>
-<h1>Matematik Oyunu</h1>
-<p id="question"></p>
-<input type="text" id="answer" placeholder="Cevabın?">
-<button onclick="checkAnswer()">Gönder</button>
-<p id="result"></p>
+<h1>Matematik Oyunu v1.0.2</h1>
+
+<p>Kullanıcı adını gir:</p>
+<input type="text" id="playerName" placeholder="Adın?">
+<button onclick="startGame()">Başla</button>
+
+<div id="gameArea" style="display:none;">
+  <p>Soru: <span id="question"></span></p>
+  <input type="text" id="answer" placeholder="Cevabın?">
+  <button onclick="checkAnswer()">Gönder</button>
+  <p id="result"></p>
+
+  <h3>Arka plan:</h3>
+  Renk: <input type="color" id="bgColor" onchange="changeBG()">
+  Fotoğraf: <input type="file" id="bgImage" accept="image/*" onchange="changeBGImage()">
+
+  <h3>Puan Tablosu</h3>
+  <div id="leaderboard"></div>
+</div>
 
 <script>
-function randomInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
-function askQuestion() {
-  let a = randomInt(1, 10);
-  let b = randomInt(1, 10);
-  let op = ["+","-","*","/"][randomInt(0,3)];
-  question = `${a} ${op} ${b}`;
-  document.getElementById("question").innerText = `${question} kaçtır?`;
-  correct = Math.round(eval(question) * 100) / 100;
+let player, score=0, correct, question;
+let leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || {};
+let correctMessages = ["Aferin!", "Harika!", "Süper!", "Bravo!"];
+let wrongMessages = ["Hmm yanlış...", "Bir daha dene!", "Yanlış oldu!", "Doğrusunu birazdan göreceksin..."];
+
+function startGame() {
+  player = document.getElementById('playerName').value.trim();
+  if(!player) { alert('Adını gir!'); return; }
+  if(!leaderboard[player]) leaderboard[player]=0;
+  document.getElementById('gameArea').style.display='block';
+  askQuestion();
+  updateLeaderboard();
 }
-function checkAnswer() {
-  let user = document.getElementById("answer").value;
-  let result = document.getElementById("result");
-  if (parseFloat(user) === correct) {
-    result.innerText = "Aferin, doğru!";
-    result.style.color = "lime";
-  } else {
-    result.innerText = `Yanlış! Doğrusu ${correct}`;
-    result.style.color = "red";
-  }
+
+function randomInt(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
+
+function askQuestion(){
+  let a=randomInt(1,10);
+  let b=randomInt(1,10);
+  let ops=["+","-","*","/"];
+  let op=ops[randomInt(0,3)];
+  question = `${a} ${op} ${b}`;
+  document.getElementById("question").innerText = question;
+  correct = Math.round(eval(question)*100)/100;
+}
+
+function nearlyEqual(a,b,eps=0.01){ return Math.abs(a-b)<eps; }
+
+function checkAnswer(){
+  let user=parseFloat(document.getElementById("answer").value);
+  let result=document.getElementById("result");
   document.getElementById("answer").value = "";
+
+  if(nearlyEqual(user,correct)){
+    let msg = correctMessages[randomInt(0, correctMessages.length-1)];
+    result.innerText = msg;
+    result.style.color="lime";
+  } else {
+    let msg = wrongMessages[randomInt(0, wrongMessages.length-1)];
+    result.innerText = msg;
+    result.style.color="red";
+    setTimeout(()=>{ result.innerText = `Doğrusu: ${correct}`; }, 1500);
+  }
+
+  setTimeout(()=>{ result.innerText = ""; }, 2000);
+
+  if(nearlyEqual(user,correct)) score+=10; else score-=5;
+  leaderboard[player]=score;
+  localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
+  updateLeaderboard();
   askQuestion();
 }
-let question, correct;
-askQuestion();
+
+function updateLeaderboard(){
+  let lb = Object.entries(leaderboard)
+           .sort((a,b)=>b[1]-a[1])
+           .map(e=>`${e[0]}: ${e[1]} puan`).join("<br>");
+  document.getElementById('leaderboard').innerHTML = lb;
+}
+
+// Arka plan renk ve resim
+function changeBG(){
+  document.body.style.background = document.getElementById('bgColor').value;
+  document.body.style.backgroundSize = "cover";
+}
+function changeBGImage(){
+  let file=document.getElementById('bgImage').files[0];
+  if(file){
+    let reader = new FileReader();
+    reader.onload=function(e){
+      document.body.style.background=`url(${e.target.result})`;
+      document.body.style.backgroundSize="cover";
+    }
+    reader.readAsDataURL(file);
+  }
+}
 </script>
 </body>
 </html>
