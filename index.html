@@ -4,14 +4,15 @@
 <meta charset="UTF-8">
 <title>Matematik Oyunu</title>
 <style>
-  body { font-family: Arial; text-align: center; background: #222; color: #eee; transition: background 0.4s, color 0.2s; margin:0; padding:20px; }
-  .container { max-width:520px; margin:0 auto; }
-  input, select, button { font-size: 18px; padding: 8px; margin: 6px; }
-  button { cursor: pointer; }
-  #leaderboard { margin-top: 16px; text-align: left; display: inline-block; min-width:200px; }
-  #topbar { display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:12px; }
-  #result { min-height:28px; font-weight:700; transition: opacity 0.4s; }
-  .hidden { display:none; }
+body { font-family: Arial; text-align: center; background: #222; color: #eee; transition: background 0.4s, color 0.2s; margin:0; padding:20px; }
+.container { max-width:520px; margin:0 auto; }
+input, select, button { font-size: 18px; padding: 8px; margin: 6px; }
+button { cursor: pointer; }
+#leaderboard { margin-top: 16px; text-align: left; display: inline-block; min-width:200px; }
+#topbar { display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:12px; }
+#result { min-height:28px; font-weight:700; transition: opacity 0.4s; }
+.hidden { display:none; }
+.versionNote { position:fixed; left:10px; bottom:5px; font-size:12px; color:#888; }
 </style>
 </head>
 <body>
@@ -24,6 +25,14 @@
   <div id="menu">
     <p>Kullanıcı adını gir:</p>
     <input type="text" id="playerName" placeholder="Adın?">
+    
+    <!-- Firebase login kontrolleri -->
+    <div id="authControls" style="margin-top:10px;">
+      <button id="googleSignBtn">Google ile giriş</button>
+      <button id="logoutBtn">Çıkış</button>
+      <span id="userLabel">Giriş yapılmadı</span>
+    </div>
+
     <div>
       <button id="bgBtn">Arka Plan Seç</button>
       <button id="startBtn">Başla</button>
@@ -53,10 +62,31 @@
   </div>
 </div>
 
-<script>
-/* Matematik Oyunu - v1.0.2 (UI sadeleştirildi) */
-/* Versiyon bilgisi: v1.0.2 - kodda tutulur, ekranda gözükmez */
+<div class="versionNote">v1.0.2</div>
 
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-analytics.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
+import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyD-2dVgKDEqDwV54fRUH_JZXPe5V1X3rzM",
+  authDomain: "mathgame-a7c75.firebaseapp.com",
+  projectId: "mathgame-a7c75",
+  storageBucket: "mathgame-a7c75.firebasestorage.app",
+  messagingSenderId: "863695580865",
+  appId: "1:863695580865:web:0312fae1d4f563dae40",
+  measurementId: "G-FK7QYNJPCB"
+};
+
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+const auth = getAuth();
+const db = getFirestore();
+const provider = new GoogleAuthProvider();
+
+/* --- Oyun kodu (v1.0.2) --- */
 let player = null;
 let score = 0;
 let correct = null;
@@ -84,19 +114,21 @@ const bgColor = document.getElementById('bgColor');
 const bgImage = document.getElementById('bgImage');
 const miniInfo = document.getElementById('miniInfo');
 
+/* --- Başlangıç eventleri --- */
 bgBtn.onclick = () => bgControls.classList.toggle('hidden');
-
 startBtn.onclick = startGame;
 submitBtn.onclick = checkAnswer;
 menuBtn.onclick = goMenu;
 bgColor.onchange = changeBG;
 bgImage.onchange = changeBGImage;
+answerInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter') submitBtn.click(); });
+playerNameInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter') startBtn.click(); });
 
-function startGame() {
+function startGame(){
   const name = playerNameInput.value.trim();
-  if (!name) { alert('Adını gir!'); return; }
+  if(!name){ alert('Adını gir!'); return; }
   player = name;
-  if (!leaderboard[player]) leaderboard[player] = 0;
+  if(!leaderboard[player]) leaderboard[player] = 0;
   score = leaderboard[player];
   playerDisplay.innerText = player;
   scoreDisplay.innerText = score;
@@ -108,8 +140,7 @@ function startGame() {
   updateMiniInfo();
 }
 
-function goMenu() {
-  // geri dön: menüyü göster, oyun alanını gizle
+function goMenu(){
   gameArea.classList.add('hidden');
   menu.classList.remove('hidden');
   resultEl.innerText = '';
@@ -119,159 +150,77 @@ function goMenu() {
 function randomInt(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
 
 function askQuestion(){
-  // Basit rastgele soru üretimi
-  const a = randomInt(1,10);
-  const b = randomInt(1,10);
-  const ops = ["+","-","*","/"];
-  const op = ops[randomInt(0,3)];
-  // Bölmede tam sayı sonucu göstermek için düzenleme: eğer "/" seçilmişse b yerine çarpım yapıp tam bölünebilir soru oluştur
-  if (op === "/") {
-    const prod = a * b;
-    question = `${prod} / ${a}`;
-    correct = Math.round((prod / a) * 100) / 100;
-  } else {
-    question = `${a} ${op} ${b}`;
-    // eval kullanıyoruz ama girişler kontrollü olduğundan risk yok (sadece rastgele sayı/operatör)
-    correct = Math.round(eval(question) * 100) / 100;
-  }
+  const a=randomInt(1,10), b=randomInt(1,10), ops=["+","-","*","/"];
+  const op=ops[randomInt(0,3)];
+  if(op==="/"){ const prod=a*b; question=`${prod} / ${a}`; correct=Math.round(prod/a*100)/100; }
+  else{ question=`${a} ${op} ${b}`; correct=Math.round(eval(question)*100)/100; }
   questionEl.innerText = question + ' = ?';
-  // temizle önceki sonuç gösterimini
-  resultEl.innerText = '';
-  resultEl.style.opacity = 1;
+  resultEl.innerText=''; resultEl.style.opacity=1;
   enableInput();
 }
 
-function nearlyEqual(a,b,eps=0.01){ return Math.abs(a-b) < eps; }
-
-function disableInput(){
-  answerInput.disabled = true;
-  submitBtn.disabled = true;
-}
-function enableInput(){
-  answerInput.disabled = false;
-  submitBtn.disabled = false;
-  answerInput.focus();
-}
+function nearlyEqual(a,b,eps=0.01){ return Math.abs(a-b)<eps; }
+function disableInput(){ answerInput.disabled=true; submitBtn.disabled=true; }
+function enableInput(){ answerInput.disabled=false; submitBtn.disabled=false; answerInput.focus(); }
 
 function checkAnswer(){
-  const raw = answerInput.value.trim();
-  if (raw === '') { resultEl.innerText = 'Cevap gir!'; resultEl.style.color = 'orange'; return; }
-  const user = parseFloat(raw.replace(',', '.')); // virgul kullanılsa da al
-  if (Number.isNaN(user)) { resultEl.innerText = 'Sayı gir!'; resultEl.style.color = 'orange'; return; }
+  const raw=answerInput.value.trim();
+  if(raw===''){ resultEl.innerText='Cevap gir!'; resultEl.style.color='orange'; return; }
+  const user=parseFloat(raw.replace(',','.')); 
+  if(Number.isNaN(user)){ resultEl.innerText='Sayı gir!'; resultEl.style.color='orange'; return; }
 
-  disableInput(); // kullanıcı tekrar yazamasın; mesajlar görünene kadar beklesin
+  disableInput();
 
-  if (nearlyEqual(user, correct)) {
-    // doğru akışı: rastgele kutlama, puan ekle, göster -> sonra yeni soru
-    const msg = correctMessages[randomInt(0, correctMessages.length-1)];
-    resultEl.innerText = msg;
-    resultEl.style.color = 'lime';
-    score += 10;
-    leaderboard[player] = score;
-    localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
-    updateLeaderboard();
-    scoreDisplay.innerText = score;
-
-    // mesajı kademeli silme: 1.2s sonra biraz daha az opak, 1.8s sonra temizle ve yeni soru
-    setTimeout(()=>{ resultEl.style.opacity = 0.6; }, 1200);
-    setTimeout(()=>{ resultEl.innerText = ''; resultEl.style.opacity = 1; askQuestion(); }, 1800);
-
-  } else {
-    // yanlış akışı: önce uyarı, 1.2s sonra doğrusu göster, sonra 2.2s sonra temizle ve yeni soru
-    const msg = wrongMessages[randomInt(0, wrongMessages.length-1)];
-    resultEl.innerText = msg;
-    resultEl.style.color = 'red';
-    // puanı hemen düşür; skor tablosu güncellensin
-    score -= 5;
-    leaderboard[player] = score;
-    localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
-    updateLeaderboard();
-    scoreDisplay.innerText = score;
-
-    setTimeout(()=>{
-      resultEl.innerText = `Doğrusu: ${correct}`;
-      resultEl.style.color = '#ffd700'; // altın gibi
-    }, 1200);
-
-    setTimeout(()=>{
-      resultEl.innerText = '';
-      askQuestion();
-    }, 2200);
+  if(nearlyEqual(user,correct)){
+    const msg=correctMessages[randomInt(0,correctMessages.length-1)];
+    resultEl.innerText=msg; resultEl.style.color='lime';
+    score+=10; leaderboard[player]=score;
+    localStorage.setItem('leaderboard',JSON.stringify(leaderboard));
+    updateLeaderboard(); scoreDisplay.innerText=score;
+    setTimeout(()=>{ resultEl.style.opacity=0.6; },1200);
+    setTimeout(()=>{ resultEl.innerText=''; resultEl.style.opacity=1; askQuestion(); },1800);
+  }else{
+    const msg=wrongMessages[randomInt(0,wrongMessages.length-1)];
+    resultEl.innerText=msg; resultEl.style.color='red';
+    score-=5; leaderboard[player]=score;
+    localStorage.setItem('leaderboard',JSON.stringify(leaderboard));
+    updateLeaderboard(); scoreDisplay.innerText=score;
+    setTimeout(()=>{ resultEl.innerText=`Doğrusu: ${correct}`; resultEl.style.color='#ffd700'; },1200);
+    setTimeout(()=>{ resultEl.innerText=''; askQuestion(); },2200);
   }
-  // temizle input (ama enableInput çağrısına kadar disabled)
-  answerInput.value = '';
+  answerInput.value='';
 }
 
 function updateLeaderboard(){
-  const entries = Object.entries(leaderboard).sort((a,b)=>b[1]-a[1]);
-  if (entries.length === 0) {
-    leaderboardEl.innerHTML = '<i>Henüz kimse yok</i>';
-  } else {
-    leaderboardEl.innerHTML = entries.map(e=>`${escapeHtml(e[0])}: ${e[1]} puan`).join('<br>');
-  }
+  const entries=Object.entries(leaderboard).sort((a,b)=>b[1]-a[1]);
+  leaderboardEl.innerHTML=entries.length===0?'<i>Henüz kimse yok</i>':entries.map(e=>`${escapeHtml(e[0])}: ${e[1]} puan`).join('<br>');
 }
 
-function escapeHtml(text) {
-  return text.replace(/[&<>"']/g, (m)=> ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[m]));
-}
+function escapeHtml(text){ return text.replace(/[&<>"']/g,(m)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;'}[m])); }
 
-// Arka plan renk ve resim
-function changeBG(){
-  const c = bgColor.value;
-  document.body.style.background = c;
-  adjustTextColorForBackground(c);
-}
-function changeBGImage(){
-  const file = bgImage.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    document.body.style.background = `url(${e.target.result}) center/cover no-repeat`;
-    // resim koyulduğunda yazı rengini garantiye almak için hafif overlay ekleyelim:
-    document.body.style.backgroundBlendMode = 'overlay';
-    // attempt to set text color based on average (simple heuristic: dark overlay -> white text)
-    adjustTextColorForBackground('#000'); // güvenli seçim
-  };
-  reader.readAsDataURL(file);
-}
+function changeBG(){ const c=bgColor.value; document.body.style.background=c; adjustTextColorForBackground(c); }
+function changeBGImage(){ const file=bgImage.files[0]; if(!file)return; const reader=new FileReader(); reader.onload=(e)=>{ document.body.style.background=`url(${e.target.result}) center/cover no-repeat`; document.body.style.backgroundBlendMode='overlay'; adjustTextColorForBackground('#000'); }; reader.readAsDataURL(file); }
+function adjustTextColorForBackground(hex){ if(!/^#([0-9A-F]{3}){1,2}$/i.test(hex)){ document.body.style.color='#eee'; return; } let c=hex.substring(1); if(c.length===3)c=c.split('').map(ch=>ch+ch).join(''); const r=parseInt(c.substring(0,2),16); const g=parseInt(c.substring(2,4),16); const b=parseInt(c.substring(4,6),16); const lum=0.2126*r+0.7152*g+0.0722*b; document.body.style.color=(lum>150)?'#111':'#eee'; }
+function updateMiniInfo(){ miniInfo.innerText=player?`${player} • ${score}p`:""; }
 
-// Basit kontrast çözümü: hex alır, açıksa koyu yazı, koyuysa açık yazı
-function adjustTextColorForBackground(hex) {
-  // Eğer hex formatında değilse (ör. image kullanıldı), default beyaz yap
-  if (!/^#([0-9A-F]{3}){1,2}$/i.test(hex)) {
-    document.body.style.color = '#eee';
-    return;
-  }
-  let c = hex.substring(1);
-  if (c.length === 3) c = c.split('').map(ch => ch+ch).join('');
-  const r = parseInt(c.substring(0,2),16);
-  const g = parseInt(c.substring(2,4),16);
-  const b = parseInt(c.substring(4,6),16);
-  // luminance
-  const lum = 0.2126*r + 0.7152*g + 0.0722*b;
-  if (lum > 150) {
-    document.body.style.color = '#111'; // koyu yazı
-  } else {
-    document.body.style.color = '#eee'; // açık yazı
-  }
-}
-
-// mini info (oyuncu ve puan)
-function updateMiniInfo(){
-  miniInfo.innerText = player ? `${player} • ${score}p` : '';
-}
-
-// Klavye Enter ile gönderme
-answerInput.addEventListener('keydown', (e)=>{
-  if (e.key === 'Enter') submitBtn.click();
-});
-playerNameInput.addEventListener('keydown', (e)=>{
-  if (e.key === 'Enter') startBtn.click();
-});
-
-// Başlangıçta leaderboard gösterilsin
 updateLeaderboard();
 
+/* --- Firebase Google Login --- */
+const googleSignBtn=document.getElementById('googleSignBtn');
+const logoutBtn=document.getElementById('logoutBtn');
+const userLabel=document.getElementById('userLabel');
+
+googleSignBtn.onclick=()=>{
+  signInWithPopup(auth,provider)
+  .then(res=>{ userLabel.innerText=`${res.user.displayName} giriş yaptı`; player=res.user.displayName; })
+  .catch(err=>console.log(err));
+};
+
+logoutBtn.onclick=()=>{ signOut(auth).then(()=>{ userLabel.innerText='Giriş yapılmadı'; player=null; }); };
+
+onAuthStateChanged(auth,user=>{
+  if(user){ player=user.displayName; playerNameInput.value=player; }
+});
 </script>
 </body>
 </html>
