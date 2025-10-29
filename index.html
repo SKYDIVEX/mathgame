@@ -1,504 +1,85 @@
 <!doctype html>
-<html lang="tr">
+<html>
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Matematik Oyunu - Final</title>
-<style>
-  :root{
-    --bg:#0f1724; --card:#0b1220; --accent:#10b981; --muted:#94a3b8; --glass:rgba(255,255,255,0.04);
-  }
-  *{box-sizing:border-box}
-  body{margin:0; font-family:Inter,Segoe UI,Roboto,Arial; background:linear-gradient(180deg,#071022 0%, #0b1630 100%); color:#e6eef8; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;}
-  .wrap{max-width:950px;margin:20px auto;padding:18px}
-  /* Entrance */
-  #entrance{display:flex;flex-direction:column;align-items:center;gap:14px;padding:28px;border-radius:12px;background:var(--card);box-shadow:0 8px 30px rgba(2,6,23,0.6)}
-  #entrance h1{margin:0;font-size:28px}
-  .btn{background:var(--accent);color:#00110a;border:0;padding:10px 16px;border-radius:10px;font-weight:600;cursor:pointer;box-shadow:0 6px 14px rgba(16,185,129,0.12)}
-  .btn.ghost{background:transparent;color:var(--accent);border:1px solid rgba(255,255,255,0.06)}
-  .muted{color:var(--muted)}
-  /* Menu (slide down) */
-  #menuCard{margin-top:18px;overflow:hidden;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));box-shadow:0 10px 30px rgba(2,6,23,0.6); transform-origin:top; transition:transform .45s cubic-bezier(.22,.9,.26,1),opacity .4s}
-  #menuInner{padding:18px; display:flex; gap:14px; align-items:flex-start; flex-wrap:wrap;}
-  .left{flex:1;min-width:260px}
-  .right{width:320px;min-width:240px}
-  .card{background:var(--glass);padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.02)}
-  .row{display:flex;gap:8px;align-items:center}
-  label{display:flex;gap:8px;align-items:center;cursor:pointer}
-  input[type="text"]{padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit;width:100%}
-  .big{padding:12px 16px;font-size:16px}
-  /* Settings */
-  .ops{display:flex;gap:8px;flex-wrap:wrap}
-  .ops label{background:rgba(255,255,255,0.02);padding:8px 10px;border-radius:8px}
-  .toggle{display:inline-flex;align-items:center;gap:8px}
-  input[type="range"]{width:100%}
-  /* Game area */
-  #gameArea{margin-top:14px;padding:18px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.02)); display:none}
-  #questionBox{font-size:22px;font-weight:700;margin-bottom:8px}
-  #answerRow{display:flex;gap:10px;align-items:center}
-  #answerInput{flex:1;padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);font-size:18px;background:transparent;color:inherit}
-  #submitBtn{background:var(--accent);border:0;color:#06110a;padding:10px 14px;border-radius:10px;font-weight:700;cursor:pointer}
-  #resultMsg{min-height:28px;font-weight:700;margin-top:8px}
-  #leaderboard{margin-top:12px;max-height:240px;overflow:auto}
-  .lbItem{padding:6px 8px;border-radius:8px;margin-bottom:6px;background:rgba(255,255,255,0.02);display:flex;justify-content:space-between}
-  /* responsive */
-  @media (max-width:800px){
-    .wrap{padding:10px}
-    #menuInner{flex-direction:column}
-    .right{width:100%}
-    #answerRow{flex-direction:column;align-items:stretch}
-    #submitBtn{width:100%}
-    .btn.big{width:100%}
-  }
-  /* animation helpers */
-  .slide-in{transform:translateY(-16px) scale(.98);opacity:0}
-  .slide-down{transform:translateY(0) scale(1);opacity:1}
-  /* small helper */
-  .mutedSmall{color:var(--muted);font-size:13px}
-  footer{margin-top:18px;color:var(--muted);font-size:13px;text-align:center}
-</style>
+  <meta charset="utf-8">
+  <title>Matematik Mini Oyunu</title>
+  <style>
+    body{font-family:Arial;margin:30px;background:#111;color:#eee}
+    .box{max-width:420px;margin:0 auto;padding:20px;border-radius:8px;background:#1a1a1a}
+    button{padding:8px 12px;margin-top:10px}
+    input{padding:8px;width:100%}
+  </style>
 </head>
 <body>
-<div class="wrap">
-  <!-- Entrance screen -->
-  <div id="entrance" class="card">
-    <h1>Matematik Oyunu</h1>
-    <p class="muted">Hemen oyna — rahatla. Ayarlar'dan hangi işlem türlerini seçtiğini belirle. Ses ayarı var. Enter ile gönder (PC), mobilde büyük buton.</p>
-    <div style="display:flex;gap:10px;flex-wrap:wrap">
-      <input id="nameStart" type="text" placeholder="Adın (ör. Enes)" />
-      <button id="enterBtn" class="btn">Giriş Yap</button>
+  <div class="box">
+    <h2>Matematik Meydan Okuma</h2>
+    <p id="info">Seviye: <span id="lvl">1</span></p>
+    <p id="q"></p>
+    <input id="ans" autocomplete="off" />
+    <div>
+      <button id="check">Cevapla</button>
+      <button id="skip">Atla</button>
     </div>
-    <div style="display:flex;gap:10px;margin-top:6px">
-      <button id="demoBtn" class="btn ghost">Misafir Gir</button>
-      <button id="aboutBtn" class="btn ghost">Hakkında</button>
-    </div>
+    <p id="msg"></p>
   </div>
 
-  <!-- Menu card (initially hidden / slide-in) -->
-  <div id="menuCard" class="slide-in">
-    <div id="menuInner">
-      <div class="left">
-        <div class="card">
-          <div style="display:flex;justify-content:space-between;align-items:center">
-            <div>
-              <div class="mutedSmall">Oyuncu</div>
-              <div id="playerLabel" style="font-weight:700">—</div>
-            </div>
-            <div>
-              <button id="startGameBtn" class="btn big">Başla</button>
-            </div>
-          </div>
-          <hr style="margin:12px 0 10px;border:none;border-top:1px solid rgba(255,255,255,0.03)" />
-          <div>
-            <div class="mutedSmall">Hızlı ayarlar</div>
-            <div style="display:flex;gap:8px;margin-top:8px">
-              <button id="openSettings" class="btn ghost">Ayarlar</button>
-              <button id="resetScores" class="btn ghost">Skorları Sıfırla</button>
-            </div>
-          </div>
-        </div>
+  <script>
+    let level = 1;
+    const qEl = document.getElementById('q');
+    const lvlEl = document.getElementById('lvl');
+    const ans = document.getElementById('ans');
+    const msg = document.getElementById('msg');
 
-        <div class="card" style="margin-top:12px">
-          <div class="mutedSmall">Geçerli Seçenekler</div>
-          <div id="chosenOps" style="margin-top:8px">Toplama</div>
-        </div>
-      </div>
-
-      <div class="right">
-        <div class="card">
-          <div class="mutedSmall">Puan Tablosu</div>
-          <div id="leaderboard" style="margin-top:8px">Henüz kimse yok</div>
-        </div>
-
-        <div class="card" style="margin-top:12px">
-          <div class="mutedSmall">Ses</div>
-          <div style="display:flex;gap:8px;align-items:center;margin-top:8px">
-            <label class="toggle"><input id="soundToggle" type="checkbox" checked/> Ses açık</label>
-          </div>
-          <div style="margin-top:8px">
-            Ses seviyesi: <input id="volRange" type="range" min="0" max="1" step="0.01" value="0.6" />
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Settings panel (hidden modal-like) -->
-  <div id="settings" class="card" style="margin-top:12px;display:none">
-    <div style="display:flex;justify-content:space-between;align-items:center">
-      <div>
-        <div class="mutedSmall">Ayarlar</div>
-        <div style="font-weight:700">Hangi işlemler sorulsun?</div>
-      </div>
-      <div><button id="closeSettings" class="btn ghost">Kapat</button></div>
-    </div>
-    <hr style="margin:12px 0;border:none;border-top:1px solid rgba(255,255,255,0.03)"/>
-    <div class="ops">
-      <label><input type="checkbox" class="opChk" value="+" checked/> Toplama (+)</label>
-      <label><input type="checkbox" class="opChk" value="-" checked/> Çıkarma (-)</label>
-      <label><input type="checkbox" class="opChk" value="*" checked/> Çarpma (*)</label>
-      <label><input type="checkbox" class="opChk" value="/" /> Bölme (/)</label>
-    </div>
-    <div style="margin-top:12px" class="mutedSmall">Not: Bölme soruları ondalık olabilir; cevap toleransı 0.01'dir.</div>
-  </div>
-
-  <!-- Game area -->
-  <div id="gameArea" class="card" aria-hidden="true">
-    <div style="display:flex;justify-content:space-between;gap:12px;align-items:center">
-      <div>
-        <div class="mutedSmall">Oyuncu</div>
-        <div id="playerDisplay" style="font-weight:700">—</div>
-      </div>
-      <div>
-        <div class="mutedSmall">Puan</div>
-        <div id="scoreDisplay" style="font-weight:700">0</div>
-      </div>
-      <div>
-        <button id="menuBack" class="btn ghost">Ana Menü</button>
-      </div>
-    </div>
-
-    <hr style="margin:10px 0;border:none;border-top:1px solid rgba(255,255,255,0.03)"/>
-
-    <div id="questionBox">Soru: <span id="questionText">—</span></div>
-    <div id="answerRow">
-      <input id="answerInput" type="text" inputmode="decimal" placeholder="Cevabını yaz..."/>
-      <button id="submitBtn">Gönder</button>
-    </div>
-    <div id="resultMsg"></div>
-    <div id="controlsHint" class="mutedSmall" style="margin-top:8px">PC: Enter ile gönder. Mobil: Gönder butonunu kullan.</div>
-
-    <div id="gameSettings" style="margin-top:12px" class="mutedSmall">Zorluk: <span id="levelDisplay">1</span></div>
-  </div>
-
-  <footer>© Senin Oyun | Final Update</footer>
-</div>
-
-<script>
-/* Final update script */
-/* State & storage */
-const LS_KEY = 'mathgame_final_v1';
-let state = {
-  player: null,
-  score: 0,
-  ops: ['+','-'], // default
-  soundOn: true,
-  vol: 0.6,
-  leaderboard: JSON.parse(localStorage.getItem(LS_KEY) || '{}')
-};
-
-/* UI refs */
-const entrance = document.getElementById('entrance');
-const enterBtn = document.getElementById('enterBtn');
-const demoBtn = document.getElementById('demoBtn');
-const nameStart = document.getElementById('nameStart');
-const menuCard = document.getElementById('menuCard');
-const startGameBtn = document.getElementById('startGameBtn');
-const playerLabel = document.getElementById('playerLabel');
-const openSettings = document.getElementById('openSettings');
-const settingsPanel = document.getElementById('settings');
-const closeSettings = document.getElementById('closeSettings');
-const chosenOps = document.getElementById('chosenOps');
-const opChecks = document.querySelectorAll('.opChk');
-const soundToggle = document.getElementById('soundToggle');
-const volRange = document.getElementById('volRange');
-const leaderboardEl = document.getElementById('leaderboard');
-const resetScores = document.getElementById('resetScores');
-const startBtn = document.getElementById('startGameBtn');
-const gameArea = document.getElementById('gameArea');
-const playerDisplay = document.getElementById('playerDisplay');
-const scoreDisplay = document.getElementById('scoreDisplay');
-const menuBack = document.getElementById('menuBack');
-const questionText = document.getElementById('questionText');
-const answerInput = document.getElementById('answerInput');
-const submitBtn = document.getElementById('submitBtn');
-const resultMsg = document.getElementById('resultMsg');
-const levelDisplay = document.getElementById('levelDisplay');
-const enterBtnDemo = document.getElementById('demoBtn');
-const playerLabelUI = document.getElementById('playerLabel');
-
-/* Audio: WebAudio simple sounds + bg music tone */
-const AudioCtx = window.AudioContext || window.webkitAudioContext;
-let audioCtx = null;
-let bgGain = null, bgOsc = null;
-function ensureAudio(){
-  if(audioCtx) return;
-  audioCtx = new AudioCtx();
-  bgGain = audioCtx.createGain();
-  bgGain.gain.value = 0;
-  bgGain.connect(audioCtx.destination);
-  // simple gentle background tone (triangle)
-  bgOsc = audioCtx.createOscillator();
-  bgOsc.type = 'sine';
-  bgOsc.frequency.value = 220;
-  const lfo = audioCtx.createOscillator();
-  lfo.frequency.value = 0.25;
-  const lfoGain = audioCtx.createGain(); lfoGain.gain.value = 30;
-  lfo.connect(lfoGain);
-  const detuneNode = audioCtx.createGain();
-  lfoGain.connect(detuneNode);
-  detuneNode.connect(bgOsc.frequency);
-  bgOsc.connect(bgGain);
-  bgOsc.start();
-  lfo.start();
-}
-function setBgVolume(v){
-  if(!audioCtx) return;
-  bgGain.gain.value = state.soundOn ? v * 0.12 : 0;
-}
-function playSuccess(){
-  if(!state.soundOn) return;
-  ensureAudio();
-  const g = audioCtx.createGain(); g.gain.value = 0.0001;
-  g.connect(audioCtx.destination);
-  const o = audioCtx.createOscillator();
-  o.type = 'triangle';
-  o.frequency.value = 880;
-  o.connect(g);
-  const now = audioCtx.currentTime;
-  g.gain.linearRampToValueAtTime(state.vol, now + 0.01);
-  g.gain.exponentialRampToValueAtTime(0.0001, now + 0.5);
-  o.start(now); o.stop(now + 0.6);
-}
-function playFail(){
-  if(!state.soundOn) return;
-  ensureAudio();
-  const g = audioCtx.createGain(); g.gain.value = 0.001;
-  g.connect(audioCtx.destination);
-  const o = audioCtx.createOscillator();
-  o.type = 'sawtooth';
-  o.frequency.value = 120;
-  o.connect(g);
-  const now = audioCtx.currentTime;
-  g.gain.linearRampToValueAtTime(state.vol * 0.6, now + 0.01);
-  g.gain.exponentialRampToValueAtTime(0.0001, now + 0.6);
-  o.start(now); o.stop(now + 0.7);
-}
-
-/* utility */
-function saveState(){ localStorage.setItem(LS_KEY, JSON.stringify(state.leaderboard)); }
-function loadLeaderboard(){
-  try{
-    const data = JSON.parse(localStorage.getItem(LS_KEY) || '{}');
-    state.leaderboard = data;
-  }catch(e){
-    state.leaderboard = {};
-  }
-}
-function renderLeaderboard(){
-  loadLeaderboard();
-  const arr = Object.entries(state.leaderboard).sort((a,b)=>b[1]-a[1]);
-  if(arr.length===0){ leaderboardEl.innerHTML = '<i>Henüz kimse yok</i>'; return; }
-  leaderboardEl.innerHTML = arr.map(e=>`<div class="lbItem"><div>${escapeHtml(e[0])}</div><div>${e[1]}p</div></div>`).join('');
-}
-function escapeHtml(s=''){ return String(s).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"})[m]); }
-
-/* initial UI state */
-menuCard.classList.add('slide-in'); // hidden at start
-renderLeaderboard();
-
-/* Entrance handlers */
-enterBtn.addEventListener('click', ()=> {
-  const name = nameStart.value.trim();
-  if(!name){ alert('Adını gir.'); nameStart.focus(); return; }
-  officialEnter(name);
-});
-demoBtn.addEventListener('click', ()=> {
-  const guest = 'Misafir-' + Math.floor(Math.random()*9000 + 1000);
-  officialEnter(guest);
-});
-
-function officialEnter(name){
-  state.player = name;
-  state.score = state.leaderboard[name] || 0;
-  // hide entrance
-  entrance.style.display = 'none';
-  // show menu with animation
-  menuCard.classList.remove('slide-in'); menuCard.classList.add('slide-down');
-  // populate labels
-  playerLabel.textContent = name;
-  playerDisplay.textContent = name;
-  updateChosenOpsUI();
-  renderLeaderboard();
-  setTimeout(()=> {
-    // reveal settings small area default collapsed (we use settings panel separately)
-    // start background audio if soundOn
-    if(state.soundOn){ ensureAudio(); setBgVolume(state.vol); }
-  }, 250);
-}
-
-/* Menu controls */
-openSettings.addEventListener('click', ()=> {
-  settingsPanel.style.display = settingsPanel.style.display === 'none' ? 'block' : 'none';
-  // scroll into view
-  settingsPanel.scrollIntoView({behavior:'smooth', block:'center'});
-});
-closeSettings.addEventListener('click', ()=> settingsPanel.style.display = 'none');
-
-opChecks.forEach(ch => {
-  ch.addEventListener('change', ()=> {
-    updateChosenOps();
-    updateChosenOpsUI();
-  });
-});
-function updateChosenOps(){
-  const ops = Array.from(opChecks).filter(c=>c.checked).map(c=>c.value);
-  state.ops = ops.length ? ops : ['+'];
-}
-function updateChosenOpsUI(){
-  updateChosenOps();
-  chosenOps.textContent = state.ops.join(' ');
-}
-
-/* sound controls */
-soundToggle.addEventListener('change', ()=> {
-  state.soundOn = !!soundToggle.checked;
-  if(state.soundOn){ ensureAudio(); setBgVolume(parseFloat(volRange.value)); }
-  else { if(bgGain) bgGain.gain.value = 0; }
-});
-volRange.addEventListener('input', ()=> {
-  state.vol = parseFloat(volRange.value);
-  setBgVolume(state.vol);
-});
-
-/* Start game */
-startBtn.addEventListener('click', ()=> {
-  // menu -> game
-  menuCard.classList.remove('slide-down');
-  menuCard.classList.add('slide-in');
-  setTimeout(()=> menuCard.style.display = 'none', 420);
-  // show game area
-  gameArea.style.display = 'block';
-  gameArea.setAttribute('aria-hidden','false');
-  answerInput.focus();
-  nextQuestion(true);
-});
-
-/* Back to menu */
-menuBack.addEventListener('click', ()=> {
-  gameArea.style.display = 'none';
-  menuCard.style.display = ''; // un-hide
-  // play slide down
-  menuCard.classList.remove('slide-in'); menuCard.classList.add('slide-down');
-});
-
-/* Reset scores */
-resetScores.addEventListener('click', ()=> {
-  if(confirm('Skor tablosunu sıfırlamak istediğine emin misin?')){ state.leaderboard = {}; saveState(); renderLeaderboard(); alert('Sıfırlandı.'); }
-});
-
-/* Game logic */
-let currentQuestion = '';
-let correctAnswer = 0;
-let level = 1;
-
-function nextQuestion(newRound=false){
-  // increase difficulty slowly
-  if(newRound) level = 1;
-  else level = Math.min(10, level + 0.1);
-  levelDisplay.textContent = Math.floor(level);
-  // choose operation from state.ops
-  if(!state.ops || state.ops.length===0) state.ops = ['+'];
-  const op = state.ops[Math.floor(Math.random()*state.ops.length)];
-  // choose numbers based on level
-  const max = 5 + Math.floor(level * 2);
-  let a = randInt(1,max);
-  let b = randInt(1,max);
-  if(op === '/'){
-    // make divisible-ish or allow decimal with rounding
-    const prod = a * b;
-    currentQuestion = `${prod} / ${a}`;
-    correctAnswer = Math.round((prod / a) * 100) / 100;
-  } else if(op === '*'){
-    currentQuestion = `${a} * ${b}`;
-    correctAnswer = Math.round((a * b) * 100) / 100;
-  } else if(op === '+'){
-    currentQuestion = `${a} + ${b}`;
-    correctAnswer = Math.round((a + b) * 100) / 100;
-  } else if(op === '-'){
-    // ensure non-negative sometimes
-    if(b > a){ [a,b] = [b,a]; }
-    currentQuestion = `${a} - ${b}`;
-    correctAnswer = Math.round((a - b) * 100) / 100;
-  }
-  currentQuestion = currentQuestion.replace('*','×').replace('/','÷');
-  questionText.textContent = currentQuestion;
-  resultMsg.textContent = '';
-}
-
-/* submit answer */
-function nearlyEqual(a,b,eps=0.01){ return Math.abs(a - b) < eps; }
-function submitAnswer(){
-  const raw = answerInput.value.trim();
-  if(!raw){ resultMsg.style.color='#f59e0b'; resultMsg.textContent='Cevap gir!'; return; }
-  const user = parseFloat(raw.replace(',','.'));
-  if(Number.isNaN(user)){ resultMsg.style.color='#f59e0b'; resultMsg.textContent='Geçerli sayı gir!'; return; }
-  if(nearlyEqual(user, correctAnswer)){
-    // success
-    playSuccess();
-    resultMsg.style.color = '#10b981';
-    resultMsg.textContent = ['Aferin!','Süper!','Bravo!', 'Harika!'][randInt(0,3)];
-    state.score = (state.score || 0) + 10;
-    state.leaderboard[state.player] = state.score;
-    saveState();
-    scoreDisplay.textContent = state.score;
-    renderLeaderboard();
-    // small delay then next
-    setTimeout(()=> { answerInput.value=''; nextQuestion(false); }, 1100);
-  } else {
-    // fail
-    playFail();
-    resultMsg.style.color = '#fb7185';
-    resultMsg.textContent = 'Yanlış... doğrusu biraz sonra gösterilecek.';
-    state.score = Math.max(0, (state.score || 0) - 5);
-    state.leaderboard[state.player] = state.score;
-    saveState();
-    scoreDisplay.textContent = state.score;
-    renderLeaderboard();
-    setTimeout(()=> { resultMsg.style.color = '#fbbf24'; resultMsg.textContent = 'Doğrusu: ' + correctAnswer; }, 1100);
-    setTimeout(()=> { answerInput.value=''; nextQuestion(false); }, 2200);
-  }
-}
-
-/* Enter key handling (desktop) */
-document.addEventListener('keydown', (e)=> {
-  if(e.key === 'Enter'){
-    // if game visible and input focused -> submit
-    if(gameArea.style.display === 'block'){
-      submitAnswer();
-    } else {
-      // if on entrance, pressing Enter triggers enter
-      if(document.activeElement === nameStart){
-        enterBtn.click();
+    function makeQuestion() {
+      // seviye arttıkça aralık büyür, rastgele işlemler, kök soruları nadiren
+      const max = 3 + level * 2;
+      const a = Math.floor(Math.random()*max)+1;
+      const b = Math.floor(Math.random()*max)+1;
+      const ops = ['+','-','*','/','sqrt'];
+      // sqrt nadiren çıkacak
+      const op = (Math.random() < Math.min(0.15, level*0.02)) ? 'sqrt' : ops[Math.floor(Math.random()*3)];
+      let text, answer;
+      if(op === '+'){ text = `${a} + ${b}`; answer = a + b; }
+      else if(op === '-'){ text = `${a} - ${b}`; answer = a - b; }
+      else if(op === '*'){ text = `${a} × ${b}`; answer = a * b; }
+      else { // bölme: tam bölünebilir yap
+        const prod = a * b;
+        text = `${prod} / ${a}`; answer = b;
       }
+      // kök sorusu (sadece pozitif tam karelerle)
+      if(op === 'sqrt'){
+        const n = (Math.floor(Math.random()* (1 + Math.min(5, level))) + 1);
+        const square = n*n;
+        text = `√${square}`;
+        answer = n;
+      }
+      qEl.textContent = text + " = ?";
+      qEl.dataset.answer = String(answer);
+      lvlEl.textContent = level;
+      ans.value = '';
+      ans.focus();
+      msg.textContent = '';
     }
-  }
-});
-submitBtn.addEventListener('click', submitAnswer);
 
-/* Utilities */
-function randInt(a,b){ return Math.floor(Math.random() * (b - a + 1)) + a; }
+    document.getElementById('check').onclick = ()=>{
+      const correct = qEl.dataset.answer;
+      if(ans.value.trim() === '') { msg.textContent='Cevap gir.'; return; }
+      if(ans.value.trim() === correct){
+        msg.textContent = 'Tebrikler! Seviye yükseliyor.';
+        level++;
+      } else {
+        msg.textContent = `Yanlış! Doğru: ${correct}. Seviye 1'e dönüyor.`;
+        level = 1;
+      }
+      setTimeout(makeQuestion, 900);
+    };
+    document.getElementById('skip').onclick = ()=>{
+      msg.textContent = `Atlandı. Doğru: ${qEl.dataset.answer}`;
+      level = Math.max(1, level-1);
+      setTimeout(makeQuestion,800);
+    };
 
-/* small helpers for UX */
-function updateChosenOpsAndUI(){
-  updateChosenOps();
-  chosenOps.textContent = state.ops.join(' ');
-}
-function updateChosenOps(){ const ops = Array.from(opChecks).filter(c=>c.checked).map(c=>c.value); state.ops = ops.length ? ops : ['+']; }
-function escapeHtml(s){ return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"})[m]); }
-
-/* Start background music lazily on first user gesture (browser autoplay policy) */
-document.addEventListener('click', function onceAudioInit(){
-  if(state.soundOn){ ensureAudio(); setBgVolume(state.vol); }
-  document.removeEventListener('click', onceAudioInit);
-});
-
-/* initial load */
-updateChosenOpsUI();
-renderLeaderboard();
-
-/* expose for debugging */
-window._mathgame = { state, nextQuestion, submitAnswer };
-</script>
+    makeQuestion();
+  </script>
 </body>
 </html>
