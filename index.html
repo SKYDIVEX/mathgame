@@ -1,85 +1,157 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="tr">
 <head>
-  <meta charset="utf-8">
-  <title>Matematik Mini Oyunu</title>
-  <style>
-    body{font-family:Arial;margin:30px;background:#111;color:#eee}
-    .box{max-width:420px;margin:0 auto;padding:20px;border-radius:8px;background:#1a1a1a}
-    button{padding:8px 12px;margin-top:10px}
-    input{padding:8px;width:100%}
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Matematik Oyunu</title>
+<style>
+*{box-sizing:border-box;font-family:sans-serif;}
+body{margin:0;padding:0;overflow:hidden;background:#1b1b1b;color:#fff;display:flex;justify-content:center;align-items:center;height:100vh;flex-direction:column;}
+.hidden{display:none;}
+button{padding:10px 20px;margin:5px;border:none;border-radius:10px;cursor:pointer;background:#4caf50;color:white;font-size:16px;transition:0.3s;}
+button:hover{background:#66bb6a;}
+input{padding:10px;font-size:16px;border-radius:10px;border:none;}
+#menu,#game,#settings,#about{position:absolute;top:-100%;left:0;width:100%;height:100%;background:#242424;display:flex;flex-direction:column;justify-content:center;align-items:center;transition:top 0.8s ease;}
+.showMenu{top:0;}
+.checkbox{display:flex;align-items:center;margin:5px;}
+</style>
 </head>
 <body>
-  <div class="box">
-    <h2>Matematik Meydan Okuma</h2>
-    <p id="info">Seviye: <span id="lvl">1</span></p>
-    <p id="q"></p>
-    <input id="ans" autocomplete="off" />
-    <div>
-      <button id="check">Cevapla</button>
-      <button id="skip">Atla</button>
-    </div>
-    <p id="msg"></p>
-  </div>
+<div id="login">
+<h2>Matematik Oyunu</h2>
+<input id="username" placeholder="Kullanıcı adını yaz"><br>
+<button id="startBtn">Başla</button>
+</div>
 
-  <script>
-    let level = 1;
-    const qEl = document.getElementById('q');
-    const lvlEl = document.getElementById('lvl');
-    const ans = document.getElementById('ans');
-    const msg = document.getElementById('msg');
+<div id="menu">
+<h1>Ana Menü</h1>
+<button id="playBtn">Oyuna Başla</button>
+<button id="settingsBtn">Ayarlar</button>
+<button id="aboutBtn">Hakkında</button>
+</div>
 
-    function makeQuestion() {
-      // seviye arttıkça aralık büyür, rastgele işlemler, kök soruları nadiren
-      const max = 3 + level * 2;
-      const a = Math.floor(Math.random()*max)+1;
-      const b = Math.floor(Math.random()*max)+1;
-      const ops = ['+','-','*','/','sqrt'];
-      // sqrt nadiren çıkacak
-      const op = (Math.random() < Math.min(0.15, level*0.02)) ? 'sqrt' : ops[Math.floor(Math.random()*3)];
-      let text, answer;
-      if(op === '+'){ text = `${a} + ${b}`; answer = a + b; }
-      else if(op === '-'){ text = `${a} - ${b}`; answer = a - b; }
-      else if(op === '*'){ text = `${a} × ${b}`; answer = a * b; }
-      else { // bölme: tam bölünebilir yap
-        const prod = a * b;
-        text = `${prod} / ${a}`; answer = b;
-      }
-      // kök sorusu (sadece pozitif tam karelerle)
-      if(op === 'sqrt'){
-        const n = (Math.floor(Math.random()* (1 + Math.min(5, level))) + 1);
-        const square = n*n;
-        text = `√${square}`;
-        answer = n;
-      }
-      qEl.textContent = text + " = ?";
-      qEl.dataset.answer = String(answer);
-      lvlEl.textContent = level;
-      ans.value = '';
-      ans.focus();
-      msg.textContent = '';
-    }
+<div id="settings">
+<h2>Ayarlar</h2>
+<div class="checkbox"><input type="checkbox" id="addCheck" checked> Toplama</div>
+<div class="checkbox"><input type="checkbox" id="subCheck"> Çıkarma</div>
+<div class="checkbox"><input type="checkbox" id="mulCheck"> Çarpma</div>
+<div class="checkbox"><input type="checkbox" id="divCheck"> Bölme</div>
+<label>Ses: <input type="range" id="volume" min="0" max="1" step="0.1" value="0.5"></label>
+<button onclick="showMenu()">Geri</button>
+</div>
 
-    document.getElementById('check').onclick = ()=>{
-      const correct = qEl.dataset.answer;
-      if(ans.value.trim() === '') { msg.textContent='Cevap gir.'; return; }
-      if(ans.value.trim() === correct){
-        msg.textContent = 'Tebrikler! Seviye yükseliyor.';
-        level++;
-      } else {
-        msg.textContent = `Yanlış! Doğru: ${correct}. Seviye 1'e dönüyor.`;
-        level = 1;
-      }
-      setTimeout(makeQuestion, 900);
-    };
-    document.getElementById('skip').onclick = ()=>{
-      msg.textContent = `Atlandı. Doğru: ${qEl.dataset.answer}`;
-      level = Math.max(1, level-1);
-      setTimeout(makeQuestion,800);
-    };
+<div id="about">
+<h2>Hakkında</h2>
+<p>Bu oyun basit bir matematik alıştırması sunar. Kod by sen & ChatGPT.</p>
+<button onclick="showMenu()">Geri</button>
+</div>
 
-    makeQuestion();
-  </script>
+<div id="game" class="hidden">
+<h2 id="question"></h2>
+<input id="answer" type="number" placeholder="Cevap"><br>
+<button id="submitBtn">Gönder</button>
+<h3 id="feedback"></h3>
+<button id="backToMenu">Ana Menü</button>
+</div>
+
+<audio id="clickSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_90535a6ab9.mp3?filename=click-124467.mp3"></audio>
+
+<script>
+const startBtn=document.getElementById('startBtn');
+const menu=document.getElementById('menu');
+const login=document.getElementById('login');
+const game=document.getElementById('game');
+const question=document.getElementById('question');
+const answer=document.getElementById('answer');
+const submitBtn=document.getElementById('submitBtn');
+const feedback=document.getElementById('feedback');
+const backToMenu=document.getElementById('backToMenu');
+const settings=document.getElementById('settings');
+const about=document.getElementById('about');
+const clickSound=document.getElementById('clickSound');
+const volume=document.getElementById('volume');
+
+volume.addEventListener('input',()=>clickSound.volume=volume.value);
+function playSound(){clickSound.currentTime=0;clickSound.play();}
+
+function showMenu(){
+	settings.classList.remove('showMenu');
+	about.classList.remove('showMenu');
+	menu.classList.add('showMenu');
+	game.classList.add('hidden');
+	playSound();
+}
+
+startBtn.onclick=()=>{
+	playSound();
+	login.classList.add('hidden');
+	menu.classList.add('showMenu');
+}
+
+document.getElementById('settingsBtn').onclick=()=>{
+	menu.classList.remove('showMenu');
+	settings.classList.add('showMenu');
+	playSound();
+}
+
+document.getElementById('aboutBtn').onclick=()=>{
+	menu.classList.remove('showMenu');
+	about.classList.add('showMenu');
+	playSound();
+}
+
+document.getElementById('playBtn').onclick=()=>{
+	menu.classList.remove('showMenu');
+	game.classList.remove('hidden');
+	playSound();
+	newQuestion();
+}
+
+backToMenu.onclick=showMenu;
+
+let correctAnswer=0;
+function newQuestion(){
+	let ops=[];
+	if(document.getElementById('addCheck').checked)ops.push('+');
+	if(document.getElementById('subCheck').checked)ops.push('-');
+	if(document.getElementById('mulCheck').checked)ops.push('*');
+	if(document.getElementById('divCheck').checked)ops.push('/');
+	if(ops.length===0)ops=['+'];
+	let op=ops[Math.floor(Math.random()*ops.length)];
+	let a=Math.floor(Math.random()*10)+1;
+	let b=Math.floor(Math.random()*10)+1;
+	switch(op){
+		case '+':correctAnswer=a+b;break;
+		case '-':correctAnswer=a-b;break;
+		case '*':correctAnswer=a*b;break;
+		case '/':correctAnswer=parseFloat((a/b).toFixed(1));break;
+	}
+	question.textContent=`${a} ${op} ${b} = ?`;
+	answer.value='';
+	answer.focus();
+}
+
+function checkAnswer(){
+	playSound();
+	let val=parseFloat(answer.value);
+	if(val===correctAnswer){feedback.textContent='Doğru!';feedback.style.color='lime';}
+	else{feedback.textContent=`Yanlış! Doğru cevap: ${correctAnswer}`;feedback.style.color='red';}
+	setTimeout(()=>{feedback.textContent='';newQuestion();},1000);
+}
+
+submitBtn.onclick=checkAnswer;
+document.addEventListener('keydown',e=>{
+	if(e.key==='Enter'&&!game.classList.contains('hidden'))checkAnswer();
+});
+
+function scaleUI(){
+	let w=window.innerWidth,h=window.innerHeight;
+	let scale=Math.min(w/600,h/800);
+	document.body.style.transform=`scale(${scale})`;
+	document.body.style.transformOrigin='top center';
+}
+window.addEventListener('resize',scaleUI);
+scaleUI();
+</script>
 </body>
 </html>
