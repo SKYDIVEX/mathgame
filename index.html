@@ -460,7 +460,7 @@ function submitAnswer(){
   } else {
     playFail();
     resultMsg.style.color = '#fb7185';
-    resultMsg.textContent = 'Yanlış... doğrusu biraz sonra gösterilecek.';
+    resultMsg.textContent = 'Yanlış, daha dikkatli olmalısın!';
     state.score = Math.max(0, (state.score || 0) - 5);
     state.leaderboard[state.player] = state.score;
     saveAll(); renderLeaderboard(); scoreDisplay.textContent = state.score;
