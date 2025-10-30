@@ -1,161 +1,205 @@
 <!doctype html>
 <html lang="tr">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Matematik Oyunu - Final</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Matematik Oyunu — Skydivex Edition (v1.2)</title>
 <style>
   :root{
-    --bg:#0f1724; --card:#0b1220; --accent:#10b981; --muted:#94a3b8; --glass:rgba(255,255,255,0.03);
-    --accent-contrast:#00110a;
+    --bg1: #071022;
+    --bg2: #0b1630;
+    --card: rgba(255,255,255,0.03);
+    --muted: #94a3b8;
+    --accent: #10b981;
+    --accent-contrast: #00110a;
+    --glass: rgba(255,255,255,0.03);
+    --ui-radius: 12px;
   }
   *{box-sizing:border-box}
-  body{margin:0; font-family:Inter,Segoe UI,Roboto,Arial; background:linear-gradient(180deg,#071022 0%, #0b1630 100%); color:#e6eef8; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;}
-  .wrap{max-width:950px;margin:20px auto;padding:18px}
-  /* Entrance */
-  #entrance{display:flex;flex-direction:column;align-items:center;gap:14px;padding:28px;border-radius:12px;background:var(--card);box-shadow:0 8px 30px rgba(2,6,23,0.6)}
-  #entrance h1{margin:0;font-size:28px}
-  .btn{background:var(--accent);color:var(--accent-contrast);border:0;padding:10px 16px;border-radius:10px;font-weight:600;cursor:pointer;box-shadow:0 6px 14px rgba(16,185,129,0.12)}
-  .btn.ghost{background:transparent;color:var(--accent);border:1px solid rgba(255,255,255,0.06)}
+  body{margin:0;font-family:Inter,Segoe UI,Roboto,Arial;background:linear-gradient(180deg,var(--bg1),var(--bg2));color:#e6eef8;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:980px;margin:22px auto;padding:18px}
+  .card{background:var(--card);padding:14px;border-radius:var(--ui-radius);border:1px solid rgba(255,255,255,0.03);box-shadow:0 10px 30px rgba(2,6,23,0.6)}
+  h1{margin:0;font-size:26px}
   .muted{color:var(--muted)}
-  /* Menu (slide down) */
-  #menuCard{margin-top:18px;overflow:hidden;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.02));box-shadow:0 10px 30px rgba(2,6,23,0.6); transform-origin:top; transition:transform .45s cubic-bezier(.22,.9,.26,1),opacity .4s}
-  #menuInner{padding:18px; display:flex; gap:14px; align-items:flex-start; flex-wrap:wrap;}
-  .left{flex:1;min-width:260px}
-  .right{width:320px;min-width:240px}
-  .card{background:var(--glass);padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.02)}
-  .row{display:flex;gap:8px;align-items:center}
-  label{display:flex;gap:8px;align-items:center;cursor:pointer}
-  input[type="text"]{padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit;width:100%}
-  .big{padding:12px 16px;font-size:16px}
-  /* Settings */
-  .ops{display:flex;gap:8px;flex-wrap:wrap}
-  .ops label{background:rgba(255,255,255,0.02);padding:8px 10px;border-radius:8px}
-  .toggle{display:inline-flex;align-items:center;gap:8px}
-  input[type="range"]{width:100%}
-  /* Game area */
-  #gameArea{margin-top:14px;padding:18px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.02)); display:none}
-  #questionBox{font-size:22px;font-weight:700;margin-bottom:8px}
-  #answerRow{display:flex;gap:10px;align-items:center}
-  #answerInput{flex:1;padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);font-size:18px;background:transparent;color:inherit}
-  #submitBtn{background:var(--accent);border:0;color:var(--accent-contrast);padding:10px 14px;border-radius:10px;font-weight:700;cursor:pointer}
-  #resultMsg{min-height:28px;font-weight:700;margin-top:8px}
-  #leaderboard{margin-top:12px;max-height:240px;overflow:auto}
-  .lbItem{padding:6px 8px;border-radius:8px;margin-bottom:6px;background:rgba(255,255,255,0.02);display:flex;justify-content:space-between}
-  /* responsive */
-  @media (max-width:800px){
-    .wrap{padding:10px}
-    #menuInner{flex-direction:column}
-    .right{width:100%}
-    #answerRow{flex-direction:column;align-items:stretch}
-    #submitBtn{width:100%}
-    .btn.big{width:100%}
+  .row{display:flex;gap:10px;align-items:center}
+  input[type="text"]{padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit;min-width:180px}
+  button{cursor:pointer;border:0;padding:10px 14px;border-radius:10px;background:var(--accent);color:var(--accent-contrast);font-weight:700;transition:transform .12s ease, box-shadow .12s ease, opacity .12s}
+  button.ghost{background:transparent;color:var(--accent);border:1px solid rgba(255,255,255,0.06);font-weight:600}
+  button.big{padding:12px 18px;font-size:15px}
+  button:hover{transform:translateY(-4px);box-shadow:0 10px 30px rgba(0,0,0,0.45)}
+  button:active{transform:translateY(0) scale(.98)}
+  /* subtle micro-animations for desktop hover */
+  @media (hover:hover){
+    .btn-hover:hover{transform:translateY(-6px) rotateZ(-0.5deg) scale(1.01)}
   }
-  /* animation helpers */
-  .slide-in{transform:translateY(-16px) scale(.98);opacity:0}
-  .slide-down{transform:translateY(0) scale(1);opacity:1}
+
+  /* Menu slide */
+  #menuCard{margin-top:18px;overflow:hidden;transform-origin:top;transition:transform .45s cubic-bezier(.22,.9,.26,1),opacity .35s;opacity:0;transform:translateY(-12px) scale(.995)}
+  #menuCard.show{opacity:1;transform:translateY(0) scale(1)}
+
+  /* settings */
+  .ops{display:flex;gap:8px;flex-wrap:wrap}
+  .ops label{background:rgba(255,255,255,0.02);padding:8px 10px;border-radius:8px;cursor:pointer}
+
+  /* game area */
+  #gameArea{margin-top:14px;padding:16px;border-radius:var(--ui-radius);display:none}
+  #questionBox{font-size:22px;font-weight:700}
+  #answerRow{display:flex;gap:10px;margin-top:8px;align-items:center}
+  #answerInput{flex:1;padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit;font-size:16px}
+  #submitBtn{background:var(--accent);color:var(--accent-contrast)}
+  #resultMsg{min-height:28px;margin-top:8px;font-weight:700}
+
+  /* leaderboard */
+  #leaderboard{margin-top:10px;max-height:220px;overflow:auto}
+  .lbItem{display:flex;justify-content:space-between;padding:8px;border-radius:8px;margin-bottom:6px;background:rgba(255,255,255,0.02)}
+
+  /* footer / branding */
+  footer{margin-top:18px;text-align:center;color:var(--muted);font-size:13px}
+  .skydivex{font-weight:800;color:var(--accent)}
+
   /* modal */
   .modal-backdrop{position:fixed;left:0;top:0;right:0;bottom:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:9999}
-  .modal{background:linear-gradient(180deg,#0e1724,#071022);padding:18px;border-radius:12px;max-width:720px;color:#e6eef8;border:1px solid rgba(255,255,255,0.03)}
-  .modal h3{margin:0 0 8px 0}
-  .mutedSmall{color:var(--muted);font-size:13px}
-  footer{margin-top:18px;color:var(--muted);font-size:13px;text-align:center}
+  .modal{background:linear-gradient(180deg,#0e1724,#071022);padding:18px;border-radius:12px;color:#e6eef8;border:1px solid rgba(255,255,255,0.03);max-width:720px}
+
+  /* responsive tweaks */
+  @media (max-width:840px){
+    .wrap{padding:10px}
+    #menuInner{flex-direction:column}
+    #answerRow{flex-direction:column;align-items:stretch}
+    button{width:100%}
+  }
+
+  /* small parallax background on mouse move (subtle) */
+  #bgLayer{position:fixed;left:0;top:0;right:0;bottom:0;z-index:-1;pointer-events:none;background:radial-gradient(circle at var(--mx,50%) var(--my,50%), rgba(16,185,129,0.03), transparent 25%), linear-gradient(180deg,var(--bg1),var(--bg2));transition:transform .25s linear}
+  /* customizable button color preview */
+  .btn-preview{display:inline-flex;gap:8px;align-items:center;padding:8px 10px;border-radius:8px}
+  .small-muted{color:var(--muted);font-size:13px}
+  /* hover glow for selected button color */
+  .color-swatch{width:28px;height:28px;border-radius:8px;border:1px solid rgba(255,255,255,0.06)}
+  /* subtle version tag */
+  .versionTag{font-size:13px;color:var(--muted);padding:6px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.02);background:transparent}
 </style>
 </head>
 <body>
+<div id="bgLayer"></div>
+
 <div class="wrap">
-  <!-- Entrance screen -->
+  <!-- Entrance -->
   <div id="entrance" class="card">
-    <h1>Matematik Oyunu</h1>
-    <p class="muted">Hemen oyna — rahatla. Ayarlar'dan hangi işlem türlerini seçtiğini belirle. Ses ayarı var. Enter ile gönder (PC), mobilde büyük buton.</p>
-    <div style="display:flex;gap:10px;flex-wrap:wrap">
-      <input id="nameStart" type="text" placeholder="Adın (ör. Ahmet)" />
-      <button id="enterBtn" class="btn">Giriş Yap</button>
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <h1>Matematik Oyunu</h1>
+        <div class="muted">Skydivex presents — v1.2</div>
+      </div>
+      <div class="versionTag">v1.2 • Skydivex</div>
     </div>
-    <div style="display:flex;gap:10px;margin-top:6px">
+
+    <p class="muted" style="margin-top:10px">Ayarlar'dan işlem türlerini seç, arka plan ve buton rengini özelleştir. PC: Enter ile gönder. Mobil: Gönder butonu.</p>
+
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
+      <input id="nameStart" type="text" placeholder="Adın (ör. Ahmet)" />
+      <button id="enterBtn" class="btn big btn-hover">Giriş Yap</button>
       <button id="demoBtn" class="btn ghost">Misafir Gir</button>
       <button id="aboutBtn" class="btn ghost">Hakkında</button>
     </div>
   </div>
 
-  <!-- Menu card (initially hidden / slide-in) -->
-  <div id="menuCard" class="slide-in" style="display:none">
-    <div id="menuInner">
-      <div class="left">
-        <div class="card">
+  <!-- Menu -->
+  <div id="menuCard" class="card" style="margin-top:18px;display:none">
+    <div id="menuInner" style="display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap">
+      <div style="flex:1;min-width:260px">
+        <div class="card" style="padding:12px">
           <div style="display:flex;justify-content:space-between;align-items:center">
             <div>
-              <div class="mutedSmall">Oyuncu</div>
-              <div id="playerLabel" style="font-weight:700">—</div>
+              <div class="small-muted">Oyuncu</div>
+              <div id="playerLabel" style="font-weight:800">—</div>
+              <div class="small-muted" style="margin-top:6px">Seviye: <span id="levelDisplay">1</span> • Puan: <span id="scoreDisplay">0</span></div>
             </div>
-            <div>
-              <button id="startGameBtn" class="btn big">Başla</button>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <button id="startGameBtn" class="btn big btn-hover">Başla</button>
+              <div class="small-muted" style="text-align:right">Made by <span class="skydivex">Skydivex</span></div>
             </div>
           </div>
-          <hr style="margin:12px 0 10px;border:none;border-top:1px solid rgba(255,255,255,0.03)" />
-          <div>
-            <div class="mutedSmall">Hızlı ayarlar</div>
-            <div style="display:flex;gap:8px;margin-top:8px">
-              <button id="openSettings" class="btn ghost">Ayarlar</button>
-              <button id="resetScores" class="btn ghost">Skorları Sıfırla</button>
-            </div>
+
+          <hr style="margin:12px 0;border:none;border-top:1px solid rgba(255,255,255,0.03)"/>
+
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <button id="openSettings" class="btn ghost">Ayarlar</button>
+            <button id="resetScores" class="btn ghost">Skorları Sıfırla</button>
           </div>
         </div>
 
-        <div class="card" style="margin-top:12px">
-          <div class="mutedSmall">Geçerli Seçenekler</div>
-          <div id="chosenOps" style="margin-top:8px">Toplama</div>
+        <div class="card" style="margin-top:12px;padding:12px">
+          <div class="small-muted">Geçerli İşlemler</div>
+          <div id="chosenOps" style="margin-top:8px;font-weight:700">Toplama</div>
+          <div style="margin-top:8px" class="small-muted">Versiyon geçmişi: v1.0 → v1.1 → <strong>v1.2</strong></div>
         </div>
       </div>
 
-      <div class="right">
-        <div class="card">
-          <div class="mutedSmall">Puan Tablosu</div>
+      <div style="width:320px;min-width:240px">
+        <div class="card" style="padding:12px">
+          <div class="small-muted">Puan Tablosu</div>
           <div id="leaderboard" style="margin-top:8px">Henüz kimse yok</div>
         </div>
 
-        <div class="card" style="margin-top:12px">
-          <div class="mutedSmall">Ses</div>
-          <div style="display:flex;gap:8px;align-items:center;margin-top:8px">
-            <label class="toggle"><input id="soundToggle" type="checkbox" checked/> Ses açık</label>
+        <div class="card" style="margin-top:12px;padding:12px">
+          <div class="small-muted">Ses</div>
+          <div style="display:flex;align-items:center;gap:8px;margin-top:8px">
+            <label class="small-muted"><input id="soundToggle" type="checkbox" checked/> Ses açık</label>
           </div>
+          <div style="margin-top:8px" class="small-muted">Seviye: <input id="volRange" type="range" min="0" max="1" step="0.01" value="0.6" /></div>
+        </div>
+
+        <div class="card" style="margin-top:12px;padding:12px">
+          <div class="small-muted">Hızlı Özelleştir</div>
           <div style="margin-top:8px">
-            Ses seviyesi: <input id="volRange" type="range" min="0" max="1" step="0.01" value="0.6" />
+            <div class="small-muted">Buton rengi</div>
+            <div style="display:flex;gap:8px;align-items:center;margin-top:6px">
+              <input id="btnColor" type="color" value="#10b981" />
+              <div class="btn-preview" id="btnPreview"><div class="color-swatch" id="previewSwatch" style="background:#10b981"></div><div class="small-muted">Buton önizleme</div></div>
+            </div>
+            <div style="margin-top:10px" class="small-muted">Arka plan rengi</div>
+            <div style="display:flex;gap:8px;align-items:center;margin-top:6px">
+              <input id="bgColor" type="color" value="#071022" />
+              <button id="bgImageBtn" class="btn ghost">Fotoğraf Yükle</button>
+              <input id="bgImage" type="file" accept="image/*" style="display:none" />
+            </div>
           </div>
         </div>
+
       </div>
     </div>
   </div>
 
-  <!-- Settings panel (hidden modal-like) -->
+  <!-- Settings expanded -->
   <div id="settings" class="card" style="margin-top:12px;display:none">
     <div style="display:flex;justify-content:space-between;align-items:center">
       <div>
-        <div class="mutedSmall">Ayarlar</div>
-        <div style="font-weight:700">Hangi işlemler sorulsun?</div>
+        <div class="small-muted">Ayarlar</div>
+        <div style="font-weight:800">Hangi işlemler sorulsun?</div>
       </div>
       <div><button id="closeSettings" class="btn ghost">Kapat</button></div>
     </div>
     <hr style="margin:12px 0;border:none;border-top:1px solid rgba(255,255,255,0.03)"/>
-    <div class="ops">
-      <label><input type="checkbox" class="opChk" value="+" checked/> Toplama (+)</label>
-      <label><input type="checkbox" class="opChk" value="-" checked/> Çıkarma (-)</label>
-      <label><input type="checkbox" class="opChk" value="*" checked/> Çarpma (*)</label>
-      <label><input type="checkbox" class="opChk" value="/" checked /> Bölme (/)</label>
+    <div class="ops" style="margin-top:6px">
+      <label><input class="opChk" type="checkbox" value="+" checked/> Toplama (+)</label>
+      <label><input class="opChk" type="checkbox" value="-" checked/> Çıkarma (-)</label>
+      <label><input class="opChk" type="checkbox" value="*" checked/> Çarpma (*)</label>
+      <label><input class="opChk" type="checkbox" value="/" /> Bölme (/)</label>
     </div>
-    <div style="margin-top:12px" class="mutedSmall">Not: Bölme soruları ondalık olabilir; cevap toleransı 0.01'dir.</div>
+    <div style="margin-top:12px" class="small-muted">Bölme soruları ondalık olabilir; cevap toleransı 0.01'dir.</div>
   </div>
 
   <!-- Game area -->
   <div id="gameArea" class="card" aria-hidden="true">
     <div style="display:flex;justify-content:space-between;gap:12px;align-items:center">
       <div>
-        <div class="mutedSmall">Oyuncu</div>
-        <div id="playerDisplay" style="font-weight:700">—</div>
+        <div class="small-muted">Oyuncu</div>
+        <div id="playerDisplay" style="font-weight:800">—</div>
       </div>
       <div>
-        <div class="mutedSmall">Puan</div>
-        <div id="scoreDisplay" style="font-weight:700">0</div>
+        <div class="small-muted">Puan</div>
+        <div id="scoreDisplay2" style="font-weight:800">0</div>
       </div>
       <div>
         <button id="menuBack" class="btn ghost">Ana Menü</button>
@@ -166,262 +210,293 @@
 
     <div id="questionBox">Soru: <span id="questionText">—</span></div>
     <div id="answerRow">
-      <input id="answerInput" type="text" inputmode="decimal" placeholder="Cevabını yaz..."/>
-      <button id="submitBtn">Gönder</button>
+      <input id="answerInput" type="text" inputmode="decimal" placeholder="Cevabını yaz..." />
+      <button id="submitBtn" class="btn big">Gönder</button>
     </div>
     <div id="resultMsg"></div>
-    <div id="controlsHint" class="mutedSmall" style="margin-top:8px">PC: Enter ile gönder. Mobil: Gönder butonunu kullan.</div>
-
-    <div id="gameSettings" style="margin-top:12px" class="mutedSmall">Zorluk: <span id="levelDisplay">1</span></div>
+    <div class="small-muted" style="margin-top:8px">PC: Enter ile gönder • Mobil: Gönder butonunu kullan</div>
   </div>
 
-  <footer>© Enes | Final Update</footer>
+  <footer>© <span class="skydivex">Skydivex</span> — All rights reserved.</footer>
 </div>
 
-<!-- About modal (hidden) -->
+<!-- About modal -->
 <div id="aboutModal" class="modal-backdrop" style="display:none;">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="aboutTitle">
     <div style="display:flex;justify-content:space-between;align-items:center">
-      <h3 id="aboutTitle">Hakkında — Matematik Oyunu</h3>
+      <h3 id="aboutTitle">Hakkında — Skydivex Edition</h3>
       <button id="closeAbout" class="btn ghost">Kapat</button>
     </div>
-    <p class="mutedSmall" style="margin-top:8px">
-      Bu oyun öğrenme amaçlı hazırlanmış bir prototiptir. Geliştirici: Enes. Versiyon: v1.1 final.
-      <br><br>
-      Özellikler:
-      <ul style="margin:6px 0 0 18px">
-        <li>Giriş ekranı + ana menü (animasyonlu)</li>
-        <li>Ayarlarla işlem türü seçimi (Toplama/Çıkarma/Çarpma/Bölme)</li>
-        <li>Ses efektleri ve arka plan tonu (aç/kapa + seviye)</li>
-        <li>PC: Enter ile gönderme / Mobil: Butonla gönderme</li>
-        <li>Yerel liderlik tablosu (localStorage)</li>
-      </ul>
+    <p class="muted" style="margin-top:8px">
+      Matematik Oyunu — Skydivex Edition<br/>
+      Versiyon: <strong>v1.2</strong><br/>
+      Yapımcı: <strong class="skydivex">Skydivex</strong><br/>
+      Bu sürüm: zorluk artışı, puan çarpanı, buton/arka plan özelleştirmesi, hover & tıklama efektleri, mobil/masaüstü uyumu.
     </p>
+    <div style="margin-top:10px" class="small-muted">
+      <strong>Değişiklikler (kısa):</strong>
+      <ul>
+        <li>v1.0: Temel</li>
+        <li>v1.1: Animasyonlar & ayarlar</li>
+        <li><strong>v1.2:</strong> Zorluk artışı, seviye çarpanı, görsel özelleştirme, Skydivex branding</li>
+      </ul>
+    </div>
   </div>
 </div>
 
 <script>
-/* Final update script - Fixed & polished */
-/* State & storage */
-const LS_KEY = 'mathgame_final_v1';
+/* v1.2 — Skydivex Edition (single file final release) */
+
+/* Storage & state */
+const LS_KEY = 'mathgame_skydivex_v1_2';
 let state = {
   player: null,
   score: 0,
+  leaderboard: {},
   ops: ['+','-'],
   soundOn: true,
   vol: 0.6,
-  leaderboard: {}
+  btnColor: '#10b981',
+  bgColor: '#071022',
+  level: 1,
+  correctStreak: 0, // track for level ups
+  version: 'v1.2'
 };
+
 /* UI refs */
-const entrance = document.getElementById('entrance');
+const nameStart = document.getElementById('nameStart');
 const enterBtn = document.getElementById('enterBtn');
 const demoBtn = document.getElementById('demoBtn');
 const aboutBtn = document.getElementById('aboutBtn');
 const aboutModal = document.getElementById('aboutModal');
 const closeAbout = document.getElementById('closeAbout');
-const nameStart = document.getElementById('nameStart');
+
 const menuCard = document.getElementById('menuCard');
 const startGameBtn = document.getElementById('startGameBtn');
-const playerLabel = document.getElementById('playerLabel');
 const openSettings = document.getElementById('openSettings');
 const settingsPanel = document.getElementById('settings');
 const closeSettings = document.getElementById('closeSettings');
-const chosenOps = document.getElementById('chosenOps');
 const opChecks = document.querySelectorAll('.opChk');
+const chosenOps = document.getElementById('chosenOps');
+
 const soundToggle = document.getElementById('soundToggle');
 const volRange = document.getElementById('volRange');
+
+const btnColor = document.getElementById('btnColor');
+const previewSwatch = document.getElementById('previewSwatch');
+const btnPreview = document.getElementById('btnPreview');
+
+const bgColor = document.getElementById('bgColor');
+const bgImageBtn = document.getElementById('bgImageBtn');
+const bgImageInput = document.getElementById('bgImage');
+
 const leaderboardEl = document.getElementById('leaderboard');
 const resetScores = document.getElementById('resetScores');
-const startBtn = document.getElementById('startGameBtn');
-const gameArea = document.getElementById('gameArea');
+
+const playerLabel = document.getElementById('playerLabel');
 const playerDisplay = document.getElementById('playerDisplay');
 const scoreDisplay = document.getElementById('scoreDisplay');
+const scoreDisplay2 = document.getElementById('scoreDisplay2');
+
+const levelDisplay = document.getElementById('levelDisplay');
+
+const startBtn = document.getElementById('startGameBtn');
+const gameArea = document.getElementById('gameArea');
 const menuBack = document.getElementById('menuBack');
+
 const questionText = document.getElementById('questionText');
 const answerInput = document.getElementById('answerInput');
 const submitBtn = document.getElementById('submitBtn');
 const resultMsg = document.getElementById('resultMsg');
-const levelDisplay = document.getElementById('levelDisplay');
-const playerLabelUI = document.getElementById('playerLabel');
 
-/* Audio: WebAudio simple */
+const bgLayer = document.getElementById('bgLayer');
+
+const aboutCloseBtn = document.getElementById('closeAbout');
+
+/* Audio (WebAudio minimal) */
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
-let audioCtx = null;
-let bgGain = null, bgOsc = null;
+let audioCtx = null, bgGain = null, bgOsc = null;
 function ensureAudio(){
   if(audioCtx) return;
   audioCtx = new AudioCtx();
-  bgGain = audioCtx.createGain();
-  bgGain.gain.value = 0;
-  bgGain.connect(audioCtx.destination);
-  bgOsc = audioCtx.createOscillator();
-  bgOsc.type = 'sine';
-  bgOsc.frequency.value = 220;
-  const lfo = audioCtx.createOscillator();
-  lfo.frequency.value = 0.25;
-  const lfoGain = audioCtx.createGain(); lfoGain.gain.value = 30;
-  lfo.connect(lfoGain);
-  lfoGain.connect(bgOsc.frequency);
-  bgOsc.connect(bgGain);
-  bgOsc.start();
-  lfo.start();
+  bgGain = audioCtx.createGain(); bgGain.gain.value = 0; bgGain.connect(audioCtx.destination);
+  bgOsc = audioCtx.createOscillator(); bgOsc.type='sine'; bgOsc.frequency.value = 170;
+  const lfo = audioCtx.createOscillator(); lfo.frequency.value = 0.18;
+  const lfoGain = audioCtx.createGain(); lfoGain.gain.value = 20;
+  lfo.connect(lfoGain); lfoGain.connect(bgOsc.frequency);
+  bgOsc.connect(bgGain); lfo.start(); bgOsc.start();
 }
-function setBgVolume(v){
-  if(!audioCtx) return;
-  bgGain.gain.value = state.soundOn ? v * 0.12 : 0;
+function setBgVolume(v){ if(!audioCtx) return; bgGain.gain.value = state.soundOn ? v * 0.12 : 0; }
+function playSuccess(){ if(!state.soundOn) return; ensureAudio();
+  const g = audioCtx.createGain(); g.gain.value = 0.0001; g.connect(audioCtx.destination);
+  const o = audioCtx.createOscillator(); o.type='triangle'; o.frequency.value = 880; o.connect(g);
+  const now=audioCtx.currentTime; g.gain.linearRampToValueAtTime(state.vol, now+0.01); g.gain.exponentialRampToValueAtTime(0.0001, now+0.45);
+  o.start(now); o.stop(now+0.5);
 }
-function playSuccess(){
-  if(!state.soundOn) return;
-  ensureAudio();
-  const g = audioCtx.createGain(); g.gain.value = 0.0001;
-  g.connect(audioCtx.destination);
-  const o = audioCtx.createOscillator();
-  o.type = 'triangle';
-  o.frequency.value = 880;
-  o.connect(g);
-  const now = audioCtx.currentTime;
-  g.gain.linearRampToValueAtTime(state.vol, now + 0.01);
-  g.gain.exponentialRampToValueAtTime(0.0001, now + 0.5);
-  o.start(now); o.stop(now + 0.6);
-}
-function playFail(){
-  if(!state.soundOn) return;
-  ensureAudio();
-  const g = audioCtx.createGain(); g.gain.value = 0.001;
-  g.connect(audioCtx.destination);
-  const o = audioCtx.createOscillator();
-  o.type = 'sawtooth';
-  o.frequency.value = 120;
-  o.connect(g);
-  const now = audioCtx.currentTime;
-  g.gain.linearRampToValueAtTime(state.vol * 0.6, now + 0.01);
-  g.gain.exponentialRampToValueAtTime(0.0001, now + 0.6);
-  o.start(now); o.stop(now + 0.7);
+function playFail(){ if(!state.soundOn) return; ensureAudio();
+  const g = audioCtx.createGain(); g.gain.value = 0.001; g.connect(audioCtx.destination);
+  const o = audioCtx.createOscillator(); o.type='sawtooth'; o.frequency.value = 140; o.connect(g);
+  const now=audioCtx.currentTime; g.gain.linearRampToValueAtTime(state.vol*0.6, now+0.01); g.gain.exponentialRampToValueAtTime(0.0001, now+0.6);
+  o.start(now); o.stop(now+0.7);
 }
 
-/* Storage helpers */
-function loadAll(){
+/* Storage */
+function loadState(){
   try{
     const raw = JSON.parse(localStorage.getItem(LS_KEY) || '{}');
-    state.leaderboard = raw.leaderboard || raw || {};
+    if(raw.leaderboard) state.leaderboard = raw.leaderboard;
     if(raw.player) state.player = raw.player;
-  }catch(e){ state.leaderboard = {}; }
+    if(raw.score) state.score = raw.score;
+    if(raw.ops) state.ops = raw.ops;
+    if(raw.soundOn !== undefined) state.soundOn = raw.soundOn;
+    if(raw.vol) state.vol = raw.vol;
+    if(raw.btnColor) state.btnColor = raw.btnColor;
+    if(raw.bgColor) state.bgColor = raw.bgColor;
+  }catch(e){ /* ignore */ }
 }
-function saveAll(){
-  try{
-    const payload = { leaderboard: state.leaderboard, player: state.player };
-    localStorage.setItem(LS_KEY, JSON.stringify(payload));
-  }catch(e){}
-}
+function saveState(){ try{ const payload = { leaderboard: state.leaderboard, player: state.player, score: state.score, ops: state.ops, soundOn: state.soundOn, vol: state.vol, btnColor: state.btnColor, bgColor: state.bgColor }; localStorage.setItem(LS_KEY, JSON.stringify(payload)); }catch(e){}}
+
+/* UI helpers */
 function renderLeaderboard(){
-  loadAll();
   const arr = Object.entries(state.leaderboard).sort((a,b)=>b[1]-a[1]);
   if(arr.length===0){ leaderboardEl.innerHTML = '<i>Henüz kimse yok</i>'; return; }
   leaderboardEl.innerHTML = arr.map(e=>`<div class="lbItem"><div>${escapeHtml(e[0])}</div><div>${e[1]}p</div></div>`).join('');
 }
 function escapeHtml(s=''){ return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"})[m]); }
+function updateChosenOpsUI(){ chosenOps.textContent = (state.ops && state.ops.length) ? state.ops.join(' ') : '+'; }
 
-/* initial */
-menuCard.classList.add('slide-in');
+/* Entrance */
+loadState();
+updateChosenOpsUI();
 renderLeaderboard();
+previewSwatch.style.background = state.btnColor;
+btnColor.value = state.btnColor;
+bgColor.value = state.bgColor;
+volRange.value = state.vol;
+soundToggle.checked = !!state.soundOn;
+document.documentElement.style.setProperty('--accent', state.btnColor);
 
 /* Entrance handlers */
 enterBtn.addEventListener('click', ()=> {
   const name = nameStart.value.trim();
   if(!name){ alert('Adını gir.'); nameStart.focus(); return; }
-  officialEnter(name);
+  startSession(name);
 });
 demoBtn.addEventListener('click', ()=> {
-  const guest = 'Misafir-' + Math.floor(Math.random()*9000 + 1000);
-  officialEnter(guest);
+  startSession('Misafir-' + Math.floor(Math.random()*9000+1000));
 });
 
-/* About modal handlers */
-aboutBtn.addEventListener('click', ()=> {
-  aboutModal.style.display = 'flex';
-});
-closeAbout.addEventListener('click', ()=> aboutModal.style.display = 'none');
-aboutModal.addEventListener('click', (e)=> { if(e.target === aboutModal) aboutModal.style.display='none'; });
-document.addEventListener('keydown', (e)=> { if(e.key==='Escape') aboutModal.style.display='none'; });
+/* About modal */
+aboutBtn.addEventListener('click', ()=> { aboutModal.style.display = 'flex'; });
+closeAbout.addEventListener('click', ()=> { aboutModal.style.display = 'none'; });
+aboutModal.addEventListener('click', e=> { if(e.target === aboutModal) aboutModal.style.display = 'none'; });
+document.addEventListener('keydown', e=> { if(e.key === 'Escape') aboutModal.style.display = 'none'; });
 
-function officialEnter(name){
+function startSession(name){
   state.player = name;
-  state.score = (state.leaderboard[name] || 0);
-  // hide entrance
-  entrance.style.display = 'none';
-  // reveal menu
-  menuCard.style.display = '';
-  // small animation tick
-  setTimeout(()=> { menuCard.classList.remove('slide-in'); menuCard.classList.add('slide-down'); }, 40);
+  state.score = state.leaderboard[name] || 0;
+  saveState();
+  // hide entrance, show menu
+  document.getElementById('entrance').style.display = 'none';
+  menuCard.style.display = ''; setTimeout(()=> menuCard.classList.add('show'), 20);
   playerLabel.textContent = name;
   playerDisplay.textContent = name;
-  updateChosenOpsUI();
-  renderLeaderboard();
-  // start audio on first gesture if allowed
+  scoreDisplay.textContent = state.score;
+  scoreDisplay2.textContent = state.score;
+  levelDisplay.textContent = state.level;
+  // start audio on first gesture
   if(state.soundOn){ ensureAudio(); setBgVolume(state.vol); }
 }
 
-/* Menu & settings */
+/* Menu controls */
 openSettings.addEventListener('click', ()=> {
   settingsPanel.style.display = settingsPanel.style.display === 'none' ? 'block' : 'none';
-  settingsPanel.scrollIntoView({behavior:'smooth', block:'center'});
+  settingsPanel.scrollIntoView({behavior:'smooth',block:'center'});
 });
 closeSettings.addEventListener('click', ()=> settingsPanel.style.display = 'none');
 
 opChecks.forEach(ch => {
-  ch.addEventListener('change', ()=> { updateChosenOps(); updateChosenOpsUI(); });
+  ch.addEventListener('change', ()=> {
+    const ops = Array.from(opChecks).filter(c=>c.checked).map(c=>c.value);
+    state.ops = ops.length ? ops : ['+'];
+    updateChosenOpsUI();
+    saveState();
+  });
 });
-function updateChosenOps(){
-  const ops = Array.from(opChecks).filter(c=>c.checked).map(c=>c.value);
-  state.ops = ops.length ? ops : ['+'];
-}
-function updateChosenOpsUI(){ updateChosenOps(); chosenOps.textContent = state.ops.join(' '); }
 
-/* sound controls */
+/* sound & volume */
 soundToggle.addEventListener('change', ()=> {
   state.soundOn = !!soundToggle.checked;
-  if(state.soundOn){ ensureAudio(); setBgVolume(state.vol); }
-  else { if(bgGain) bgGain.gain.value = 0; }
+  setBgVolume(state.vol);
+  saveState();
 });
-volRange.addEventListener('input', ()=> { state.vol = parseFloat(volRange.value); setBgVolume(state.vol); });
+volRange.addEventListener('input', ()=> {
+  state.vol = parseFloat(volRange.value);
+  setBgVolume(state.vol);
+  saveState();
+});
+
+/* color & background */
+btnColor.addEventListener('input', e=> {
+  state.btnColor = e.target.value;
+  document.documentElement.style.setProperty('--accent', state.btnColor);
+  previewSwatch.style.background = state.btnColor;
+  saveState();
+});
+bgColor.addEventListener('input', e=> {
+  state.bgColor = e.target.value;
+  document.documentElement.style.setProperty('--bg1', state.bgColor);
+  saveState();
+});
+bgImageBtn.addEventListener('click', ()=> bgImageInput.click());
+bgImageInput.addEventListener('change', e=> {
+  const f = e.target.files[0]; if(!f) return;
+  const r = new FileReader();
+  r.onload = ev => {
+    bgLayer.style.backgroundImage = `url(${ev.target.result}), radial-gradient(circle at 50% 40%, rgba(255,255,255,0.03), transparent 20%), linear-gradient(180deg,var(--bg1),var(--bg2))`;
+    bgLayer.style.backgroundSize = 'cover';
+  };
+  r.readAsDataURL(f);
+});
+
+/* leaderboard reset */
+resetScores.addEventListener('click', ()=> {
+  if(confirm('Skorları sıfırlamak istiyor musun?')){ state.leaderboard = {}; saveState(); renderLeaderboard(); alert('Sıfırlandı.'); }
+});
 
 /* Start game */
-startGameBtn.addEventListener('click', ()=> {
-  // hide menu with animation then show game
-  menuCard.classList.remove('slide-down');
-  menuCard.classList.add('slide-in');
-  setTimeout(()=> { menuCard.style.display = 'none'; }, 420);
+startBtn.addEventListener('click', ()=> {
+  // hide menu
+  menuCard.classList.remove('show'); setTimeout(()=> menuCard.style.display = 'none', 420);
   gameArea.style.display = 'block';
   gameArea.setAttribute('aria-hidden','false');
   answerInput.focus();
   nextQuestion(true);
 });
 
-/* Back to menu */
+/* back to menu */
 menuBack.addEventListener('click', ()=> {
   gameArea.style.display = 'none';
-  menuCard.style.display = '';
-  menuCard.classList.remove('slide-in'); menuCard.classList.add('slide-down');
+  menuCard.style.display = ''; setTimeout(()=> menuCard.classList.add('show'), 20);
 });
 
-/* Reset scores */
-resetScores.addEventListener('click', ()=> {
-  if(confirm('Skor tablosunu sıfırlamak istediğine emin misin?')){
-    state.leaderboard = {}; saveAll(); renderLeaderboard(); alert('Sıfırlandı.'); }
-});
-
-/* Game logic */
+/* Game logic with level scaling and multiplier */
 let currentQuestion = '';
 let correctAnswer = 0;
-let level = 1;
+let questionCount = 0;
 
-function nextQuestion(newRound=false){
-  if(newRound) level = 1; else level = Math.min(10, level + 0.1);
-  levelDisplay.textContent = Math.floor(level);
-  if(!state.ops || state.ops.length===0) state.ops = ['+'];
-  const op = state.ops[Math.floor(Math.random()*state.ops.length)];
-  const max = 5 + Math.floor(level * 2);
-  let a = randInt(1,max), b = randInt(1,max);
+function nextQuestion(reset=false){
+  if(reset){
+    state.level = 1;
+    state.correctStreak = 0;
+    questionCount = 0;
+  }
+  // small difficulty growth: increases a bit each question, and level up on streak thresholds
+  questionCount++;
+  const baseDifficulty = 4 + Math.floor(state.level * 1.5);
+  const op = (state.ops && state.ops.length) ? state.ops[Math.floor(Math.random()*state.ops.length)] : '+';
+  let a = randInt(1, baseDifficulty);
+  let b = randInt(1, baseDifficulty);
   if(op === '/'){
     const prod = a * b;
     currentQuestion = `${prod} / ${a}`;
@@ -437,65 +512,95 @@ function nextQuestion(newRound=false){
     currentQuestion = `${a} - ${b}`;
     correctAnswer = Math.round((a - b) * 100) / 100;
   }
-  currentQuestion = currentQuestion.replace('*','×').replace('/','÷');
-  questionText.textContent = currentQuestion;
+  questionText.textContent = currentQuestion.replace('*','×').replace('/','÷');
   resultMsg.textContent = '';
 }
 
-/* submit answer */
-function nearlyEqual(a,b,eps=0.01){ return Math.abs(a - b) < eps; }
+function nearlyEqual(a,b,eps=0.01){ return Math.abs(a-b) < eps; }
+
 function submitAnswer(){
   const raw = answerInput.value.trim();
   if(!raw){ resultMsg.style.color='#f59e0b'; resultMsg.textContent='Cevap gir!'; return; }
   const user = parseFloat(raw.replace(',','.'));
   if(Number.isNaN(user)){ resultMsg.style.color='#f59e0b'; resultMsg.textContent='Geçerli sayı gir!'; return; }
+
   if(nearlyEqual(user, correctAnswer)){
     playSuccess();
     resultMsg.style.color = '#10b981';
-    resultMsg.textContent = ['Aferin!','Süper!','Bravo!', 'Harika!'][randInt(0,3)];
-    state.score = (state.score || 0) + 10;
+    resultMsg.textContent = ['Aferin!','Süper!','Bravo!','Harika!'][randInt(0,3)];
+    // scoring: base 10 * multiplier; multiplier increases with level
+    const multiplier = Math.max(1, Math.floor(state.level));
+    const gained = 10 * multiplier;
+    state.score = (state.score || 0) + gained;
+    state.correctStreak = (state.correctStreak || 0) + 1;
+    // level up: every 4 corrects => level++ (faster growth)
+    if(state.correctStreak > 0 && state.correctStreak % 4 === 0){
+      state.level = Math.min(99, state.level + 1);
+      // tiny celebratory sound
+      playSuccess();
+    }
+    // update leaderboard
     state.leaderboard[state.player] = state.score;
-    saveAll(); renderLeaderboard(); scoreDisplay.textContent = state.score;
-    setTimeout(()=> { answerInput.value=''; nextQuestion(false); }, 1100);
+    saveState(); renderLeaderboard();
+    scoreDisplay.textContent = state.score;
+    scoreDisplay2.textContent = state.score;
+    levelDisplay.textContent = state.level;
+    // next question after short delay
+    setTimeout(()=>{ answerInput.value=''; nextQuestion(false); }, 900);
   } else {
     playFail();
     resultMsg.style.color = '#fb7185';
-    resultMsg.textContent = 'Yanlış, daha dikkatli olmalısın!';
+    resultMsg.textContent = 'Yanlış... doğrusu biraz sonra gösterilecek.';
     state.score = Math.max(0, (state.score || 0) - 5);
+    state.correctStreak = 0;
     state.leaderboard[state.player] = state.score;
-    saveAll(); renderLeaderboard(); scoreDisplay.textContent = state.score;
-    setTimeout(()=> { resultMsg.style.color = '#fbbf24'; resultMsg.textContent = 'Doğrusu: ' + correctAnswer; }, 1100);
-    setTimeout(()=> { answerInput.value=''; nextQuestion(false); }, 2200);
+    saveState(); renderLeaderboard(); scoreDisplay.textContent = state.score; scoreDisplay2.textContent = state.score;
+    setTimeout(()=>{ resultMsg.style.color='#fbbf24'; resultMsg.textContent = 'Doğrusu: ' + correctAnswer; }, 900);
+    setTimeout(()=>{ answerInput.value=''; nextQuestion(false); }, 2000);
   }
 }
 
-/* Enter key handling (desktop) */
+/* Enter key / submit binding */
+submitBtn.addEventListener('click', submitAnswer);
 document.addEventListener('keydown', (e)=> {
   if(e.key === 'Enter'){
-    if(gameArea.style.display === 'block'){ submitAnswer(); } else { if(document.activeElement === nameStart) enterBtn.click(); }
+    if(gameArea.style.display === 'block'){ submitAnswer(); }
+    else if(document.activeElement === nameStart){ enterBtn.click(); }
   }
 });
-submitBtn.addEventListener('click', submitAnswer);
 
 /* utilities */
-function randInt(a,b){ return Math.floor(Math.random() * (b - a + 1)) + a; }
+function randInt(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
 
-/* Start background music lazily on first user gesture (autoplay policy) */
-document.addEventListener('click', function onceAudioInit(){
-  if(state.soundOn){ ensureAudio(); setBgVolume(state.vol); }
-  document.removeEventListener('click', onceAudioInit);
+/* parallax small effect for bg */
+document.addEventListener('mousemove', e=>{
+  const mx = e.clientX / window.innerWidth * 100;
+  const my = e.clientY / window.innerHeight * 100;
+  bgLayer.style.setProperty('--mx', mx + '%');
+  bgLayer.style.setProperty('--my', my + '%');
 });
 
-/* initial load & UI prep */
-updateChosenOpsUI();
-renderLeaderboard();
+/* small helper: apply btn color */
+function applyButtonColor(hex){
+  document.documentElement.style.setProperty('--accent', hex);
+  // also update inline preview
+  previewSwatch.style.background = hex;
+}
+applyButtonColor(state.btnColor);
+document.documentElement.style.setProperty('--bg1', state.bgColor);
 
-/* expose for debugging (if lazım) */
-window._mathgame = { state, nextQuestion, submitAnswer, saveAll };
+/* lazy audio start due to autoplay policy */
+document.addEventListener('click', function onceAudio(){
+  if(state.soundOn){ ensureAudio(); setBgVolume(state.vol); }
+  document.removeEventListener('click', onceAudio);
+});
 
-/* focus helper for mobile: ensure submit button visible on input focus (minor UX) */
+/* expose debug */
+window._sky = { state, nextQuestion, submitAnswer, saveState };
+
+/* initial question placeholder */
+questionText.textContent = 'Başlamak için Başla butonuna bas.';
 answerInput.addEventListener('focus', ()=> { window.scrollTo({top:0,behavior:'smooth'}); });
-
 </script>
 </body>
 </html>
