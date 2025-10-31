@@ -2,259 +2,246 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>MathGame v1.2.5</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MathGame</title>
 <style>
-/* Temel stil ve tema */
-:root{--primary:#00ff44;--bg:#111;--text:#eee;--accent:#0f0}
-html,body{margin:0;padding:0;height:100%;font-family:Arial, sans-serif;background:var(--bg);color:var(--text);overflow:hidden}
-*{box-sizing:border-box;transition:all 0.25s ease}
-
-.hidden{display:none}
-
-/* Giriş ekranı */
-#loginScreen{position:absolute;top:0;left:0;width:100%;height:100%;display:flex;justify-content:center;align-items:center;flex-direction:column;background:var(--bg)}
-#loginScreen input{padding:10px;font-size:18px;margin:5px;border-radius:6px;border:none;width:200px;text-align:center}
-#loginScreen button{padding:10px 20px;margin:5px;background:var(--primary);border:none;color:#000;font-weight:700;border-radius:6px;cursor:pointer;transition:0.2s}
-#loginScreen button:hover{transform:scale(1.05);filter:brightness(1.2)}
-#loginScreen h1{font-size:36px;margin-bottom:15px}
-
-/* Ana menü */
-#mainMenu{position:absolute;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:12px;background:linear-gradient(180deg,#111,#222);transform:translateY(-100%);}
-.menu-btn{padding:12px 25px;font-size:18px;font-weight:600;border:none;border-radius:8px;background:var(--primary);color:#000;cursor:pointer;transition:0.25s}
-.menu-btn:hover{transform:scale(1.05);filter:brightness(1.3)}
-#versionInfo{position:absolute;bottom:12px;font-size:12px;color:#0f0}
-
-/* Oyun alanı */
-#gameArea{position:absolute;top:0;left:0;width:100%;height:100%;padding:20px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:12px}
-#topBar{width:100%;display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;font-size:16px}
-#question{font-size:22px;font-weight:700}
-#answer{padding:8px;font-size:16px;width:120px;text-align:center;border-radius:6px;border:none}
-#submitBtn{padding:8px 16px;font-size:16px;background:var(--primary);border:none;border-radius:6px;cursor:pointer;transition:0.2s}
-#submitBtn:hover{transform:scale(1.05);filter:brightness(1.2)}
-#scoreDisplay,#levelDisplay,#nextScore{font-weight:700;color:var(--primary)}
-#result{min-height:28px;font-weight:700;transition:opacity 0.3s}
-
-/* Puan tablosu */
-#leaderboard{margin-top:12px;text-align:left;width:300px;border-top:1px solid #333;padding-top:6px}
-#leaderboard i{color:#555}
-
-/* Duraklatma menüsü */
-#pauseMenu{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);backdrop-filter:blur(0px);display:flex;flex-direction:column;justify-content:center;align-items:center;opacity:0;pointer-events:none;transition:0.4s}
-#pauseMenu.show{opacity:1;pointer-events:auto;backdrop-filter:blur(4px)}
-#pauseMenu .menuContent{background:#222;padding:20px;border-radius:12px;display:flex;flex-direction:column;align-items:center;gap:10px;transform:translateY(-50px);transition:0.3s}
-#pauseMenu.show .menuContent{transform:translateY(0)}
-
-/* Ayarlar */
-#settings{display:flex;flex-direction:column;gap:8px;width:220px}
-#settings label{display:flex;justify-content:space-between;font-size:14px}
-#settings input[type=checkbox]{transform:scale(1.3);margin-left:6px}
-#settings input[type=color]{width:40px;height:24px;border:none;padding:0}
-
-/* Hakkında */
-#about{font-size:14px;color:#0f0;text-align:center;max-width:320px;margin-top:12px}
-#about b{color:#0f0}
-
-/* Animasyonlar ve küçük detaylar */
-button:active{transform:scale(0.95)}
+  :root {
+    --primary:#00ff44;
+    --bg:#111;
+    --text:#eee;
+    --accent:#0f0;
+    --button-bg:#222;
+    --button-hover:#333;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    transition: background 0.3s,color 0.3s;
+  }
+  .container{
+    max-width:600px;
+    margin:0 auto;
+    padding:20px;
+  }
+  h1{margin:0 0 10px;}
+  button{
+    padding:8px 12px;
+    font-size:16px;
+    margin:4px;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+    background:var(--button-bg);
+    color:var(--text);
+    transition:0.2s;
+  }
+  button:hover{
+    background:var(--button-hover);
+    transform:scale(1.05);
+  }
+  #menu, #gameArea, #pauseMenu, #settingsMenu{
+    position:absolute;
+    top:0; left:0; width:100%; height:100%;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    flex-direction:column;
+    background:rgba(0,0,0,0.85);
+    transition:all 0.4s;
+    opacity:1;
+    z-index:10;
+  }
+  .hidden{opacity:0;pointer-events:none;}
+  input[type=text]{padding:6px;font-size:16px;margin:4px;border-radius:6px;border:1px solid #333;background:#222;color:#eee;}
+  #question{font-size:20px;font-weight:600;margin:10px;}
+  #result{min-height:24px;margin:6px;font-weight:bold;transition:opacity 0.3s;}
+  #leaderboard{margin-top:12px;text-align:left;width:100%;max-width:400px;}
+  #hud{position:fixed;top:10px;right:10px;color:var(--accent);font-size:14px;background:rgba(0,0,0,0.3);padding:6px;border-radius:6px;}
+  #pauseMenu, #settingsMenu{background:rgba(0,0,0,0.95);}
+  #pauseMenu button, #settingsMenu button{width:180px;}
+  .small{font-size:12px;padding:4px 6px;margin-top:4px;}
 </style>
 </head>
 <body>
+<div class="container">
 
-<!-- Giriş ekranı -->
-<div id="loginScreen">
-  <h1>MathGame</h1>
-  <input type="text" id="playerName" placeholder="Kullanıcı adın?">
-  <button id="loginBtn">Başla</button>
-</div>
-
-<!-- Ana Menü -->
-<div id="mainMenu">
-  <button class="menu-btn" id="startGameBtn">Oyna</button>
-  <button class="menu-btn" id="pauseSettingsBtn">Ayarlar</button>
-  <button class="menu-btn" id="aboutBtn">Hakkında</button>
-  <div id="versionInfo">v1.2.5 • Yapımcı: SKYDIVEX</div>
-</div>
-
-<!-- Oyun Alanı -->
-<div id="gameArea" class="hidden">
-  <div id="topBar">
-    <div>Oyuncu: <span id="playerDisplay"></span></div>
-    <div>Seviye: <span id="levelDisplay">1</span> (Sonraki: <span id="nextScore">10</span>p)</div>
-    <div>Puan: <span id="scoreDisplay">0</span></div>
-    <button id="pauseBtn">Duraklat</button>
-  </div>
-
-  <div id="questionArea">
-    <p id="question">Soru yükleniyor...</p>
-    <input type="text" id="answer">
-    <button id="submitBtn">Gönder</button>
-    <p id="result"></p>
-  </div>
-
-  <h3>Puan Tablosu</h3>
-  <div id="leaderboard"></div>
-</div>
-
-<!-- Duraklatma ve Ayarlar -->
-<div id="pauseMenu">
-  <div class="menuContent">
-    <button id="resumeBtn">Devam</button>
-    <div id="settings">
-      <label>Sesler Açık/Kapalı <input type="checkbox" id="soundToggle"></label>
-      <label>Arka Plan Renk <input type="color" id="bgColorPicker" value="#111111"></label>
-      <label>Buton Renk <input type="color" id="btnColorPicker" value="#00ff44"></label>
-      <label>Toplama <input type="checkbox" id="opAdd" checked></label>
-      <label>Çıkarma <input type="checkbox" id="opSub" checked></label>
-      <label>Çarpma <input type="checkbox" id="opMul" checked></label>
-      <label>Bölme <input type="checkbox" id="opDiv" checked></label>
+  <!-- Giriş ekranı -->
+  <div id="loginScreen">
+    <h1>MathGame</h1>
+    <input type="text" id="playerName" placeholder="Kullanıcı adın">
+    <div>
+      <button id="loginBtn">Giriş Yap</button>
     </div>
   </div>
-</div>
 
-<!-- Hakkında Detay -->
-<div id="about" class="hidden">
-  <p><b>MathGame v1.2.5</b></p>
-  <p>Yapımcı: SKYDIVEX</p>
-  <p>Bu sürümde animasyonlu menüler, ayarlar, modern sesler, seviye artışı ve zorluk sistemi eklendi. Duraklatma menüsü, puan tablosu ve oyun içi ayarlar tamamen güncellendi.</p>
+  <!-- Ana Menü -->
+  <div id="menu" class="hidden">
+    <h1>MathGame</h1>
+    <button id="startBtn">Başla</button>
+    <button id="settingsBtn">Ayarlar</button>
+    <button id="aboutBtn">Hakkında</button>
+    <div id="versionInfo" style="margin-top:10px;font-size:12px;color:#0f0;">v1.2.5</div>
+  </div>
+
+  <!-- Ayarlar Menüsü -->
+  <div id="settingsMenu" class="hidden">
+    <h2>Ayarlar</h2>
+    <div>
+      <label>Ses: <input type="checkbox" id="soundToggle" checked></label>
+    </div>
+    <div>
+      <label>İşlem Türü:</label><br>
+      <label><input type="checkbox" class="opType" value="+"> Toplama</label><br>
+      <label><input type="checkbox" class="opType" value="-"> Çıkarma</label><br>
+      <label><input type="checkbox" class="opType" value="*"> Çarpma</label><br>
+      <label><input type="checkbox" class="opType" value="/"> Bölme</label>
+    </div>
+    <button id="closeSettingsBtn">Kapat</button>
+  </div>
+
+  <!-- Hakkında Menüsü -->
+  <div id="aboutMenu" class="hidden">
+    <h2>Hakkında</h2>
+    <p>Yapımcı: SKYDIVEX</p>
+    <p>MathGame v1.2.5</p>
+    <ul>
+      <li>Seviye sistemi ve artan zorluk</li>
+      <li>Puan sistemi: Seviye ×10 puan</li>
+      <li>Duraklatma menüsü animasyonlu</li>
+      <li>Ayarlarla işlem türü seçimi ve ses kontrolü</li>
+    </ul>
+    <button id="closeAboutBtn">Kapat</button>
+  </div>
+
+  <!-- Oyun Alanı -->
+  <div id="gameArea" class="hidden">
+    <div id="hud">Seviye: <span id="level">1</span> | Puan: <span id="score">0</span> | Ödül: <span id="reward">10</span></div>
+    <p id="question"></p>
+    <input type="text" id="answer" placeholder="Cevabın?">
+    <button id="submitBtn">Gönder</button>
+    <p id="result"></p>
+    <h3>Puan Tablosu</h3>
+    <div id="leaderboard"></div>
+    <button id="pauseBtn" class="small">Duraklat</button>
+  </div>
+
+  <!-- Duraklatma Menüsü -->
+  <div id="pauseMenu" class="hidden">
+    <h2>Duraklatıldı</h2>
+    <button id="resumeBtn">Devam Et</button>
+    <button id="pauseSettingsBtn">Ayarlar</button>
+  </div>
+
 </div>
 
 <script>
-// Oyun mantığı
-let player = '';
-let score = 0;
-let level = 1;
-let nextScore = 10;
-let correct = 0;
-let operations = ['+','-','*','/'];
-let enabledOps = { '+':true,'-':true,'*':true,'/':true };
-let leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || {};
-let soundEnabled = true;
+let player, score=0, level=1, reward=10, correct;
+let leaderboard=JSON.parse(localStorage.getItem('leaderboard'))||{};
+let soundOn = localStorage.getItem('sound')!=='false';
+const opTypes = ['+','-','*','/'];
 
-// Elements
 const loginScreen = document.getElementById('loginScreen');
-const mainMenu = document.getElementById('mainMenu');
+const menu = document.getElementById('menu');
 const gameArea = document.getElementById('gameArea');
-const playerDisplay = document.getElementById('playerDisplay');
-const scoreDisplay = document.getElementById('scoreDisplay');
-const levelDisplay = document.getElementById('levelDisplay');
-const nextScoreDisplay = document.getElementById('nextScore');
-const questionEl = document.getElementById('question');
+const settingsMenu = document.getElementById('settingsMenu');
+const aboutMenu = document.getElementById('aboutMenu');
+const pauseMenu = document.getElementById('pauseMenu');
+
+const playerNameInput = document.getElementById('playerName');
+const loginBtn = document.getElementById('loginBtn');
+const startBtn = document.getElementById('startBtn');
+const settingsBtn = document.getElementById('settingsBtn');
+const aboutBtn = document.getElementById('aboutBtn');
+const closeSettingsBtn = document.getElementById('closeSettingsBtn');
+const closeAboutBtn = document.getElementById('closeAboutBtn');
+const submitBtn = document.getElementById('submitBtn');
 const answerInput = document.getElementById('answer');
+const questionEl = document.getElementById('question');
 const resultEl = document.getElementById('result');
 const leaderboardEl = document.getElementById('leaderboard');
-
-const pauseMenu = document.getElementById('pauseMenu');
+const levelEl = document.getElementById('level');
+const scoreEl = document.getElementById('score');
+const rewardEl = document.getElementById('reward');
+const pauseBtn = document.getElementById('pauseBtn');
 const resumeBtn = document.getElementById('resumeBtn');
+const pauseSettingsBtn = document.getElementById('pauseSettingsBtn');
 const soundToggle = document.getElementById('soundToggle');
-const bgColorPicker = document.getElementById('bgColorPicker');
-const btnColorPicker = document.getElementById('btnColorPicker');
-const opAdd = document.getElementById('opAdd');
-const opSub = document.getElementById('opSub');
-const opMul = document.getElementById('opMul');
-const opDiv = document.getElementById('opDiv');
+const opCheckboxes = document.querySelectorAll('.opType');
 
-const aboutDiv = document.getElementById('about');
+soundToggle.checked=soundOn;
 
-// Sesler
-const clickSound = new Audio('https://www.soundjay.com/button/beep-07.mp3');
-clickSound.volume = 0.1;
-
-function playClick(){
-  if(soundEnabled) clickSound.currentTime=0,clickSound.play();
-}
-
-// Login
-document.getElementById('loginBtn').addEventListener('click',()=>{
-  player = document.getElementById('playerName').value || 'Oyuncu';
+loginBtn.onclick = ()=> {
+  const name = playerNameInput.value.trim();
+  if(!name){alert('Adını gir!'); return;}
+  player=name;
+  if(!leaderboard[player]) leaderboard[player]=0;
+  score=leaderboard[player];
   loginScreen.classList.add('hidden');
-  mainMenu.style.transform = 'translateY(0)';
-});
+  menu.classList.remove('hidden');
+};
 
-// Menü butonları
-document.getElementById('startGameBtn').addEventListener('click',()=>{
-  playClick();
-  mainMenu.style.transform = 'translateY(-100%)';
-  setTimeout(()=>{
-    mainMenu.classList.add('hidden');
-    gameArea.classList.remove('hidden');
-    playerDisplay.innerText = player;
-    newQuestion();
-  },300);
-});
+startBtn.onclick = ()=>{menu.classList.add('hidden'); gameArea.classList.remove('hidden'); newQuestion();}
+settingsBtn.onclick = ()=>{settingsMenu.classList.remove('hidden'); menu.classList.add('hidden');}
+closeSettingsBtn.onclick = ()=>{settingsMenu.classList.add('hidden'); menu.classList.remove('hidden');}
+aboutBtn.onclick = ()=>{aboutMenu.classList.remove('hidden'); menu.classList.add('hidden');}
+closeAboutBtn.onclick = ()=>{aboutMenu.classList.add('hidden'); menu.classList.remove('hidden');}
 
-document.getElementById('pauseBtn').addEventListener('click',()=>{
-  playClick();
-  pauseMenu.classList.add('show');
-});
-resumeBtn.addEventListener('click',()=>{
-  playClick();
-  pauseMenu.classList.remove('show');
-});
+submitBtn.onclick = checkAnswer;
+answerInput.addEventListener('keydown',e=>{if(e.key==='Enter') submitBtn.click();});
 
-document.getElementById('aboutBtn').addEventListener('click',()=>{
-  playClick();
-  aboutDiv.classList.toggle('hidden');
-});
+pauseBtn.onclick = ()=>{pauseMenu.classList.remove('hidden'); gameArea.classList.add('hidden');}
+resumeBtn.onclick = ()=>{pauseMenu.classList.add('hidden'); gameArea.classList.remove('hidden');}
+pauseSettingsBtn.onclick = ()=>{settingsMenu.classList.remove('hidden'); pauseMenu.classList.add('hidden');}
 
-// Ayarlar
-soundToggle.addEventListener('change',()=>{soundEnabled = soundToggle.checked;});
-bgColorPicker.addEventListener('input',()=>{document.body.style.background = bgColorPicker.value;});
-btnColorPicker.addEventListener('input',()=>{document.querySelectorAll('.menu-btn,#submitBtn').forEach(b=>b.style.background = btnColorPicker.value);});
-opAdd.addEventListener('change',()=>{enabledOps['+'] = opAdd.checked;});
-opSub.addEventListener('change',()=>{enabledOps['-'] = opSub.checked;});
-opMul.addEventListener('change',()=>{enabledOps['*'] = opMul.checked;});
-opDiv.addEventListener('change',()=>{enabledOps['/'] = opDiv.checked;});
+soundToggle.onchange = ()=>{soundOn=soundToggle.checked; localStorage.setItem('sound',soundOn);}
 
-// Oyun Fonksiyonları
-function newQuestion(){
-  let ops = operations.filter(o=>enabledOps[o]);
-  if(ops.length===0) ops = ['+'];
-  const op = ops[Math.floor(Math.random()*ops.length)];
-  const levelMax = Math.min(level*10, 100);
-  let a = Math.floor(Math.random()*levelMax)+1;
-  let b = Math.floor(Math.random()*levelMax)+1;
-  if(op==='/' && b===0) b=1;
-  let qText = `${a} ${op} ${b} = ?`;
-  questionEl.innerText = qText;
-  answerInput.value = '';
-  answerInput.focus();
-  questionEl.dataset.answer = Math.floor(eval(`${a}${op}${b}`));
+function randomInt(min,max){return Math.floor(Math.random()*(max-min+1))+min;}
+function getRandomOp(){ 
+  let types = Array.from(opCheckboxes).filter(c=>c.checked).map(c=>c.value);
+  return types.length>0 ? types[randomInt(0,types.length-1)] : opTypes[randomInt(0,opTypes.length-1)];
 }
-
-document.getElementById('submitBtn').addEventListener('click',checkAnswer);
-answerInput.addEventListener('keydown',e=>{if(e.key==='Enter') checkAnswer();});
+function newQuestion(){
+  let max = Math.min(10+level*2,100);
+  let op = getRandomOp();
+  let a = randomInt(1,max), b=randomInt(1,max);
+  if(op==='/' || op==='-'){if(b>a){[a,b]=[b,a];}}
+  if(op==='/'){b=Math.max(1,b); a=b*randomInt(1,Math.floor(max/b));}
+  correct = eval(a+op+b);
+  questionEl.innerText=`Seviye ${level}: ${a} ${op} ${b} = ? (Ödül: ${level*10})`;
+  reward=level*10; rewardEl.innerText=reward;
+  answerInput.value=''; answerInput.focus();
+  resultEl.style.opacity=0;
+}
 
 function checkAnswer(){
-  let ans = parseInt(answerInput.value);
-  let correctAns = parseInt(questionEl.dataset.answer);
-  if(ans===correctAns){
-    resultEl.innerText = 'Doğru!';
-    score += level*10;
-    correct++;
-    if(correct>=level){
-      level++;
-      correct=0;
-    }
-  }else{
-    resultEl.innerText = 'Yanlış!';
+  let val=parseFloat(answerInput.value);
+  if(val===correct){
+    score+=reward;
+    scoreEl.innerText=score;
+    resultEl.innerText='Doğru!';
+    resultEl.style.opacity=1;
+    level++;
+    levelEl.innerText=level;
+    newQuestion();
+  } else {
+    resultEl.innerText='Yanlış!';
+    resultEl.style.opacity=1;
   }
-  scoreDisplay.innerText = score;
-  levelDisplay.innerText = level;
-  nextScoreDisplay.innerText = level*10;
+  leaderboard[player]=score;
+  localStorage.setItem('leaderboard',JSON.stringify(leaderboard));
   updateLeaderboard();
-  newQuestion();
 }
 
 function updateLeaderboard(){
-  leaderboard[player] = score;
-  localStorage.setItem('leaderboard',JSON.stringify(leaderboard));
-  let html='';
-  Object.entries(leaderboard).sort((a,b)=>b[1]-a[1]).forEach(([p,s],i)=>{
-    html += `<i>${i+1}. ${p} : ${s}p</i><br>`;
-  });
-  leaderboardEl.innerHTML = html;
+  let entries = Object.entries(leaderboard).sort((a,b)=>b[1]-a[1]);
+  leaderboardEl.innerHTML='';
+  entries.forEach(([p,s])=>{leaderboardEl.innerHTML+=`<p>${p}: ${s}</p>`;});
 }
 
-// İlk ayarlar
-soundToggle.checked = soundEnabled;
+updateLeaderboard();
+</script>
+</body>
+</html>
