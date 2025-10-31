@@ -1,247 +1,760 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="tr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MathGame</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>MathGame — v1.2.5 — SKYDIVEX</title>
 <style>
-  :root {
-    --primary:#00ff44;
-    --bg:#111;
-    --text:#eee;
-    --accent:#0f0;
-    --button-bg:#222;
-    --button-hover:#333;
-  }
-  *{box-sizing:border-box;}
-  body{
-    margin:0;
-    font-family:Arial,sans-serif;
-    background:var(--bg);
-    color:var(--text);
-    transition: background 0.3s,color 0.3s;
-  }
-  .container{
-    max-width:600px;
-    margin:0 auto;
-    padding:20px;
-  }
-  h1{margin:0 0 10px;}
-  button{
-    padding:8px 12px;
-    font-size:16px;
-    margin:4px;
-    border:none;
-    border-radius:6px;
-    cursor:pointer;
-    background:var(--button-bg);
-    color:var(--text);
-    transition:0.2s;
-  }
-  button:hover{
-    background:var(--button-hover);
-    transform:scale(1.05);
-  }
-  #menu, #gameArea, #pauseMenu, #settingsMenu{
-    position:absolute;
-    top:0; left:0; width:100%; height:100%;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    flex-direction:column;
-    background:rgba(0,0,0,0.85);
-    transition:all 0.4s;
-    opacity:1;
-    z-index:10;
-  }
-  .hidden{opacity:0;pointer-events:none;}
-  input[type=text]{padding:6px;font-size:16px;margin:4px;border-radius:6px;border:1px solid #333;background:#222;color:#eee;}
-  #question{font-size:20px;font-weight:600;margin:10px;}
-  #result{min-height:24px;margin:6px;font-weight:bold;transition:opacity 0.3s;}
-  #leaderboard{margin-top:12px;text-align:left;width:100%;max-width:400px;}
-  #hud{position:fixed;top:10px;right:10px;color:var(--accent);font-size:14px;background:rgba(0,0,0,0.3);padding:6px;border-radius:6px;}
-  #pauseMenu, #settingsMenu{background:rgba(0,0,0,0.95);}
-  #pauseMenu button, #settingsMenu button{width:180px;}
-  .small{font-size:12px;padding:4px 6px;margin-top:4px;}
+/* ---------------------------
+   MathGame v1.2.5 - SKYDIVEX
+   Siyah - Yeşil final tasarım
+   ---------------------------*/
+
+/* Root colors */
+:root{
+  --bg-dark:#060708;
+  --bg-mid:#0b1220;
+  --card:#071022;
+  --neon:#00ff66;
+  --muted:#9fb3b0;
+  --glass: rgba(255,255,255,0.03);
+  --accent: var(--neon);
+  --ui-radius:14px;
+  --ease: cubic-bezier(.2,.9,.25,1);
+}
+
+/* Reset */
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--bg-dark),var(--bg-mid));color:#e6f7ea;font-family:Inter,ui-sans-serif,system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale}
+a{color:inherit}
+button{font-family:inherit}
+
+/* Background layer (image + radial overlay) */
+#bgLayer{
+  position:fixed; inset:0; z-index:-3;
+  background: radial-gradient(circle at var(--mx,50%) var(--my,50%), rgba(0,255,102,0.02), transparent 18%), linear-gradient(180deg,var(--bg-dark),var(--bg-mid));
+  transition: background 360ms var(--ease), transform 250ms var(--ease), filter 300ms linear;
+  background-size: cover;
+  background-position: center center;
+}
+
+/* container */
+.app {
+  max-width:980px;
+  margin:28px auto;
+  padding:18px;
+}
+
+/* card look */
+.card {
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border:1px solid rgba(255,255,255,0.04);
+  border-radius:var(--ui-radius);
+  padding:14px;
+  box-shadow:0 10px 30px rgba(2,6,10,0.6);
+}
+
+/* header */
+.header {
+  display:flex; justify-content:space-between; align-items:center; gap:12px;
+}
+.title {
+  font-size:20px; font-weight:700; letter-spacing:0.2px;
+}
+.subtitle { color:var(--muted); font-size:13px; }
+
+/* small helper classes */
+.row{display:flex;gap:8px;align-items:center}
+.col{display:flex;flex-direction:column;gap:8px}
+.space-between{display:flex;justify-content:space-between;align-items:center}
+.center{display:flex;justify-content:center;align-items:center}
+
+/* buttons */
+.btn {
+  padding:10px 14px; border-radius:12px; border:0; cursor:pointer;
+  background:linear-gradient(180deg,var(--neon), #00d458); color:#06110b; font-weight:800;
+  box-shadow:0 8px 30px rgba(0,255,102,0.06);
+  transition: transform .12s var(--ease), box-shadow .12s var(--ease), filter .12s var(--ease);
+}
+.btn:hover{ transform:translateY(-6px) scale(1.02); box-shadow:0 20px 40px rgba(0,255,102,0.12); filter:brightness(1.02) }
+.btn:active{ transform:translateY(0) scale(.985); box-shadow:0 6px 12px rgba(0,0,0,0.6) }
+.btn.ghost { background:transparent; color:var(--neon); border:1px solid rgba(255,255,255,0.04); box-shadow:none; font-weight:700 }
+
+/* layout: left & right */
+.main-grid { display:grid; grid-template-columns: 1fr 340px; gap:14px; margin-top:12px; }
+@media (max-width:880px){ .main-grid{ grid-template-columns: 1fr; } }
+
+/* input */
+.input {
+  padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.04); background:transparent; color:inherit;
+}
+
+/* menu styles */
+#entryCard .card { display:flex; flex-direction:column; gap:10px; align-items:center; text-align:center; padding:18px }
+#entryCard input { min-width:240px }
+
+/* menu slide - visually identical to final model */
+#menuCard {
+  margin-top:14px; transform-origin:top; transition: transform .48s var(--ease), opacity .28s var(--ease); opacity:0; transform:translateY(-16px) scale(.995)
+}
+#menuCard.show { opacity:1; transform:translateY(0) scale(1) }
+
+/* leader board */
+.lb { margin-top:10px; max-height:300px; overflow:auto; }
+.lbItem { display:flex;justify-content:space-between; padding:8px; border-radius:8px; background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); margin-bottom:6px }
+
+/* game area */
+#gameArea { display:none; margin-top:14px; padding:16px; border-radius:14px; }
+.topbar { display:flex; gap:12px; justify-content:space-between; align-items:center; margin-bottom:10px; }
+.stat { font-size:13px; color:var(--muted) }
+.stat strong { color:var(--neon); font-weight:800 }
+
+/* question block */
+#questionBlock { margin-top:6px; display:flex; gap:10px; align-items:center; flex-wrap:wrap }
+#questionText { font-size:20px; font-weight:800 }
+#answerInput{ padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.04); background:transparent; color:inherit; width:160px }
+
+/* result message */
+#resultMsg { min-height:26px; margin-top:10px; font-weight:700; transition:opacity .44s ease }
+
+/* pause overlay */
+#pauseOverlay {
+  position:fixed; inset:0; display:none; z-index:60; align-items:center; justify-content:center;
+  background: rgba(1,4,6,0.45); backdrop-filter: blur(0px); transition: backdrop-filter .45s linear, opacity .35s ease;
+}
+#pauseOverlay.show { display:flex; backdrop-filter: blur(6px); }
+#pauseCard { width:360px; background:linear-gradient(180deg,#071022,#0b1626); padding:18px; border-radius:12px; border:1px solid rgba(255,255,255,0.03); transform:translateY(-24px); transition: transform .38s var(--ease), opacity .28s var(--ease) }
+#pauseOverlay.show #pauseCard { transform:translateY(0) }
+
+/* settings slide (inside pause) */
+#settingsPanel { margin-top:12px; background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); padding:12px; border-radius:10px; max-width:360px; width:100% }
+
+/* about modal - simple */
+#aboutModal {
+  position:fixed; inset:0; display:none; z-index:80; align-items:center; justify-content:center;
+  background: rgba(0,0,0,0.6);
+}
+#aboutModal.show { display:flex; }
+#aboutCard { width:720px; max-width:95%; padding:18px; border-radius:12px; background:linear-gradient(180deg,#071022,#081426); border:1px solid rgba(255,255,255,0.03) }
+
+/* version list buttons */
+.verList { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px }
+.verBtn { padding:8px 12px; border-radius:8px; background:transparent; border:1px solid rgba(255,255,255,0.04); color:var(--muted); cursor:pointer }
+.verBtn:hover { color:var(--neon); transform:translateY(-4px) }
+
+/* small screens adjustments */
+@media (max-width:720px){
+  .main-grid{ grid-template-columns: 1fr; }
+  #pauseCard { width:90%; }
+  #aboutCard { width:92%; padding:12px; }
+}
+
+/* tiny flourish */
+.signature { font-size:12px; color:var(--muted); margin-top:10px }
 </style>
 </head>
 <body>
-<div class="container">
+<div id="bgLayer"></div>
 
-  <!-- Giriş ekranı -->
-  <div id="loginScreen">
-    <h1>MathGame</h1>
-    <input type="text" id="playerName" placeholder="Kullanıcı adın">
+<div class="app">
+  <!-- Header -->
+  <div class="card header">
     <div>
-      <button id="loginBtn">Giriş Yap</button>
+      <div class="title">MathGame</div>
+      <div class="subtitle">Skydivex Edition — final</div>
+    </div>
+    <div class="space-between">
+      <div class="signature">© SKYDIVEX</div>
+      <div class="signature" id="miniInfo"></div>
     </div>
   </div>
 
-  <!-- Ana Menü -->
-  <div id="menu" class="hidden">
-    <h1>MathGame</h1>
-    <button id="startBtn">Başla</button>
-    <button id="settingsBtn">Ayarlar</button>
-    <button id="aboutBtn">Hakkında</button>
-    <div id="versionInfo" style="margin-top:10px;font-size:12px;color:#0f0;">v1.2.5</div>
-  </div>
-
-  <!-- Ayarlar Menüsü -->
-  <div id="settingsMenu" class="hidden">
-    <h2>Ayarlar</h2>
-    <div>
-      <label>Ses: <input type="checkbox" id="soundToggle" checked></label>
+  <!-- Entry card (simple) -->
+  <div id="entryCard" class="card" style="margin-top:12px">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+      <h2 style="margin:6px 0">Giriş</h2>
+      <input id="playerName" class="input" placeholder="Adın (ör. Enes)">
+      <div style="display:flex;gap:10px;margin-top:6px">
+        <button id="enterBtn" class="btn">Giriş Yap</button>
+        <button id="guestBtn" class="btn ghost">Misafir</button>
+      </div>
+      <div class="small muted" style="color:var(--muted);margin-top:8px">Sadece adını yaz — hesabın lokal olarak kaydedilecek.</div>
     </div>
-    <div>
-      <label>İşlem Türü:</label><br>
-      <label><input type="checkbox" class="opType" value="+"> Toplama</label><br>
-      <label><input type="checkbox" class="opType" value="-"> Çıkarma</label><br>
-      <label><input type="checkbox" class="opType" value="*"> Çarpma</label><br>
-      <label><input type="checkbox" class="opType" value="/"> Bölme</label>
+  </div>
+
+  <!-- Main menu -->
+  <div id="menuCard" class="card" style="margin-top:12px">
+    <div class="main-grid">
+      <div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div class="small muted">Oyuncu</div>
+            <div id="playerLabel" style="font-weight:800">—</div>
+            <div class="small muted" style="margin-top:6px">Seviye: <span id="levelDisplay">1</span> • Puan: <span id="scoreDisplay">0</span></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end">
+            <button id="startGameBtn" class="btn">Başla</button>
+            <button id="logoutBtn" class="btn ghost">Oturumu Kapat</button>
+          </div>
+        </div>
+
+        <hr style="margin:12px 0;border:none;border-top:1px solid rgba(255,255,255,0.03)" />
+
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button id="openSettings" class="btn ghost">Ayarlar</button>
+          <button id="openAbout" class="btn ghost">Hakkında</button>
+          <button id="resetScores" class="btn ghost">Skorları Sıfırla</button>
+        </div>
+
+        <!-- optional settings quick area -->
+        <div id="quickSettings" style="margin-top:12px;display:flex;gap:8px;align-items:center">
+          <label style="color:var(--muted)"><input type="checkbox" id="soundToggle" checked> Ses açık</label>
+          <div style="margin-left:auto;color:var(--muted)">Versiyon: <strong>v1.2.5</strong></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="card" style="padding:12px">
+          <div class="small muted">Liderlik Tablosu</div>
+          <div id="leaderboard" class="lb" style="margin-top:8px">Henüz kimse yok</div>
+        </div>
+
+        <div class="card" style="padding:12px;margin-top:12px">
+          <div class="small muted">Hızlı Ayarlar</div>
+          <div style="margin-top:8px;display:flex;gap:8px;align-items:center">
+            <label class="small muted">Buton rengi</label>
+            <input type="color" id="btnColor" value="#00ff66">
+            <div style="margin-left:auto" class="small muted">Arka plan</div>
+            <input type="color" id="bgColor" value="#08121a">
+          </div>
+          <div style="margin-top:10px" class="small muted">Arka plan fotoğrafı:</div>
+          <div style="margin-top:6px;display:flex;gap:8px;align-items:center">
+            <button id="bgImageBtn" class="btn ghost">Fotoğraf Yükle</button>
+            <input id="bgImageInput" type="file" accept="image/*" style="display:none">
+            <button id="clearBgBtn" class="btn ghost">Sıfırla</button>
+          </div>
+        </div>
+      </div>
     </div>
-    <button id="closeSettingsBtn">Kapat</button>
   </div>
 
-  <!-- Hakkında Menüsü -->
-  <div id="aboutMenu" class="hidden">
-    <h2>Hakkında</h2>
-    <p>Yapımcı: SKYDIVEX</p>
-    <p>MathGame v1.2.5</p>
-    <ul>
-      <li>Seviye sistemi ve artan zorluk</li>
-      <li>Puan sistemi: Seviye ×10 puan</li>
-      <li>Duraklatma menüsü animasyonlu</li>
-      <li>Ayarlarla işlem türü seçimi ve ses kontrolü</li>
-    </ul>
-    <button id="closeAboutBtn">Kapat</button>
+  <!-- Game area -->
+  <div id="gameArea" class="card" style="margin-top:12px;display:none">
+    <div class="topbar">
+      <div>
+        <div class="stat">Oyuncu: <strong id="playerDisplay">—</strong></div>
+      </div>
+      <div style="text-align:center">
+        <div class="stat">Seviye <strong id="levelUI">1</strong></div>
+        <div class="stat" style="font-size:13px;color:var(--muted)">Puan Çarpanı: <strong id="multiplierUI">1 × 10</strong></div>
+      </div>
+      <div style="text-align:right">
+        <div class="stat">Puan: <strong id="scoreUI">0</strong></div>
+      </div>
+    </div>
+
+    <div id="questionBlock">
+      <div id="questionText">—</div>
+      <input id="answerInput" class="input" placeholder="Cevabını yaz..." />
+      <button id="submitAnswerBtn" class="btn">Gönder</button>
+    </div>
+
+    <div id="resultMsg"></div>
+
+    <div style="margin-top:10px;display:flex;gap:8px;align-items:center">
+      <button id="pauseBtn" class="btn ghost">Duraklat</button>
+      <div style="margin-left:auto" class="small muted">Ödül: <strong id="rewardUI">10</strong>p</div>
+    </div>
+
+    <hr style="margin-top:12px;border:none;border-top:1px solid rgba(255,255,255,0.03)" />
+    <h3 style="margin:8px 0">Puan Tablosu</h3>
+    <div id="board" class="lb"></div>
   </div>
 
-  <!-- Oyun Alanı -->
-  <div id="gameArea" class="hidden">
-    <div id="hud">Seviye: <span id="level">1</span> | Puan: <span id="score">0</span> | Ödül: <span id="reward">10</span></div>
-    <p id="question"></p>
-    <input type="text" id="answer" placeholder="Cevabın?">
-    <button id="submitBtn">Gönder</button>
-    <p id="result"></p>
-    <h3>Puan Tablosu</h3>
-    <div id="leaderboard"></div>
-    <button id="pauseBtn" class="small">Duraklat</button>
+  <div style="height:8px"></div>
+  <div class="card" style="padding:10px;font-size:12px;color:var(--muted)">
+    <div style="display:flex;justify-content:space-between">
+      <div>Geliştirici: <strong>SKYDIVEX</strong></div>
+      <div>Sürüm: <strong>v1.2.5</strong></div>
+    </div>
   </div>
+</div>
 
-  <!-- Duraklatma Menüsü -->
-  <div id="pauseMenu" class="hidden">
-    <h2>Duraklatıldı</h2>
-    <button id="resumeBtn">Devam Et</button>
-    <button id="pauseSettingsBtn">Ayarlar</button>
+<!-- Pause overlay -->
+<div id="pauseOverlay">
+  <div id="pauseCard" class="card" style="width:420px;max-width:94%">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <div style="font-weight:800">Oyun Duraklatıldı</div>
+        <div style="color:var(--muted);font-size:13px;margin-top:6px">Skydivex</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end">
+        <button id="resumeBtn" class="btn">Devam Et</button>
+        <button id="pauseSettingsBtn" class="btn ghost">Ayarlar</button>
+        <button id="pauseMenuBtn" class="btn ghost">Ana Menü</button>
+      </div>
+    </div>
+
+    <div id="settingsPanel" style="margin-top:14px;display:none">
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <label style="color:var(--muted)"><input type="checkbox" id="settingSound"> Ses açık</label>
+        <label style="color:var(--muted)">Buton renk <input type="color" id="settingBtnColor" value="#00ff66"></label>
+        <label style="color:var(--muted)">Arka plan <input type="color" id="settingBgColor" value="#08121a"></label>
+      </div>
+    </div>
   </div>
+</div>
 
+<!-- About modal -->
+<div id="aboutModal">
+  <div id="aboutCard">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <div style="font-weight:900;font-size:18px">Hakkında — MathGame</div>
+        <div style="color:var(--muted);margin-top:6px">SKYDIVEX</div>
+      </div>
+      <div><button id="closeAboutModal" class="btn ghost">Kapat</button></div>
+    </div>
+
+    <hr style="margin:12px 0;border:none;border-top:1px solid rgba(255,255,255,0.03)" />
+
+    <div style="display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap">
+      <div style="flex:1;min-width:260px">
+        <div style="font-weight:800">Sürüm: v1.2.5</div>
+        <div style="color:var(--muted);margin-top:6px">Tarihçe</div>
+        <div style="font-size:13px;color:var(--muted);margin-top:6px">
+          <p><strong>v1.0</strong> — Temel soru/cevap, puanlama sistemi.</p>
+          <p><strong>v1.1</strong> — Menü animasyonları ve ses efektleri eklendi.</p>
+          <p><strong>v1.2</strong> — Görsel özelleştirme, zorluk dengesi ve çarpan sistemi eklendi.</p>
+          <p><strong>v1.2.5</strong> — Final sürüm: duraklatma/settings animasyonları, kalıcı ayarlar, fotoğraf arka plan düzeltmeleri ve iyileştirilmiş kullanıcı deneyimi.</p>
+        </div>
+      </div>
+
+      <div style="width:320px;min-width:240px">
+        <div style="font-weight:800">Puan Çarpanı (Nasıl çalışır)</div>
+        <div style="color:var(--muted);margin-top:6px;font-size:13px">
+          <p>Her seviye için ödül = <strong>Seviye × 10</strong> puan. Örnek: Seviye 1 → 10p, Seviye 5 → 50p. Seviye ilerledikçe soruların büyüklük eşiği artar (ör. Seviye 1 küçük sayılar; Seviye 5 orta, Seviye 10 büyük sayılar).</p>
+          <p>Doğru yanıtlar seviye atlamanı sağlar; yanlışlarda ceza yok ama kazanma fırsatı kaçabilir.</p>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:12px;color:var(--muted);font-size:13px">
+      Yapımcı: <strong>SKYDIVEX</strong> • 2025
+    </div>
+  </div>
 </div>
 
 <script>
-let player, score=0, level=1, reward=10, correct;
-let leaderboard=JSON.parse(localStorage.getItem('leaderboard'))||{};
-let soundOn = localStorage.getItem('sound')!=='false';
-const opTypes = ['+','-','*','/'];
+/* --------------------------
+   MathGame v1.2.5 - Logic JS
+   -------------------------- */
 
-const loginScreen = document.getElementById('loginScreen');
-const menu = document.getElementById('menu');
-const gameArea = document.getElementById('gameArea');
-const settingsMenu = document.getElementById('settingsMenu');
-const aboutMenu = document.getElementById('aboutMenu');
-const pauseMenu = document.getElementById('pauseMenu');
-
-const playerNameInput = document.getElementById('playerName');
-const loginBtn = document.getElementById('loginBtn');
-const startBtn = document.getElementById('startBtn');
-const settingsBtn = document.getElementById('settingsBtn');
-const aboutBtn = document.getElementById('aboutBtn');
-const closeSettingsBtn = document.getElementById('closeSettingsBtn');
-const closeAboutBtn = document.getElementById('closeAboutBtn');
-const submitBtn = document.getElementById('submitBtn');
-const answerInput = document.getElementById('answer');
-const questionEl = document.getElementById('question');
-const resultEl = document.getElementById('result');
-const leaderboardEl = document.getElementById('leaderboard');
-const levelEl = document.getElementById('level');
-const scoreEl = document.getElementById('score');
-const rewardEl = document.getElementById('reward');
-const pauseBtn = document.getElementById('pauseBtn');
-const resumeBtn = document.getElementById('resumeBtn');
-const pauseSettingsBtn = document.getElementById('pauseSettingsBtn');
-const soundToggle = document.getElementById('soundToggle');
-const opCheckboxes = document.querySelectorAll('.opType');
-
-soundToggle.checked=soundOn;
-
-loginBtn.onclick = ()=> {
-  const name = playerNameInput.value.trim();
-  if(!name){alert('Adını gir!'); return;}
-  player=name;
-  if(!leaderboard[player]) leaderboard[player]=0;
-  score=leaderboard[player];
-  loginScreen.classList.add('hidden');
-  menu.classList.remove('hidden');
+/* State */
+const LS_KEY = 'mathgame_v1_2_5';
+let state = {
+  player: null,
+  score: 0,
+  level: 1,
+  leaderboard: {},
+  ops: ['+','-'],
+  soundOn: true,
+  btnColor: '#00ff66',
+  bgColor: '#08121a',
+  bgImage: null
 };
 
-startBtn.onclick = ()=>{menu.classList.add('hidden'); gameArea.classList.remove('hidden'); newQuestion();}
-settingsBtn.onclick = ()=>{settingsMenu.classList.remove('hidden'); menu.classList.add('hidden');}
-closeSettingsBtn.onclick = ()=>{settingsMenu.classList.add('hidden'); menu.classList.remove('hidden');}
-aboutBtn.onclick = ()=>{aboutMenu.classList.remove('hidden'); menu.classList.add('hidden');}
-closeAboutBtn.onclick = ()=>{aboutMenu.classList.add('hidden'); menu.classList.remove('hidden');}
+/* DOM refs */
+const bgLayer = document.getElementById('bgLayer');
 
-submitBtn.onclick = checkAnswer;
-answerInput.addEventListener('keydown',e=>{if(e.key==='Enter') submitBtn.click();});
+const entryCard = document.getElementById('entryCard');
+const playerNameInput = document.getElementById('playerName');
+const enterBtn = document.getElementById('enterBtn');
+const guestBtn = document.getElementById('guestBtn');
 
-pauseBtn.onclick = ()=>{pauseMenu.classList.remove('hidden'); gameArea.classList.add('hidden');}
-resumeBtn.onclick = ()=>{pauseMenu.classList.add('hidden'); gameArea.classList.remove('hidden');}
-pauseSettingsBtn.onclick = ()=>{settingsMenu.classList.remove('hidden'); pauseMenu.classList.add('hidden');}
+const menuCard = document.getElementById('menuCard');
+const playerLabel = document.getElementById('playerLabel');
+const startGameBtn = document.getElementById('startGameBtn');
+const logoutBtn = document.getElementById('logoutBtn');
+const openSettings = document.getElementById('openSettings');
+const openAbout = document.getElementById('openAbout');
+const resetScores = document.getElementById('resetScores');
 
-soundToggle.onchange = ()=>{soundOn=soundToggle.checked; localStorage.setItem('sound',soundOn);}
+const leaderboardEl = document.getElementById('leaderboard');
+const boardDiv = document.getElementById('board');
 
-function randomInt(min,max){return Math.floor(Math.random()*(max-min+1))+min;}
-function getRandomOp(){ 
-  let types = Array.from(opCheckboxes).filter(c=>c.checked).map(c=>c.value);
-  return types.length>0 ? types[randomInt(0,types.length-1)] : opTypes[randomInt(0,opTypes.length-1)];
+const scoreDisplay = document.getElementById('scoreDisplay');
+const levelDisplay = document.getElementById('levelDisplay');
+
+const btnColorInput = document.getElementById('btnColor');
+const bgColorInput = document.getElementById('bgColor');
+const bgImageBtn = document.getElementById('bgImageBtn');
+const bgImageInput = document.getElementById('bgImageInput');
+const clearBgBtn = document.getElementById('clearBgBtn');
+
+const gameArea = document.getElementById('gameArea');
+const playerDisplay = document.getElementById('playerDisplay');
+const levelUI = document.getElementById('levelUI');
+const scoreUI = document.getElementById('scoreUI');
+const multiplierUI = document.getElementById('multiplierUI');
+const rewardUI = document.getElementById('rewardUI');
+
+const questionText = document.getElementById('questionText');
+const answerInput = document.getElementById('answerInput');
+const submitAnswerBtn = document.getElementById('submitAnswerBtn');
+const resultMsg = document.getElementById('resultMsg');
+
+const pauseOverlay = document.getElementById('pauseOverlay');
+const resumeBtn = document.getElementById('resumeBtn');
+const pauseSettingsBtn = document.getElementById('pauseSettingsBtn');
+const pauseMenuBtn = document.getElementById('pauseMenuBtn');
+const settingsPanel = document.getElementById('settingsPanel');
+const settingSound = document.getElementById('settingSound');
+const settingBtnColor = document.getElementById('settingBtnColor');
+const settingBgColor = document.getElementById('settingBgColor');
+
+const aboutModal = document.getElementById('aboutModal');
+const openAboutBtn = document.getElementById('openAbout');
+const closeAboutModal = document.getElementById('closeAboutModal');
+
+const quickSoundToggle = document.getElementById('soundToggle');
+const opCheckboxes = document.querySelectorAll('.opType');
+const resetBtn = document.getElementById('resetScores');
+
+/* Audio (WebAudio, short UI tones) */
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+let audioCtx = null;
+let masterGain = null;
+
+function initAudio(){
+  if(audioCtx) return;
+  try{
+    audioCtx = new AudioCtx();
+    masterGain = audioCtx.createGain(); masterGain.gain.value = 0; masterGain.connect(audioCtx.destination);
+  }catch(e){
+    audioCtx = null;
+    console.warn('Audio not supported');
+  }
 }
-function newQuestion(){
-  let max = Math.min(10+level*2,100);
-  let op = getRandomOp();
-  let a = randomInt(1,max), b=randomInt(1,max);
-  if(op==='/' || op==='-'){if(b>a){[a,b]=[b,a];}}
-  if(op==='/'){b=Math.max(1,b); a=b*randomInt(1,Math.floor(max/b));}
-  correct = eval(a+op+b);
-  questionEl.innerText=`Seviye ${level}: ${a} ${op} ${b} = ? (Ödül: ${level*10})`;
-  reward=level*10; rewardEl.innerText=reward;
-  answerInput.value=''; answerInput.focus();
-  resultEl.style.opacity=0;
+function playTone(type='sine', freq=880, dur=0.12, gain=0.5){
+  if(!state.soundOn) return;
+  initAudio();
+  if(!audioCtx) return;
+  const o = audioCtx.createOscillator();
+  const g = audioCtx.createGain();
+  o.type = type; o.frequency.value = freq;
+  o.connect(g); g.connect(masterGain);
+  const now = audioCtx.currentTime;
+  g.gain.setValueAtTime(0.0001, now);
+  g.gain.linearRampToValueAtTime(gain*state.soundOn, now+0.003);
+  g.gain.exponentialRampToValueAtTime(0.0001, now+dur);
+  o.start(now); o.stop(now+dur+0.02);
 }
+
+/* Click/success/fail convenience */
+function clickSound(){ playTone('sine', 1100, 0.08, 0.35); }
+function successSound(){ playTone('triangle', 660, 0.22, 0.9); }
+function failSound(){ playTone('sawtooth', 160, 0.36, 0.6); }
+
+/* Persist state */
+function loadState(){
+  try{
+    const raw = JSON.parse(localStorage.getItem(LS_KEY) || '{}');
+    state = Object.assign(state, raw || {});
+  }catch(e){}
+}
+function saveState(){
+  try{ localStorage.setItem(LS_KEY, JSON.stringify(state)); }catch(e){}
+}
+
+/* Leaderboard render */
+function renderLeaderboard(){
+  const arr = Object.entries(state.leaderboard).sort((a,b)=>b[1]-a[1]);
+  if(arr.length===0){ leaderboardEl.innerHTML='<i style="color:var(--muted)">Henüz kimse yok</i>'; boardDiv.innerHTML=''; return; }
+  leaderboardEl.innerHTML = arr.map((e,i)=>`<div class="lbItem"><div>${i+1}. ${escapeHtml(e[0])}</div><div>${e[1]}p</div></div>`).join('');
+  boardDiv.innerHTML = arr.map(e=>`<div style="display:flex;justify-content:space-between;padding:6px;border-radius:6px;background:rgba(255,255,255,0.02);margin-bottom:6px">${escapeHtml(e[0])}<strong>${e[1]}p</strong></div>`).join('');
+}
+
+/* helpers */
+function escapeHtml(s=''){ return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"})[m]); }
+function randInt(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
+
+/* UI initial apply */
+loadState();
+document.documentElement.style.setProperty('--accent', state.btnColor || '#00ff66');
+document.documentElement.style.setProperty('--neon', state.btnColor || '#00ff66');
+document.documentElement.style.setProperty('--bg-mid', state.bgColor || '#08121a');
+if(state.bgImage) bgLayer.style.backgroundImage = `url(${state.bgImage}), radial-gradient(circle at 50% 40%, rgba(0,255,102,0.02), transparent 18%), linear-gradient(180deg,var(--bg-dark),var(--bg-mid))`;
+
+/* Setup UI from state */
+quickSoundToggle.checked = !!state.soundOn;
+btnColorInput.value = state.btnColor || '#00ff66';
+bgColorInput.value = state.bgColor || '#08121a';
+settingBtnColor.value = state.btnColor || '#00ff66';
+settingBgColor.value = state.bgColor || '#08121a';
+settingSound.checked = !!state.soundOn;
+
+/* Flow: entry -> menu */
+enterBtn.addEventListener('click', ()=>{
+  const name = (playerNameInput.value || '').trim();
+  if(!name){ alert('Adını gir!'); return; }
+  startSession(name);
+});
+guestBtn.addEventListener('click', ()=> startSession('Misafir-'+randInt(1000,9999)));
+
+function startSession(name){
+  state.player = name;
+  state.score = state.leaderboard[name] || 0;
+  state.level = state.level || 1;
+  saveState();
+  playerLabel.innerText = name;
+  document.getElementById('playerDisplay').innerText = name;
+  document.getElementById('scoreDisplay').innerText = state.score;
+  document.getElementById('levelDisplay').innerText = state.level;
+  menuCard.classList.add('show');
+  entryCard.style.display = 'none';
+  clickSound();
+  renderLeaderboard();
+  updateMiniInfo();
+}
+
+/* menu buttons */
+startGameBtn.addEventListener('click', ()=>{
+  clickSound();
+  menuCard.classList.remove('show');
+  setTimeout(()=> menuCard.style.display='none',420);
+  gameArea.style.display = 'block';
+  loadGameUI();
+  nextQuestion(true);
+});
+logoutBtn.addEventListener('click', ()=>{
+  if(!confirm('Oturumu kapatmak istiyor musun?')) return;
+  clickSound();
+  state.player = null; state.score = 0;
+  saveState();
+  entryCard.style.display='block';
+  menuCard.classList.remove('show'); menuCard.style.display='none';
+});
+
+/* open settings & about */
+openSettings.addEventListener('click', ()=> {
+  clickSound();
+  settingsPanel.style.display = (settingsPanel.style.display==='block') ? 'none' : 'block';
+});
+openAbout.addEventListener('click', ()=> {
+  clickSound();
+  aboutModal.classList.add('show');
+});
+document.getElementById('closeAboutModal').addEventListener('click', ()=> { aboutModal.classList.remove('show'); clickSound(); });
+
+resetScores.addEventListener('click', ()=> {
+  if(!confirm('Skorları sıfırlamak istiyor musun?')) return;
+  state.leaderboard = {}; saveState(); renderLeaderboard(); clickSound();
+});
+
+/* quick settings */
+quickSoundToggle.addEventListener('change', (e)=> { state.soundOn = e.target.checked; saveState(); clickSound(); });
+opCheckboxes.forEach(cb=> cb.addEventListener('change', ()=> {
+  const types = Array.from(opCheckboxes).filter(x=>x.checked).map(x=>x.value);
+  state.ops = types.length ? types : ['+'];
+  saveState();
+}));
+
+/* bg & button color */
+btnColorInput.addEventListener('input', e=> {
+  state.btnColor = e.target.value; document.documentElement.style.setProperty('--neon', state.btnColor); saveState(); clickSound();
+});
+bgColorInput.addEventListener('input', e=> {
+  state.bgColor = e.target.value; document.documentElement.style.setProperty('--bg-mid', state.bgColor); saveState(); clickSound();
+});
+bgImageBtn.addEventListener('click', ()=> bgImageInput.click());
+bgImageInput.addEventListener('change', (ev)=>{
+  const f = ev.target.files[0]; if(!f) return;
+  const r = new FileReader();
+  r.onload = (e)=> {
+    state.bgImage = e.target.result;
+    bgLayer.style.backgroundImage = `url(${state.bgImage}), radial-gradient(circle at 50% 40%, rgba(0,255,102,0.02), transparent 18%), linear-gradient(180deg,var(--bg-dark),var(--bg-mid))`;
+    bgLayer.style.backgroundSize = 'cover'; bgLayer.style.backgroundPosition='center center';
+    saveState();
+  };
+  r.readAsDataURL(f);
+});
+clearBgBtn.addEventListener('click', ()=> {
+  state.bgImage = null; bgLayer.style.backgroundImage = ''; saveState(); clickSound();
+});
+
+/* game engine */
+let correctAnswer = null;
+let questionCount = 0;
+
+function loadGameUI(){
+  document.getElementById('playerDisplay').innerText = state.player;
+  document.getElementById('levelUI').innerText = state.level;
+  document.getElementById('scoreUI').innerText = state.score;
+  multiplierUI.innerText = `${state.level} × 10`;
+  rewardUI.innerText = state.level*10;
+}
+
+/* difficulty base - bigger level -> larger numbers */
+function difficultyBase(level){
+  return Math.min(10 + Math.floor(level * 3), 300); // keeps growth reasonable
+}
+
+function nextQuestion(reset=false){
+  if(reset){
+    state.level = state.level || 1; questionCount = 0;
+  }
+  questionCount++;
+  const lvl = state.level || 1;
+  const base = difficultyBase(lvl);
+  const ops = state.ops && state.ops.length ? state.ops : ['+'];
+  const op = ops[randInt(0, ops.length-1)];
+  let a = randInt(1, Math.max(2, Math.floor(base/2)));
+  let b = randInt(1, Math.max(1, Math.floor(base/2)));
+  if(op === '/') { // ensure clean-ish division or allow decimals
+    b = randInt(1, Math.max(1,Math.floor(base/4)));
+    a = b * randInt(1, Math.max(1,Math.floor(base/6)));
+  } else if(op === '-' && b > a){ [a,b] = [b,a]; }
+  correctAnswer = Math.round(eval(a + op + b) * 100) / 100;
+  questionText.innerText = `Seviye ${lvl}: ${a} ${op} ${b} = ?`;
+  rewardUI.innerText = (lvl * 10);
+  multiplierUI.innerText = `${lvl} × 10`;
+  resultMsg.style.opacity = 0;
+  answerInput.value = '';
+  answerInput.focus();
+}
+
+/* answer check */
+submitAnswerBtn.addEventListener('click', checkAnswer);
+answerInput.addEventListener('keydown', (e)=> { if(e.key==='Enter') checkAnswer(); });
 
 function checkAnswer(){
-  let val=parseFloat(answerInput.value);
-  if(val===correct){
-    score+=reward;
-    scoreEl.innerText=score;
-    resultEl.innerText='Doğru!';
-    resultEl.style.opacity=1;
-    level++;
-    levelEl.innerText=level;
-    newQuestion();
+  const raw = answerInput.value.trim();
+  if(raw === '') { resultMsg.style.color = '#f59e0b'; resultMsg.innerText = 'Cevap gir!'; resultMsg.style.opacity=1; failSound(); return; }
+  const user = parseFloat(raw.replace(',','.'));
+  if(Number.isNaN(user)) { resultMsg.style.color = '#f59e0b'; resultMsg.innerText = 'Sayı gir!'; resultMsg.style.opacity=1; failSound(); return; }
+
+  if(Math.abs(user - correctAnswer) < 0.01){
+    // correct
+    successSound();
+    resultMsg.style.color = '#00ff66';
+    const gained = state.level * 10;
+    state.score = (state.score || 0) + gained;
+    state.leaderboard[state.player] = state.score;
+    state.correctStreak = (state.correctStreak || 0) + 1;
+    resultMsg.innerText = ['Aferin!','Süper!','Bravo!','Harika!'][randInt(0,3)];
+    // level up every 4 corrects
+    if(state.correctStreak > 0 && state.correctStreak % 4 === 0) {
+      state.level = Math.min(99, state.level + 1);
+    }
+    saveState();
+    loadGameUI();
+    renderLeaderboard();
+    setTimeout(()=> nextQuestion(false), 900);
   } else {
-    resultEl.innerText='Yanlış!';
-    resultEl.style.opacity=1;
+    // wrong
+    failSound();
+    resultMsg.style.color = '#ff6b6b';
+    resultMsg.innerText = 'Yanlış...';
+    state.correctStreak = 0;
+    saveState();
+    setTimeout(()=> { resultMsg.style.color = '#ffd166'; resultMsg.innerText = 'Doğrusu: ' + correctAnswer; }, 900);
+    setTimeout(()=> nextQuestion(false), 2000);
   }
-  leaderboard[player]=score;
-  localStorage.setItem('leaderboard',JSON.stringify(leaderboard));
-  updateLeaderboard();
 }
 
+/* pause overlay + animation logic (settings slide interplay) */
+const pauseOverlayEl = document.getElementById('pauseOverlay');
+const pauseCard = document.getElementById('pauseCard');
+
+document.getElementById('pauseBtn').addEventListener('click', ()=>{
+  clickSound();
+  pauseOverlayEl.classList.add('show');
+  // blur background gradually
+  bgLayer.style.filter = 'blur(3px)';
+});
+
+resumeBtn.addEventListener('click', ()=>{
+  clickSound();
+  pauseOverlayEl.classList.remove('show');
+  bgLayer.style.filter = 'blur(0px)';
+});
+
+pauseSettingsBtn.addEventListener('click', ()=>{
+  // open settings panel inside pause card with animation
+  clickSound();
+  settingsPanel.style.display = settingsPanel.style.display==='block' ? 'none' : 'block';
+});
+
+pauseMenuBtn.addEventListener('click', ()=>{
+  if(!confirm('Ana menüye dönülsün mü? (oyun durumu kaydedilir)')) return;
+  clickSound();
+  pauseOverlayEl.classList.remove('show');
+  bgLayer.style.filter = 'blur(0px)';
+  gameArea.style.display = 'none';
+  menuCard.style.display = '';
+  menuCard.classList.add('show');
+});
+
+/* settings inside pause panel */
+settingSound.addEventListener('change', ()=> {
+  state.soundOn = settingSound.checked;
+  saveState();
+  clickSound();
+});
+settingBtnColor.addEventListener('input', ()=> {
+  state.btnColor = settingBtnColor.value; document.documentElement.style.setProperty('--neon', state.btnColor); saveState(); clickSound();
+});
+settingBgColor.addEventListener('input', ()=> {
+  state.bgColor = settingBgColor.value; document.documentElement.style.setProperty('--bg-mid', state.bgColor); saveState(); clickSound();
+});
+
+/* About modal open/close */
+openAbout.addEventListener('click', ()=>{
+  aboutModal.classList.add('show');
+});
+document.getElementById('closeAboutModal').addEventListener('click', ()=>{
+  aboutModal.classList.remove('show');
+  clickSound();
+});
+
+/* mini UI info */
+function updateMiniInfo(){
+  const el = document.getElementById('miniInfo');
+  el.innerText = state.player ? `${state.player} • ${state.score}p` : '';
+}
+
+/* helper: save & render leaderboard every change */
 function updateLeaderboard(){
-  let entries = Object.entries(leaderboard).sort((a,b)=>b[1]-a[1]);
-  leaderboardEl.innerHTML='';
-  entries.forEach(([p,s])=>{leaderboardEl.innerHTML+=`<p>${p}: ${s}</p>`;});
+  renderLeaderboard();
+  // also populate boardDiv
+  boardDiv.innerHTML = Object.entries(state.leaderboard).sort((a,b)=>b[1]-a[1]).map((e,i)=>`<div style="display:flex;justify-content:space-between;padding:6px;border-radius:6px;background:rgba(255,255,255,0.02);margin-bottom:6px">${i+1}. ${escapeHtml(e[0])}<strong>${e[1]}p</strong></div>`).join('');
 }
 
-updateLeaderboard();
+/* expose quick debug */
+window._mathgame = { state, nextQuestion, checkAnswer };
+
+/* initial render */
+renderLeaderboard();
+updateMiniInfo();
+
+/* small utility to ensure audio resume on user gesture */
+document.addEventListener('click', function resumeAudioOnce(){
+  if(audioCtx && audioCtx.state==='suspended') audioCtx.resume().catch(()=>{});
+  document.removeEventListener('click', resumeAudioOnce);
+});
+
+/* keyboard: esc toggles pause */
+document.addEventListener('keydown', (e)=>{
+  if(e.key==='Escape'){
+    if(pauseOverlayEl.classList.contains('show')) { resumeBtn.click(); }
+    else { document.getElementById('pauseBtn').click(); }
+  }
+});
+
+/* expose save to localstorage when window closed */
+window.addEventListener('beforeunload', ()=> saveState());
+
 </script>
 </body>
 </html>
