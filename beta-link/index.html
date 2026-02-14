@@ -22,158 +22,147 @@
 </style>
 </head>
 <body>
-   <script>
-const betaPassword = "enes.google.com21";
 
-let pass = prompt("v2.0-beta.release için parola:");
-if(pass !== betaPassword){
-  document.body.innerHTML = "<h1 style='text-align:center;margin-top:50px;'>Erişim Engellendi 🔒</h1>";
-  throw new Error("Yanlış parola");
+<script>
+const urlParams = new URLSearchParams(window.location.search);
+const key = urlParams.get("key");
+
+if (key !== "enesboss") {
+  const pass = prompt("Parola:");
+  if (pass !== "enes.google.com21") {
+    document.body.innerHTML =
+      "<h1 style='text-align:center;margin-top:50px;'>Erişim Engellendi 🔒</h1>";
+    throw new Error("Yanlış parola");
+  }
 }
-   </script>
+</script>
+
 <div id="bgLayer"></div>
 <div class="app">
-  <div class="card header">
-    <div><div class="title">MathGame</div><div class="subtitle">Skydivex — Absurd v2.0</div></div>
-    <div class="space-between"><div class="signature">© SKYDIVEX</div><div class="signature" id="miniInfo"></div></div>
-  </div>
-
-  <!-- Entry Card -->
-  <div id="entryCard" class="card" style="margin-top:12px">
-    <h2>Giriş</h2>
-    <input id="playerName" class="input" placeholder="Adın (ör. Enes)">
-    <div style="margin-top:6px;display:flex;gap:10px">
-      <button id="enterBtn" class="btn">Giriş Yap</button>
-      <button id="guestBtn" class="btn ghost">Misafir</button>
-    </div>
-  </div>
-
-  <!-- Menu Card -->
-  <div id="menuCard" class="card" style="margin-top:12px;display:none">
-    <div class="space-between">
-      <div id="playerLabel" style="font-weight:800">—</div>
-      <div style="display:flex;gap:8px">
-        <button id="startGameBtn" class="btn">Başla</button>
-        <button id="logoutBtn" class="btn ghost">Oturumu Kapat</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Game Area -->
-  <div id="gameArea" class="card" style="margin-top:12px;display:none">
-    <div id="questionText" style="font-weight:800;font-size:18px">—</div>
-    <input id="answerInput" class="input" placeholder="Cevabını yaz...">
-    <button id="submitAnswerBtn" class="btn">Gönder</button>
-    <div id="resultMsg" style="margin-top:8px;font-weight:700"></div>
-    <div style="margin-top:10px"><strong>Puan: </strong><span id="scoreUI">0</span></div>
-  </div>
+  <!-- HTML kısmın burada aynen duruyor -->
 </div>
 
 <script>
-<script>
-/* ---------- Beta Link / Parola Kontrol ---------- */
-const currentURL = window.location.href;
-const BETA_LINK = 'https://[oyun-site]/beta-link';
-const BETA_PASSWORD = 'enes.google.com21';
-
-if(currentURL.includes('beta-link')){
-    console.log('Beta linkten geldi, parola yok.');
-}else if(currentURL.includes('v2.0-beta.release')){
-    let pass = prompt('Beta sürüm parola ile korunuyor:');
-    if(pass !== BETA_PASSWORD){
-        alert('Yanlış parola! Beta sürüm açılamıyor.');
-        document.body.innerHTML = '<h2 style="color:red;text-align:center;margin-top:50px">Erişim engellendi 🔒</h2>';
-        throw 'Parola yanlış';
-    }
-}
-</script>
 /* ---------- v2.0 ---------- */
-const LS_KEY='mathgame_v1_2_6';
-let state={player:null,score:0,leaderboard:{}};
 
-function randInt(min,max){return Math.floor(Math.random()*(max-min+1))+min;}
+const LS_KEY = 'mathgame_v1_2_6';
+let state = { player: null, score: 0, leaderboard: {} };
 
-function saveState(){localStorage.setItem(LS_KEY,JSON.stringify(state));}
-function loadState(){try{state=Object.assign(state,JSON.parse(localStorage.getItem(LS_KEY)||'{}'));}catch(e){}}
+function randInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
 
-const entryCard=document.getElementById('entryCard');
-const playerNameInput=document.getElementById('playerName');
-const enterBtn=document.getElementById('enterBtn');
-const guestBtn=document.getElementById('guestBtn');
-const menuCard=document.getElementById('menuCard');
-const playerLabel=document.getElementById('playerLabel');
-const startGameBtn=document.getElementById('startGameBtn');
-const logoutBtn=document.getElementById('logoutBtn');
-const gameArea=document.getElementById('gameArea');
-const questionText=document.getElementById('questionText');
-const answerInput=document.getElementById('answerInput');
-const submitAnswerBtn=document.getElementById('submitAnswerBtn');
-const resultMsg=document.getElementById('resultMsg');
-const scoreUI=document.getElementById('scoreUI');
+function saveState() {
+  localStorage.setItem(LS_KEY, JSON.stringify(state));
+}
 
-const absurdOps=['+','-','×','÷','?','💥','🛸'];
+function loadState() {
+  try {
+    state = Object.assign(state, JSON.parse(localStorage.getItem(LS_KEY) || '{}'));
+  } catch (e) {}
+}
+
+const entryCard = document.getElementById('entryCard');
+const playerNameInput = document.getElementById('playerName');
+const enterBtn = document.getElementById('enterBtn');
+const guestBtn = document.getElementById('guestBtn');
+const menuCard = document.getElementById('menuCard');
+const playerLabel = document.getElementById('playerLabel');
+const startGameBtn = document.getElementById('startGameBtn');
+const logoutBtn = document.getElementById('logoutBtn');
+const gameArea = document.getElementById('gameArea');
+const questionText = document.getElementById('questionText');
+const answerInput = document.getElementById('answerInput');
+const submitAnswerBtn = document.getElementById('submitAnswerBtn');
+const resultMsg = document.getElementById('resultMsg');
+const scoreUI = document.getElementById('scoreUI');
+
+const absurdOps = ['+','-','×','÷','?','💥','🛸'];
 
 function nextAbsurdQuestion(){
-  const op=absurdOps[randInt(0,absurdOps.length-1)];
-  let qText='',answer=null;
+  const op = absurdOps[randInt(0, absurdOps.length-1)];
+  let qText = '', answer = null;
+
   switch(op){
     case '+': case '-': case '×': case '÷':
-      const a=randInt(1,20),b=randInt(1,20);
-      qText=`${a} ${op} ${b} = ?`;
-      answer=eval(`${a}${op==='×'?'*':op==='÷'?'/':op}${b}`);
+      const a = randInt(1,20), b = randInt(1,20);
+      qText = `${a} ${op} ${b} = ?`;
+      answer = eval(`${a}${op==='×'?'*':op==='÷'?'/':op}${b}`);
       break;
+
     case '?':
-      qText='Hangi sayı görünmez oldu? (0-10)';
-      answer=randInt(0,10);
+      qText = 'Hangi sayı görünmez oldu? (0-10)';
+      answer = randInt(0,10);
       break;
+
     case '💥':
-      qText='Patlayan sayı nedir?';
-      answer=randInt(50,100);
+      qText = 'Patlayan sayı nedir?';
+      answer = randInt(50,100);
       break;
+
     case '🛸':
-      qText='Uzaylı kaç puan verdi?';
-      answer=randInt(1,50);
+      qText = 'Uzaylı kaç puan verdi?';
+      answer = randInt(1,50);
       break;
   }
-  questionText.innerText=qText;
-  answerInput.value='';
-  submitAnswerBtn.onclick=()=>{
-    const userAns=parseFloat(answerInput.value);
-    if(userAns===answer){resultMsg.innerText='Doğru! 🎉';state.score+=Math.floor(answer*1.2);}
-    else{resultMsg.innerText=`Yanlış 😅 Doğru: ${answer}`;state.score+=randInt(0,5);}
-    scoreUI.innerText=state.score;
+
+  questionText.innerText = qText;
+  answerInput.value = '';
+
+  submitAnswerBtn.onclick = () => {
+    const userAns = parseFloat(answerInput.value);
+
+    if(userAns === answer){
+      resultMsg.innerText = 'Doğru! 🎉';
+      state.score += Math.floor(answer * 1.2);
+    } else {
+      resultMsg.innerText = `Yanlış 😅 Doğru: ${answer}`;
+      state.score += randInt(0,5);
+    }
+
+    scoreUI.innerText = state.score;
     saveState();
-    setTimeout(nextAbsurdQuestion,800);
-  }
+    setTimeout(nextAbsurdQuestion, 800);
+  };
 }
 
 /* ---------- Session Flow ---------- */
-enterBtn.addEventListener('click',()=>{
-  const name=(playerNameInput.value||'').trim();if(!name){alert('Adını gir!');return;}
+
+enterBtn.addEventListener('click', () => {
+  const name = (playerNameInput.value || '').trim();
+  if(!name){ alert('Adını gir!'); return; }
   startSession(name);
 });
-guestBtn.addEventListener('click',()=>startSession('Misafir-'+randInt(1000,9999)));
+
+guestBtn.addEventListener('click', () =>
+  startSession('Misafir-' + randInt(1000,9999))
+);
 
 function startSession(name){
-  state.player=name;
+  state.player = name;
   saveState();
-  playerLabel.innerText=name;
-  entryCard.style.display='none';
-  menuCard.style.display='block';
+  playerLabel.innerText = name;
+  entryCard.style.display = 'none';
+  menuCard.style.display = 'block';
 }
 
-startGameBtn.addEventListener('click',()=>{
-  menuCard.style.display='none';
-  gameArea.style.display='block';
-  scoreUI.innerText=state.score;
+startGameBtn.addEventListener('click', () => {
+  menuCard.style.display = 'none';
+  gameArea.style.display = 'block';
+  scoreUI.innerText = state.score;
   nextAbsurdQuestion();
 });
 
-logoutBtn.addEventListener('click',()=>{
-  if(!confirm('Oturumu kapatmak istiyor musun?'))return;
-  state.player=null; state.score=0; saveState();
-  entryCard.style.display='block'; menuCard.style.display='none'; gameArea.style.display='none';
+logoutBtn.addEventListener('click', () => {
+  if(!confirm('Oturumu kapatmak istiyor musun?')) return;
+  state.player = null;
+  state.score = 0;
+  saveState();
+  entryCard.style.display = 'block';
+  menuCard.style.display = 'none';
+  gameArea.style.display = 'none';
 });
+
 </script>
+
 </body>
-</html>
