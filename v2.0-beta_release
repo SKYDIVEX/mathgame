@@ -6,7 +6,7 @@
 <title>MathGame — v2.0 — SKYDIVEX</title>
 <style>
 /* ---------------------------
-   MathGame v2.0 - Absurd Edition
+   MathGame v2.0
    Tema: Siyah-Yeşil (v1.2.5 üzerine)
    ---------------------------*/
 :root{--bg-dark:#060708;--bg-mid:#0b1220;--card:#071022;--neon:#00ff66;--muted:#9fb3b0;--glass: rgba(255,255,255,0.03);--accent: var(--neon);--ui-radius:14px;--ease: cubic-bezier(.2,.9,.25,1);}
