@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>MathGame — v2.0 — SKYDIVEX</title>
+<style>
+/* ---------------------------
+   MathGame v2.0 - Absurd Edition
+   Tema: Siyah-Yeşil (v1.2.5 üzerine)
+   ---------------------------*/
+:root{--bg-dark:#060708;--bg-mid:#0b1220;--card:#071022;--neon:#00ff66;--muted:#9fb3b0;--glass: rgba(255,255,255,0.03);--accent: var(--neon);--ui-radius:14px;--ease: cubic-bezier(.2,.9,.25,1);}
+*{box-sizing:border-box}html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--bg-dark),var(--bg-mid));color:#e6f7ea;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}button{font-family:inherit}a{color:inherit}
+/* Basit arayüz stilleri aynı kaldı */
+.card{background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.04);border-radius:var(--ui-radius);padding:14px;box-shadow:0 10px 30px rgba(2,6,10,0.6);}
+.header{display:flex;justify-content:space-between;align-items:center;gap:12px}.title{font-size:20px;font-weight:700;letter-spacing:0.2px}.subtitle{color:var(--muted);font-size:13px}
+.row{display:flex;gap:8px;align-items:center}.col{display:flex;flex-direction:column;gap:8px}.space-between{display:flex;justify-content:space-between;align-items:center}.center{display:flex;justify-content:center;align-items:center}
+.btn{padding:10px 14px;border-radius:12px;border:0;cursor:pointer;background:linear-gradient(180deg,var(--neon),#00d458);color:#06110b;font-weight:800;box-shadow:0 8px 30px rgba(0,255,102,0.06);transition: transform .12s var(--ease), box-shadow .12s var(--ease), filter .12s var(--ease);}.btn:hover{ transform:translateY(-6px) scale(1.02); box-shadow:0 20px 40px rgba(0,255,102,0.12); filter:brightness(1.02)}.btn:active{ transform:translateY(0) scale(.985); box-shadow:0 6px 12px rgba(0,0,0,0.6)}.btn.ghost{background:transparent;color:var(--neon);border:1px solid rgba(255,255,255,0.04);box-shadow:none;font-weight:700}
+.input{padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit;width:160px}
+.lb{margin-top:10px;max-height:300px;overflow:auto}.lbItem{display:flex;justify-content:space-between;padding:8px;border-radius:8px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));margin-bottom:6px}
+#bgLayer{position:fixed;inset:0;z-index:-3;background: radial-gradient(circle at var(--mx,50%) var(--my,50%), rgba(0,255,102,0.02), transparent 18%), linear-gradient(180deg,var(--bg-dark),var(--bg-mid));transition: background 360ms var(--ease), transform 250ms var(--ease), filter 300ms linear; background-size: cover; background-position: center center;}
+</style>
+</head>
+<body>
+<div id="bgLayer"></div>
+<div class="app">
+  <div class="card header">
+    <div><div class="title">MathGame</div><div class="subtitle">Skydivex — Absurd v2.0</div></div>
+    <div class="space-between"><div class="signature">© SKYDIVEX</div><div class="signature" id="miniInfo"></div></div>
+  </div>
+
+  <!-- Entry Card -->
+  <div id="entryCard" class="card" style="margin-top:12px">
+    <h2>Giriş</h2>
+    <input id="playerName" class="input" placeholder="Adın (ör. Enes)">
+    <div style="margin-top:6px;display:flex;gap:10px">
+      <button id="enterBtn" class="btn">Giriş Yap</button>
+      <button id="guestBtn" class="btn ghost">Misafir</button>
+    </div>
+  </div>
+
+  <!-- Menu Card -->
+  <div id="menuCard" class="card" style="margin-top:12px;display:none">
+    <div class="space-between">
+      <div id="playerLabel" style="font-weight:800">—</div>
+      <div style="display:flex;gap:8px">
+        <button id="startGameBtn" class="btn">Başla</button>
+        <button id="logoutBtn" class="btn ghost">Oturumu Kapat</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Game Area -->
+  <div id="gameArea" class="card" style="margin-top:12px;display:none">
+    <div id="questionText" style="font-weight:800;font-size:18px">—</div>
+    <input id="answerInput" class="input" placeholder="Cevabını yaz...">
+    <button id="submitAnswerBtn" class="btn">Gönder</button>
+    <div id="resultMsg" style="margin-top:8px;font-weight:700"></div>
+    <div style="margin-top:10px"><strong>Puan: </strong><span id="scoreUI">0</span></div>
+  </div>
+</div>
+
+<script>
+/* ---------- Absurd Game Logic v2.0 ---------- */
+const LS_KEY='mathgame_v1_2_6';
+let state={player:null,score:0,leaderboard:{}};
+
+function randInt(min,max){return Math.floor(Math.random()*(max-min+1))+min;}
+
+function saveState(){localStorage.setItem(LS_KEY,JSON.stringify(state));}
+function loadState(){try{state=Object.assign(state,JSON.parse(localStorage.getItem(LS_KEY)||'{}'));}catch(e){}}
+
+const entryCard=document.getElementById('entryCard');
+const playerNameInput=document.getElementById('playerName');
+const enterBtn=document.getElementById('enterBtn');
+const guestBtn=document.getElementById('guestBtn');
+const menuCard=document.getElementById('menuCard');
+const playerLabel=document.getElementById('playerLabel');
+const startGameBtn=document.getElementById('startGameBtn');
+const logoutBtn=document.getElementById('logoutBtn');
+const gameArea=document.getElementById('gameArea');
+const questionText=document.getElementById('questionText');
+const answerInput=document.getElementById('answerInput');
+const submitAnswerBtn=document.getElementById('submitAnswerBtn');
+const resultMsg=document.getElementById('resultMsg');
+const scoreUI=document.getElementById('scoreUI');
+
+const absurdOps=['+','-','×','÷','?','💥','🛸'];
+
+function nextAbsurdQuestion(){
+  const op=absurdOps[randInt(0,absurdOps.length-1)];
+  let qText='',answer=null;
+  switch(op){
+    case '+': case '-': case '×': case '÷':
+      const a=randInt(1,20),b=randInt(1,20);
+      qText=`${a} ${op} ${b} = ?`;
+      answer=eval(`${a}${op==='×'?'*':op==='÷'?'/':op}${b}`);
+      break;
+    case '?':
+      qText='Hangi sayı görünmez oldu? (0-10)';
+      answer=randInt(0,10);
+      break;
+    case '💥':
+      qText='Patlayan sayı nedir?';
+      answer=randInt(50,100);
+      break;
+    case '🛸':
+      qText='Uzaylı kaç puan verdi?';
+      answer=randInt(1,50);
+      break;
+  }
+  questionText.innerText=qText;
+  answerInput.value='';
+  submitAnswerBtn.onclick=()=>{
+    const userAns=parseFloat(answerInput.value);
+    if(userAns===answer){resultMsg.innerText='Doğru! 🎉';state.score+=Math.floor(answer*1.2);}
+    else{resultMsg.innerText=`Yanlış 😅 Doğru: ${answer}`;state.score+=randInt(0,5);}
+    scoreUI.innerText=state.score;
+    saveState();
+    setTimeout(nextAbsurdQuestion,800);
+  }
+}
+
+/* ---------- Session Flow ---------- */
+enterBtn.addEventListener('click',()=>{
+  const name=(playerNameInput.value||'').trim();if(!name){alert('Adını gir!');return;}
+  startSession(name);
+});
+guestBtn.addEventListener('click',()=>startSession('Misafir-'+randInt(1000,9999)));
+
+function startSession(name){
+  state.player=name;
+  saveState();
+  playerLabel.innerText=name;
+  entryCard.style.display='none';
+  menuCard.style.display='block';
+}
+
+startGameBtn.addEventListener('click',()=>{
+  menuCard.style.display='none';
+  gameArea.style.display='block';
+  scoreUI.innerText=state.score;
+  nextAbsurdQuestion();
+});
+
+logoutBtn.addEventListener('click',()=>{
+  if(!confirm('Oturumu kapatmak istiyor musun?'))return;
+  state.player=null; state.score=0; saveState();
+  entryCard.style.display='block'; menuCard.style.display='none'; gameArea.style.display='none';
+});
+</script>
+</body>
+</html>
