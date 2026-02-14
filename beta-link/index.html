@@ -22,6 +22,15 @@
 </style>
 </head>
 <body>
+   <script>
+const betaPassword = "enes.google.com21";
+
+let pass = prompt("v2.0-beta.release için parola:");
+if(pass !== betaPassword){
+  document.body.innerHTML = "<h1 style='text-align:center;margin-top:50px;'>Erişim Engellendi 🔒</h1>";
+  throw new Error("Yanlış parola");
+}
+   </script>
 <div id="bgLayer"></div>
 <div class="app">
   <div class="card header">
