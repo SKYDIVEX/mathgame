@@ -61,7 +61,24 @@
 </div>
 
 <script>
-/* ---------- Absurd Game Logic v2.0 ---------- */
+<script>
+/* ---------- Beta Link / Parola Kontrol ---------- */
+const currentURL = window.location.href;
+const BETA_LINK = 'https://[oyun-site]/beta-link';
+const BETA_PASSWORD = 'enes.google.com21';
+
+if(currentURL.includes('beta-link')){
+    console.log('Beta linkten geldi, parola yok.');
+}else if(currentURL.includes('v2.0-beta.release')){
+    let pass = prompt('Beta sürüm parola ile korunuyor:');
+    if(pass !== BETA_PASSWORD){
+        alert('Yanlış parola! Beta sürüm açılamıyor.');
+        document.body.innerHTML = '<h2 style="color:red;text-align:center;margin-top:50px">Erişim engellendi 🔒</h2>';
+        throw 'Parola yanlış';
+    }
+}
+</script>
+/* ---------- v2.0 ---------- */
 const LS_KEY='mathgame_v1_2_6';
 let state={player:null,score:0,leaderboard:{}};
 
