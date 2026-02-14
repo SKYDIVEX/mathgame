@@ -24,16 +24,13 @@
 <body>
 
 <script>
-const urlParams = new URLSearchParams(window.location.search);
-const key = urlParams.get("key");
+const betaPassword = "emineningotunegirsinbuproje";
 
-if (key !== "enesboss") {
-  const pass = prompt("Parola:");
-  if (pass !== "enes.google.com21") {
-    document.body.innerHTML =
-      "<h1 style='text-align:center;margin-top:50px;'>Erişim Engellendi 🔒</h1>";
-    throw new Error("Yanlış parola");
-  }
+const pass = prompt("v2.0-beta.release için parola:");
+
+if (pass !== betaPassword) {
+  document.write("<h1 style='text-align:center;margin-top:50px;'>Erişim Engellendi 🔒</h1>");
+  throw new Error("Yanlış parola");
 }
 </script>
 
