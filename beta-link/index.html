@@ -1,65 +1,9 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="tr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MathGame v2.0-beta.release</title>
-
-<style>
-body{
-  margin:0;
-  font-family:Arial, Helvetica, sans-serif;
-  background:#060708;
-  color:#00ff66;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  height:100vh;
-}
-
-.container{
-  text-align:center;
-  width:400px;
-}
-
-button{
-  background:#00ff66;
-  border:none;
-  padding:10px 20px;
-  margin:5px;
-  cursor:pointer;
-  font-weight:bold;
-}
-
-button:hover{
-  background:#00cc55;
-}
-
-.modal{
-  position:fixed;
-  inset:0;
-  display:none;
-  justify-content:center;
-  align-items:center;
-  background:rgba(0,0,0,0.8);
-}
-
-.modal-content{
-  background:#111;
-  padding:20px;
-  border:2px solid #00ff66;
-  text-align:center;
-}
-
-input{
-  padding:8px;
-  margin:10px;
-  width:80%;
-}
-
-#settingsModal{display:none;}
-</style>
-
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>MathGame — v2.0-beta.release — SKYDIVEX</title>
 <script>
 /* 🔒 BETA KORUMA */
 (function(){
@@ -77,111 +21,1092 @@ input{
   }
 })();
 </script>
+<style>
+/* ---------------------------
+   MathGame v2.0-beta.release - SKYDIVEX
+   Siyah - Yeşil final tasarım
+   ---------------------------*/
 
+/* Root colors */
+:root{
+  --bg-dark:#060708;
+  --bg-mid:#0b1220;
+  --card:#071022;
+  --neon:#00ff66;
+  --muted:#9fb3b0;
+  --glass: rgba(255,255,255,0.03);
+  --accent: var(--neon);
+  --ui-radius:14px;
+  --ease: cubic-bezier(.2,.9,.25,1);
+}
+
+/* Reset */
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--bg-dark),var(--bg-mid));color:#e6f7ea;font-family:Inter,ui-sans-serif,system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale}
+a{color:inherit}
+button{font-family:inherit}
+
+/* Background layer (image + radial overlay) */
+#bgLayer{
+  position:fixed; inset:0; z-index:-3;
+  background: radial-gradient(circle at var(--mx,50%) var(--my,50%), rgba(0,255,102,0.02), transparent 18%), linear-gradient(180deg,var(--bg-dark),var(--bg-mid));
+  transition: background 360ms var(--ease), transform 250ms var(--ease), filter 300ms linear;
+  background-size: cover;
+  background-position: center center;
+}
+
+/* container */
+.app {
+  max-width:980px;
+  margin:28px auto;
+  padding:18px;
+}
+
+/* card look */
+.card {
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border:1px solid rgba(255,255,255,0.04);
+  border-radius:var(--ui-radius);
+  padding:14px;
+  box-shadow:0 10px 30px rgba(2,6,10,0.6);
+}
+
+/* header */
+.header {
+  display:flex; justify-content:space-between; align-items:center; gap:12px;
+}
+.title {
+  font-size:20px; font-weight:700; letter-spacing:0.2px;
+}
+.subtitle { color:var(--muted); font-size:13px; }
+
+/* small helper classes */
+.row{display:flex;gap:8px;align-items:center}
+.col{display:flex;flex-direction:column;gap:8px}
+.space-between{display:flex;justify-content:space-between;align-items:center}
+.center{display:flex;justify-content:center;align-items:center}
+
+/* buttons */
+.btn {
+  padding:10px 14px; border-radius:12px; border:0; cursor:pointer;
+  background:linear-gradient(180deg,var(--neon), #00d458); color:#06110b; font-weight:800;
+  box-shadow:0 8px 30px rgba(0,255,102,0.06);
+  transition: transform .12s var(--ease), box-shadow .12s var(--ease), filter .12s var(--ease);
+}
+.btn:hover{ transform:translateY(-6px) scale(1.02); box-shadow:0 20px 40px rgba(0,255,102,0.12); filter:brightness(1.02) }
+.btn:active{ transform:translateY(0) scale(.985); box-shadow:0 6px 12px rgba(0,0,0,0.6) }
+.btn.ghost { background:transparent; color:var(--neon); border:1px solid rgba(255,255,255,0.04); box-shadow:none; font-weight:700 }
+
+/* layout: left & right */
+.main-grid { display:grid; grid-template-columns: 1fr 340px; gap:14px; margin-top:12px; }
+@media (max-width:880px){ .main-grid{ grid-template-columns: 1fr; } }
+
+/* input */
+.input {
+  padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.04); background:transparent; color:inherit;
+}
+
+/* menu styles */
+#entryCard .card { display:flex; flex-direction:column; gap:10px; align-items:center; text-align:center; padding:18px }
+#entryCard input { min-width:240px }
+
+/* menu slide - visually identical to final model */
+#menuCard {
+  margin-top:14px; transform-origin:top; transition: transform .48s var(--ease), opacity .28s var(--ease); opacity:0; transform:translateY(-16px) scale(.995)
+}
+#menuCard.show { opacity:1; transform:translateY(0) scale(1) }
+
+/* leader board */
+.lb { margin-top:10px; max-height:300px; overflow:auto; }
+.lbItem { display:flex;justify-content:space-between; padding:8px; border-radius:8px; background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); margin-bottom:6px }
+
+/* game area */
+#gameArea { display:none; margin-top:14px; padding:16px; border-radius:14px; }
+.topbar { display:flex; gap:12px; justify-content:space-between; align-items:center; margin-bottom:10px; }
+.stat { font-size:13px; color:var(--muted) }
+.stat strong { color:var(--neon); font-weight:800 }
+
+/* question block */
+#questionBlock { margin-top:6px; display:flex; gap:10px; align-items:center; flex-wrap:wrap }
+#questionText { font-size:20px; font-weight:800 }
+#answerInput{ padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.04); background:transparent; color:inherit; width:160px }
+
+/* result message */
+#resultMsg { min-height:26px; margin-top:10px; font-weight:700; transition:opacity .44s ease }
+
+/* pause overlay */
+#pauseOverlay {
+  position:fixed; inset:0; display:none; z-index:60; align-items:center; justify-content:center;
+  background: rgba(1,4,6,0.45); backdrop-filter: blur(0px); transition: backdrop-filter .45s linear, opacity .35s ease;
+}
+#pauseOverlay.show { display:flex; backdrop-filter: blur(6px); }
+#pauseCard { width:360px; background:linear-gradient(180deg,#071022,#0b1626); padding:18px; border-radius:12px; border:1px solid rgba(255,255,255,0.03); transform:translateY(-24px); transition: transform .38s var(--ease), opacity .28s var(--ease) }
+#pauseOverlay.show #pauseCard { transform:translateY(0) }
+
+/* settings slide (inside pause) */
+#settingsPanel { margin-top:12px; background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); padding:12px; border-radius:10px; max-width:360px; width:100% }
+
+/* about modal - simple */
+#aboutModal {
+  position:fixed; inset:0; display:none; z-index:80; align-items:center; justify-content:center;
+  background: rgba(0,0,0,0.6);
+}
+#aboutModal.show { display:flex; }
+#aboutCard { width:720px; max-width:95%; padding:18px; border-radius:12px; background:linear-gradient(180deg,#071022,#081426); border:1px solid rgba(255,255,255,0.03) }
+
+/* Settings modal */
+#settingsModal {
+  position:fixed; inset:0; display:none; z-index:80; align-items:center; justify-content:center;
+  background: rgba(0,0,0,0.65); backdrop-filter: blur(4px);
+}
+#settingsModal.show { display:flex; }
+#settingsCard {
+  width:560px; max-width:96%; max-height:88vh; overflow-y:auto;
+  padding:20px; border-radius:14px;
+  background:linear-gradient(180deg,#071022,#081426);
+  border:1px solid rgba(255,255,255,0.05);
+  box-shadow:0 24px 60px rgba(0,0,0,0.8);
+}
+.settings-section { margin-top:16px; padding-top:14px; border-top:1px solid rgba(255,255,255,0.04); }
+.settings-section:first-child { margin-top:0; padding-top:0; border-top:none; }
+.settings-label { font-size:11px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--muted); margin-bottom:10px; }
+.op-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
+.op-btn {
+  padding:10px 8px; border-radius:10px; border:1px solid rgba(255,255,255,0.06);
+  background:rgba(255,255,255,0.02); color:var(--muted); cursor:pointer; font-size:18px; font-weight:800;
+  transition: all .15s ease; text-align:center;
+}
+.op-btn.active { background:rgba(0,255,102,0.12); border-color:var(--neon); color:var(--neon); box-shadow:0 0 12px rgba(0,255,102,0.15); }
+.toggle-row { display:flex; justify-content:space-between; align-items:center; padding:8px 0; }
+.toggle-switch { position:relative; width:42px; height:24px; }
+.toggle-switch input { opacity:0; width:0; height:0; }
+.toggle-track {
+  position:absolute; inset:0; background:rgba(255,255,255,0.08); border-radius:12px; cursor:pointer;
+  transition: background .2s;
+}
+.toggle-track:before {
+  content:''; position:absolute; width:18px; height:18px; left:3px; top:3px;
+  background:#fff; border-radius:50%; transition: transform .2s;
+}
+.toggle-switch input:checked + .toggle-track { background:var(--neon); }
+.toggle-switch input:checked + .toggle-track:before { transform:translateX(18px); background:#06110b; }
+.range-row { display:flex; align-items:center; gap:10px; }
+.range-row input[type=range] { flex:1; accent-color:var(--neon); }
+.range-val { color:var(--neon); font-weight:800; min-width:28px; text-align:right; }
+
+/* Confirm modal */
+#confirmModal {
+  position:fixed; inset:0; display:none; z-index:100; align-items:center; justify-content:center;
+  background: rgba(0,0,0,0.7); backdrop-filter:blur(3px);
+}
+#confirmModal.show { display:flex; }
+#confirmCard {
+  width:340px; max-width:94%; padding:20px; border-radius:14px;
+  background:linear-gradient(180deg,#071022,#0a1628);
+  border:1px solid rgba(255,255,255,0.06);
+  box-shadow:0 20px 50px rgba(0,0,0,0.9);
+  text-align:center;
+}
+#confirmCard .confirm-msg { margin:10px 0 18px; color:var(--muted); font-size:14px; }
+#confirmCard .confirm-btns { display:flex; gap:10px; justify-content:center; }
+
+/* version list buttons */
+.verList { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px }
+.verBtn { padding:8px 12px; border-radius:8px; background:transparent; border:1px solid rgba(255,255,255,0.04); color:var(--muted); cursor:pointer }
+.verBtn:hover { color:var(--neon); transform:translateY(-4px) }
+
+/* small screens adjustments */
+@media (max-width:720px){
+  .main-grid{ grid-template-columns: 1fr; }
+  #pauseCard { width:90%; }
+  #aboutCard { width:92%; padding:12px; }
+}
+
+/* tiny flourish */
+.signature { font-size:12px; color:var(--muted); margin-top:10px }
+
+/* absurd mode choices */
+.absurd-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:4px; }
+@media(max-width:500px){ .absurd-grid{ grid-template-columns:1fr; } }
+.choice-btn {
+  padding:14px 12px; border-radius:12px; border:1px solid rgba(255,255,255,0.06);
+  background:rgba(255,255,255,0.03); color:#e6f7ea; cursor:pointer; font-size:14px;
+  font-family:inherit; font-weight:600; text-align:left; line-height:1.4;
+  transition: all .15s ease;
+}
+.choice-btn:hover { background:rgba(168,85,247,0.12); border-color:rgba(168,85,247,0.4); transform:translateY(-2px); }
+.choice-btn.correct { background:rgba(0,255,102,0.15); border-color:var(--neon); color:var(--neon); }
+.choice-btn.wrong   { background:rgba(255,80,80,0.12); border-color:#ff6b6b; color:#ff6b6b; }
+.choice-btn:disabled { cursor:default; transform:none; }
+</style>
 </head>
 <body>
+<div id="bgLayer"></div>
 
-<div class="container">
-  <h1>MathGame</h1>
-  <p id="question">Başla butonuna bas</p>
-  <input type="text" id="answerInput" placeholder="Cevap">
-  <br>
-  <button id="startBtn">Başla</button>
-  <button id="settingsBtn">Ayarlar</button>
-  <p>Skor: <span id="score">0</span></p>
+<div class="app">
+  <!-- Header -->
+  <div class="card header">
+    <div>
+      <div class="title">MathGame</div>
+      <div class="subtitle">Skydivex Edition — final</div>
+    </div>
+    <div class="space-between">
+      <div class="signature">© SKYDIVEX</div>
+      <div class="signature" id="miniInfo"></div>
+    </div>
+  </div>
+
+  <!-- Entry card (simple) -->
+  <div id="entryCard" class="card" style="margin-top:12px">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+      <h2 style="margin:6px 0">Giriş</h2>
+      <input id="playerName" class="input" placeholder="Adın (ör. Enes)">
+      <div style="display:flex;gap:10px;margin-top:6px">
+        <button id="enterBtn" class="btn">Giriş Yap</button>
+        <button id="guestBtn" class="btn ghost">Misafir</button>
+      </div>
+      <div class="small muted" style="color:var(--muted);margin-top:8px">Sadece adını yaz — hesabın lokal olarak kaydedilecek.</div>
+    </div>
+  </div>
+
+  <!-- Main menu -->
+  <div id="menuCard" class="card" style="margin-top:12px">
+    <div class="main-grid">
+      <div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div class="small muted">Oyuncu</div>
+            <div id="playerLabel" style="font-weight:800">—</div>
+            <div class="small muted" style="margin-top:6px">Seviye: <span id="levelDisplay">1</span> • Puan: <span id="scoreDisplay">0</span></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end">
+            <button id="startGameBtn" class="btn">▶ Matematik Modu</button>
+            <button id="startAbsurdBtn" class="btn" style="background:linear-gradient(180deg,#a855f7,#7c3aed);box-shadow:0 8px 30px rgba(168,85,247,0.15)">🤪 Absürt Mod</button>
+            <button id="logoutBtn" class="btn ghost">Oturumu Kapat</button>
+          </div>
+        </div>
+
+        <hr style="margin:12px 0;border:none;border-top:1px solid rgba(255,255,255,0.03)" />
+
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button id="openSettings" class="btn ghost">Ayarlar</button>
+          <button id="openAbout" class="btn ghost">Hakkında</button>
+          <button id="resetScores" class="btn ghost">Skorları Sıfırla</button>
+        </div>
+
+        <!-- optional settings quick area -->
+        <div id="quickSettings" style="margin-top:12px;display:flex;gap:8px;align-items:center">
+          <label style="color:var(--muted)"><input type="checkbox" id="soundToggle" checked> Ses açık</label>
+          <div style="margin-left:auto;color:var(--muted)">Versiyon: <strong>v2.0-beta.release</strong></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="card" style="padding:12px">
+          <div class="small muted">Liderlik Tablosu</div>
+          <div id="leaderboard" class="lb" style="margin-top:8px">Henüz kimse yok</div>
+        </div>
+
+        <div class="card" style="padding:12px;margin-top:12px">
+          <div class="small muted">Hızlı Ayarlar</div>
+          <div style="margin-top:8px;display:flex;gap:8px;align-items:center">
+            <label class="small muted">Buton rengi</label>
+            <input type="color" id="btnColor" value="#00ff66">
+            <div style="margin-left:auto" class="small muted">Arka plan</div>
+            <input type="color" id="bgColor" value="#08121a">
+          </div>
+          <div style="margin-top:10px" class="small muted">Arka plan fotoğrafı:</div>
+          <div style="margin-top:6px;display:flex;gap:8px;align-items:center">
+            <button id="bgImageBtn" class="btn ghost">Fotoğraf Yükle</button>
+            <input id="bgImageInput" type="file" accept="image/*" style="display:none">
+            <button id="clearBgBtn" class="btn ghost">Sıfırla</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Game area -->
+  <div id="gameArea" class="card" style="margin-top:12px;display:none">
+    <div class="topbar">
+      <div>
+        <div class="stat">Oyuncu: <strong id="playerDisplay">—</strong></div>
+        <div id="modeBadge" style="display:none;margin-top:4px;font-size:11px;font-weight:800;letter-spacing:1px;padding:2px 8px;border-radius:20px;background:rgba(168,85,247,0.18);color:#c084fc;border:1px solid rgba(168,85,247,0.3)">🤪 ABSÜRT MOD</div>
+      </div>
+      <div style="text-align:center">
+        <div class="stat">Seviye <strong id="levelUI">1</strong></div>
+        <div class="stat" style="font-size:13px;color:var(--muted)">Puan Çarpanı: <strong id="multiplierUI">1 × 10</strong></div>
+      </div>
+      <div style="text-align:right">
+        <div class="stat">Puan: <strong id="scoreUI">0</strong></div>
+      </div>
+    </div>
+
+    <div id="questionBlock">
+      <div id="questionText" style="font-size:18px;font-weight:800;line-height:1.5;margin-bottom:12px">—</div>
+      <!-- Math input (shown in math mode) -->
+      <div id="mathInputRow" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <input id="answerInput" class="input" placeholder="Cevabını yaz..." />
+        <button id="submitAnswerBtn" class="btn">Gönder</button>
+      </div>
+      <!-- Absurd choices (shown in absurd mode) -->
+      <div id="absurdChoices" style="display:none;margin-top:8px"></div>
+    </div>
+
+    <div id="resultMsg" style="min-height:26px;margin-top:10px;font-weight:700;transition:opacity .44s ease"></div>
+
+    <div style="margin-top:10px;display:flex;gap:8px;align-items:center">
+      <button id="pauseBtn" class="btn ghost">Duraklat</button>
+      <div style="margin-left:auto" class="small muted">Ödül: <strong id="rewardUI">10</strong>p</div>
+    </div>
+
+    <hr style="margin-top:12px;border:none;border-top:1px solid rgba(255,255,255,0.03)" />
+    <h3 style="margin:8px 0">Puan Tablosu</h3>
+    <div id="board" class="lb"></div>
+  </div>
+
+  <div style="height:8px"></div>
+  <div class="card" style="padding:10px;font-size:12px;color:var(--muted)">
+    <div style="display:flex;justify-content:space-between">
+      <div>Geliştirici: <strong>SKYDIVEX</strong></div>
+      <div>Sürüm: <strong>v2.0-beta.release</strong></div>
+    </div>
+  </div>
 </div>
 
-<div id="settingsModal" class="modal">
-  <div class="modal-content">
-    <h2>Ayarlar</h2>
-    <button id="absurdToggle">Absurd Mode: OFF</button>
-    <br>
-    <button id="closeSettings">Kapat</button>
+<!-- Pause overlay -->
+<div id="pauseOverlay">
+  <div id="pauseCard" class="card" style="width:420px;max-width:94%">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <div style="font-weight:800">Oyun Duraklatıldı</div>
+        <div style="color:var(--muted);font-size:13px;margin-top:6px">Skydivex</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end">
+        <button id="resumeBtn" class="btn">Devam Et</button>
+        <button id="pauseSettingsBtn" class="btn ghost">Ayarlar</button>
+        <button id="pauseMenuBtn" class="btn ghost">Ana Menü</button>
+      </div>
+    </div>
+
+    <div id="settingsPanel" style="margin-top:14px;display:none">
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <label style="color:var(--muted)"><input type="checkbox" id="settingSound"> Ses açık</label>
+        <label style="color:var(--muted)">Buton renk <input type="color" id="settingBtnColor" value="#00ff66"></label>
+        <label style="color:var(--muted)">Arka plan <input type="color" id="settingBgColor" value="#08121a"></label>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Settings Modal -->
+<div id="settingsModal">
+  <div id="settingsCard">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <div style="font-weight:900;font-size:18px">⚙️ Ayarlar</div>
+        <div style="color:var(--muted);margin-top:4px;font-size:13px">MathGame v2.0-beta.release — SKYDIVEX</div>
+      </div>
+      <button id="closeSettingsModal" class="btn ghost">Kapat</button>
+    </div>
+
+    <hr style="margin:14px 0;border:none;border-top:1px solid rgba(255,255,255,0.04)" />
+
+    <!-- Operators -->
+    <div class="settings-section">
+      <div class="settings-label">İşlem Türleri</div>
+      <div class="op-grid">
+        <button class="op-btn active" data-op="+">＋<br><span style="font-size:10px;font-weight:400">Toplama</span></button>
+        <button class="op-btn active" data-op="-">－<br><span style="font-size:10px;font-weight:400">Çıkarma</span></button>
+        <button class="op-btn" data-op="*">✕<br><span style="font-size:10px;font-weight:400">Çarpma</span></button>
+        <button class="op-btn" data-op="/">÷<br><span style="font-size:10px;font-weight:400">Bölme</span></button>
+      </div>
+      <div style="margin-top:8px;font-size:12px;color:var(--muted)">En az bir işlem türü seçili olmalı.</div>
+    </div>
+
+    <!-- Level up speed -->
+    <div class="settings-section">
+      <div class="settings-label">Seviye Atlama Hızı</div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:8px">Her <span id="levelUpVal">4</span> doğru cevaptan sonra seviye atla.</div>
+      <div class="range-row">
+        <span style="font-size:12px;color:var(--muted)">Hızlı (2)</span>
+        <input type="range" id="levelUpSpeed" min="2" max="10" value="4" step="1">
+        <span style="font-size:12px;color:var(--muted)">Yavaş (10)</span>
+      </div>
+    </div>
+
+    <!-- Sound -->
+    <div class="settings-section">
+      <div class="settings-label">Ses</div>
+      <div class="toggle-row">
+        <span style="font-size:14px">Ses Efektleri</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="settingSoundToggle" checked>
+          <span class="toggle-track"></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Visuals -->
+    <div class="settings-section">
+      <div class="settings-label">Görünüm</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="toggle-row">
+          <span style="font-size:14px">Buton / Vurgu Rengi</span>
+          <input type="color" id="settingBtnColor" value="#00ff66" style="width:40px;height:30px;border:none;background:none;cursor:pointer;border-radius:6px">
+        </div>
+        <div class="toggle-row">
+          <span style="font-size:14px">Arka Plan Rengi</span>
+          <input type="color" id="settingBgColor" value="#0b1220" style="width:40px;height:30px;border:none;background:none;cursor:pointer;border-radius:6px">
+        </div>
+        <div>
+          <div style="font-size:14px;margin-bottom:6px">Arka Plan Fotoğrafı</div>
+          <div style="display:flex;gap:8px">
+            <button id="settingBgImageBtn" class="btn ghost">📁 Fotoğraf Yükle</button>
+            <input id="settingBgImageInput" type="file" accept="image/*" style="display:none">
+            <button id="settingClearBgBtn" class="btn ghost">Sıfırla</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Danger zone -->
+    <div class="settings-section">
+      <div class="settings-label">Diğer</div>
+      <button id="settingResetScores" class="btn ghost" style="color:#ff6b6b;border-color:rgba(255,100,100,0.2)">🗑 Tüm Skorları Sıfırla</button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm Modal -->
+<div id="confirmModal">
+  <div id="confirmCard">
+    <div style="font-weight:800;font-size:16px" id="confirmTitle">Emin misin?</div>
+    <div class="confirm-msg" id="confirmMsg"></div>
+    <div class="confirm-btns">
+      <button id="confirmOk" class="btn">Evet</button>
+      <button id="confirmCancel" class="btn ghost">İptal</button>
+    </div>
+  </div>
+</div>
+
+<!-- About modal -->
+<div id="aboutModal">
+  <div id="aboutCard">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <div style="font-weight:900;font-size:18px">Hakkında — MathGame</div>
+        <div style="color:var(--muted);margin-top:6px">SKYDIVEX</div>
+      </div>
+      <div><button id="closeAboutModal" class="btn ghost">Kapat</button></div>
+    </div>
+
+    <hr style="margin:12px 0;border:none;border-top:1px solid rgba(255,255,255,0.03)" />
+
+    <div style="display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap">
+      <div style="flex:1;min-width:260px">
+        <div style="font-weight:800">Sürüm: v2.0-beta.release</div>
+        <div style="color:var(--muted);margin-top:6px">Tarihçe</div>
+        <div style="font-size:13px;color:var(--muted);margin-top:6px">
+          <p><strong>v1.0</strong> — Temel soru/cevap, puanlama sistemi.</p>
+          <p><strong>v1.1</strong> — Menü animasyonları ve ses efektleri eklendi.</p>
+          <p><strong>v1.2</strong> — Görsel özelleştirme, zorluk dengesi ve çarpan sistemi eklendi.</p>
+          <p><strong>v2.0-beta.release</strong> — Final sürüm: duraklatma/settings animasyonları, kalıcı ayarlar, fotoğraf arka plan düzeltmeleri.</p>
+          <p><strong>v2.0-beta.release</strong> — Settings modal, işlem türü seçimi, seviye hızı, confirm dialogları, navigasyon düzeltmeleri.</p>
+        </div>
+      </div>
+
+      <div style="width:320px;min-width:240px">
+        <div style="font-weight:800">Puan Çarpanı (Nasıl çalışır)</div>
+        <div style="color:var(--muted);margin-top:6px;font-size:13px">
+          <p>Her seviye için ödül = <strong>Seviye × 10</strong> puan. Örnek: Seviye 1 → 10p, Seviye 5 → 50p. Seviye ilerledikçe soruların büyüklük eşiği artar (ör. Seviye 1 küçük sayılar; Seviye 5 orta, Seviye 10 büyük sayılar).</p>
+          <p>Doğru yanıtlar seviye atlamanı sağlar; yanlışlarda ceza yok ama kazanma fırsatı kaçabilir.</p>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:12px;color:var(--muted);font-size:13px">
+      Yapımcı: <strong>SKYDIVEX</strong> • 2025
+    </div>
   </div>
 </div>
 
 <script>
-/* ====== v2.0-beta.release ====== */
-const LS_KEY = "mathgame_v2_beta";
+/* --------------------------
+   MathGame v2.0-beta.release - Logic JS
+   -------------------------- */
 
-let score = 0;
-let currentAnswer = "";
-let gameMode = "classic";
-
-const questionEl = document.getElementById("question");
-const answerInput = document.getElementById("answerInput");
-const scoreEl = document.getElementById("score");
-
-const startBtn = document.getElementById("startBtn");
-const settingsBtn = document.getElementById("settingsBtn");
-const settingsModal = document.getElementById("settingsModal");
-const closeSettings = document.getElementById("closeSettings");
-const absurdBtn = document.getElementById("absurdToggle");
-
-/* ===== AYARLAR FIX ===== */
-function openSettings(){
-  settingsModal.style.display="flex";
-}
-
-function closeSettingsModal(){
-  settingsModal.style.display="none";
-}
-
-settingsBtn.onclick = openSettings;
-closeSettings.onclick = closeSettingsModal;
-
-/* ===== ABSURD MODE ===== */
-absurdBtn.onclick = ()=>{
-  if(gameMode==="classic"){
-    gameMode="absurd";
-    absurdBtn.textContent="Absurd Mode: ON";
-  }else{
-    gameMode="classic";
-    absurdBtn.textContent="Absurd Mode: OFF";
-  }
+/* State */
+const LS_KEY = 'mathgame_v1_3_0';
+let state = {
+  player: null,
+  score: 0,
+  level: 1,
+  leaderboard: {},
+  ops: ['+','-'],
+  soundOn: true,
+  levelUpEvery: 4,
+  btnColor: '#00ff66',
+  bgColor: '#0b1220',
+  bgImage: null
 };
 
-/* ===== SORU ÜRETİM ===== */
-function generateQuestion(){
+/* DOM refs */
+const bgLayer = document.getElementById('bgLayer');
+const entryCard = document.getElementById('entryCard');
+const playerNameInput = document.getElementById('playerName');
+const enterBtn = document.getElementById('enterBtn');
+const guestBtn = document.getElementById('guestBtn');
+const menuCard = document.getElementById('menuCard');
+const playerLabel = document.getElementById('playerLabel');
+const startGameBtn = document.getElementById('startGameBtn');
+const startAbsurdBtn = document.getElementById('startAbsurdBtn');
+const logoutBtn = document.getElementById('logoutBtn');
+const openSettings = document.getElementById('openSettings');
+const openAbout = document.getElementById('openAbout');
+const resetScores = document.getElementById('resetScores');
+const leaderboardEl = document.getElementById('leaderboard');
+const boardDiv = document.getElementById('board');
+const scoreDisplay = document.getElementById('scoreDisplay');
+const levelDisplay = document.getElementById('levelDisplay');
+const btnColorInput = document.getElementById('btnColor');
+const bgColorInput = document.getElementById('bgColor');
+const bgImageBtn = document.getElementById('bgImageBtn');
+const bgImageInput = document.getElementById('bgImageInput');
+const clearBgBtn = document.getElementById('clearBgBtn');
+const gameArea = document.getElementById('gameArea');
+const playerDisplay = document.getElementById('playerDisplay');
+const levelUI = document.getElementById('levelUI');
+const scoreUI = document.getElementById('scoreUI');
+const multiplierUI = document.getElementById('multiplierUI');
+const rewardUI = document.getElementById('rewardUI');
+const questionText = document.getElementById('questionText');
+const answerInput = document.getElementById('answerInput');
+const submitAnswerBtn = document.getElementById('submitAnswerBtn');
+const resultMsg = document.getElementById('resultMsg');
+const pauseOverlay = document.getElementById('pauseOverlay');
+const resumeBtn = document.getElementById('resumeBtn');
+const pauseSettingsBtn = document.getElementById('pauseSettingsBtn');
+const pauseMenuBtn = document.getElementById('pauseMenuBtn');
+const settingsPanel = document.getElementById('settingsPanel');
+const settingSound = document.getElementById('settingSound');
+const settingBtnColor = document.getElementById('settingBtnColor');
+const settingBgColor = document.getElementById('settingBgColor');
+const aboutModal = document.getElementById('aboutModal');
+const quickSoundToggle = document.getElementById('soundToggle');
+const opCheckboxes = document.querySelectorAll('.opType');
 
-  if(gameMode==="absurd"){
-    const absurdQuestions=[
-      {q:"5 tavuk 3 gün düşünürse kaç fikir çıkar?",a:"8"},
-      {q:"0'a bölünce evren neden sinirlenir?",a:"çünkü yasak"},
-      {q:"2+2 neden bazen 5 hissedilir?",a:"çünkü pazartesi"},
-      {q:"Eminem matematik çözse kaç bar atar?",a:"16"}
-    ];
+/* Audio (WebAudio) */
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+let audioCtx = null, masterGain = null;
+function initAudio(){
+  if(audioCtx) return;
+  try{
+    audioCtx = new AudioCtx();
+    masterGain = audioCtx.createGain(); masterGain.gain.value = 1; masterGain.connect(audioCtx.destination);
+  }catch(e){ audioCtx=null; }
+}
+function playTone(type='sine', freq=880, dur=0.12, gain=0.5){
+  if(!state.soundOn) return;
+  initAudio(); if(!audioCtx) return;
+  const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+  o.type=type; o.frequency.value=freq; o.connect(g); g.connect(masterGain);
+  const now=audioCtx.currentTime;
+  g.gain.setValueAtTime(0.0001,now);
+  g.gain.linearRampToValueAtTime(gain,now+0.003);
+  g.gain.exponentialRampToValueAtTime(0.0001,now+dur);
+  o.start(now); o.stop(now+dur+0.02);
+}
+function clickSound(){ playTone('sine',1100,0.08,0.35); }
+function successSound(){ playTone('triangle',660,0.22,0.9); }
+function failSound(){ playTone('sawtooth',160,0.36,0.6); }
 
-    const random=absurdQuestions[Math.floor(Math.random()*absurdQuestions.length)];
-    questionEl.textContent=random.q;
-    currentAnswer=random.a;
-    return;
-  }
-
-  let a=Math.floor(Math.random()*10);
-  let b=Math.floor(Math.random()*10);
-  currentAnswer=(a+b).toString();
-  questionEl.textContent=`${a} + ${b}`;
+/* Persist */
+function loadState(){
+  try{ const raw=JSON.parse(localStorage.getItem(LS_KEY)||'{}'); state=Object.assign(state,raw||{}); }catch(e){}
+}
+function saveState(){
+  try{ localStorage.setItem(LS_KEY,JSON.stringify(state)); }catch(e){}
 }
 
-/* ===== OYUN BAŞLAT ===== */
-startBtn.onclick=()=>{
-  score=0;
-  scoreEl.textContent=score;
-  generateQuestion();
-};
+/* Helpers */
+function escapeHtml(s=''){ return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"})[m]); }
+function randInt(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
+function safeCalc(a,op,b){
+  switch(op){ case '+':return a+b; case '-':return a-b; case '*':return a*b; case '/':return b!==0?a/b:0; default:return 0; }
+}
 
-/* ===== CEVAP KONTROL ===== */
-answerInput.addEventListener("keydown",function(e){
-  if(e.key==="Enter"){
-    if(answerInput.value.toLowerCase()===currentAnswer.toLowerCase()){
-      score++;
-      scoreEl.textContent=score;
-      generateQuestion();
+/* ── SCREEN NAVIGATION ─────────────────────────────── */
+function showScreen(name){
+  entryCard.style.display  = name==='entry' ? 'block' : 'none';
+  menuCard.style.display   = name==='menu'  ? 'block' : 'none';
+  gameArea.style.display   = name==='game'  ? 'block' : 'none';
+  if(name==='menu'){
+    menuCard.classList.remove('show');
+    requestAnimationFrame(()=> requestAnimationFrame(()=> menuCard.classList.add('show')));
+  }
+}
+
+/* ── CONFIRM MODAL ─────────────────────────────────── */
+const confirmModal  = document.getElementById('confirmModal');
+const confirmTitle  = document.getElementById('confirmTitle');
+const confirmMsg    = document.getElementById('confirmMsg');
+const confirmOkBtn  = document.getElementById('confirmOk');
+const confirmCancel = document.getElementById('confirmCancel');
+let _confirmResolve = null;
+
+function showConfirm(title, msg){
+  return new Promise(resolve => {
+    _confirmResolve = resolve;
+    confirmTitle.innerText = title;
+    confirmMsg.innerText = msg;
+    confirmModal.classList.add('show');
+  });
+}
+confirmOkBtn.addEventListener('click', ()=>{ confirmModal.classList.remove('show'); if(_confirmResolve){_confirmResolve(true);_confirmResolve=null;} clickSound(); });
+confirmCancel.addEventListener('click', ()=>{ confirmModal.classList.remove('show'); if(_confirmResolve){_confirmResolve(false);_confirmResolve=null;} });
+
+/* ── SETTINGS MODAL ────────────────────────────────── */
+const settingsModal    = document.getElementById('settingsModal');
+const closeSettingsBtn = document.getElementById('closeSettingsModal');
+const opBtns           = document.querySelectorAll('.op-btn');
+const levelUpSlider    = document.getElementById('levelUpSpeed');
+const levelUpVal       = document.getElementById('levelUpVal');
+const settingSoundToggle   = document.getElementById('settingSoundToggle');
+const settingBtnColorNew   = document.getElementById('settingBtnColor');
+const settingBgColorNew    = document.getElementById('settingBgColor');
+const settingBgImageBtn    = document.getElementById('settingBgImageBtn');
+const settingBgImageInput  = document.getElementById('settingBgImageInput');
+const settingClearBgBtn    = document.getElementById('settingClearBgBtn');
+const settingResetScores   = document.getElementById('settingResetScores');
+
+function openSettingsModal(){
+  // sync UI with state
+  opBtns.forEach(b => {
+    b.classList.toggle('active', state.ops.includes(b.dataset.op));
+  });
+  levelUpSlider.value = state.levelUpEvery || 4;
+  levelUpVal.innerText = state.levelUpEvery || 4;
+  settingSoundToggle.checked = !!state.soundOn;
+  settingBtnColorNew.value = state.btnColor || '#00ff66';
+  settingBgColorNew.value  = state.bgColor  || '#0b1220';
+  settingsModal.classList.add('show');
+}
+closeSettingsBtn.addEventListener('click', ()=>{ settingsModal.classList.remove('show'); clickSound(); });
+
+// Op toggle buttons
+opBtns.forEach(b => {
+  b.addEventListener('click', ()=>{
+    const op = b.dataset.op;
+    const active = state.ops.includes(op);
+    if(active && state.ops.length === 1){ return; } // at least 1
+    if(active){ state.ops = state.ops.filter(x=>x!==op); b.classList.remove('active'); }
+    else { state.ops = [...state.ops, op]; b.classList.add('active'); }
+    saveState(); clickSound();
+  });
+});
+
+// Level up speed
+levelUpSlider.addEventListener('input', ()=>{
+  state.levelUpEvery = parseInt(levelUpSlider.value);
+  levelUpVal.innerText = state.levelUpEvery;
+  saveState();
+});
+
+// Sound toggle
+settingSoundToggle.addEventListener('change', ()=>{ state.soundOn=settingSoundToggle.checked; saveState(); clickSound(); });
+
+// Btn color
+settingBtnColorNew.addEventListener('input', ()=>{
+  state.btnColor=settingBtnColorNew.value;
+  document.documentElement.style.setProperty('--neon',state.btnColor);
+  saveState();
+});
+
+// Bg color
+settingBgColorNew.addEventListener('input', ()=>{
+  state.bgColor=settingBgColorNew.value;
+  document.documentElement.style.setProperty('--bg-mid',state.bgColor);
+  saveState();
+});
+
+// Bg image
+settingBgImageBtn.addEventListener('click', ()=> settingBgImageInput.click());
+settingBgImageInput.addEventListener('change', (ev)=>{
+  const f=ev.target.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=(e)=>{
+    state.bgImage=e.target.result;
+    applyBgImage();
+    saveState();
+  };
+  r.readAsDataURL(f);
+});
+settingClearBgBtn.addEventListener('click', ()=>{ state.bgImage=null; bgLayer.style.backgroundImage=''; saveState(); clickSound(); });
+
+// Reset scores (with confirm)
+settingResetScores.addEventListener('click', async ()=>{
+  const ok = await showConfirm('Skorları Sıfırla', 'Tüm skorlar silinecek. Bu işlem geri alınamaz.');
+  if(!ok) return;
+  state.leaderboard={}; saveState(); renderLeaderboard(); clickSound();
+});
+
+function applyBgImage(){
+  if(state.bgImage){
+    bgLayer.style.backgroundImage=`url(${state.bgImage}), radial-gradient(circle at 50% 40%, rgba(0,255,102,0.02), transparent 18%), linear-gradient(180deg,var(--bg-dark),var(--bg-mid))`;
+    bgLayer.style.backgroundSize='cover'; bgLayer.style.backgroundPosition='center center';
+  }
+}
+
+/* ── LEADERBOARD ───────────────────────────────────── */
+function renderLeaderboard(){
+  const arr=Object.entries(state.leaderboard).sort((a,b)=>b[1]-a[1]);
+  if(arr.length===0){
+    leaderboardEl.innerHTML='<i style="color:var(--muted)">Henüz kimse yok</i>';
+    boardDiv.innerHTML=''; return;
+  }
+  leaderboardEl.innerHTML=arr.map((e,i)=>`<div class="lbItem"><div>${i+1}. ${escapeHtml(e[0])}</div><div>${e[1]}p</div></div>`).join('');
+  boardDiv.innerHTML=arr.map((e,i)=>`<div style="display:flex;justify-content:space-between;padding:6px;border-radius:6px;background:rgba(255,255,255,0.02);margin-bottom:6px">${i+1}. ${escapeHtml(e[0])}<strong>${e[1]}p</strong></div>`).join('');
+}
+
+/* ── INIT ──────────────────────────────────────────── */
+loadState();
+document.documentElement.style.setProperty('--accent', state.btnColor||'#00ff66');
+document.documentElement.style.setProperty('--neon',   state.btnColor||'#00ff66');
+document.documentElement.style.setProperty('--bg-mid', state.bgColor||'#0b1220');
+applyBgImage();
+
+quickSoundToggle.checked = !!state.soundOn;
+btnColorInput.value = state.btnColor||'#00ff66';
+bgColorInput.value  = state.bgColor||'#0b1220';
+settingBtnColor.value = state.btnColor||'#00ff66';
+settingBgColor.value  = state.bgColor||'#0b1220';
+settingSound.checked  = !!state.soundOn;
+
+// Show correct initial screen
+if(state.player){
+  showScreen('menu');
+  playerLabel.innerText = state.player;
+  scoreDisplay.innerText = state.score;
+  levelDisplay.innerText = state.level;
+  updateMiniInfo();
+} else {
+  showScreen('entry');
+}
+renderLeaderboard();
+
+/* ── ENTRY ─────────────────────────────────────────── */
+enterBtn.addEventListener('click', ()=>{
+  const name=(playerNameInput.value||'').trim();
+  if(!name){ playerNameInput.focus(); return; }
+  startSession(name);
+});
+playerNameInput.addEventListener('keydown', e=>{ if(e.key==='Enter') enterBtn.click(); });
+guestBtn.addEventListener('click', ()=> startSession('Misafir-'+randInt(1000,9999)));
+
+function startSession(name){
+  const prev=state.player;
+  state.player=name;
+  state.score=state.leaderboard[name]||0;
+  if(prev!==name) state.level=1;
+  state.level=state.level||1;
+  saveState();
+  playerLabel.innerText=name;
+  playerDisplay.innerText=name;
+  scoreDisplay.innerText=state.score;
+  levelDisplay.innerText=state.level;
+  showScreen('menu');
+  clickSound();
+  renderLeaderboard();
+  updateMiniInfo();
+}
+
+/* ── GAME MODE ─────────────────────────────────────── */
+let gameMode = 'math'; // 'math' | 'absurd'
+
+/* ── ABSURD QUESTIONS BANK ──────────────────────────── */
+const ABSURD_QUESTIONS = [
+  { q:"Dünya yuvarlak mı, düz mü?", choices:["Yuvarlak 🌍","Düz 🥞","Üçgen 🔺","Benim gibi karmaşık 🌀"], correct:0 },
+  { q:"Bir kedi neden 'miyav' der?", choices:["Seni sevdiği için 💕","Senden bir şey istediği için 🍽️","Aslında köpek olduğunu gizlemeye çalışıyor 🐶","Telefonunu şarj etmek istiyor 🔋"], correct:1 },
+  { q:"En hızlı internet bağlantısı hangisinde vardır?", choices:["Türk Telekom 💀","NASA 🚀","Benim evimde (olmayan wifi) 😭","Kara deliklerin içinde ⚫"], correct:1 },
+  { q:"Hangisi bir programlama dili DEĞİLdir?", choices:["Python 🐍","Java ☕","Makarna 🍝","Rust 🦀"], correct:2 },
+  { q:"Matematik neden bu kadar zordur?", choices:["Zor değil, sen tembelsin 😤","Evren kasıtlı olarak bizi zorluyor 🌌","Sayılar aslında canlı ve bize karşı 🔢","Hepsi","Öğretmenler mazoşist olduğu için 😈"], correct:0 },
+  { q:"Bir saat beklesen mi, bir dakika beklesen mi?", choices:["Bir saat — zaman görecelidir ⏰","Bir dakika — kısa acı çabuk geçer ⚡","İkisi de aynı, Matrix'teyiz 🕶️","BEKLEMEM, giderim 🚪"], correct:3 },
+  { q:"Hangisi gerçek bir gezegen değildir?", choices:["Mars 🔴","Venüs 💛","Pluton 🥺","Mynet 🌐"], correct:3 },
+  { q:"Bir balık kaç saatte bir uyur?", choices:["Hiç uyumaz 🐟","8 saat, senin gibi 😴","Sadece cumartesi geceleri 🎉","Uyku nedir ki balığa?"], correct:0 },
+  { q:"Kahve mi çay mı?", choices:["Kahve — onsuz sabah yok ☕","Çay — milli değerlerimiz 🫖","İkisi de, aynı anda, büyük bardakta 🥤","Su iç, susuz kalma 💧"], correct:2, noWrong:true },
+  { q:"Oyun oynamak zararlı mı?", choices:["Kesinlikle hayır 🎮","Bağımlılık yaparsa evet ⚠️","Zararlı olan işe gitmek 💼","Bu soruyu soran ebeveynler için değerlendirme formu 📋"], correct:1 },
+  { q:"Rüyanda düşerken yere çarparsan ne olur?", choices:["Ölürsün 💀","Uyandın, olağan 😌","Boyun uzar 🦒","Paralel evrene geçersin 🌀"], correct:1 },
+  { q:"En iyi pizza hangisidir?", choices:["Margherita 🍕","Ananaslı 🍍","Pizzasız pizza 🫙","Dürüm zaten pizzanın evrimi 🌯"], correct:0, noWrong:true },
+  { q:"Bugün hava nasıl?", choices:["Güneşli ☀️","Bulutlu ☁️","Bu soruyu soran bir yapay zeka 🤖","Hava mı? Çık dışarı bak 🚪"], correct:3 },
+  { q:"Kaç tane dil konuşabilirsin?", choices:["1 — anadil yeter 🇹🇷","2–3 — çok kültürlüyüm 🌍","Yeterince — hayatta kalıyorum ✌️","Bilmiyorum, saymadım 🤷"], correct:2, noWrong:true },
+  { q:"Işık hızında gitsek ne olur?", choices:["Zamanda geri gideriz ⏪","Saçlar dağılır 💨","Spotify buffer yapar 🎵","Hız cezası kesilir 🚔"], correct:0 },
+  { q:"Neden kara kediler uğursuz sayılır?", choices:["Orta çağ batıl inancı 🏰","Kediler genel olarak uğursuzdur 😼","Siyah çok havalı olduğu için insanlar kıskanıyor 😎","Kedi lobisi yaptırım uyguluyor 🐱‍👤"], correct:0 },
+  { q:"Bir ağaç ormanda düşerse ses çıkar mı?", choices:["Evet, fizik yasaları var 🌲","Hayır, duyan yoksa ses yoktur 🤫","Ses çıkar ama kimse dinlemez 😢","Ağaç değil, o bir influencer 📱"], correct:0 },
+  { q:"Hangi vitamin D vitaminidir?", choices:["Güneş ☀️","Süt 🥛","Hepsi değil ama güneş en önemli","D vitamini tablet almak lazım 💊"], correct:2 },
+  { q:"Sabahları erken kalkmak iyi midir?", choices:["Evet, kuşlar gibi 🐦","Hayır, kuşlar da bunu sevmez 😴","Tarih boyunca tartışılıyor 📜","Erken kalkan iş bulur ama sen zaten işsizsin 💼"], correct:0, noWrong:true },
+  { q:"Sonsuzluğun yarısı nedir?", choices:["Sonsuzluk ♾️","Yarı-sonsuzluk 🤔","Anlamsız bir soru 😤","Bu soruyu soran kişinin IQ'su 🧠"], correct:0 },
+  { q:"En güzel renk hangisidir?", choices:["Yeşil 💚 (neon tabii)","Mavi 💙","Gözün tuttuğu 👁️","Renkler hissin yansımasıdır 🎨"], correct:2, noWrong:true },
+  { q:"Bir bardak su yarısına kadar doluysa bu ne demektir?", choices:["Bardak yarı dolu — iyimser 😊","Bardak yarı boş — kötümser 😔","Bardak iki kez büyük — mühendis 🔧","Bardağı iç zaten, tartışma bitti 😤"], correct:3, noWrong:true },
+  { q:"Tavuk mu önce geldi, yumurta mı?", choices:["Tavuk 🐔","Yumurta 🥚","Evrim — ikisi de aynı anda 🧬","T. Rex yumurtası en önce geldi 🦕"], correct:2 },
+];
+
+let absurdUsed = [];
+
+function getNextAbsurdQuestion(){
+  if(absurdUsed.length >= ABSURD_QUESTIONS.length) absurdUsed = [];
+  const remaining = ABSURD_QUESTIONS.map((_,i)=>i).filter(i=>!absurdUsed.includes(i));
+  const idx = remaining[randInt(0, remaining.length-1)];
+  absurdUsed.push(idx);
+  return ABSURD_QUESTIONS[idx];
+}
+
+/* ── MENU BUTTONS ──────────────────────────────────── */
+startGameBtn.addEventListener('click', ()=>{
+  clickSound();
+  gameMode = 'math';
+  document.getElementById('modeBadge').style.display = 'none';
+  document.getElementById('mathInputRow').style.display = 'flex';
+  document.getElementById('absurdChoices').style.display = 'none';
+  showScreen('game');
+  loadGameUI();
+  nextQuestion(true);
+});
+
+startAbsurdBtn.addEventListener('click', ()=>{
+  clickSound();
+  gameMode = 'absurd';
+  absurdUsed = [];
+  document.getElementById('modeBadge').style.display = 'block';
+  document.getElementById('mathInputRow').style.display = 'none';
+  document.getElementById('absurdChoices').style.display = 'block';
+  // hide score/level/reward in absurd — purely for fun
+  document.getElementById('rewardUI').parentElement.innerHTML = '<span style="font-size:12px;color:#a855f7">Puan yok, sadece eğlence 🎉</span>';
+  showScreen('game');
+  loadGameUI();
+  nextAbsurdQuestion();
+});
+
+logoutBtn.addEventListener('click', async ()=>{
+  const ok = await showConfirm('Oturumu Kapat', 'Oturumun kapatılacak. Skorun kaydedildi.');
+  if(!ok) return;
+  clickSound();
+  state.player=null; state.score=0; saveState();
+  playerNameInput.value='';
+  showScreen('entry');
+  updateMiniInfo();
+});
+
+openSettings.addEventListener('click', ()=>{ clickSound(); openSettingsModal(); });
+openAbout.addEventListener('click', ()=>{ clickSound(); aboutModal.classList.add('show'); });
+document.getElementById('closeAboutModal').addEventListener('click', ()=>{ aboutModal.classList.remove('show'); clickSound(); });
+
+resetScores.addEventListener('click', async ()=>{
+  const ok = await showConfirm('Skorları Sıfırla', 'Tüm skorlar silinecek.');
+  if(!ok) return;
+  state.leaderboard={}; saveState(); renderLeaderboard(); clickSound();
+});
+
+/* Quick sound toggle */
+quickSoundToggle.addEventListener('change', e=>{ state.soundOn=e.target.checked; saveState(); clickSound(); });
+
+/* Old bg/color inputs still work (menu sidebar) */
+btnColorInput.addEventListener('input', e=>{
+  state.btnColor=e.target.value; document.documentElement.style.setProperty('--neon',state.btnColor); saveState(); clickSound();
+});
+bgColorInput.addEventListener('input', e=>{
+  state.bgColor=e.target.value; document.documentElement.style.setProperty('--bg-mid',state.bgColor); saveState(); clickSound();
+});
+bgImageBtn.addEventListener('click', ()=> bgImageInput.click());
+bgImageInput.addEventListener('change', (ev)=>{
+  const f=ev.target.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=(e)=>{ state.bgImage=e.target.result; applyBgImage(); saveState(); };
+  r.readAsDataURL(f);
+});
+clearBgBtn.addEventListener('click', ()=>{ state.bgImage=null; bgLayer.style.backgroundImage=''; saveState(); clickSound(); });
+
+/* ── GAME ENGINE ───────────────────────────────────── */
+let correctAnswer=null, questionCount=0;
+
+function loadGameUI(){
+  playerDisplay.innerText=state.player;
+  levelUI.innerText=state.level;
+  scoreUI.innerText=state.score;
+  multiplierUI.innerText=`${state.level} × 10`;
+  rewardUI.innerText=state.level*10;
+}
+
+function difficultyBase(level){ return Math.min(10+Math.floor(level*3),300); }
+
+function nextQuestion(reset=false){
+  if(reset){ state.level=state.level||1; questionCount=0; }
+  questionCount++;
+  const lvl=state.level||1;
+  const base=difficultyBase(lvl);
+  const ops=state.ops&&state.ops.length?state.ops:['+'];
+  const op=ops[randInt(0,ops.length-1)];
+  let a=randInt(1,Math.max(2,Math.floor(base/2)));
+  let b=randInt(1,Math.max(1,Math.floor(base/2)));
+  if(op==='/'){
+    b=randInt(1,Math.max(1,Math.floor(base/4)));
+    a=b*randInt(1,Math.max(1,Math.floor(base/6)));
+  } else if(op==='-'&&b>a){ [a,b]=[b,a]; }
+  correctAnswer=Math.round(safeCalc(a,op,b)*100)/100;
+  const opDisplay={'+':`+`,'-':`−`,'*':`×`,'/':'÷'}[op]||op;
+  questionText.innerText=`Seviye ${lvl}: ${a} ${opDisplay} ${b} = ?`;
+  rewardUI.innerText=lvl*10;
+  multiplierUI.innerText=`${lvl} × 10`;
+  resultMsg.style.opacity=0;
+  answerInput.value='';
+  answerInput.focus();
+}
+
+submitAnswerBtn.addEventListener('click', checkAnswer);
+answerInput.addEventListener('keydown', e=>{ if(e.key==='Enter') checkAnswer(); });
+
+function checkAnswer(){
+  const raw=answerInput.value.trim();
+  if(raw===''){ resultMsg.style.color='#f59e0b'; resultMsg.innerText='Cevap gir!'; resultMsg.style.opacity=1; failSound(); return; }
+  const user=parseFloat(raw.replace(',','.'));
+  if(Number.isNaN(user)){ resultMsg.style.color='#f59e0b'; resultMsg.innerText='Sayı gir!'; resultMsg.style.opacity=1; failSound(); return; }
+  if(Math.abs(user-correctAnswer)<0.01){
+    successSound();
+    resultMsg.style.color='#00ff66';
+    const gained=state.level*10;
+    state.score=(state.score||0)+gained;
+    state.leaderboard[state.player]=state.score;
+    state.correctStreak=(state.correctStreak||0)+1;
+    resultMsg.innerText=['Aferin!','Süper!','Bravo!','Harika!','Mükemmel!'][randInt(0,4)];
+    const every=state.levelUpEvery||4;
+    if(state.correctStreak>0&&state.correctStreak%every===0){
+      state.level=Math.min(99,state.level+1);
     }
-    answerInput.value="";
+    saveState(); loadGameUI(); renderLeaderboard(); updateMiniInfo();
+    setTimeout(()=>nextQuestion(false),900);
+  } else {
+    failSound();
+    resultMsg.style.color='#ff6b6b';
+    resultMsg.innerText='Yanlış...';
+    state.correctStreak=0; saveState();
+    setTimeout(()=>{ resultMsg.style.color='#ffd166'; resultMsg.innerText='Doğrusu: '+correctAnswer; },900);
+    setTimeout(()=>nextQuestion(false),2000);
+  }
+}
+
+/* ── ABSURD GAME ENGINE ────────────────────────────── */
+let currentAbsurd = null;
+
+function nextAbsurdQuestion(){
+  currentAbsurd = getNextAbsurdQuestion();
+  const lvl = state.level || 1;
+  questionText.innerText = currentAbsurd.q;
+  rewardUI.innerText = lvl * 10;
+  multiplierUI.innerText = `${lvl} × 10`;
+  resultMsg.style.opacity = 0;
+  resultMsg.innerText = '';
+
+  // shuffle choices
+  const indices = currentAbsurd.choices.map((_,i)=>i);
+  // Fisher-Yates shuffle
+  for(let i=indices.length-1;i>0;i--){ const j=randInt(0,i); [indices[i],indices[j]]=[indices[j],indices[i]]; }
+
+  const container = document.getElementById('absurdChoices');
+  container.innerHTML = '';
+  const grid = document.createElement('div');
+  grid.className = 'absurd-grid';
+
+  let correctShuffledIdx = -1;
+  indices.forEach((origIdx, shuffledIdx) => {
+    if(origIdx === currentAbsurd.correct) correctShuffledIdx = shuffledIdx;
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.textContent = currentAbsurd.choices[origIdx];
+    btn.dataset.orig = origIdx;
+    btn.addEventListener('click', ()=> handleAbsurdAnswer(btn, origIdx, grid));
+    grid.appendChild(btn);
+  });
+  container.appendChild(grid);
+}
+
+function handleAbsurdAnswer(clickedBtn, origIdx, grid){
+  const allBtns = grid.querySelectorAll('.choice-btn');
+  allBtns.forEach(b => b.disabled = true);
+
+  const isCorrect = origIdx === currentAbsurd.correct;
+  const isNoWrong = !!currentAbsurd.noWrong;
+
+  if(isCorrect || isNoWrong){
+    clickedBtn.classList.add('correct');
+    successSound();
+    resultMsg.style.color = '#00ff66';
+    resultMsg.innerText = isNoWrong
+      ? ['Geçerli görüş! 😄','Mantıklı! 🤔','Bence de! 👍','Kabul 🤝'][randInt(0,3)]
+      : ['Doğru! 🎯','Evet efendim! ✅','Harika! 🌟','Bravo! 🎊'][randInt(0,3)];
+    resultMsg.style.opacity = 1;
+    setTimeout(()=>nextAbsurdQuestion(), 1400);
+  } else {
+    allBtns.forEach(b => {
+      if(parseInt(b.dataset.orig) === currentAbsurd.correct) b.classList.add('correct');
+    });
+    clickedBtn.classList.add('wrong');
+    failSound();
+    resultMsg.style.color = '#ff6b6b';
+    resultMsg.innerText = ['Yanlış! 😬','Olmadı 😅','Bu değildi 🙈','Tekrar dene!'][randInt(0,3)];
+    resultMsg.style.opacity = 1;
+    setTimeout(()=>nextAbsurdQuestion(), 1800);
+  }
+}
+
+/* ── PAUSE ─────────────────────────────────────────── */
+document.getElementById('pauseBtn').addEventListener('click', ()=>{
+  clickSound(); pauseOverlay.classList.add('show'); bgLayer.style.filter='blur(3px)';
+});
+resumeBtn.addEventListener('click', ()=>{
+  clickSound(); pauseOverlay.classList.remove('show'); bgLayer.style.filter='blur(0px)';
+});
+pauseSettingsBtn.addEventListener('click', ()=>{
+  clickSound();
+  pauseOverlay.classList.remove('show'); bgLayer.style.filter='blur(0px)';
+  openSettingsModal();
+});
+pauseMenuBtn.addEventListener('click', async ()=>{
+  const ok = await showConfirm('Ana Menü', 'Ana menüye dön? Oyun durumu kaydedildi.');
+  if(!ok) return;
+  clickSound();
+  pauseOverlay.classList.remove('show'); bgLayer.style.filter='blur(0px)';
+  gameMode = 'math';
+  showScreen('menu');
+  updateMiniInfo();
+});
+
+/* Settings inside old pause panel (still wire up for compat) */
+settingSound.addEventListener('change', ()=>{ state.soundOn=settingSound.checked; saveState(); clickSound(); });
+settingBtnColor.addEventListener('input', ()=>{ state.btnColor=settingBtnColor.value; document.documentElement.style.setProperty('--neon',state.btnColor); saveState(); clickSound(); });
+settingBgColor.addEventListener('input', ()=>{ state.bgColor=settingBgColor.value; document.documentElement.style.setProperty('--bg-mid',state.bgColor); saveState(); clickSound(); });
+
+/* ── MINI INFO ─────────────────────────────────────── */
+function updateMiniInfo(){
+  const el=document.getElementById('miniInfo');
+  el.innerText=state.player?`${state.player} • ${state.score}p`:'';
+}
+
+/* ── MISC ──────────────────────────────────────────── */
+document.addEventListener('click', function resumeAudioOnce(){
+  if(audioCtx&&audioCtx.state==='suspended') audioCtx.resume().catch(()=>{});
+  document.removeEventListener('click',resumeAudioOnce);
+});
+document.addEventListener('keydown', e=>{
+  if(e.key==='Escape'){
+    if(confirmModal.classList.contains('show')){ confirmCancel.click(); return; }
+    if(settingsModal.classList.contains('show')){ closeSettingsBtn.click(); return; }
+    if(aboutModal.classList.contains('show')){ document.getElementById('closeAboutModal').click(); return; }
+    if(pauseOverlay.classList.contains('show')){ resumeBtn.click(); }
+    else if(gameArea.style.display!=='none'){ document.getElementById('pauseBtn').click(); }
   }
 });
+window.addEventListener('beforeunload', ()=>saveState());
+window._mathgame={ state, nextQuestion, checkAnswer };
 </script>
 
 </body>
