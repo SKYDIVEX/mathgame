@@ -225,6 +225,19 @@ button{font-family:inherit}
 /* tiny flourish */
 .signature { font-size:12px; color:var(--muted); margin-top:10px }
 
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Toast notification */
+#toast {
+  position:fixed; top:-70px; left:50%; transform:translateX(-50%);
+  padding:12px 20px; border-radius:10px; border:1px solid var(--neon);
+  background:linear-gradient(135deg,#071022,#0a1e14);
+  color:var(--neon); font-weight:700; font-size:14px;
+  z-index:200; transition:top .35s cubic-bezier(.2,.9,.25,1);
+  white-space:nowrap; box-shadow:0 8px 30px rgba(0,0,0,0.7);
+}
+#toast.show { top:20px; }
+
 /* absurd mode choices */
 .absurd-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:4px; }
 @media(max-width:500px){ .absurd-grid{ grid-template-columns:1fr; } }
@@ -374,6 +387,9 @@ button{font-family:inherit}
   </div>
 </div>
 
+<!-- Toast -->
+<div id="toast"></div>
+
 <!-- Pause overlay -->
 <div id="pauseOverlay">
   <div id="pauseCard" class="card" style="width:420px;max-width:94%">
@@ -407,7 +423,6 @@ button{font-family:inherit}
         <div style="font-weight:900;font-size:18px">⚙️ Ayarlar</div>
         <div style="color:var(--muted);margin-top:4px;font-size:13px">MathGame v2.0-beta.release — SKYDIVEX</div>
       </div>
-      <button id="closeSettingsModal" class="btn ghost">Kapat</button>
     </div>
 
     <hr style="margin:14px 0;border:none;border-top:1px solid rgba(255,255,255,0.04)" />
@@ -475,6 +490,12 @@ button{font-family:inherit}
       <div class="settings-label">Diğer</div>
       <button id="settingResetScores" class="btn ghost" style="color:#ff6b6b;border-color:rgba(255,100,100,0.2)">🗑 Tüm Skorları Sıfırla</button>
     </div>
+
+    <!-- Save -->
+    <div style="margin-top:20px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.04);display:flex;justify-content:flex-end;gap:10px">
+      <button id="closeSettingsModal" class="btn ghost">Kapat</button>
+      <button id="saveSettingsBtn" class="btn" style="padding:10px 24px">💾 Kaydet</button>
+    </div>
   </div>
 </div>
 
@@ -537,13 +558,13 @@ button{font-family:inherit}
    -------------------------- */
 
 /* State */
-const LS_KEY = 'mathgame_v1_3_0';
+const LS_KEY = 'mathgame_v2_0';
 let state = {
   player: null,
   score: 0,
   level: 1,
-  leaderboard: {},
-  ops: ['+','-'],
+  leaderboard: {},   // keyed by opsKey → { playerName: score }
+  ops: ['+','-','*','/'],
   soundOn: true,
   levelUpEvery: 4,
   btnColor: '#00ff66',
@@ -636,6 +657,18 @@ function safeCalc(a,op,b){
   switch(op){ case '+':return a+b; case '-':return a-b; case '*':return a*b; case '/':return b!==0?a/b:0; default:return 0; }
 }
 
+const OP_LABELS = { '+':'Toplama','- ':'Çıkarma','*':'Çarpma','/':'Bölme' };
+const OP_SORT   = ['+','-','*','/'];
+function opsKey(ops){ return [...ops].sort((a,b)=>OP_SORT.indexOf(a)-OP_SORT.indexOf(b)).join(''); }
+function opsLabel(ops){
+  const sorted=[...ops].sort((a,b)=>OP_SORT.indexOf(a)-OP_SORT.indexOf(b));
+  const names={'+':'Toplama','-':'Çıkarma','*':'Çarpma','/':'Bölme'};
+  return sorted.map(o=>names[o]||o).join(' + ');
+}
+function currentOpsKey(){ return opsKey(state.ops); }
+function getCurrentBoard(){ return state.leaderboard[currentOpsKey()] || {}; }
+function setCurrentBoard(board){ state.leaderboard[currentOpsKey()] = board; }
+
 /* ── SCREEN NAVIGATION ─────────────────────────────── */
 function showScreen(name){
   entryCard.style.display  = name==='entry' ? 'block' : 'none';
@@ -699,35 +732,32 @@ opBtns.forEach(b => {
   b.addEventListener('click', ()=>{
     const op = b.dataset.op;
     const active = state.ops.includes(op);
-    if(active && state.ops.length === 1){ return; } // at least 1
+    if(active && state.ops.length === 1){
+      showToast('⚠️ En az bir işlem türü seçili olmalı!', '#f59e0b');
+      return;
+    }
     if(active){ state.ops = state.ops.filter(x=>x!==op); b.classList.remove('active'); }
     else { state.ops = [...state.ops, op]; b.classList.add('active'); }
-    saveState(); clickSound();
+    clickSound();
   });
 });
 
 // Level up speed
 levelUpSlider.addEventListener('input', ()=>{
-  state.levelUpEvery = parseInt(levelUpSlider.value);
-  levelUpVal.innerText = state.levelUpEvery;
-  saveState();
+  levelUpVal.innerText = levelUpSlider.value;
 });
 
-// Sound toggle
-settingSoundToggle.addEventListener('change', ()=>{ state.soundOn=settingSoundToggle.checked; saveState(); clickSound(); });
+// Sound toggle — just UI, saved on Save button
+settingSoundToggle.addEventListener('change', ()=>{ clickSound(); });
 
-// Btn color
+// Btn color — live preview only, saved on Save
 settingBtnColorNew.addEventListener('input', ()=>{
-  state.btnColor=settingBtnColorNew.value;
-  document.documentElement.style.setProperty('--neon',state.btnColor);
-  saveState();
+  document.documentElement.style.setProperty('--neon', settingBtnColorNew.value);
 });
 
-// Bg color
+// Bg color — live preview only
 settingBgColorNew.addEventListener('input', ()=>{
-  state.bgColor=settingBgColorNew.value;
-  document.documentElement.style.setProperty('--bg-mid',state.bgColor);
-  saveState();
+  document.documentElement.style.setProperty('--bg-mid', settingBgColorNew.value);
 });
 
 // Bg image
@@ -746,9 +776,10 @@ settingClearBgBtn.addEventListener('click', ()=>{ state.bgImage=null; bgLayer.st
 
 // Reset scores (with confirm)
 settingResetScores.addEventListener('click', async ()=>{
-  const ok = await showConfirm('Skorları Sıfırla', 'Tüm skorlar silinecek. Bu işlem geri alınamaz.');
+  const ok = await showConfirm('Skorları Sıfırla', 'Tüm modlardaki tüm skorlar silinecek.');
   if(!ok) return;
   state.leaderboard={}; saveState(); renderLeaderboard(); clickSound();
+  showToast('🗑 Tüm skorlar silindi','#ff6b6b');
 });
 
 function applyBgImage(){
@@ -758,15 +789,54 @@ function applyBgImage(){
   }
 }
 
+/* ── TOAST ─────────────────────────────────────────── */
+const toastEl = document.getElementById('toast');
+let toastTimer = null;
+function showToast(msg, color='#00ff66'){
+  toastEl.innerText = msg;
+  toastEl.style.background = color === '#00ff66' ? 'linear-gradient(135deg,#071022,#0a1e14)' : 'linear-gradient(135deg,#1a0f00,#1a1200)';
+  toastEl.style.borderColor = color;
+  toastEl.style.color = color;
+  toastEl.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=> toastEl.classList.remove('show'), 2800);
+}
+
+/* ── SETTINGS SAVE ─────────────────────────────────── */
+document.getElementById('saveSettingsBtn').addEventListener('click', ()=>{
+  // save ops
+  state.ops = Array.from(opBtns).filter(b=>b.classList.contains('active')).map(b=>b.dataset.op);
+  if(state.ops.length===0){ showToast('⚠️ En az bir işlem türü seçili olmalı!','#f59e0b'); return; }
+  // save other settings
+  state.levelUpEvery = parseInt(levelUpSlider.value);
+  state.soundOn = settingSoundToggle.checked;
+  state.btnColor = settingBtnColorNew.value;
+  state.bgColor  = settingBgColorNew.value;
+  saveState();
+  // update score for current ops board
+  state.score = getCurrentBoard()[state.player] || 0;
+  renderLeaderboard();
+  updateMiniInfo();
+  scoreDisplay.innerText = state.score;
+  levelDisplay.innerText = state.level;
+  clickSound();
+  showToast('✅ Ayarlar kaydedildi!');
+});
+
 /* ── LEADERBOARD ───────────────────────────────────── */
 function renderLeaderboard(){
-  const arr=Object.entries(state.leaderboard).sort((a,b)=>b[1]-a[1]);
+  const board = getCurrentBoard();
+  const label = opsLabel(state.ops);
+  const arr = Object.entries(board).sort((a,b)=>b[1]-a[1]);
+
+  const header = `<div style="font-size:11px;font-weight:700;letter-spacing:.5px;color:#a855f7;margin-bottom:6px">📊 ${label}</div>`;
+
   if(arr.length===0){
-    leaderboardEl.innerHTML='<i style="color:var(--muted)">Henüz kimse yok</i>';
+    leaderboardEl.innerHTML = header + '<i style="color:var(--muted)">Henüz kimse yok</i>';
     boardDiv.innerHTML=''; return;
   }
-  leaderboardEl.innerHTML=arr.map((e,i)=>`<div class="lbItem"><div>${i+1}. ${escapeHtml(e[0])}</div><div>${e[1]}p</div></div>`).join('');
-  boardDiv.innerHTML=arr.map((e,i)=>`<div style="display:flex;justify-content:space-between;padding:6px;border-radius:6px;background:rgba(255,255,255,0.02);margin-bottom:6px">${i+1}. ${escapeHtml(e[0])}<strong>${e[1]}p</strong></div>`).join('');
+  leaderboardEl.innerHTML = header + arr.map((e,i)=>`<div class="lbItem"><div>${i+1}. ${escapeHtml(e[0])}</div><div>${e[1]}p</div></div>`).join('');
+  boardDiv.innerHTML = arr.map((e,i)=>`<div style="display:flex;justify-content:space-between;padding:6px;border-radius:6px;background:rgba(255,255,255,0.02);margin-bottom:6px">${i+1}. ${escapeHtml(e[0])}<strong>${e[1]}p</strong></div>`).join('');
 }
 
 /* ── INIT ──────────────────────────────────────────── */
@@ -807,9 +877,9 @@ guestBtn.addEventListener('click', ()=> startSession('Misafir-'+randInt(1000,999
 function startSession(name){
   const prev=state.player;
   state.player=name;
-  state.score=state.leaderboard[name]||0;
   if(prev!==name) state.level=1;
   state.level=state.level||1;
+  state.score=getCurrentBoard()[name]||0;
   saveState();
   playerLabel.innerText=name;
   playerDisplay.innerText=name;
@@ -824,43 +894,6 @@ function startSession(name){
 /* ── GAME MODE ─────────────────────────────────────── */
 let gameMode = 'math'; // 'math' | 'absurd'
 
-/* ── ABSURD QUESTIONS BANK ──────────────────────────── */
-const ABSURD_QUESTIONS = [
-  { q:"Dünya yuvarlak mı, düz mü?", choices:["Yuvarlak 🌍","Düz 🥞","Üçgen 🔺","Benim gibi karmaşık 🌀"], correct:0 },
-  { q:"Bir kedi neden 'miyav' der?", choices:["Seni sevdiği için 💕","Senden bir şey istediği için 🍽️","Aslında köpek olduğunu gizlemeye çalışıyor 🐶","Telefonunu şarj etmek istiyor 🔋"], correct:1 },
-  { q:"En hızlı internet bağlantısı hangisinde vardır?", choices:["Türk Telekom 💀","NASA 🚀","Benim evimde (olmayan wifi) 😭","Kara deliklerin içinde ⚫"], correct:1 },
-  { q:"Hangisi bir programlama dili DEĞİLdir?", choices:["Python 🐍","Java ☕","Makarna 🍝","Rust 🦀"], correct:2 },
-  { q:"Matematik neden bu kadar zordur?", choices:["Zor değil, sen tembelsin 😤","Evren kasıtlı olarak bizi zorluyor 🌌","Sayılar aslında canlı ve bize karşı 🔢","Hepsi","Öğretmenler mazoşist olduğu için 😈"], correct:0 },
-  { q:"Bir saat beklesen mi, bir dakika beklesen mi?", choices:["Bir saat — zaman görecelidir ⏰","Bir dakika — kısa acı çabuk geçer ⚡","İkisi de aynı, Matrix'teyiz 🕶️","BEKLEMEM, giderim 🚪"], correct:3 },
-  { q:"Hangisi gerçek bir gezegen değildir?", choices:["Mars 🔴","Venüs 💛","Pluton 🥺","Mynet 🌐"], correct:3 },
-  { q:"Bir balık kaç saatte bir uyur?", choices:["Hiç uyumaz 🐟","8 saat, senin gibi 😴","Sadece cumartesi geceleri 🎉","Uyku nedir ki balığa?"], correct:0 },
-  { q:"Kahve mi çay mı?", choices:["Kahve — onsuz sabah yok ☕","Çay — milli değerlerimiz 🫖","İkisi de, aynı anda, büyük bardakta 🥤","Su iç, susuz kalma 💧"], correct:2, noWrong:true },
-  { q:"Oyun oynamak zararlı mı?", choices:["Kesinlikle hayır 🎮","Bağımlılık yaparsa evet ⚠️","Zararlı olan işe gitmek 💼","Bu soruyu soran ebeveynler için değerlendirme formu 📋"], correct:1 },
-  { q:"Rüyanda düşerken yere çarparsan ne olur?", choices:["Ölürsün 💀","Uyandın, olağan 😌","Boyun uzar 🦒","Paralel evrene geçersin 🌀"], correct:1 },
-  { q:"En iyi pizza hangisidir?", choices:["Margherita 🍕","Ananaslı 🍍","Pizzasız pizza 🫙","Dürüm zaten pizzanın evrimi 🌯"], correct:0, noWrong:true },
-  { q:"Bugün hava nasıl?", choices:["Güneşli ☀️","Bulutlu ☁️","Bu soruyu soran bir yapay zeka 🤖","Hava mı? Çık dışarı bak 🚪"], correct:3 },
-  { q:"Kaç tane dil konuşabilirsin?", choices:["1 — anadil yeter 🇹🇷","2–3 — çok kültürlüyüm 🌍","Yeterince — hayatta kalıyorum ✌️","Bilmiyorum, saymadım 🤷"], correct:2, noWrong:true },
-  { q:"Işık hızında gitsek ne olur?", choices:["Zamanda geri gideriz ⏪","Saçlar dağılır 💨","Spotify buffer yapar 🎵","Hız cezası kesilir 🚔"], correct:0 },
-  { q:"Neden kara kediler uğursuz sayılır?", choices:["Orta çağ batıl inancı 🏰","Kediler genel olarak uğursuzdur 😼","Siyah çok havalı olduğu için insanlar kıskanıyor 😎","Kedi lobisi yaptırım uyguluyor 🐱‍👤"], correct:0 },
-  { q:"Bir ağaç ormanda düşerse ses çıkar mı?", choices:["Evet, fizik yasaları var 🌲","Hayır, duyan yoksa ses yoktur 🤫","Ses çıkar ama kimse dinlemez 😢","Ağaç değil, o bir influencer 📱"], correct:0 },
-  { q:"Hangi vitamin D vitaminidir?", choices:["Güneş ☀️","Süt 🥛","Hepsi değil ama güneş en önemli","D vitamini tablet almak lazım 💊"], correct:2 },
-  { q:"Sabahları erken kalkmak iyi midir?", choices:["Evet, kuşlar gibi 🐦","Hayır, kuşlar da bunu sevmez 😴","Tarih boyunca tartışılıyor 📜","Erken kalkan iş bulur ama sen zaten işsizsin 💼"], correct:0, noWrong:true },
-  { q:"Sonsuzluğun yarısı nedir?", choices:["Sonsuzluk ♾️","Yarı-sonsuzluk 🤔","Anlamsız bir soru 😤","Bu soruyu soran kişinin IQ'su 🧠"], correct:0 },
-  { q:"En güzel renk hangisidir?", choices:["Yeşil 💚 (neon tabii)","Mavi 💙","Gözün tuttuğu 👁️","Renkler hissin yansımasıdır 🎨"], correct:2, noWrong:true },
-  { q:"Bir bardak su yarısına kadar doluysa bu ne demektir?", choices:["Bardak yarı dolu — iyimser 😊","Bardak yarı boş — kötümser 😔","Bardak iki kez büyük — mühendis 🔧","Bardağı iç zaten, tartışma bitti 😤"], correct:3, noWrong:true },
-  { q:"Tavuk mu önce geldi, yumurta mı?", choices:["Tavuk 🐔","Yumurta 🥚","Evrim — ikisi de aynı anda 🧬","T. Rex yumurtası en önce geldi 🦕"], correct:2 },
-];
-
-let absurdUsed = [];
-
-function getNextAbsurdQuestion(){
-  if(absurdUsed.length >= ABSURD_QUESTIONS.length) absurdUsed = [];
-  const remaining = ABSURD_QUESTIONS.map((_,i)=>i).filter(i=>!absurdUsed.includes(i));
-  const idx = remaining[randInt(0, remaining.length-1)];
-  absurdUsed.push(idx);
-  return ABSURD_QUESTIONS[idx];
-}
-
 /* ── MENU BUTTONS ──────────────────────────────────── */
 startGameBtn.addEventListener('click', ()=>{
   clickSound();
@@ -873,17 +906,20 @@ startGameBtn.addEventListener('click', ()=>{
   nextQuestion(true);
 });
 
-startAbsurdBtn.addEventListener('click', ()=>{
+startAbsurdBtn.addEventListener('click', async ()=>{
   clickSound();
   gameMode = 'absurd';
-  absurdUsed = [];
+  absurdSessionUsed = new Set();
+  absurdQueue = [];
+  absurdFetching = false;
   document.getElementById('modeBadge').style.display = 'block';
   document.getElementById('mathInputRow').style.display = 'none';
   document.getElementById('absurdChoices').style.display = 'block';
-  // hide score/level/reward in absurd — purely for fun
   document.getElementById('rewardUI').parentElement.innerHTML = '<span style="font-size:12px;color:#a855f7">Puan yok, sadece eğlence 🎉</span>';
   showScreen('game');
   loadGameUI();
+  showAbsurdLoading();
+  await fetchAbsurdBatch();
   nextAbsurdQuestion();
 });
 
@@ -937,28 +973,65 @@ function loadGameUI(){
   rewardUI.innerText=state.level*10;
 }
 
-function difficultyBase(level){ return Math.min(10+Math.floor(level*3),300); }
+/*
+  Zorluk tablosu (yaklaşık):
+  Seviye  1 → toplama/çıkarma: 1–10,   çarpma: 1–5×1–5,    bölme: 2–5
+  Seviye  5 → toplama/çıkarma: 1–50,   çarpma: 1–12×1–12,  bölme: 2–20
+  Seviye 10 → toplama/çıkarma: 1–150,  çarpma: 1–25×1–25,  bölme: 2–50
+  Seviye 20 → toplama/çıkarma: 1–600,  çarpma: 1–50×1–50,  bölme: 2–150
+  Seviye 30 → toplama/çıkarma: 1–2000, çarpma: 1–99×1–99,  bölme: büyük
+*/
+function difficultyMax(lvl){
+  // Üstel büyüme: lvl 1 ≈ 10, lvl 10 ≈ 150, lvl 20 ≈ 600, lvl 30 ≈ 2000
+  return Math.min(Math.floor(8 * Math.pow(1.22, lvl)), 9999);
+}
+
+/* ── MATH SORU HAVUZU ──────────────────────────────── */
+const askedQuestions = new Set(); // "a|op|b" formatında
+const MAX_POOL = 500; // sonsuz döngüyü önlemek için limit
 
 function nextQuestion(reset=false){
-  if(reset){ state.level=state.level||1; questionCount=0; }
+  if(reset){ state.level=state.level||1; questionCount=0; askedQuestions.clear(); }
   questionCount++;
-  const lvl=state.level||1;
-  const base=difficultyBase(lvl);
-  const ops=state.ops&&state.ops.length?state.ops:['+'];
-  const op=ops[randInt(0,ops.length-1)];
-  let a=randInt(1,Math.max(2,Math.floor(base/2)));
-  let b=randInt(1,Math.max(1,Math.floor(base/2)));
-  if(op==='/'){
-    b=randInt(1,Math.max(1,Math.floor(base/4)));
-    a=b*randInt(1,Math.max(1,Math.floor(base/6)));
-  } else if(op==='-'&&b>a){ [a,b]=[b,a]; }
-  correctAnswer=Math.round(safeCalc(a,op,b)*100)/100;
-  const opDisplay={'+':`+`,'-':`−`,'*':`×`,'/':'÷'}[op]||op;
-  questionText.innerText=`Seviye ${lvl}: ${a} ${opDisplay} ${b} = ?`;
-  rewardUI.innerText=lvl*10;
-  multiplierUI.innerText=`${lvl} × 10`;
-  resultMsg.style.opacity=0;
-  answerInput.value='';
+  const lvl = state.level||1;
+  const max  = difficultyMax(lvl);
+  const ops  = state.ops&&state.ops.length ? state.ops : ['+'];
+  let a, b, op, key;
+  let attempts = 0;
+
+  do {
+    op = ops[randInt(0, ops.length-1)];
+    if(op==='+'){
+      a = randInt(Math.floor(max*0.1), max);
+      b = randInt(Math.floor(max*0.1), max);
+    } else if(op==='-'){
+      a = randInt(Math.floor(max*0.2), max);
+      b = randInt(1, a);
+    } else if(op==='*'){
+      const mulMax = Math.min(Math.floor(Math.sqrt(max) * 1.5), 999);
+      const mulMin = Math.max(2, Math.floor(mulMax * 0.15));
+      a = randInt(mulMin, mulMax);
+      b = randInt(mulMin, mulMax);
+    } else {
+      const divMax = Math.min(Math.floor(max * 0.5), 500);
+      b = randInt(2, Math.max(2, Math.floor(divMax * 0.3)));
+      const maxMultiplier = Math.max(2, Math.floor(divMax / b));
+      a = b * randInt(2, maxMultiplier);
+    }
+    key = `${a}|${op}|${b}`;
+    attempts++;
+    // havuz doluysa sıfırla
+    if(attempts > MAX_POOL){ askedQuestions.clear(); break; }
+  } while(askedQuestions.has(key));
+
+  askedQuestions.add(key);
+  correctAnswer = Math.round(safeCalc(a, op, b) * 100) / 100;
+  const opDisplay = {'+':`+`, '-':`−`, '*':`×`, '/':'÷'}[op]||op;
+  questionText.innerText = `Seviye ${lvl}: ${a} ${opDisplay} ${b} = ?`;
+  rewardUI.innerText = lvl*10;
+  multiplierUI.innerText = `${lvl} × 10`;
+  resultMsg.style.opacity = 0;
+  answerInput.value = '';
   answerInput.focus();
 }
 
@@ -974,10 +1047,10 @@ function checkAnswer(){
     successSound();
     resultMsg.style.color='#00ff66';
     const gained=state.level*10;
-    state.score=(state.score||0)+gained;
-    state.leaderboard[state.player]=state.score;
+    state.score=Math.max(0,(state.score||0)+gained);
+    const board=getCurrentBoard(); board[state.player]=state.score; setCurrentBoard(board);
     state.correctStreak=(state.correctStreak||0)+1;
-    resultMsg.innerText=['Aferin!','Süper!','Bravo!','Harika!','Mükemmel!'][randInt(0,4)];
+    resultMsg.innerText=['Aferin! +'+gained+'p','Süper! +'+gained+'p','Bravo! +'+gained+'p','Harika! +'+gained+'p','Mükemmel! +'+gained+'p'][randInt(0,4)];
     const every=state.levelUpEvery||4;
     if(state.correctStreak>0&&state.correctStreak%every===0){
       state.level=Math.min(99,state.level+1);
@@ -986,42 +1059,140 @@ function checkAnswer(){
     setTimeout(()=>nextQuestion(false),900);
   } else {
     failSound();
+    const penalty=Math.max(5, Math.floor(state.level*5));
+    state.score=Math.max(0,(state.score||0)-penalty);
+    const board=getCurrentBoard(); board[state.player]=state.score; setCurrentBoard(board);
+    state.correctStreak=0;
+    saveState(); loadGameUI(); renderLeaderboard(); updateMiniInfo();
     resultMsg.style.color='#ff6b6b';
-    resultMsg.innerText='Yanlış...';
-    state.correctStreak=0; saveState();
+    resultMsg.innerText='Yanlış! −'+penalty+'p';
+    resultMsg.style.opacity=1;
     setTimeout(()=>{ resultMsg.style.color='#ffd166'; resultMsg.innerText='Doğrusu: '+correctAnswer; },900);
     setTimeout(()=>nextQuestion(false),2000);
   }
 }
 
-/* ── ABSURD GAME ENGINE ────────────────────────────── */
-let currentAbsurd = null;
+/* ── ABSURD GAME ENGINE — AI DESTEKLİ ─────────────── */
+let currentAbsurd  = null;
+let absurdQueue    = [];
+let absurdFetching = false;
+let absurdSessionUsed = new Set();
 
-function nextAbsurdQuestion(){
-  currentAbsurd = getNextAbsurdQuestion();
-  const lvl = state.level || 1;
-  questionText.innerText = currentAbsurd.q;
-  rewardUI.innerText = lvl * 10;
-  multiplierUI.innerText = `${lvl} × 10`;
+async function fetchAbsurdBatch(){
+  if(absurdFetching) return;
+  absurdFetching = true;
+  const usedList = Array.from(absurdSessionUsed).slice(-20).join(' | ');
+  const prompt = `MathGame icin Turkce absurt komik quiz sorusu yaz. ${usedList ? 'TEKRAR YAZMA: '+usedList+'.' : ''} 5 soru uret. SADECE JSON array don, baska hicbir sey yazma, markdown yok.
+Ornek format:
+[{"q":"Bir kedi neden miyav der?","choices":["Seni seviyor 💕","Bir seyi istiyor 🍽️","Aslinda kopek 🐶","Telefonu sarj etmek istiyor 🔋"],"correct":1,"noWrong":false}]
+Kurallar:
+- Her sik MUTLAKA kelime/cumle ve emoji icermeli, sadece emoji OLMAZ
+- Siklarin basinda A) B) C) D) YAZMA
+- correct: dogru sikin indexi (0,1,2,3)
+- noWrong:true subjektif/goruse gore sorular icin
+- Turkce yaz`;
+
+  try {
+    const url = 'https://text.pollinations.ai/' + encodeURIComponent(prompt) + '?model=openai&seed=' + Math.floor(Math.random()*99999);
+    const resp = await fetch(url);
+    if(!resp.ok) throw new Error('HTTP ' + resp.status);
+    let raw = await resp.text();
+
+    // Eğer JSON objesi olarak geldiyse (role/content sarmalı) içinden metni çıkar
+    try {
+      const obj = JSON.parse(raw);
+      if(obj && obj.choices && obj.choices[0] && obj.choices[0].message){
+        raw = obj.choices[0].message.content;
+      } else if(obj && obj.content){
+        raw = obj.content;
+      } else if(obj && obj.reasoning_content){
+        // reasoning_content'ten sonra gelen asıl içerik
+        raw = raw; // ham string'de JSON array'i ara
+      }
+    } catch(e){ /* ham metin, devam et */ }
+
+    // Markdown fence temizle
+    raw = raw.replace(/```json/gi,'').replace(/```/g,'').trim();
+
+    // JSON array bul — açgözlü olmayan match ile
+    const match = raw.match(/\[[\s\S]*\]/);
+    if(!match) throw new Error('JSON array bulunamadi');
+
+    const parsed = JSON.parse(match[0]);
+    const valid = parsed.filter(q =>
+      q && q.q && Array.isArray(q.choices) && q.choices.length === 4 &&
+      typeof q.correct === 'number' && !absurdSessionUsed.has(q.q)
+    ).map(q => ({
+      ...q,
+      choices: q.choices.map(c => String(c).replace(/^[A-Da-d][\)\.\s]+/,'').trim())
+    }));
+    if(valid.length === 0) throw new Error('Gecerli soru yok');
+    absurdQueue.push(...valid);
+  } catch(e){
+    console.warn('Pollinations hatasi:', e.message);
+  }
+  absurdFetching = false;
+}
+
+function showAbsurdLoading(){
+  document.getElementById('absurdChoices').innerHTML = `
+    <div style="text-align:center;padding:32px;color:var(--muted)">
+      <div style="font-size:32px;display:inline-block;animation:spin 1s linear infinite">🤪</div>
+      <div style="margin-top:12px;font-size:13px">AI soru üretiyor...</div>
+    </div>`;
+  questionText.innerText = '';
+  resultMsg.style.opacity = 0;
+}
+
+async function nextAbsurdQuestion(){
+  // Kuyruk azalıyorsa arka planda yeni batch başlat
+  if(absurdQueue.length <= 1 && !absurdFetching) fetchAbsurdBatch();
+
+  // Kuyruk boşsa önce doldur, sonra devam et
+  if(absurdQueue.length === 0){
+    showAbsurdLoading();
+    if(!absurdFetching) fetchAbsurdBatch();
+    // Yüklenene kadar bekle (max 20s, 300ms aralıkla)
+    let waited = 0;
+    await new Promise(resolve => {
+      const check = setInterval(() => {
+        waited += 300;
+        if(absurdQueue.length > 0 || waited >= 20000){
+          clearInterval(check);
+          resolve();
+        }
+      }, 300);
+    });
+    if(absurdQueue.length === 0){
+      document.getElementById('absurdChoices').innerHTML =
+        `<div style="text-align:center;padding:24px;color:#ff6b6b">
+          ⚠️ AI bağlanamadı.<br>
+          <button onclick="nextAbsurdQuestion()" class="btn ghost" style="margin-top:12px">Tekrar Dene</button>
+        </div>`;
+      questionText.innerText = 'Bağlantı hatası';
+      return;
+    }
+  }
+
+  const q = absurdQueue.shift();
+  absurdSessionUsed.add(q.q);
+  currentAbsurd = q;
+
+  questionText.innerText = q.q;
   resultMsg.style.opacity = 0;
   resultMsg.innerText = '';
 
-  // shuffle choices
-  const indices = currentAbsurd.choices.map((_,i)=>i);
-  // Fisher-Yates shuffle
-  for(let i=indices.length-1;i>0;i--){ const j=randInt(0,i); [indices[i],indices[j]]=[indices[j],indices[i]]; }
+  const indices = [0,1,2,3];
+  for(let i=3;i>0;i--){ const j=randInt(0,i); [indices[i],indices[j]]=[indices[j],indices[i]]; }
 
   const container = document.getElementById('absurdChoices');
   container.innerHTML = '';
   const grid = document.createElement('div');
   grid.className = 'absurd-grid';
-
-  let correctShuffledIdx = -1;
-  indices.forEach((origIdx, shuffledIdx) => {
-    if(origIdx === currentAbsurd.correct) correctShuffledIdx = shuffledIdx;
+  indices.forEach(origIdx => {
     const btn = document.createElement('button');
     btn.className = 'choice-btn';
-    btn.textContent = currentAbsurd.choices[origIdx];
+    btn.textContent = String(q.choices[origIdx]).replace(/^[A-Da-d][\)\.\s]+/,'').trim();
     btn.dataset.orig = origIdx;
     btn.addEventListener('click', ()=> handleAbsurdAnswer(btn, origIdx, grid));
     grid.appendChild(btn);
