@@ -1889,6 +1889,7 @@ body.has-bg-image .card {
           <div class="small muted" style="margin-bottom:8px;display:flex;justify-content:space-between;align-items:center">
             <span>📊 İstatistikler</span>
           </div>
+          <div id="statsDebug" style="font-size:10px;color:#f59e0b;margin-bottom:6px;word-break:break-all"></div>
           <div id="statsGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:6px"></div>
         </div>
 
@@ -2193,12 +2194,19 @@ body.has-bg-image .card {
 
 /* State */
 var LS_KEY = 'mathgame_v2_0';
+var CURRENT_UID_KEY = 'mathgame_current_uid';
+
 function getLsKey(uid) {
   if (uid) {
     return 'mathgame_v2_0_' + uid;
   }
   if (authUser && authUser.uid) {
     return 'mathgame_v2_0_' + authUser.uid;
+  }
+  /* authUser henüz yüklenmemişse localStorage'dan uid oku */
+  var storedUid = localStorage.getItem(CURRENT_UID_KEY);
+  if (storedUid) {
+    return 'mathgame_v2_0_' + storedUid;
   }
   return LS_KEY;
 }
@@ -2314,7 +2322,7 @@ function saveState() {
     var key = getLsKey();
     var data = JSON.stringify(state);
     localStorage.setItem(key, data);
-    console.log('[saveState] key:', key, '| totalCorrect:', state.stats.totalCorrect);
+    console.log('[saveState] key:', key, '| totalCorrect:', state.stats ? state.stats.totalCorrect : 'STATS YOK');
   } catch(e) {
     console.warn('[saveState] hata:', e);
   }
@@ -2727,7 +2735,13 @@ function renderLeaderboard(){
 }
 
 /* ── INIT ──────────────────────────────────────────── */
-loadState();
+/* Önce auth durumunu yükle, sonra uid'e göre state yükle */
+loadAuth();
+if (authUser && authUser.uid) {
+  loadState(authUser.uid);
+} else {
+  loadState();
+}
 document.documentElement.style.setProperty('--accent', state.btnColor||'#00ff66');
 document.documentElement.style.setProperty('--neon',   state.btnColor||'#00ff66');
 document.documentElement.style.setProperty('--bg-mid', state.bgColor||'#0b1220');
@@ -2741,28 +2755,28 @@ settingBgColor.value  = state.bgColor||'#0b1220';
 settingSound.checked  = !!state.soundOn;
 
 // Show correct initial screen
-if(state.player){
+if (authUser && authUser.uid) {
+  /* Auth var — state zaten uid key'den yüklendi */
+  state.player = authUser.name;
+  playerLabel.innerText = state.player;
+  scoreDisplay.innerText = state.score;
+  levelDisplay.innerText = state.level;
+  updateProfileBtn();
+  showScreen('menu');
+  refreshMenuPanels();
+  updateMiniInfo();
+} else if (state.player) {
+  /* Misafir — eski global state'ten */
   showScreen('menu');
   playerLabel.innerText = state.player;
   scoreDisplay.innerText = state.score;
   levelDisplay.innerText = state.level;
   updateMiniInfo();
 } else {
-  /* Kayıtlı auth token varsa direkt menü */
-  loadAuth();
-  if (authUser) {
-    /* UID'e özel veriyi yükle — global key'deki veriyi ezdik */
-    loadState(authUser.uid);
-    state.player = authUser.name;
-    showScreen('menu');
-    updateProfileBtn();
-    refreshMenuPanels();
-  } else {
-    /* Beta şifresi geçti, direkt auth modal */
-    setTimeout(function() {
-      try { openAuthModal(); } catch(e) {}
-    }, 300);
-  }
+  /* Giriş yapılmamış */
+  setTimeout(function() {
+    try { openAuthModal(); } catch(e) {}
+  }, 300);
 }
 renderLeaderboard();
 
@@ -3413,20 +3427,20 @@ window.addEventListener('beforeunload', ()=>saveState());
 /* ── BAŞARI TANIMI ─────────────────────────────────────────── */
 const ACHIEVEMENTS = [
   /* ── Seri ── */
-  { id:'streak_3',   icon:'🔥', cat:'🔥 Seri',       name:'Isındım',         desc:'3 doğru arka arkaya',                   check: s => (s.stats?.bestStreak||0) >= 3    },
-  { id:'streak_5',   icon:'⚡', cat:'🔥 Seri',       name:'Voltaj',          desc:'5 doğru arka arkaya',                   check: s => (s.stats?.bestStreak||0) >= 5    },
-  { id:'streak_10',  icon:'🌩️', cat:'🔥 Seri',       name:'Elektrik',        desc:'10 doğru arka arkaya',                  check: s => (s.stats?.bestStreak||0) >= 10   },
-  { id:'streak_20',  icon:'🌪️', cat:'🔥 Seri',       name:'Kasırga',         desc:'20 doğru arka arkaya',                  check: s => (s.stats?.bestStreak||0) >= 20   },
-  { id:'streak_50',  icon:'💥', cat:'🔥 Seri',       name:'Patlamak Üzere',  desc:'50 doğru arka arkaya',                  check: s => (s.stats?.bestStreak||0) >= 50   },
-  { id:'streak_100', icon:'🐲', cat:'🔥 Seri',       name:'Ejderha',         desc:'100 doğru arka arkaya',                 check: s => (s.stats?.bestStreak||0) >= 100  },
+  { id:'streak_3',   icon:'🔥', cat:'🔥 Seri',       name:'Isındım',         desc:'3 doğru arka arkaya',                   check: s => (s.stats ? (s.stats.bestStreak || 0) : 0) >= 3    },
+  { id:'streak_5',   icon:'⚡', cat:'🔥 Seri',       name:'Voltaj',          desc:'5 doğru arka arkaya',                   check: s => (s.stats ? (s.stats.bestStreak || 0) : 0) >= 5    },
+  { id:'streak_10',  icon:'🌩️', cat:'🔥 Seri',       name:'Elektrik',        desc:'10 doğru arka arkaya',                  check: s => (s.stats ? (s.stats.bestStreak || 0) : 0) >= 10   },
+  { id:'streak_20',  icon:'🌪️', cat:'🔥 Seri',       name:'Kasırga',         desc:'20 doğru arka arkaya',                  check: s => (s.stats ? (s.stats.bestStreak || 0) : 0) >= 20   },
+  { id:'streak_50',  icon:'💥', cat:'🔥 Seri',       name:'Patlamak Üzere',  desc:'50 doğru arka arkaya',                  check: s => (s.stats ? (s.stats.bestStreak || 0) : 0) >= 50   },
+  { id:'streak_100', icon:'🐲', cat:'🔥 Seri',       name:'Ejderha',         desc:'100 doğru arka arkaya',                 check: s => (s.stats ? (s.stats.bestStreak || 0) : 0) >= 100  },
 
   /* ── Seviye ── */
-  { id:'level_3',    icon:'🌱', cat:'📈 Seviye',     name:'Başlangıç',       desc:"Seviye 3'e ulaş",                       check: s => (s.stats?.highestLevel||1) >= 3  },
-  { id:'level_5',    icon:'🚀', cat:'📈 Seviye',     name:'Yükseliyorum',    desc:"Seviye 5'e ulaş",                       check: s => (s.stats?.highestLevel||1) >= 5  },
-  { id:'level_10',   icon:'🛸', cat:'📈 Seviye',     name:'Uzayda',          desc:"Seviye 10'a ulaş",                      check: s => (s.stats?.highestLevel||1) >= 10 },
-  { id:'level_20',   icon:'👾', cat:'📈 Seviye',     name:'Efsane',          desc:"Seviye 20'ye ulaş",                     check: s => (s.stats?.highestLevel||1) >= 20 },
-  { id:'level_50',   icon:'🏔️', cat:'📈 Seviye',     name:'Zirve',           desc:"Seviye 50'ye ulaş",                     check: s => (s.stats?.highestLevel||1) >= 50 },
-  { id:'level_100',  icon:'🌌', cat:'📈 Seviye',     name:'Tanrı Modu',      desc:"Seviye 100'e ulaş",                     check: s => (s.stats?.highestLevel||1) >= 100},
+  { id:'level_3',    icon:'🌱', cat:'📈 Seviye',     name:'Başlangıç',       desc:"Seviye 3'e ulaş",                       check: s => (s.stats ? (s.stats.highestLevel || 1) : 1) >= 3  },
+  { id:'level_5',    icon:'🚀', cat:'📈 Seviye',     name:'Yükseliyorum',    desc:"Seviye 5'e ulaş",                       check: s => (s.stats ? (s.stats.highestLevel || 1) : 1) >= 5  },
+  { id:'level_10',   icon:'🛸', cat:'📈 Seviye',     name:'Uzayda',          desc:"Seviye 10'a ulaş",                      check: s => (s.stats ? (s.stats.highestLevel || 1) : 1) >= 10 },
+  { id:'level_20',   icon:'👾', cat:'📈 Seviye',     name:'Efsane',          desc:"Seviye 20'ye ulaş",                     check: s => (s.stats ? (s.stats.highestLevel || 1) : 1) >= 20 },
+  { id:'level_50',   icon:'🏔️', cat:'📈 Seviye',     name:'Zirve',           desc:"Seviye 50'ye ulaş",                     check: s => (s.stats ? (s.stats.highestLevel || 1) : 1) >= 50 },
+  { id:'level_100',  icon:'🌌', cat:'📈 Seviye',     name:'Tanrı Modu',      desc:"Seviye 100'e ulaş",                     check: s => (s.stats ? (s.stats.highestLevel || 1) : 1) >= 100},
 
   /* ── Puan ── */
   { id:'score_500',  icon:'💵', cat:'💰 Puan',       name:'İlk Beş Yüz',    desc:'500 puana ulaş',                        check: s => (s.score||0) >= 500   },
@@ -3436,28 +3450,28 @@ const ACHIEVEMENTS = [
   { id:'score_50k',  icon:'🏆', cat:'💰 Puan',       name:'Efsane Skorer',   desc:'50.000 puana ulaş',                     check: s => (s.score||0) >= 50000 },
 
   /* ── Soru Sayısı ── */
-  { id:'ans_1',      icon:'🎯', cat:'📚 Emek',       name:'İlk Adım',        desc:'İlk doğru cevabı ver',                  check: s => (s.stats?.totalCorrect||0) >= 1  },
-  { id:'ans_10',     icon:'✏️', cat:'📚 Emek',       name:'Kalem Kıran',     desc:'10 soru doğru cevapla',                 check: s => (s.stats?.totalCorrect||0) >= 10 },
-  { id:'ans_50',     icon:'📚', cat:'📚 Emek',       name:'Çalışkan',        desc:'50 soru doğru cevapla',                 check: s => (s.stats?.totalCorrect||0) >= 50 },
-  { id:'ans_200',    icon:'🧠', cat:'📚 Emek',       name:'Matematik Dehası',desc:'200 soru doğru cevapla',                check: s => (s.stats?.totalCorrect||0) >= 200},
-  { id:'ans_500',    icon:'🔬', cat:'📚 Emek',       name:'Araştırmacı',     desc:'500 soru doğru cevapla',                check: s => (s.stats?.totalCorrect||0) >= 500},
-  { id:'ans_1000',   icon:'🎓', cat:'📚 Emek',       name:'Profesör',        desc:'1000 soru doğru cevapla',               check: s => (s.stats?.totalCorrect||0) >= 1000},
+  { id:'ans_1',      icon:'🎯', cat:'📚 Emek',       name:'İlk Adım',        desc:'İlk doğru cevabı ver',                  check: s => (s.stats ? (s.stats.totalCorrect || 0) : 0) >= 1  },
+  { id:'ans_10',     icon:'✏️', cat:'📚 Emek',       name:'Kalem Kıran',     desc:'10 soru doğru cevapla',                 check: s => (s.stats ? (s.stats.totalCorrect || 0) : 0) >= 10 },
+  { id:'ans_50',     icon:'📚', cat:'📚 Emek',       name:'Çalışkan',        desc:'50 soru doğru cevapla',                 check: s => (s.stats ? (s.stats.totalCorrect || 0) : 0) >= 50 },
+  { id:'ans_200',    icon:'🧠', cat:'📚 Emek',       name:'Matematik Dehası',desc:'200 soru doğru cevapla',                check: s => (s.stats ? (s.stats.totalCorrect || 0) : 0) >= 200},
+  { id:'ans_500',    icon:'🔬', cat:'📚 Emek',       name:'Araştırmacı',     desc:'500 soru doğru cevapla',                check: s => (s.stats ? (s.stats.totalCorrect || 0) : 0) >= 500},
+  { id:'ans_1000',   icon:'🎓', cat:'📚 Emek',       name:'Profesör',        desc:'1000 soru doğru cevapla',               check: s => (s.stats ? (s.stats.totalCorrect || 0) : 0) >= 1000},
 
   /* ── Mükemmellik ── */
-  { id:'perfect_10', icon:'✨', cat:'⭐ Mükemmellik', name:'Kusursuz 10',     desc:'Hiç yanlış yapmadan 10 soru',           check: s => (s.stats?.currentNoWrong||0) >= 10 },
-  { id:'perfect_25', icon:'💫', cat:'⭐ Mükemmellik', name:'Pırıl Pırıl',    desc:'Hiç yanlış yapmadan 25 soru',           check: s => (s.stats?.currentNoWrong||0) >= 25 },
-  { id:'accuracy_90',icon:'🎓', cat:'⭐ Mükemmellik', name:'Hassas Nişancı', desc:'%90+ doğruluk (min 20 soru)',           check: s => { const t=s.stats?.totalAnswered||0,c=s.stats?.totalCorrect||0; return t>=20&&c/t>=0.9; } },
-  { id:'accuracy_99',icon:'🌠', cat:'⭐ Mükemmellik', name:'Hatasız',        desc:'%99+ doğruluk (min 50 soru)',           check: s => { const t=s.stats?.totalAnswered||0,c=s.stats?.totalCorrect||0; return t>=50&&c/t>=0.99; } },
+  { id:'perfect_10', icon:'✨', cat:'⭐ Mükemmellik', name:'Kusursuz 10',     desc:'Hiç yanlış yapmadan 10 soru',           check: s => (s.stats ? (s.stats.currentNoWrong || 0) : 0) >= 10 },
+  { id:'perfect_25', icon:'💫', cat:'⭐ Mükemmellik', name:'Pırıl Pırıl',    desc:'Hiç yanlış yapmadan 25 soru',           check: s => (s.stats ? (s.stats.currentNoWrong || 0) : 0) >= 25 },
+  { id:'accuracy_90',icon:'🎓', cat:'⭐ Mükemmellik', name:'Hassas Nişancı', desc:'%90+ doğruluk (min 20 soru)',           check: function(s) { var t = s.stats ? (s.stats.totalAnswered || 0) : 0; var c = s.stats ? (s.stats.totalCorrect || 0) : 0; return t >= 20 && c / t >= 0.9; } },
+  { id:'accuracy_99',icon:'🌠', cat:'⭐ Mükemmellik', name:'Hatasız',        desc:'%99+ doğruluk (min 50 soru)',           check: function(s) { var t = s.stats ? (s.stats.totalAnswered || 0) : 0; var c = s.stats ? (s.stats.totalCorrect || 0) : 0; return t >= 50 && c / t >= 0.99; } },
 
   /* ── Absürt Mod ── */
-  { id:'absurd_1',   icon:'🤔', cat:'🤪 Absürt',     name:'Ne Diyorsun?',    desc:'İlk absürt soruyu cevapla',             check: s => (s.stats?.absurdPlayed||0) >= 1  },
-  { id:'absurd_10',  icon:'🤪', cat:'🤪 Absürt',     name:'Kafayı Yedim',    desc:'Absürt modda 10 soru cevapla',          check: s => (s.stats?.absurdPlayed||0) >= 10 },
-  { id:'absurd_50',  icon:'🌀', cat:'🤪 Absürt',     name:'Boyut Atlayıcı',  desc:'Absürt modda 50 soru cevapla',          check: s => (s.stats?.absurdPlayed||0) >= 50 },
-  { id:'absurd_100', icon:'🧿', cat:'🤪 Absürt',     name:'Paralel Evren',   desc:'Absürt modda 100 soru cevapla',         check: s => (s.stats?.absurdPlayed||0) >= 100},
+  { id:'absurd_1',   icon:'🤔', cat:'🤪 Absürt',     name:'Ne Diyorsun?',    desc:'İlk absürt soruyu cevapla',             check: s => (s.stats ? (s.stats.absurdPlayed || 0) : 0) >= 1  },
+  { id:'absurd_10',  icon:'🤪', cat:'🤪 Absürt',     name:'Kafayı Yedim',    desc:'Absürt modda 10 soru cevapla',          check: s => (s.stats ? (s.stats.absurdPlayed || 0) : 0) >= 10 },
+  { id:'absurd_50',  icon:'🌀', cat:'🤪 Absürt',     name:'Boyut Atlayıcı',  desc:'Absürt modda 50 soru cevapla',          check: s => (s.stats ? (s.stats.absurdPlayed || 0) : 0) >= 50 },
+  { id:'absurd_100', icon:'🧿', cat:'🤪 Absürt',     name:'Paralel Evren',   desc:'Absürt modda 100 soru cevapla',         check: s => (s.stats ? (s.stats.absurdPlayed || 0) : 0) >= 100},
 
   /* ── Özel ── */
-  { id:'daily_3',    icon:'📅', cat:'🌟 Özel',       name:'Düzenli',         desc:'3 günlük görev tamamla',                check: s => (s.stats?.dailyLevelUps||0) >= 3 },
-  { id:'night_owl',  icon:'🦉', cat:'🌟 Özel',       name:'Gece Kuşu',       desc:'Saat 00:00-05:00 arasında oyna',        check: s => { const h=new Date().getHours(); return h>=0&&h<5&&(s.stats?.totalAnswered||0)>0; } },
+  { id:'daily_3',    icon:'📅', cat:'🌟 Özel',       name:'Düzenli',         desc:'3 günlük görev tamamla',                check: s => (s.stats ? (s.stats.dailyLevelUps || 0) : 0) >= 3 },
+  { id:'night_owl',  icon:'🦉', cat:'🌟 Özel',       name:'Gece Kuşu',       desc:'Saat 00:00-05:00 arasında oyna',        check: s => { const h=new Date().getHours(); return h>=0&&h<5&&(s.stats ? (s.stats.totalAnswered || 0) : 0)>0; } },
   { id:'speed_demon',icon:'⏱️', cat:'🌟 Özel',       name:'Hız Şeytanı',     desc:'Seviye atlama hızını maksimuma ayarla', check: s => (s.levelUpEvery||4) <= 2 },
 ];
 
@@ -3693,6 +3707,14 @@ function renderStats() {
     if (!grid) return;
 
     const s = state.stats || {};
+    /* DEBUG — geçici, ekranda göster */
+    const dbgEl = document.getElementById('statsDebug');
+    if (dbgEl) {
+      dbgEl.innerHTML = 'KEY: ' + getLsKey() + '<br>' +
+        'totalCorrect: ' + (s.totalCorrect || 0) + '<br>' +
+        'totalAnswered: ' + (s.totalAnswered || 0) + '<br>' +
+        'authUser: ' + (authUser ? authUser.uid.slice(0,8) : 'null');
+    }
     const tot = s.totalAnswered || 0;
     const cor = s.totalCorrect || 0;
     const accuracy = tot > 0 ? Math.round((cor / tot) * 100) : 0;
@@ -4030,19 +4052,30 @@ function getDailyKey() {
   } catch(e) { return 'daily_fallback'; }
 }
 
+function getDailyStorageKey() {
+  if (authUser && authUser.uid) {
+    return 'mathgame_daily_' + authUser.uid;
+  }
+  var storedUid = localStorage.getItem(CURRENT_UID_KEY);
+  if (storedUid) {
+    return 'mathgame_daily_' + storedUid;
+  }
+  return 'mathgame_daily_guest';
+}
+
 function getTodaysTasks() {
   try {
-    const key = getDailyKey();
-    /* Aynı günün görevlerini localStorage'dan al */
-    const saved = JSON.parse(localStorage.getItem('mathgame_daily') || '{}');
-    if (saved.key === key && Array.isArray(saved.tasks)) {
+    var dayKey = getDailyKey();
+    var storageKey = getDailyStorageKey();
+    var saved = JSON.parse(localStorage.getItem(storageKey) || '{}');
+    if (saved.key === dayKey && Array.isArray(saved.tasks)) {
       return saved.tasks;
     }
     /* Yeni gün — rastgele 3 görev seç */
-    const shuffled = [...DAILY_TASK_POOL].sort(() => Math.random() - 0.5);
-    const chosen = shuffled.slice(0, 3);
-    const tasks = chosen.map(t => ({ ...t, progress: 0, completed: false, rewardGiven: false }));
-    localStorage.setItem('mathgame_daily', JSON.stringify({ key, tasks }));
+    var shuffled = [...DAILY_TASK_POOL].sort(function() { return Math.random() - 0.5; });
+    var chosen = shuffled.slice(0, 3);
+    var tasks = chosen.map(function(t) { return Object.assign({}, t, { progress: 0, completed: false, rewardGiven: false }); });
+    localStorage.setItem(storageKey, JSON.stringify({ key: dayKey, tasks: tasks }));
     return tasks;
   } catch(e) {
     console.warn('getTodaysTasks hata:', e);
@@ -4052,8 +4085,9 @@ function getTodaysTasks() {
 
 function saveTodaysTasks(tasks) {
   try {
-    const key = getDailyKey();
-    localStorage.setItem('mathgame_daily', JSON.stringify({ key, tasks }));
+    var dayKey = getDailyKey();
+    var storageKey = getDailyStorageKey();
+    localStorage.setItem(storageKey, JSON.stringify({ key: dayKey, tasks: tasks }));
   } catch(e) {}
 }
 
@@ -4616,6 +4650,10 @@ function loadAuth() {
 
 function saveAuth(user) {
   authUser = user;
+  /* uid'i ayrı key'e kaydet — getLsKey için hızlı erişim */
+  if (user && user.uid) {
+    localStorage.setItem(CURRENT_UID_KEY, user.uid);
+  }
   try {
     if (user) localStorage.setItem(AUTH_KEY, JSON.stringify(user));
     else localStorage.removeItem(AUTH_KEY);
