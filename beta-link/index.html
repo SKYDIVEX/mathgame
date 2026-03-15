@@ -2147,39 +2147,23 @@ body.has-bg-image .card {
 /* State */
 var LS_KEY = 'mathgame_v2_0'; /* Giriş yapınca uid'e göre güncellenir */
 function getLsKey() { return authUser ? 'mathgame_v2_0_' + authUser.uid : LS_KEY; }
-let state = {
-  player: null,
-  score: 0,
-  level: 1,
-  leaderboard: {},           // keyed by opsKey → { playerName: score }
-  ops: ['+','-','*','/'],
-  soundOn: true,
-  levelUpEvery: 4,
-  btnColor: '#00ff66',
-  bgColor: '#0b1220',
-  bgImage: null,
-  theme: 'green',         // aktif tema
-  bgLibId: null,          // seçili kütüphane arka planı id
-  bgLibGradient: null,    // seçili kütüphane gradientı
-  bgLibPhotoUrl: null,    // seçili kütüphane fotoğraf URL'si
-  bgLibFallback: null,    // fotoğraf yüklenirken gösterilecek gradient
-
-  /* ── İstatistikler ── */
-  stats: {
-    totalAnswered:  0,    // toplam cevaplanan soru
-    totalCorrect:   0,    // toplam doğru
-    totalWrong:     0,    // toplam yanlış
-    bestStreak:     0,    // en uzun doğru serisi
-    totalScore:     0,    // tüm zamanların en yüksek puanı
-    sessionStart:   null, // mevcut oturumun başlangıç zamanı (ms)
-    totalTimeSec:   0,    // toplam oynama süresi (saniye)
-    highestLevel:   1,    // ulaşılan en yüksek seviye
-    absurdPlayed:   0,    // absürt modda oynanan soru sayısı
-  },
-
-  /* ── Başarılar ── */
-  achievements: {},        // { achievementId: timestamp }
-};
+function defaultState() {
+  return {
+    player: null, score: 0, level: 1,
+    leaderboard: {}, ops: ['+','-','*','/'],
+    soundOn: true, levelUpEvery: 4,
+    btnColor: '#00ff66', bgColor: '#0b1220', bgImage: null,
+    theme: 'green', bgLibId: null, bgLibGradient: null,
+    bgLibPhotoUrl: null, bgLibFallback: null,
+    stats: {
+      totalAnswered: 0, totalCorrect: 0, totalWrong: 0,
+      bestStreak: 0, totalScore: 0, sessionStart: null,
+      totalTimeSec: 0, highestLevel: 1, absurdPlayed: 0,
+    },
+    achievements: {},
+  };
+}
+let state = defaultState();
 
 /* DOM refs */
 const bgLayer = document.getElementById('bgLayer');
@@ -2253,10 +2237,15 @@ function failSound(){ playTone('sawtooth',160,0.36,0.6); }
 
 /* Persist */
 function loadState(){
-  try{ const raw=JSON.parse(localStorage.getItem(getLsKey())||'{}'); state=Object.assign(state,raw||{}); }catch(e){}
+  try{
+    const raw = JSON.parse(localStorage.getItem(getLsKey()) || '{}');
+    /* Ayarları koru, kişisel veriyi temizle ve yeniden yükle */
+    const saved = Object.assign(defaultState(), raw || {});
+    state = saved;
+  } catch(e) { state = defaultState(); }
 }
 function saveState(){
-  try{ localStorage.setItem(getLsKey(),JSON.stringify(state)); }catch(e){}
+  try{ localStorage.setItem(getLsKey(), JSON.stringify(state)); }catch(e){}
 }
 
 /* Helpers */
@@ -4461,11 +4450,19 @@ try {
     /* Worker token — geçici değil, gerçek worker token'ı kullan */
     saveAuth({ uid: user.uid, name, email: user.email || '', provider: 'google', token: workerToken || null });
 
-    /* Kişisel veriyi yükle (uid bazlı localStorage key) */
-    const prevScore = state.score;
-    loadState();
-    /* İsim her zaman Firebase'den gelsin */
-    state.player = name;
+    /* Kişisel veriyi yükle — uid bazlı key, state tamamen yenilenir */
+    const savedSettings = {
+      soundOn: state.soundOn, levelUpEvery: state.levelUpEvery,
+      btnColor: state.btnColor, bgColor: state.bgColor,
+      bgImage: state.bgImage, theme: state.theme,
+      bgLibId: state.bgLibId, bgLibGradient: state.bgLibGradient,
+      bgLibPhotoUrl: state.bgLibPhotoUrl, bgLibFallback: state.bgLibFallback,
+      ops: state.ops,
+    };
+    loadState(); /* uid key'den yükle, temiz state */
+    /* Ayarları geri yaz (uid key'de yoksa global'dekini kullan) */
+    if (!state.btnColor || state.btnColor === '#00ff66') Object.assign(state, savedSettings);
+    state.player = name; /* İsim her zaman Firebase'den */
 
     closeModal(document.getElementById('authModal'));
     hideLoginChoice();
