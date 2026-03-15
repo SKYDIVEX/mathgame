@@ -2363,9 +2363,15 @@ function showScreen(name){
   }
   menuCard.style.display   = name==='menu'  ? 'block' : 'none';
   gameArea.style.display   = name==='game'  ? 'block' : 'none';
-  if(name==='menu'){
+  if (name === 'menu') {
     menuCard.classList.remove('show');
-    requestAnimationFrame(()=> requestAnimationFrame(()=> menuCard.classList.add('show')));
+    requestAnimationFrame(function() {
+      requestAnimationFrame(function() {
+        menuCard.classList.add('show');
+      });
+    });
+    /* Seri badge'ini gizle — oyun dışındayken gösterilmemeli */
+    try { updateStreakBadge(0); } catch(e) {}
   }
 }
 
@@ -4585,11 +4591,14 @@ try {
     try { await syncOnlineScore(); } catch(e) { console.warn('syncOnlineScore hata:', e); }
     try { await loadProfileFromCloud(); } catch(e) { console.warn('loadProfileFromCloud hata:', e); }
 
-    /* PIN ayarlanmamışsa belirleme ekranı göster */
+    /* PIN ayarlanmamışsa belirleme ekranı göster — ama daha önce atlandıysa tekrar sorma */
     if (workerToken && !workerHasPin) {
-      setTimeout(function() {
-        openPinModal('set');
-      }, 1000);
+      var pinSkipped = localStorage.getItem('mathgame_pin_skipped_' + user.uid);
+      if (!pinSkipped) {
+        setTimeout(function() {
+          openPinModal('set');
+        }, 1000);
+      }
     }
   });
 } catch(e) {
@@ -5097,9 +5106,9 @@ async function loadProfileFromCloud() {
       state.level = result.level;
       if (levelDisplay) { levelDisplay.innerText = state.level; }
     }
-    saveState(authUser.uid);
+    saveState();
     refreshMenuPanels();
-    showToast('☁️ Profil buluttan yüklendi', '#38bdf8');
+    showToast('☁️ İstatistikler ve başarımlar buluttan yüklendi', '#38bdf8');
   } catch(e) {
     console.warn('loadProfileFromCloud hata:', e);
   }
@@ -5621,6 +5630,10 @@ function pinDel() {
 
 function pinSkip() {
   closePinModal();
+  /* Bir daha sorma — kullanıcı bilerek atladı */
+  if (authUser && authUser.uid) {
+    localStorage.setItem('mathgame_pin_skipped_' + authUser.uid, '1');
+  }
   showToast('PIN atlandı — profil ayarlarından ekleyebilirsin', '#f59e0b');
 }
 
@@ -5653,6 +5666,10 @@ async function pinConfirm() {
         var result = await workerPost('set-pin', { token: authUser.token, pin: _pinBuffer });
         if (result && result.ok) {
           if (msg) { msg.textContent = '✅ PIN ayarlandı!'; msg.style.color = '#00ff66'; }
+          /* Artık PIN var — atlandı flag'ini temizle */
+          if (authUser && authUser.uid) {
+            localStorage.removeItem('mathgame_pin_skipped_' + authUser.uid);
+          }
           setTimeout(closePinModal, 1200);
         } else {
           if (msg) { msg.textContent = '❌ ' + (result ? result.error : 'Hata'); msg.style.color = '#ef4444'; }
