@@ -4535,10 +4535,14 @@ try {
     const name = sanitizeUsername(user.displayName || user.email.split('@')[0]);
 
     /* Worker'a firebase-login gönder — hata olsa bile girişi tamamla */
-    let workerToken = null;
+    var workerToken = null;
+    var workerHasPin = false;
     try {
-      const result = await workerPost('firebase-login', { uid: user.uid, name });
-      if (result && result.ok) workerToken = result.token;
+      var fbLoginResult = await workerPost('firebase-login', { uid: user.uid, name, email: user.email || '' });
+      if (fbLoginResult && fbLoginResult.ok) {
+        workerToken  = fbLoginResult.token;
+        workerHasPin = fbLoginResult.hasPin === true;
+      }
     } catch(e) { console.warn('Worker firebase-login hata:', e); }
 
     /* Worker token — geçici değil, gerçek worker token'ı kullan */
@@ -4581,7 +4585,7 @@ try {
     try { await loadProfileFromCloud(); } catch(e) { console.warn('loadProfileFromCloud hata:', e); }
 
     /* PIN ayarlanmamışsa belirleme ekranı göster */
-    if (workerToken && !result.hasPin) {
+    if (workerToken && !workerHasPin) {
       setTimeout(function() {
         openPinModal('set');
       }, 1000);
