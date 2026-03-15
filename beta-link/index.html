@@ -2145,8 +2145,16 @@ body.has-bg-image .card {
    -------------------------- */
 
 /* State */
-var LS_KEY = 'mathgame_v2_0'; /* Giriş yapınca uid'e göre güncellenir */
-function getLsKey() { return authUser ? 'mathgame_v2_0_' + authUser.uid : LS_KEY; }
+var LS_KEY = 'mathgame_v2_0';
+function getLsKey(uid) {
+  if (uid) {
+    return 'mathgame_v2_0_' + uid;
+  }
+  if (authUser && authUser.uid) {
+    return 'mathgame_v2_0_' + authUser.uid;
+  }
+  return LS_KEY;
+}
 function defaultState() {
   return {
     player: null, score: 0, level: 1,
@@ -2236,16 +2244,28 @@ function successSound(){ playTone('triangle',660,0.22,0.9); }
 function failSound(){ playTone('sawtooth',160,0.36,0.6); }
 
 /* Persist */
-function loadState(){
-  try{
-    const raw = JSON.parse(localStorage.getItem(getLsKey()) || '{}');
-    /* Ayarları koru, kişisel veriyi temizle ve yeniden yükle */
-    const saved = Object.assign(defaultState(), raw || {});
-    state = saved;
-  } catch(e) { state = defaultState(); }
+function loadState(uid) {
+  try {
+    var key = getLsKey(uid);
+    var stored = localStorage.getItem(key);
+    if (stored) {
+      var raw = JSON.parse(stored);
+      state = Object.assign(defaultState(), raw);
+    } else {
+      state = defaultState();
+    }
+  } catch(e) {
+    state = defaultState();
+  }
 }
-function saveState(){
-  try{ localStorage.setItem(getLsKey(), JSON.stringify(state)); }catch(e){}
+function saveState() {
+  try {
+    var key = getLsKey();
+    var data = JSON.stringify(state);
+    localStorage.setItem(key, data);
+  } catch(e) {
+    console.warn('saveState hata:', e);
+  }
 }
 
 /* Helpers */
@@ -4459,10 +4479,22 @@ try {
       bgLibPhotoUrl: state.bgLibPhotoUrl, bgLibFallback: state.bgLibFallback,
       ops: state.ops,
     };
-    loadState(); /* uid key'den yükle, temiz state */
-    /* Ayarları geri yaz (uid key'de yoksa global'dekini kullan) */
-    if (!state.btnColor || state.btnColor === '#00ff66') Object.assign(state, savedSettings);
-    state.player = name; /* İsim her zaman Firebase'den */
+    loadState(user.uid); /* uid key'den yükle — authUser set edildi, parametre de geç */
+    /* Ayarları geri yaz — uid key'de kayıtlı veri yoksa (yeni hesap) global ayarları kullan */
+    if (!state.btnColor || state.btnColor === '#00ff66') {
+      state.soundOn       = savedSettings.soundOn;
+      state.levelUpEvery  = savedSettings.levelUpEvery;
+      state.btnColor      = savedSettings.btnColor;
+      state.bgColor       = savedSettings.bgColor;
+      state.bgImage       = savedSettings.bgImage;
+      state.theme         = savedSettings.theme;
+      state.bgLibId       = savedSettings.bgLibId;
+      state.bgLibGradient = savedSettings.bgLibGradient;
+      state.bgLibPhotoUrl = savedSettings.bgLibPhotoUrl;
+      state.bgLibFallback = savedSettings.bgLibFallback;
+      state.ops           = savedSettings.ops;
+    }
+    state.player = name;
 
     closeModal(document.getElementById('authModal'));
     hideLoginChoice();
@@ -4886,16 +4918,23 @@ function showProfileMenu() {
 
 /* ── Online skoru Worker'a gönder ────────────────────── */
 async function pushScoreToWorker() {
+  if (!authUser) {
+    return;
+  }
+  if (!authUser.token) {
+    return;
+  }
   try {
-    if (!authUser || !authUser.token) return;
-    const ops = opsKey(state.ops);
+    var ops = opsKey(state.ops);
     await workerPost('score', {
       token: authUser.token,
       score: state.score,
-      ops,
+      ops: ops,
       level: state.level,
     });
-  } catch(e) { console.warn('pushScore hata:', e); }
+  } catch(e) {
+    console.warn('pushScore hata:', e);
+  }
 }
 
 /* ── Online skoru çek + senkronize et ───────────────── */
@@ -5273,7 +5312,7 @@ window.addEventListener('load', function() {
         setTimeout(() => {
           if (authUser) return; /* Firebase zaten halletti */
           authUser = saved;
-          loadState(); /* uid'e özel localStorage'ı yükle */
+          loadState(saved.uid); /* uid'e özel localStorage'ı yükle */
           state.player = saved.name;
           updateProfileBtn();
           showScreen('menu');
