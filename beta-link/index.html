@@ -2145,7 +2145,8 @@ body.has-bg-image .card {
    -------------------------- */
 
 /* State */
-const LS_KEY = 'mathgame_v2_0';
+var LS_KEY = 'mathgame_v2_0'; /* Giriş yapınca uid'e göre güncellenir */
+function getLsKey() { return authUser ? 'mathgame_v2_0_' + authUser.uid : LS_KEY; }
 let state = {
   player: null,
   score: 0,
@@ -2252,10 +2253,10 @@ function failSound(){ playTone('sawtooth',160,0.36,0.6); }
 
 /* Persist */
 function loadState(){
-  try{ const raw=JSON.parse(localStorage.getItem(LS_KEY)||'{}'); state=Object.assign(state,raw||{}); }catch(e){}
+  try{ const raw=JSON.parse(localStorage.getItem(getLsKey())||'{}'); state=Object.assign(state,raw||{}); }catch(e){}
 }
 function saveState(){
-  try{ localStorage.setItem(LS_KEY,JSON.stringify(state)); }catch(e){}
+  try{ localStorage.setItem(getLsKey(),JSON.stringify(state)); }catch(e){}
 }
 
 /* Helpers */
@@ -3037,6 +3038,9 @@ function checkAnswer(){
       loadGameUI();
       renderLeaderboard();
       updateMiniInfo();
+
+      /* Online skoru gönder */
+      try { pushScoreToWorker(); } catch(e) {}
 
       /* Başarı kontrol */
       try { checkAchievements(); } catch(e) {}
