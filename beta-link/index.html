@@ -1520,6 +1520,52 @@ body.has-bg-image .card {
 }
 .profile-msg { font-size: 12px; text-align: center; min-height: 16px; }
 
+
+/* Admin panel sekmeleri */
+.admin-tabs { display: flex; gap: 4px; margin-bottom: 12px; flex-wrap: wrap; }
+.admin-tab-btn {
+  flex: 1; min-width: 60px;
+  padding: 8px 6px; border: 1px solid rgba(239,68,68,0.2);
+  background: transparent; color: var(--muted); font-size: 11px; font-weight: 700;
+  font-family: inherit; border-radius: 8px; cursor: pointer; text-align: center;
+}
+.admin-tab-btn.active { background: rgba(239,68,68,0.15); color: #ef4444; border-color: rgba(239,68,68,0.4); }
+.admin-tab-panel { display: none; }
+.admin-tab-panel.active { display: flex; flex-direction: column; gap: 10px; }
+.admin-stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.admin-stat-card {
+  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 10px; padding: 12px; text-align: center;
+}
+.admin-stat-num { font-size: 24px; font-weight: 900; color: #e6f7ea; }
+.admin-stat-label { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.admin-req-card {
+  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 6px;
+}
+.admin-req-header { display: flex; justify-content: space-between; align-items: center; }
+.admin-req-type { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 20px; }
+.req-type-bug       { background: rgba(239,68,68,0.15); color: #ef4444; }
+.req-type-unban     { background: rgba(245,158,11,0.15); color: #f59e0b; }
+.req-type-suggestion{ background: rgba(59,130,246,0.15); color: #60a5fa; }
+.req-type-report    { background: rgba(168,85,247,0.15); color: #c084fc; }
+.req-type-reset     { background: rgba(20,184,166,0.15); color: #2dd4bf; }
+.req-type-other     { background: rgba(255,255,255,0.07); color: var(--muted); }
+.admin-req-status { font-size: 11px; }
+.status-open     { color: #f59e0b; }
+.status-resolved { color: #00ff66; }
+.status-rejected { color: #ef4444; }
+.admin-req-name { font-weight: 700; font-size: 13px; color: #e6f7ea; }
+.admin-req-msg  { font-size: 12px; color: var(--muted); line-height: 1.4; }
+.admin-req-code { font-size: 13px; color: #2dd4bf; font-weight: 800; letter-spacing: 2px; margin-top: 2px; }
+.admin-req-actions { display: flex; gap: 6px; margin-top: 4px; }
+.admin-ban-card {
+  background: rgba(239,68,68,0.05); border: 1px solid rgba(239,68,68,0.15);
+  border-radius: 10px; padding: 10px 12px; display: flex; justify-content: space-between; align-items: center;
+}
+.admin-ban-name { font-weight: 700; color: #ef4444; font-size: 13px; }
+.admin-ban-reason { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
 </style>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -1579,6 +1625,11 @@ body.has-bg-image .card {
     <!-- Admin paneli (sadece adminlere) -->
     <button class="profile-action-btn admin-btn" id="pmAdminBtn" style="display:none">
       ⚡ Admin Paneli
+    </button>
+
+    <!-- İstek / Şikayet -->
+    <button class="profile-action-btn" id="pmRequestBtn">
+      📬 İstek / Şikayet Gönder
     </button>
 
     <!-- Çıkış -->
@@ -4542,6 +4593,78 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => openAdminPanel(), 200);
   });
 
+  /* İstek / Şikayet Gönder butonu */
+  document.getElementById('pmRequestBtn')?.addEventListener('click', function() {
+    closeProfileModal();
+    const modal = document.getElementById('requestModal');
+    if (modal) modal.style.display = 'flex';
+  });
+
+  /* İstek modal kapat */
+  document.getElementById('closeRequestModal')?.addEventListener('click', function() {
+    document.getElementById('requestModal').style.display = 'none';
+  });
+  document.getElementById('requestModal')?.addEventListener('click', function(e) {
+    if (e.target === this) this.style.display = 'none';
+  });
+
+  /* İstek gönder */
+  document.getElementById('reqSendBtn')?.addEventListener('click', async function() {
+    if (!authUser) { showToast('Önce giriş yap', '#ef4444'); return; }
+    const type    = document.getElementById('reqType')?.value;
+    const message = (document.getElementById('reqMessage')?.value || '').trim();
+    const msg     = document.getElementById('reqMsg');
+    if (!message || message.length < 5) { if(msg){msg.textContent='Mesaj çok kısa';msg.style.color='#ef4444';} return; }
+    if(msg){msg.textContent='⏳ Gönderiliyor...';msg.style.color='#9fb3b0';}
+    try {
+      const r = await workerPost('request', { token: authUser.token, type, message });
+      if (r?.ok) {
+        if(msg){msg.textContent='✅ İstek gönderildi!';msg.style.color='#00ff66';}
+        document.getElementById('reqMessage').value = '';
+        setTimeout(() => { if(msg) msg.textContent=''; }, 3000);
+      } else {
+        if(msg){msg.textContent='❌ '+(r?.error||'Hata');msg.style.color='#ef4444';}
+      }
+    } catch(e) {
+      if(msg){msg.textContent='❌ Bağlantı hatası';msg.style.color='#ef4444';}
+    }
+  });
+
+  /* Şifre sıfırlama — kod iste */
+  document.getElementById('resetRequestBtn')?.addEventListener('click', async function() {
+    const username = (document.getElementById('resetUsername')?.value || '').trim();
+    const msg = document.getElementById('resetMsg');
+    if (!username) { if(msg){msg.textContent='Kullanıcı adı gir';msg.style.color='#ef4444';} return; }
+    if(msg){msg.textContent='⏳ İstek gönderiliyor...';msg.style.color='#9fb3b0';}
+    try {
+      const r = await fetch(WORKER_URL + '/reset-request', {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ username })
+      }).then(r => r.json());
+      if(msg){msg.textContent = r.ok ? '✅ ' + r.message : '❌ ' + (r.error||'Hata');
+              msg.style.color = r.ok ? '#00ff66' : '#ef4444';}
+    } catch(e) { if(msg){msg.textContent='❌ Bağlantı hatası';msg.style.color='#ef4444';} }
+  });
+
+  /* Şifre sıfırlama — kodu kullan */
+  document.getElementById('resetConfirmBtn')?.addEventListener('click', async function() {
+    const code     = (document.getElementById('resetCode')?.value || '').trim();
+    const newPass  = (document.getElementById('resetNewPass')?.value || '').trim();
+    const msg = document.getElementById('resetMsg');
+    if (!code || !newPass) { if(msg){msg.textContent='Kod ve yeni şifre gerekli';msg.style.color='#ef4444';} return; }
+    if (newPass.length < 6) { if(msg){msg.textContent='Şifre en az 6 karakter';msg.style.color='#ef4444';} return; }
+    if(msg){msg.textContent='⏳ Şifre sıfırlanıyor...';msg.style.color='#9fb3b0';}
+    try {
+      const r = await fetch(WORKER_URL + '/reset-confirm', {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ code, newPassword: newPass })
+      }).then(r => r.json());
+      if(msg){msg.textContent = r.ok ? '✅ ' + r.message : '❌ ' + (r.error||'Hata');
+              msg.style.color = r.ok ? '#00ff66' : '#ef4444';}
+      if (r.ok) { document.getElementById('resetCode').value=''; document.getElementById('resetNewPass').value=''; }
+    } catch(e) { if(msg){msg.textContent='❌ Bağlantı hatası';msg.style.color='#ef4444';} }
+  });
+
   /* Çıkış butonu */
   document.getElementById('pmLogoutBtn')?.addEventListener('click', async function() {
     closeProfileModal();
@@ -4882,9 +5005,10 @@ async function openAdminPanel() {
   if (!authUser) { showToast('Önce giriş yap', '#ef4444'); return; }
   const ok = await checkAdminStatus();
   if (!ok) { showToast('⛔ Yetkisiz erişim', '#ef4444'); return; }
-  adminLog('Admin paneli açıldı. Hoş geldin ' + authUser.name + '!');
   document.getElementById('adminModal').classList.add('show');
   clickSound();
+  adminLog('Admin paneli açıldı. Hoş geldin ' + authUser.name + '!');
+  adminLoadStats();
 }
 
 function adminLog(msg) {
@@ -4894,8 +5018,27 @@ function adminLog(msg) {
   el.textContent = '[' + time + '] ' + msg + '\n' + el.textContent;
 }
 
+function adminSwitchTab(tab) {
+  document.querySelectorAll('.admin-tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('active'));
+  const panel = document.getElementById('adminTab-' + tab);
+  if (panel) panel.classList.add('active');
+  // Aktif butonu işaretle
+  const btns = document.querySelectorAll('.admin-tab-btn');
+  const tabNames = ['stats','players','bans','requests','system'];
+  const idx = tabNames.indexOf(tab);
+  if (btns[idx]) btns[idx].classList.add('active');
+  // Otomatik yükle
+  if (tab === 'bans') adminLoadBans();
+  if (tab === 'requests') adminLoadRequests('open');
+  if (tab === 'stats') adminLoadStats();
+}
+
+function getAdminTarget() {
+  return (document.getElementById('adminTargetName')?.value || '').trim();
+}
 function getAdminOps() {
-  const v = (document.getElementById('adminOps').value || '').trim();
+  const v = (document.getElementById('adminOps')?.value || '').trim();
   return v || 'all';
 }
 
@@ -4909,50 +5052,176 @@ async function adminCall(endpoint, extra = {}) {
   }
 }
 
+async function adminLoadStats() {
+  adminLog('⏳ İstatistikler yükleniyor...');
+  const r = await adminCall('admin/stats');
+  if (r?.ok) {
+    document.getElementById('statPlayers').textContent   = r.totalPlayers;
+    document.getElementById('statBans').textContent      = r.totalBans;
+    document.getElementById('statRequests').textContent  = r.totalRequests;
+    document.getElementById('statOpenReqs').textContent  = r.openRequests;
+    adminLog('✅ İstatistikler yüklendi');
+  } else adminLog('❌ ' + (r?.error || 'Hata'));
+}
+
+async function adminPlayerInfo() {
+  const name = getAdminTarget();
+  if (!name) { adminLog('❌ Oyuncu adı gerekli'); return; }
+  adminLog('⏳ ' + name + ' bilgisi çekiliyor...');
+  const r = await adminCall('admin/player-info', { targetName: name });
+  const box = document.getElementById('adminPlayerInfoBox');
+  if (r?.ok) {
+    const created = r.createdAt ? new Date(r.createdAt).toLocaleDateString('tr-TR') : '?';
+    const banInfo = r.banned ? '🚫 ' + r.banned.reason : '✅ Temiz';
+    box.style.display = 'block';
+    box.innerHTML = '<b style="color:#e6f7ea">' + r.name + '</b><br>' +
+      'UID: ' + r.uid.slice(0,12) + '...<br>' +
+      'Giriş: ' + (r.provider === 'google' ? '🔵 Google' : '📧 E-posta') + '<br>' +
+      'Kayıt: ' + created + '<br>' +
+      'Skor: ' + r.score + 'p | Sıra: ' + (r.rank || '?') + '<br>' +
+      'Durum: ' + banInfo;
+    adminLog('✅ Bilgi yüklendi');
+  } else {
+    box.style.display = 'none';
+    adminLog('❌ ' + (r?.error || 'Bulunamadı'));
+  }
+}
+
 async function adminSetScore() {
-  const name  = (document.getElementById('adminTargetName').value || '').trim();
-  const score = parseInt(document.getElementById('adminScore').value);
+  const name  = getAdminTarget();
+  const score = parseInt(document.getElementById('adminScore')?.value);
   const ops   = getAdminOps();
   if (!name || isNaN(score)) { adminLog('❌ Oyuncu adı ve skor gerekli'); return; }
-  adminLog('⏳ ' + name + ' → ' + score + 'p ...');
+  adminLog('⏳ ' + name + ' → ' + score + 'p...');
   const r = await adminCall('admin/set-score', { targetName: name, score, ops });
-  if (r?.ok) adminLog('✅ ' + r.name + ' skoru: ' + r.newScore + 'p');
+  if (r?.ok) { adminLog('✅ ' + r.name + ' skoru: ' + r.newScore + 'p'); fetchOnlineLeaderboard(); }
   else adminLog('❌ ' + (r?.error || 'Hata'));
-  fetchOnlineLeaderboard();
 }
 
 async function adminRemovePlayer() {
-  const name = (document.getElementById('adminTargetName').value || '').trim();
+  const name = getAdminTarget();
   const ops  = getAdminOps();
   if (!name) { adminLog('❌ Oyuncu adı gerekli'); return; }
-  const ok = await showConfirm('Oyuncuyu Çıkar', '"' + name + '" liderlik tablosundan çıkarılacak. Emin misin?');
+  const ok = await showConfirm('Tablodan Çıkar', '"' + name + '" liderlik tablosundan çıkarılacak. Emin misin?');
   if (!ok) return;
   adminLog('⏳ ' + name + ' çıkarılıyor...');
   const r = await adminCall('admin/remove-player', { targetName: name, ops });
-  if (r?.ok) adminLog('✅ ' + r.removed + ' tablodan çıkarıldı');
+  if (r?.ok) { adminLog('✅ ' + r.removed + ' tablodan çıkarıldı'); fetchOnlineLeaderboard(); }
   else adminLog('❌ ' + (r?.error || 'Hata'));
-  fetchOnlineLeaderboard();
+}
+
+async function adminBan() {
+  const name   = getAdminTarget();
+  const reason = (document.getElementById('adminBanReason')?.value || '').trim() || 'kural ihlali';
+  if (!name) { adminLog('❌ Oyuncu adı gerekli'); return; }
+  const ok = await showConfirm('Banla', '"' + name + '" yasaklanacak: ' + reason);
+  if (!ok) return;
+  adminLog('⏳ ' + name + ' banlanıyor...');
+  const r = await adminCall('admin/ban', { targetName: name, reason });
+  if (r?.ok) adminLog('✅ ' + r.message);
+  else adminLog('❌ ' + (r?.error || 'Hata'));
+}
+
+async function adminUnban() {
+  const name = getAdminTarget();
+  if (!name) { adminLog('❌ Oyuncu adı gerekli'); return; }
+  adminLog('⏳ ' + name + ' banı kaldırılıyor...');
+  const r = await adminCall('admin/unban', { targetName: name });
+  if (r?.ok) adminLog('✅ ' + r.message);
+  else adminLog('❌ ' + (r?.error || 'Hata'));
+}
+
+async function adminLoadBans() {
+  adminLog('⏳ Ban listesi yükleniyor...');
+  const r = await adminCall('admin/ban-list');
+  const el = document.getElementById('adminBanList');
+  if (!el) return;
+  if (r?.ok) {
+    if (r.bans.length === 0) { el.innerHTML = '<div style="color:var(--muted);font-size:12px;text-align:center;padding:8px">Ban yok</div>'; return; }
+    el.innerHTML = r.bans.map(b =>
+      '<div class="admin-ban-card">' +
+        '<div><div class="admin-ban-name">🚫 ' + b.name + '</div>' +
+        '<div class="admin-ban-reason">' + (b.reason||'?') + ' · ' + new Date(b.bannedAt).toLocaleDateString('tr-TR') + '</div></div>' +
+        '<button class="admin-btn admin-btn-green" style="font-size:11px;padding:6px 10px" onclick="adminUnbanById(`' + b.name + '`)">Kaldır</button>' +
+      '</div>'
+    ).join('');
+    adminLog('✅ ' + r.bans.length + ' banlı kullanıcı');
+  } else adminLog('❌ ' + (r?.error || 'Hata'));
+}
+
+async function adminUnbanById(name) {
+  const r = await adminCall('admin/unban', { targetName: name });
+  if (r?.ok) { adminLog('✅ ' + r.message); adminLoadBans(); }
+  else adminLog('❌ ' + (r?.error || 'Hata'));
+}
+
+async function adminLoadRequests(status = 'open') {
+  adminLog('⏳ İstekler yükleniyor...');
+  const r = await adminCall('admin/requests', { status });
+  const el = document.getElementById('adminRequestList');
+  if (!el) return;
+  if (r?.ok) {
+    if (r.requests.length === 0) { el.innerHTML = '<div style="color:var(--muted);font-size:12px;text-align:center;padding:8px">İstek yok</div>'; return; }
+    el.innerHTML = r.requests.map(req => {
+      const typeClass = 'req-type-' + req.type;
+      const statusClass = 'status-' + req.status;
+      const typeLabel = {bug:'🐛 Bug',unban:'🔓 Unban',suggestion:'💡 Öneri',report:'⚠️ Şikayet',reset:'🔑 Şifre',other:'📝 Diğer'}[req.type] || req.type;
+      const statusLabel = {open:'⏳ Açık',resolved:'✅ Çözüldü',rejected:'❌ Reddedildi'}[req.status] || req.status;
+      const codeHtml = req.code ? '<div class="admin-req-code">Kod: ' + req.code + '</div>' : '';
+      const actionsHtml = req.status === 'open' ?
+        '<div class="admin-req-actions">' +
+          '<button class="admin-btn admin-btn-green" style="font-size:11px;padding:5px 10px" onclick="adminResolveReq(`' + req.id + '`,`resolved`)">✅ Çöz</button>' +
+          '<button class="admin-btn admin-btn-red" style="font-size:11px;padding:5px 10px" onclick="adminResolveReq(`' + req.id + '`,`rejected`)">❌ Reddet</button>' +
+        '</div>' : '';
+      return '<div class="admin-req-card">' +
+        '<div class="admin-req-header">' +
+          '<span class="admin-req-type ' + typeClass + '">' + typeLabel + '</span>' +
+          '<span class="admin-req-status ' + statusClass + '">' + statusLabel + '</span>' +
+        '</div>' +
+        '<div class="admin-req-name">' + req.name + '</div>' +
+        '<div class="admin-req-msg">' + req.message + '</div>' +
+        codeHtml + actionsHtml +
+      '</div>';
+    }).join('');
+    adminLog('✅ ' + r.requests.length + ' istek yüklendi');
+  } else adminLog('❌ ' + (r?.error || 'Hata'));
+}
+
+async function adminResolveReq(id, status) {
+  const r = await adminCall('admin/resolve-request', { id, status });
+  if (r?.ok) { adminLog('✅ İstek güncellendi'); adminLoadRequests('open'); }
+  else adminLog('❌ ' + (r?.error || 'Hata'));
+}
+
+async function adminResetPass() {
+  const name = getAdminTarget();
+  const pass = (document.getElementById('adminNewPass')?.value || '').trim();
+  if (!name || !pass) { adminLog('❌ Oyuncu adı ve yeni şifre gerekli'); return; }
+  if (pass.length < 6) { adminLog('❌ Şifre en az 6 karakter'); return; }
+  const ok = await showConfirm('Şifre Sıfırla', '"' + name + '" kullanıcısının şifresi sıfırlanacak.');
+  if (!ok) return;
+  adminLog('⏳ ' + name + ' şifresi sıfırlanıyor...');
+  const r = await adminCall('admin/reset-password', { targetName: name, newPassword: pass });
+  if (r?.ok) { adminLog('✅ ' + r.message); document.getElementById('adminNewPass').value = ''; }
+  else adminLog('❌ ' + (r?.error || 'Hata'));
 }
 
 async function adminClearLb() {
-  const ops = getAdminOps();
+  const ops = (document.getElementById('adminClearOps')?.value || '').trim() || 'all';
   const ok  = await showConfirm('Tabloyu Sıfırla', '"' + ops + '" tablosu tamamen silinecek!');
   if (!ok) return;
   adminLog('⏳ Tablo sıfırlanıyor...');
   const r = await adminCall('admin/clear-lb', { ops });
-  if (r?.ok) adminLog('✅ ' + r.cleared + ' sıfırlandı');
+  if (r?.ok) { adminLog('✅ ' + r.cleared + ' sıfırlandı'); fetchOnlineLeaderboard(); }
   else adminLog('❌ ' + (r?.error || 'Hata'));
-  fetchOnlineLeaderboard();
 }
 
 async function adminMakeFirst() {
   if (!authUser) return;
-  const ops = getAdminOps();
-  adminLog('⏳ Seni birinci yapıyorum (test)...');
-  const r = await adminCall('admin/set-score', { targetName: authUser.name, score: 999999, ops });
-  if (r?.ok) adminLog('✅ Test: ' + r.name + ' → ' + r.newScore + 'p (birinci)');
+  adminLog('⏳ Test skoru yükleniyor...');
+  const r = await adminCall('admin/set-score', { targetName: authUser.name, score: 999999, ops: 'all' });
+  if (r?.ok) { adminLog('✅ ' + r.name + ' → ' + r.newScore + 'p (birinci)'); fetchOnlineLeaderboard(); }
   else adminLog('❌ ' + (r?.error || 'Önce bir skor gönder'));
-  fetchOnlineLeaderboard();
 }
 
 async function adminListPlayers() {
@@ -4962,12 +5231,12 @@ async function adminListPlayers() {
   if (r?.ok) {
     if (r.players.length === 0) { adminLog('📋 Tablo boş'); return; }
     adminLog('📋 ' + r.players.length + ' oyuncu:\n' +
-      r.players.map((p,i) => (i+1) + '. ' + p.name + ' — ' + p.score + 'p').join('\n'));
+      r.players.map((p,i) => (i+1) + '. ' + p.name + ' — ' + p.score + 'p' + (p.banned ? ' 🚫' : '')).join('\n'));
   } else adminLog('❌ ' + (r?.error || 'Hata'));
 }
 
 async function adminGiveAdmin() {
-  const name = (document.getElementById('adminNewAdminName').value || '').trim();
+  const name = (document.getElementById('adminNewAdminName')?.value || '').trim();
   if (!name) { adminLog('❌ Kullanıcı adı gerekli'); return; }
   const r = await adminCall('admin/give-admin', { targetName: name });
   if (r?.ok) adminLog('✅ ' + r.message);
@@ -4975,7 +5244,7 @@ async function adminGiveAdmin() {
 }
 
 async function adminRemoveAdmin() {
-  const name = (document.getElementById('adminNewAdminName').value || '').trim();
+  const name = (document.getElementById('adminNewAdminName')?.value || '').trim();
   if (!name) { adminLog('❌ Kullanıcı adı gerekli'); return; }
   const r = await adminCall('admin/remove-admin', { targetName: name });
   if (r?.ok) adminLog('✅ ' + r.message);
@@ -5179,45 +5448,129 @@ document.addEventListener('pointerdown', e => {
     </div>
     <div class="admin-body">
 
-      <!-- Skor Yönetimi -->
-      <div class="admin-section">
-        <div class="admin-section-title">🎯 Skor Yönetimi</div>
+      <!-- Sekmeler -->
+      <div class="admin-tabs">
+        <button class="admin-tab-btn active" onclick="adminSwitchTab('stats')">📊 Genel</button>
+        <button class="admin-tab-btn" onclick="adminSwitchTab('players')">👥 Oyuncular</button>
+        <button class="admin-tab-btn" onclick="adminSwitchTab('bans')">🚫 Banlar</button>
+        <button class="admin-tab-btn" onclick="adminSwitchTab('requests')">📬 İstekler</button>
+        <button class="admin-tab-btn" onclick="adminSwitchTab('system')">⚙️ Sistem</button>
+      </div>
+
+      <!-- GENEL BAKIŞ -->
+      <div class="admin-tab-panel active" id="adminTab-stats">
+        <div class="admin-stat-grid" id="adminStatGrid">
+          <div class="admin-stat-card"><div class="admin-stat-num" id="statPlayers">—</div><div class="admin-stat-label">Oyuncu</div></div>
+          <div class="admin-stat-card"><div class="admin-stat-num" id="statBans">—</div><div class="admin-stat-label">Banlı</div></div>
+          <div class="admin-stat-card"><div class="admin-stat-num" id="statRequests">—</div><div class="admin-stat-label">İstek</div></div>
+          <div class="admin-stat-card"><div class="admin-stat-num" id="statOpenReqs">—</div><div class="admin-stat-label">Açık İstek</div></div>
+        </div>
+        <button class="admin-btn admin-btn-gray" onclick="adminLoadStats()" style="width:100%">🔄 Yenile</button>
+      </div>
+
+      <!-- OYUNCU YÖNETİMİ -->
+      <div class="admin-tab-panel" id="adminTab-players">
+        <div class="admin-section-title">Oyuncu Ara / Detay</div>
         <div class="admin-row">
           <input class="admin-input" id="adminTargetName" placeholder="Oyuncu adı">
-          <input class="admin-input" id="adminScore" placeholder="Yeni skor" type="number" style="max-width:100px">
-          <button class="admin-btn admin-btn-green" onclick="adminSetScore()">Ayarla</button>
+          <button class="admin-btn admin-btn-gray" onclick="adminPlayerInfo()">Detay</button>
+        </div>
+        <div id="adminPlayerInfoBox" style="display:none;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:12px;font-size:12px;color:var(--muted);line-height:1.8"></div>
+
+        <div class="admin-section-title" style="margin-top:4px">Skor & Tablo</div>
+        <div class="admin-row">
+          <input class="admin-input" id="adminScore" placeholder="Yeni skor" type="number">
+          <button class="admin-btn admin-btn-green" onclick="adminSetScore()">Skor Ayarla</button>
         </div>
         <div class="admin-row">
-          <input class="admin-input" id="adminOps" placeholder="Ops (ör: +,-,*,/ veya boş=hepsi)">
-          <button class="admin-btn admin-btn-red" onclick="adminRemovePlayer()">Oyuncuyu Çıkar</button>
+          <input class="admin-input" id="adminOps" placeholder="Ops (boş=hepsi)">
+          <button class="admin-btn admin-btn-red" onclick="adminRemovePlayer()">Tablodan Çıkar</button>
+        </div>
+        <button class="admin-btn admin-btn-gray" onclick="adminListPlayers()" style="width:100%">📋 Tüm Oyuncuları Listele</button>
+
+        <div class="admin-section-title" style="margin-top:4px">Ban</div>
+        <div class="admin-row">
+          <input class="admin-input" id="adminBanReason" placeholder="Ban sebebi">
+          <button class="admin-btn admin-btn-red" onclick="adminBan()">🚫 Banla</button>
+        </div>
+        <button class="admin-btn admin-btn-green" onclick="adminUnban()" style="width:100%">✅ Banı Kaldır</button>
+
+        <div class="admin-section-title" style="margin-top:4px">Şifre Sıfırla</div>
+        <div class="admin-row">
+          <input class="admin-input" id="adminNewPass" placeholder="Yeni şifre (min 6)" type="password">
+          <button class="admin-btn admin-btn-gray" onclick="adminResetPass()">Sıfırla</button>
         </div>
       </div>
 
-      <!-- Leaderboard -->
-      <div class="admin-section">
-        <div class="admin-section-title">🏆 Liderlik Tablosu</div>
-        <div class="admin-row">
-          <button class="admin-btn admin-btn-gray" onclick="adminListPlayers()" style="flex:1">Oyuncuları Listele</button>
-          <button class="admin-btn admin-btn-red"  onclick="adminClearLb()" style="flex:1">Tabloyu Sıfırla</button>
-        </div>
-        <div class="admin-row">
-          <button class="admin-btn admin-btn-green" onclick="adminMakeFirst()" style="flex:1">🥇 Beni Birinci Yap (Test)</button>
-        </div>
+      <!-- BAN LİSTESİ -->
+      <div class="admin-tab-panel" id="adminTab-bans">
+        <button class="admin-btn admin-btn-gray" onclick="adminLoadBans()" style="width:100%">🔄 Ban Listesini Yükle</button>
+        <div id="adminBanList" style="display:flex;flex-direction:column;gap:8px;margin-top:4px"></div>
       </div>
 
-      <!-- Admin Yönetimi -->
-      <div class="admin-section">
-        <div class="admin-section-title">👑 Admin Yönetimi</div>
+      <!-- İSTEK HAVUZU -->
+      <div class="admin-tab-panel" id="adminTab-requests">
+        <div style="display:flex;gap:6px">
+          <button class="admin-btn admin-btn-gray" onclick="adminLoadRequests('open')" style="flex:1">📬 Açık</button>
+          <button class="admin-btn admin-btn-gray" onclick="adminLoadRequests('all')" style="flex:1">📁 Hepsi</button>
+        </div>
+        <div id="adminRequestList" style="display:flex;flex-direction:column;gap:8px;margin-top:4px"></div>
+      </div>
+
+      <!-- SİSTEM -->
+      <div class="admin-tab-panel" id="adminTab-system">
+        <div class="admin-section-title">Admin Yönetimi</div>
         <div class="admin-row">
           <input class="admin-input" id="adminNewAdminName" placeholder="Kullanıcı adı">
           <button class="admin-btn admin-btn-green" onclick="adminGiveAdmin()">Admin Ver</button>
-          <button class="admin-btn admin-btn-red"   onclick="adminRemoveAdmin()">Al</button>
+          <button class="admin-btn admin-btn-red" onclick="adminRemoveAdmin()">Al</button>
         </div>
+        <div class="admin-section-title" style="margin-top:4px">Liderlik Tablosu</div>
+        <div class="admin-row">
+          <input class="admin-input" id="adminClearOps" placeholder="Ops (boş=hepsi)">
+          <button class="admin-btn admin-btn-red" onclick="adminClearLb()">🗑 Tabloyu Sıfırla</button>
+        </div>
+        <button class="admin-btn admin-btn-green" onclick="adminMakeFirst()" style="width:100%">🥇 Beni Birinci Yap (Test)</button>
       </div>
 
       <!-- Log -->
       <div class="admin-log" id="adminLog">Hazır.</div>
 
+    </div>
+  </div>
+</div>
+
+
+<!-- İstek Gönder Modalı -->
+<div id="requestModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:9500;background:rgba(2,4,10,0.97);align-items:center;justify-content:center;padding:20px;box-sizing:border-box">
+  <div style="background:#0b1220;border:1.5px solid #1a2f28;border-radius:20px;padding:22px 18px;width:100%;max-width:400px;display:flex;flex-direction:column;gap:12px;box-sizing:border-box">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div style="font-size:16px;font-weight:900;color:#e6f7ea">📬 İstek / Şikayet</div>
+      <button id="closeRequestModal" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer">✕</button>
+    </div>
+    <select id="reqType" style="background:#060c18;border:1.5px solid #1a2f28;border-radius:10px;color:#e6f7ea;font-size:14px;padding:10px 14px;font-family:inherit;width:100%;box-sizing:border-box">
+      <option value="bug">🐛 Bug / Hata</option>
+      <option value="suggestion">💡 Öneri</option>
+      <option value="report">⚠️ Kullanıcı Şikayet</option>
+      <option value="unban">🔓 Ban İtiraz</option>
+      <option value="other">📝 Diğer</option>
+    </select>
+    <textarea id="reqMessage" placeholder="Mesajını yaz... (min 5 karakter)" maxlength="500" style="background:#060c18;border:1.5px solid #1a2f28;border-radius:10px;color:#e6f7ea;font-size:14px;padding:10px 14px;font-family:inherit;width:100%;box-sizing:border-box;min-height:100px;resize:none;outline:none"></textarea>
+    <div id="reqMsg" style="font-size:12px;text-align:center;min-height:16px"></div>
+    <button id="reqSendBtn" style="background:#00ff66;color:#030608;border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:800;font-family:inherit;cursor:pointer;width:100%">Gönder</button>
+
+    <div style="border-top:1px solid #1a2f28;padding-top:12px">
+      <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:8px">🔑 Şifremi Unuttum (e-posta girişi)</div>
+      <div style="display:flex;gap:8px">
+        <input id="resetUsername" placeholder="Kullanıcı adın" style="background:#060c18;border:1.5px solid #1a2f28;border-radius:10px;color:#e6f7ea;font-size:13px;padding:9px 12px;font-family:inherit;flex:1;outline:none;box-sizing:border-box">
+        <button id="resetRequestBtn" style="background:rgba(45,212,191,0.1);border:1.5px solid rgba(45,212,191,0.3);color:#2dd4bf;border-radius:10px;padding:9px 14px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;white-space:nowrap">Kod İste</button>
+      </div>
+      <div style="margin-top:8px;display:flex;gap:8px">
+        <input id="resetCode" placeholder="6 haneli kod" maxlength="6" style="background:#060c18;border:1.5px solid #1a2f28;border-radius:10px;color:#e6f7ea;font-size:13px;padding:9px 12px;font-family:inherit;width:100px;outline:none;box-sizing:border-box">
+        <input id="resetNewPass" placeholder="Yeni şifre" type="password" style="background:#060c18;border:1.5px solid #1a2f28;border-radius:10px;color:#e6f7ea;font-size:13px;padding:9px 12px;font-family:inherit;flex:1;outline:none;box-sizing:border-box">
+        <button id="resetConfirmBtn" style="background:rgba(45,212,191,0.1);border:1.5px solid rgba(45,212,191,0.3);color:#2dd4bf;border-radius:10px;padding:9px 14px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer">✓</button>
+      </div>
+      <div id="resetMsg" style="font-size:12px;text-align:center;min-height:16px;margin-top:4px"></div>
     </div>
   </div>
 </div>
