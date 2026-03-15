@@ -2248,13 +2248,17 @@ function loadState(uid) {
   try {
     var key = getLsKey(uid);
     var stored = localStorage.getItem(key);
+    console.log('[loadState] key:', key, '| veri var mı:', stored ? 'EVET' : 'HAYIR');
     if (stored) {
       var raw = JSON.parse(stored);
       state = Object.assign(defaultState(), raw);
+      console.log('[loadState] yüklendi. totalCorrect:', state.stats.totalCorrect, '| achievements:', Object.keys(state.achievements).length);
     } else {
       state = defaultState();
+      console.log('[loadState] boş state — yeni kullanıcı');
     }
   } catch(e) {
+    console.warn('[loadState] HATA:', e);
     state = defaultState();
   }
 }
@@ -2263,8 +2267,9 @@ function saveState() {
     var key = getLsKey();
     var data = JSON.stringify(state);
     localStorage.setItem(key, data);
+    console.log('[saveState] key:', key, '| totalCorrect:', state.stats.totalCorrect);
   } catch(e) {
-    console.warn('saveState hata:', e);
+    console.warn('[saveState] hata:', e);
   }
 }
 
