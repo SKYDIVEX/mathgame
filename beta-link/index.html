@@ -4620,7 +4620,7 @@ try {
     updateProfileBtn();
     showScreen('menu');
     refreshMenuPanels();
-    saveState();
+    /* saveState() ÇAĞIRMA — loadState'ten gelen veriyi ezmesin */
     showToast('✅ Hoş geldin, ' + name + '!');
     try { await syncOnlineScore(); } catch(e) { console.warn('syncOnlineScore hata:', e); }
     try { await loadProfileFromCloud(); } catch(e) { console.warn('loadProfileFromCloud hata:', e); }
