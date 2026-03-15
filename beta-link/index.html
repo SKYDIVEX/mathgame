@@ -2690,12 +2690,17 @@ if(state.player){
   /* Kayıtlı auth token varsa direkt menü */
   loadAuth();
   if (authUser) {
+    /* UID'e özel veriyi yükle — global key'deki veriyi ezdik */
+    loadState(authUser.uid);
     state.player = authUser.name;
     showScreen('menu');
     updateProfileBtn();
+    refreshMenuPanels();
   } else {
     /* Beta şifresi geçti, direkt auth modal */
-    setTimeout(() => { try { openAuthModal(); } catch(e){} }, 300);
+    setTimeout(function() {
+      try { openAuthModal(); } catch(e) {}
+    }, 300);
   }
 }
 renderLeaderboard();
@@ -4454,9 +4459,14 @@ try {
   });
 
   fbAuth.onAuthStateChanged(async (user) => {
-    if (!user) return;
-    /* Zaten giriş yaptıysa tekrar işlem yapma */
-    if (authUser && authUser.uid === user.uid) return;
+    if (!user) {
+      return;
+    }
+    /* Aynı kullanıcıysa UI güncelleme yeterli, tam yenileme yapmaya gerek yok */
+    if (authUser && authUser.uid === user.uid) {
+      updateProfileBtn();
+      return;
+    }
 
     const name = sanitizeUsername(user.displayName || user.email.split('@')[0]);
 
