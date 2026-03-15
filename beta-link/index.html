@@ -2341,9 +2341,10 @@ function setCurrentBoard(board){ state.leaderboard[currentOpsKey()] = board; }
 
 /* ── MINI INFO ─────────────────────────────────────── */
 function updateMiniInfo(){
-  /* Puan profil butonunda gösteriliyor */
-  if (scoreEl && authUser) {
-    scoreEl.textContent = state.score + 'p';
+  /* Profil butonundaki isim güncel kalsın */
+  var nameEl = document.getElementById('pbName');
+  if (nameEl && authUser) {
+    nameEl.textContent = authUser.name.slice(0, 12);
   }
 }
 
