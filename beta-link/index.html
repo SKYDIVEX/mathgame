@@ -4820,47 +4820,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const submitBtn   = document.getElementById('authSubmitBtn');
   const passField   = document.getElementById('authPassword');
 
-  function switchAuthTab(tab) {
-    var pinSection  = document.getElementById('authPinSection');
-    var emailInput  = document.getElementById('authEmail');
-    var googleBtn2  = document.getElementById('authGoogleBtn');
-    var skipBtn2    = document.getElementById('authSkipBtn');
-    var divider2    = document.querySelector('.auth-divider');
-    var tabPin2     = document.getElementById('authTabPin');
-
-    /* Önce hepsini sıfırla */
-    if (tabLogin)    { tabLogin.classList.remove('active'); }
-    if (tabRegister) { tabRegister.classList.remove('active'); }
-    if (tabPin2)     { tabPin2.classList.remove('active'); }
-    if (pinSection)  { pinSection.style.display = 'none'; }
-    if (emailInput)  { emailInput.style.display = ''; }
-    if (nameField)   { nameField.style.display = 'none'; }
-    if (passField)   { passField.style.display = ''; }
-    if (submitBtn)   { submitBtn.style.display = ''; }
-    if (googleBtn2)  { googleBtn2.style.display = ''; }
-    if (skipBtn2)    { skipBtn2.style.display = ''; }
-    if (divider2)    { divider2.style.display = ''; }
-
-    if (tab === 'login') {
-      if (tabLogin) { tabLogin.classList.add('active'); }
-      if (submitBtn) { submitBtn.textContent = 'Giriş Yap'; }
-    } else if (tab === 'register') {
-      if (tabRegister) { tabRegister.classList.add('active'); }
-      if (nameField)   { nameField.style.display = ''; }
-      if (submitBtn)   { submitBtn.textContent = 'Kayıt Ol'; }
-    } else if (tab === 'pin') {
-      if (tabPin2)     { tabPin2.classList.add('active'); }
-      if (pinSection)  { pinSection.style.display = 'flex'; pinSection.style.flexDirection = 'column'; pinSection.style.gap = '8px'; }
-      if (emailInput)  { emailInput.style.display = 'none'; }
-      if (passField)   { passField.style.display = 'none'; }
-      if (submitBtn)   { submitBtn.style.display = 'none'; }
-      if (googleBtn2)  { googleBtn2.style.display = 'none'; }
-      if (skipBtn2)    { skipBtn2.style.display = 'none'; }
-      if (divider2)    { divider2.style.display = 'none'; }
-    }
-    clearAuthError();
-  }
-
   if (tabLogin)    { tabLogin.addEventListener('click',    function() { switchAuthTab('login'); }); }
   if (tabRegister) { tabRegister.addEventListener('click', function() { switchAuthTab('register'); }); }
 
@@ -5534,6 +5493,52 @@ function hideLoginChoice(cb) {
 
 /* loginChoiceScreen event listener'ları kaldırıldı */
 
+
+function switchAuthTab(tab) {
+  var tabLogin    = document.getElementById('authTabLogin');
+  var tabRegister = document.getElementById('authTabRegister');
+  var tabPin      = document.getElementById('authTabPin');
+  var pinSection  = document.getElementById('authPinSection');
+  var emailInput  = document.getElementById('authEmail');
+  var nameField   = document.getElementById('authDisplayName');
+  var passField   = document.getElementById('authPassword');
+  var submitBtn   = document.getElementById('authSubmitBtn');
+  var googleBtn   = document.getElementById('authGoogleBtn');
+  var skipBtn     = document.getElementById('authSkipBtn');
+  var divider     = document.querySelector('.auth-divider');
+
+  /* Önce hepsini sıfırla */
+  if (tabLogin)    { tabLogin.classList.remove('active'); }
+  if (tabRegister) { tabRegister.classList.remove('active'); }
+  if (tabPin)      { tabPin.classList.remove('active'); }
+  if (pinSection)  { pinSection.style.display = 'none'; }
+  if (emailInput)  { emailInput.style.display = ''; }
+  if (nameField)   { nameField.style.display = 'none'; }
+  if (passField)   { passField.style.display = ''; }
+  if (submitBtn)   { submitBtn.style.display = ''; }
+  if (googleBtn)   { googleBtn.style.display = ''; }
+  if (skipBtn)     { skipBtn.style.display = ''; }
+  if (divider)     { divider.style.display = ''; }
+
+  if (tab === 'login') {
+    if (tabLogin)  { tabLogin.classList.add('active'); }
+    if (submitBtn) { submitBtn.textContent = 'Giris Yap'; }
+  } else if (tab === 'register') {
+    if (tabRegister) { tabRegister.classList.add('active'); }
+    if (nameField)   { nameField.style.display = ''; }
+    if (submitBtn)   { submitBtn.textContent = 'Kayit Ol'; }
+  } else if (tab === 'pin') {
+    if (tabPin)     { tabPin.classList.add('active'); }
+    if (pinSection) { pinSection.style.display = 'flex'; pinSection.style.flexDirection = 'column'; pinSection.style.gap = '8px'; }
+    if (emailInput) { emailInput.style.display = 'none'; }
+    if (passField)  { passField.style.display = 'none'; }
+    if (submitBtn)  { submitBtn.style.display = 'none'; }
+    if (googleBtn)  { googleBtn.style.display = 'none'; }
+    if (skipBtn)    { skipBtn.style.display = 'none'; }
+    if (divider)    { divider.style.display = 'none'; }
+  }
+  try { clearAuthError(); } catch(e) {}
+}
 
 /* ══════════════════════════════════════════════════════
    PIN SİSTEMİ
