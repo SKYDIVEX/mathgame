@@ -4458,8 +4458,13 @@ try {
       if (result && result.ok) workerToken = result.token;
     } catch(e) { console.warn('Worker firebase-login hata:', e); }
 
-    /* Worker token yoksa geçici token üret */
-    saveAuth({ uid: user.uid, name, email: user.email || '', provider: 'google', token: workerToken || ('fb_' + user.uid) });
+    /* Worker token — geçici değil, gerçek worker token'ı kullan */
+    saveAuth({ uid: user.uid, name, email: user.email || '', provider: 'google', token: workerToken || null });
+
+    /* Kişisel veriyi yükle (uid bazlı localStorage key) */
+    const prevScore = state.score;
+    loadState();
+    /* İsim her zaman Firebase'den gelsin */
     state.player = name;
 
     closeModal(document.getElementById('authModal'));
@@ -4885,7 +4890,7 @@ function showProfileMenu() {
 /* ── Online skoru Worker'a gönder ────────────────────── */
 async function pushScoreToWorker() {
   try {
-    if (!authUser) return;
+    if (!authUser || !authUser.token) return;
     const ops = opsKey(state.ops);
     await workerPost('score', {
       token: authUser.token,
@@ -5271,6 +5276,7 @@ window.addEventListener('load', function() {
         setTimeout(() => {
           if (authUser) return; /* Firebase zaten halletti */
           authUser = saved;
+          loadState(); /* uid'e özel localStorage'ı yükle */
           state.player = saved.name;
           updateProfileBtn();
           showScreen('menu');
