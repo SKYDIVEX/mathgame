@@ -1156,41 +1156,61 @@ body.has-bg-image .card {
 .lb-online-item.lb-me { background: rgba(0,255,102,0.06); border: 1px solid rgba(0,255,102,0.15); }
 
 /* ── Admin Panel Modal ───────────────────────────────── */
+/* ── Admin Panel - Yeni Tasarım ─────────────────────── */
 #adminModal {
   display: none; position: fixed; inset: 0; z-index: 1000;
-  background: rgba(2,4,10,0.96);
-  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
-  align-items: center; justify-content: center; padding: 20px;
-  overflow-y: auto;
+  background: rgba(2,4,10,0.97);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  align-items: flex-end; justify-content: center;
+  overflow: hidden;
 }
 #adminModal.show { display: flex; animation: modalOverlayIn .25s ease forwards; }
 #adminCard {
-  width: 500px; max-width: 100%;
-  background: linear-gradient(160deg, rgba(20,4,4,0.99), rgba(10,2,2,0.99));
-  border: 1px solid rgba(239,68,68,0.25);
-  border-radius: 18px; overflow: hidden;
-  box-shadow: 0 30px 100px rgba(239,68,68,0.15);
-  animation: dropIn .35s cubic-bezier(.25,.9,.3,1.1) forwards;
-  margin: auto;
+  width: 100%; max-width: 520px;
+  height: 92vh;
+  background: #0a0f1a;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  border-radius: 24px 24px 0 0;
+  overflow: hidden;
+  display: flex; flex-direction: column;
+  animation: slideUpIn .3s cubic-bezier(.25,.9,.3,1) forwards;
+  margin: 0 auto;
 }
-.modal-closing #adminCard { animation: slideUpOut .25s ease forwards !important; }
+@keyframes slideUpIn { from { transform: translateY(100%); } to { transform: translateY(0); } }
 .admin-hero {
-  background: linear-gradient(135deg, #1a0404, #140202);
-  padding: 20px 22px 16px;
-  border-bottom: 1px solid rgba(239,68,68,0.15);
+  background: linear-gradient(135deg, #0d1829, #111827);
+  padding: 16px 20px 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
   display: flex; justify-content: space-between; align-items: center;
+  flex-shrink: 0;
 }
-.admin-title { font-size: 18px; font-weight: 900; color: #ef4444; }
-.admin-sub   { font-size: 12px; color: rgba(239,68,68,0.6); margin-top: 2px; }
-.admin-body  { padding: 18px; display: flex; flex-direction: column; gap: 14px; }
+.admin-title { font-size: 17px; font-weight: 900; color: #e6f7ea; }
+.admin-sub   { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.admin-body  { padding: 14px 16px; display: flex; flex-direction: column; gap: 12px; overflow-y: auto; flex: 1; }
+.admin-tabs  { display: flex; gap: 4px; flex-wrap: wrap; flex-shrink: 0; padding: 10px 16px 0; }
+.admin-tab-btn {
+  flex: 1; min-width: 52px; padding: 8px 6px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 10px; color: var(--muted);
+  font-size: 10px; font-weight: 700; font-family: inherit;
+  cursor: pointer; transition: all .2s;
+}
+.admin-tab-btn.active {
+  background: rgba(255,255,255,0.1);
+  border-color: rgba(255,255,255,0.2);
+  color: #e6f7ea;
+}
+.admin-tab-panel { display: none; }
+.admin-tab-panel.active { display: flex; flex-direction: column; gap: 10px; }
 .admin-section {
-  background: rgba(239,68,68,0.04);
-  border: 1px solid rgba(239,68,68,0.1);
-  border-radius: 12px; padding: 14px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 12px; padding: 12px 14px;
 }
 .admin-section-title {
-  font-size: 11px; font-weight: 800; letter-spacing: 1px;
-  text-transform: uppercase; color: rgba(239,68,68,0.7);
+  font-size: 10px; font-weight: 800; letter-spacing: 1px;
+  text-transform: uppercase; color: var(--muted);
   margin-bottom: 10px;
 }
 .admin-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
@@ -1201,25 +1221,30 @@ body.has-bg-image .card {
   border: 1px solid rgba(255,255,255,0.08);
   border-radius: 10px; color: #e6f7ea;
   font-size: 13px; font-family: inherit; outline: none;
+  box-sizing: border-box;
 }
-.admin-input:focus { border-color: rgba(239,68,68,0.4); }
+.admin-input:focus { border-color: rgba(0,255,102,0.3); }
 .admin-input::placeholder { color: rgba(255,255,255,0.2); }
 .admin-btn {
   padding: 9px 14px; border-radius: 10px; border: none; cursor: pointer;
   font-size: 12px; font-weight: 700; font-family: inherit;
   transition: all .2s ease; white-space: nowrap;
 }
-.admin-btn-red  { background: rgba(239,68,68,0.15); color: #ef4444; border: 1px solid rgba(239,68,68,0.3); }
-.admin-btn-red:hover { background: rgba(239,68,68,0.25); }
-.admin-btn-green{ background: rgba(0,255,102,0.1);  color: var(--neon); border: 1px solid rgba(0,255,102,0.2); }
-.admin-btn-green:hover { background: rgba(0,255,102,0.2); }
-.admin-btn-gray { background: rgba(255,255,255,0.05); color: var(--muted); border: 1px solid rgba(255,255,255,0.1); }
+.admin-btn-red   { background: rgba(239,68,68,0.12); color: #ef4444; border: 1px solid rgba(239,68,68,0.25); }
+.admin-btn-green { background: rgba(0,255,102,0.1);  color: #00ff66; border: 1px solid rgba(0,255,102,0.2); }
+.admin-btn-gray  { background: rgba(255,255,255,0.05); color: var(--muted); border: 1px solid rgba(255,255,255,0.1); }
+.admin-btn-blue  { background: rgba(56,189,248,0.1); color: #38bdf8; border: 1px solid rgba(56,189,248,0.2); }
+.admin-btn-orange{ background: rgba(251,146,60,0.1); color: #fb923c; border: 1px solid rgba(251,146,60,0.2); }
 .admin-log {
-  background: rgba(0,0,0,0.4); border-radius: 8px;
+  background: rgba(0,0,0,0.5); border-radius: 10px;
   padding: 10px 12px; font-size: 11px; color: #86efac;
-  font-family: monospace; min-height: 36px; max-height: 100px;
-  overflow-y: auto; line-height: 1.6; white-space: pre-wrap;
+  font-family: monospace; min-height: 40px; max-height: 120px;
+  overflow-y: auto; line-height: 1.7; white-space: pre-wrap;
+  flex-shrink: 0; margin: 0 16px 12px;
 }
+/* Rol badge'leri */
+.role-badge-admin { background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.3);color:#f59e0b;padding:2px 8px;border-radius:6px;font-size:10px;font-weight:800; }
+.role-badge-mod   { background:rgba(56,189,248,0.12);border:1px solid rgba(56,189,248,0.25);color:#38bdf8;padding:2px 8px;border-radius:6px;font-size:10px;font-weight:800; }
 
 /* ── Proje Şifre Ekranı ──────────────────────────────── */
 #projectLock {
@@ -3898,6 +3923,23 @@ function showAchievementNotif(ach) {
   }
 }
 
+/* Başarım tooltip */
+function showAchTooltip(achId, el) {
+  var ach = ACHIEVEMENTS.find(function(a) { return a.id === achId; });
+  if (!ach) { return; }
+  var existing = document.getElementById('achTooltip');
+  if (existing) { existing.remove(); }
+  var tip = document.createElement('div');
+  tip.id = 'achTooltip';
+  tip.style.cssText = 'position:fixed;z-index:99999;background:#0b1220;border:1px solid #1a2f28;border-radius:10px;padding:8px 12px;font-size:12px;color:#e6f7ea;max-width:220px;box-shadow:0 8px 24px rgba(0,0,0,0.5);pointer-events:none';
+  tip.innerHTML = '<b>' + ach.icon + ' ' + ach.name + '</b><br><span style="color:var(--muted)">' + ach.desc + '</span>';
+  var rect = el.getBoundingClientRect();
+  tip.style.top = (rect.top - 80) + 'px';
+  tip.style.left = Math.max(8, rect.left - 60) + 'px';
+  document.body.appendChild(tip);
+  setTimeout(function() { var t = document.getElementById('achTooltip'); if (t) t.remove(); }, 2500);
+}
+
 function renderAchievements() {
   try {
     const grid = document.getElementById('achievementsGrid');
@@ -3983,8 +4025,12 @@ function renderAchModal() {
           card.appendChild(lockIcon);
         }
 
+        var rarity2 = ACH_RARITY ? ACH_RARITY[ach.id] : '';
+        var rarityTag = rarity2 ? '<div style="font-size:9px;font-weight:800;margin-top:2px;color:' +
+          ({'Efsane':'#f59e0b','Nadir':'#a78bfa','Değerli':'#38bdf8'}[rarity2]||'var(--muted)') + '">' +
+          ({'Efsane':'🔥','Nadir':'💎','Değerli':'⭐'}[rarity2]||'') + '</div>' : '';
         card.innerHTML += '<div class="ac-icon">' + (isUnlocked ? ach.icon : '❓') + '</div>' +
-                          '<div class="ac-name">' + ach.name + '</div>';
+                          '<div class="ac-name">' + ach.name + '</div>' + rarityTag;
 
         card.addEventListener('click', () => {
           try { clickSound(); showAchievementDetail(ach); } catch(e) {}
@@ -4012,6 +4058,21 @@ function showAchievementDetail(ach) {
     icon.textContent = unlocked ? ach.icon : '🔒';
     name.textContent = ach.name;
     desc.textContent = ach.desc;
+
+    /* Nadirlik */
+    var rarity = ACH_RARITY ? ACH_RARITY[ach.id] : '';
+    var rarityColors = { 'Efsane': '#f59e0b', 'Nadir': '#a78bfa', 'Değerli': '#38bdf8' };
+    var rarityIcons  = { 'Efsane': '🔥', 'Nadir': '💎', 'Değerli': '⭐' };
+    var rarityEl = document.getElementById('apRarity');
+    if (rarityEl) {
+      if (rarity) {
+        rarityEl.style.display = '';
+        rarityEl.style.color = rarityColors[rarity] || 'var(--muted)';
+        rarityEl.textContent = (rarityIcons[rarity] || '') + ' ' + rarity + ' Başarım';
+      } else {
+        rarityEl.style.display = 'none';
+      }
+    }
 
     if (unlocked) {
       status.className   = 'ap-status unlocked';
@@ -5723,6 +5784,7 @@ async function openAdminPanel() {
   clickSound();
   adminLog('Admin paneli açıldı. Hoş geldin ' + authUser.name + '!');
   adminLoadStats();
+  try { updateAdminRoleBadge(); } catch(e) {}
   /* Panel açılışını da logla */
   try { await workerPost('admin/write-log', { token: authUser.token, action: 'panel-open', detail: authUser.name + ' paneli açtı' }); } catch(e) {}
 }
@@ -6100,6 +6162,35 @@ async function adminRemoveBadge() {
   var r = await adminCall('admin/remove-badge', { targetName: name, badgeId });
   if (r && r.ok) { adminLog('✅ Badge kaldırıldı'); }
   else adminLog('❌ ' + (r ? r.error : 'Hata'));
+}
+
+
+async function adminGiveMod() {
+  var name = (document.getElementById('adminModName')?.value || '').trim();
+  if (!name) { adminLog('❌ Kullanıcı adı gerekli'); return; }
+  var r = await adminCall('admin/give-mod', { targetName: name });
+  if (r && r.ok) { adminLog('✅ ' + name + ' moderatör yapıldı'); }
+  else adminLog('❌ ' + (r ? r.error : 'Hata'));
+}
+
+async function adminRemoveMod() {
+  var name = (document.getElementById('adminModName')?.value || '').trim();
+  if (!name) { adminLog('❌ Kullanıcı adı gerekli'); return; }
+  var r = await adminCall('admin/remove-mod', { targetName: name });
+  if (r && r.ok) { adminLog('✅ ' + name + ' moderatörlükten çıkarıldı'); }
+  else adminLog('❌ ' + (r ? r.error : 'Hata'));
+}
+
+/* Admin paneli açılınca rolü göster */
+async function updateAdminRoleBadge() {
+  try {
+    var r = await adminCall('admin/my-role', {});
+    var badge = document.getElementById('adminRoleBadge');
+    if (!badge || !r) { return; }
+    if (r.role === 'superadmin') { badge.innerHTML = '<span class="role-badge-admin">👑 Süper Admin</span>'; }
+    else if (r.role === 'admin')  { badge.innerHTML = '<span class="role-badge-admin">⚡ Admin</span>'; }
+    else if (r.role === 'moderator') { badge.innerHTML = '<span class="role-badge-mod">🛡 Moderatör</span>'; }
+  } catch(e) {}
 }
 
 async function adminGiveAdmin() {
@@ -6893,6 +6984,8 @@ async function openPublicProfile(data) {
         } else {
           badges.push('<span class="pub-badge-tag pub-badge-admin">⚡ Admin</span>');
         }
+      } else if (r.role === 'moderator') {
+        badges.push('<span class="pub-badge-tag" style="background:rgba(56,189,248,0.12);border:1px solid rgba(56,189,248,0.25);color:#38bdf8">🛡 Moderatör</span>');
       }
 
       /* Ban — sadece adminler görür */
@@ -7152,6 +7245,7 @@ function maskAdminName(name) {
    SOSYAL — Avatar, Bio
    ══════════════════════════════════════════════════════ */
 
+var ACH_RARITY = {"streak_100": "Efsane", "level_100": "Efsane", "score_50k": "Efsane", "streak_50": "Nadir", "level_50": "Nadir", "score_10k": "Nadir", "ans_500": "Nadir", "streak_20": "Değerli", "level_20": "Değerli", "score_5000": "Değerli"};
 var AVATAR_LIST = ['😀','😎','🤩','🥳','😏','🤔','🥸','🧠','👾','🤖','🦊','🐺','🦁','🐯','🐻','🐼','🦄','🐲','🔥','⚡','💎','👑','🚀','🌟','🎮','🎯','🎲','⚔️','🛡️','💻'];
 
 function toggleAvatarPicker() {
@@ -7317,7 +7411,7 @@ document.addEventListener('pointerdown', e => {
     <div class="admin-hero">
       <div>
         <div class="admin-title">⚡ Admin Paneli</div>
-        <div class="admin-sub">SKYDIVEX — Sadece yetkili erişim</div>
+        <div class="admin-sub" id="adminHeroSub">SKYDIVEX — <span id="adminRoleBadge">yetkili erişim</span></div>
       </div>
       <button id="closeAdminModal" class="btn ghost" style="padding:6px 12px;font-size:12px">✕</button>
     </div>
@@ -7325,12 +7419,12 @@ document.addEventListener('pointerdown', e => {
 
       <!-- Sekmeler -->
       <div class="admin-tabs">
-        <button class="admin-tab-btn active" onclick="adminSwitchTab('stats')" style="font-size:10px">📊 Genel</button>
-        <button class="admin-tab-btn" onclick="adminSwitchTab('players')" style="font-size:10px">👥 Oyuncular</button>
-        <button class="admin-tab-btn" onclick="adminSwitchTab('bans')" style="font-size:10px">🚫 Banlar</button>
-        <button class="admin-tab-btn" onclick="adminSwitchTab('requests')" style="font-size:10px">📬 İstekler</button>
-        <button class="admin-tab-btn" onclick="adminSwitchTab('logs')" style="font-size:10px">📜 Log</button>
-        <button class="admin-tab-btn" onclick="adminSwitchTab('system')" style="font-size:10px">⚙️ Sistem</button>
+        <button class="admin-tab-btn active" onclick="adminSwitchTab('stats')">📊</button>
+        <button class="admin-tab-btn" onclick="adminSwitchTab('players')">👥</button>
+        <button class="admin-tab-btn" onclick="adminSwitchTab('bans')">🚫</button>
+        <button class="admin-tab-btn" onclick="adminSwitchTab('requests')">📬</button>
+        <button class="admin-tab-btn" onclick="adminSwitchTab('logs')">📜</button>
+        <button class="admin-tab-btn" id="adminTabSystem" onclick="adminSwitchTab('system')">⚙️</button>
       </div>
 
       <!-- GENEL BAKIŞ -->
@@ -7422,7 +7516,13 @@ document.addEventListener('pointerdown', e => {
         <div id="adminEventList" style="margin-top:6px;display:flex;flex-direction:column;gap:4px"></div>
         <button class="admin-btn admin-btn-gray" onclick="adminLoadEvents()" style="width:100%;margin-top:4px">📋 Eventleri Listele</button>
 
-        <div class="admin-section-title" style="margin-top:12px">Admin Yönetimi</div>
+        <div class="admin-section-title" style="margin-top:12px">🛡 Moderatör</div>
+        <div style="display:flex;gap:6px;margin-bottom:6px">
+          <input class="admin-input" id="adminModName" placeholder="Kullanıcı adı">
+          <button class="admin-btn admin-btn-blue" onclick="adminGiveMod()">🛡 Ver</button>
+          <button class="admin-btn admin-btn-gray" onclick="adminRemoveMod()">❌ Al</button>
+        </div>
+        <div class="admin-section-title">👑 Admin</div>
         <div class="admin-row">
           <input class="admin-input" id="adminNewAdminName" placeholder="Kullanıcı adı">
           <button class="admin-btn admin-btn-green" onclick="adminGiveAdmin()">Admin Ver</button>
