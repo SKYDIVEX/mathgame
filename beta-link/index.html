@@ -1864,7 +1864,10 @@ body.has-bg-image .card {
         <div class="card" style="padding:12px">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
             <div class="small muted">Liderlik Tablosu</div>
-            <div id="onlineLbStatus" style="font-size:10px;color:var(--muted)"></div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <div id="onlineLbStatus" style="font-size:10px;color:var(--muted)"></div>
+              <button onclick="fetchOnlineLeaderboard()" title="Yenile" style="background:none;border:none;color:var(--muted);font-size:14px;cursor:pointer;padding:2px;line-height:1">🔄</button>
+            </div>
           </div>
           <div class="lb-tab-row">
             <button class="lb-tab active" id="lbTabLocal">📱 Lokal</button>
@@ -1888,6 +1891,7 @@ body.has-bg-image .card {
         <div class="card" id="statsPanel" style="padding:12px;margin-top:12px">
           <div class="small muted" style="margin-bottom:8px;display:flex;justify-content:space-between;align-items:center">
             <span>📊 İstatistikler</span>
+            <button onclick="renderStats()" title="Yenile" style="background:none;border:none;color:var(--muted);font-size:14px;cursor:pointer;padding:2px;line-height:1">🔄</button>
           </div>
           <div id="statsDebug" style="font-size:10px;color:#f59e0b;margin-bottom:6px;word-break:break-all"></div>
           <div id="statsGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:6px"></div>
