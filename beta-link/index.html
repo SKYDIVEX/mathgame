@@ -5159,17 +5159,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* Google */
   const googleBtn = document.getElementById('authGoogleBtn');
-  if (googleBtn) googleBtn.addEventListener('click', async () => {
-    if (!fbAuth) { showAuthError('Google girişi şu an kullanılamıyor'); return; }
-    try {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      await fbAuth.signInWithPopup(provider);
-    } catch(e) {
-      if (e.code !== 'auth/popup-closed-by-user') {
-        showAuthError('Google girişi başarısız: ' + (e.message || e.code));
-      }
-    }
-  });
+  if (googleBtn) googleBtn.addEventListener('click', function() { handleGoogleLogin(); });
 
   /* Misafir */
   const skipBtn = document.getElementById('authSkipBtn');
@@ -5996,6 +5986,49 @@ function switchAuthTab(tab) {
     if (divider)    { divider.style.display = 'none'; }
   }
   try { clearAuthError(); } catch(e) {}
+}
+
+
+async function handleGoogleLogin() {
+  if (!fbAuth) { showToast('Google girişi şu an kullanılamıyor', '#ef4444'); return; }
+  try {
+    var provider = new firebase.auth.GoogleAuthProvider();
+    var result = await fbAuth.signInWithPopup(provider);
+    if (!result || !result.user) { return; }
+    var user = result.user;
+    var name = sanitizeUsername(user.displayName || user.email.split('@')[0]);
+    var workerToken  = null;
+    var workerHasPin = false;
+    try {
+      var fbRes = await workerPost('firebase-login', { uid: user.uid, name: name, email: user.email || '' });
+      if (fbRes && fbRes.ok) {
+        workerToken  = fbRes.token;
+        workerHasPin = fbRes.hasPin === true;
+      }
+    } catch(e) { console.warn('Worker firebase-login hata:', e); }
+    saveAuth({ uid: user.uid, name: name, email: user.email || '', provider: 'google', token: workerToken || null });
+    loadState(user.uid);
+    state.player = name;
+    closeModal(document.getElementById('authModal'));
+    updateProfileBtn();
+    showScreen('menu');
+    refreshMenuPanels();
+    showToast('✅ Hoş geldin, ' + name + '!');
+    try { await syncOnlineScore(); } catch(e) {}
+    try { await loadProfileFromCloud(); } catch(e) {}
+    try { startUnreadListener(); } catch(e) {}
+    if (workerToken && !workerHasPin) {
+      var pinSkipped = localStorage.getItem('mathgame_pin_skipped_' + user.uid);
+      if (!pinSkipped) {
+        setTimeout(function() { openPinModal('set'); }, 1000);
+      }
+    }
+  } catch(e) {
+    if (e.code !== 'auth/popup-closed-by-user') {
+      showToast('Google girişi başarısız: ' + (e.message || e.code), '#ef4444');
+      try { showAuthError('Google girişi başarısız: ' + (e.message || e.code)); } catch(ex) {}
+    }
+  }
 }
 
 /* ══════════════════════════════════════════════════════
