@@ -2216,7 +2216,7 @@ body.has-bg-image .card {
           <div class="about-how-item">
             <div class="how-icon">🧮</div>
             <div class="how-title">Matematik Modu</div>
-            <div class="how-desc">Gelen soruyu cevapla, seviye atla. Ödül = Seviye × 10p.</div>
+            <div class="how-desc">Gelen soruyu cevapla, seviye atla. Ödül = Seviye × 5p.</div>
           </div>
           <div class="about-how-item">
             <div class="how-icon">🤪</div>
@@ -2225,18 +2225,28 @@ body.has-bg-image .card {
           </div>
           <div class="about-how-item">
             <div class="how-icon">📈</div>
-            <div class="how-title">Seviye Sistemi</div>
-            <div class="how-desc">Her doğruda seri artar. Belirlenen seriye ulaşınca seviye atlanır.</div>
+            <div class="how-title">Artan Zorluk</div>
+            <div class="how-desc">Seviye 5'ten itibaren eksik sayı, seviye 15'ten denklem soruları çıkar.</div>
           </div>
           <div class="about-how-item">
             <div class="how-icon">💥</div>
             <div class="how-title">Ceza Sistemi</div>
-            <div class="how-desc">Yanlış cevapta puan kesilir: max(5, Seviye × 5) puan.</div>
+            <div class="how-desc">Yanlış cevapta puan kesilir: max(10, Seviye × 8) puan.</div>
+          </div>
+          <div class="about-how-item">
+            <div class="how-icon">🌐</div>
+            <div class="how-title">Online Liderlik</div>
+            <div class="how-desc">Kategoriye göre ayrı tablolar: Toplama, Çıkarma, Çarpma, Bölme, Karma.</div>
+          </div>
+          <div class="about-how-item">
+            <div class="how-icon">🔐</div>
+            <div class="how-title">Hesap Sistemi</div>
+            <div class="how-desc">Google veya e-posta ile giriş yap. PIN belirle — Google olmadan da giriş yap.</div>
           </div>
           <div class="about-how-item">
             <div class="how-icon">🏆</div>
             <div class="how-title">Başarılar</div>
-            <div class="how-desc">16 farklı başarı rozeti — oyna, kazan, kilitleri aç!</div>
+            <div class="how-desc">32 farklı başarı rozeti — seri, seviye, puan ve daha fazlası.</div>
           </div>
           <div class="about-how-item">
             <div class="how-icon">📅</div>
@@ -2268,7 +2278,11 @@ body.has-bg-image .card {
           </div>
           <div class="about-changelog-item">
             <span class="cl-ver">v2.0</span>
-            <span class="cl-text">Absürt Mod (AI destekli, Groq/Cloudflare Worker), başarı sistemi, günlük görevler, 5 tema, arka plan kütüphanesi, partikül & konfeti efektleri, level-up tam ekran, istatistik paneli.</span>
+            <span class="cl-text">Absürt Mod (AI/Groq), başarı sistemi (32 rozet), günlük görevler, 5 tema, arka plan kütüphanesi, partikül & konfeti, level-up ekranı, istatistik paneli.</span>
+          </div>
+          <div class="about-changelog-item" style="border-left:2px solid var(--neon)">
+            <span class="cl-ver" style="background:rgba(0,255,102,0.15);color:var(--neon)">v2.0</span>
+            <span class="cl-text">Google + e-posta girişi, oyuna özel PIN sistemi, online liderlik tablosu (kategori bazlı), istatistik & başarım bulut kaydı, admin paneli (ban/unban, istek havuzu, admin log), artan zorluk sistemi (eksik sayı & denklem soruları), yeniden dengelenmiş puanlama.</span>
           </div>
         </div>
       </div>
@@ -2276,7 +2290,7 @@ body.has-bg-image .card {
     </div>
 
     <div class="about-footer">
-      <div style="font-size:12px;color:var(--muted)">Yapımcı: <strong style="color:var(--neon)">SKYDIVEX</strong> • 2025</div>
+      <div style="font-size:12px;color:var(--muted)">Yapımcı: <strong style="color:var(--neon)">SKYDIVEX</strong> • 2025-2026</div>
       <div style="font-size:11px;color:rgba(255,255,255,0.3)">Tüm hakları saklıdır</div>
     </div>
 
@@ -2310,7 +2324,7 @@ function defaultState() {
   return {
     player: null, score: 0, level: 1,
     leaderboard: {}, ops: ['+','-','*','/'],
-    soundOn: true, levelUpEvery: 4,
+    soundOn: true, levelUpEvery: 6,
     btnColor: '#00ff66', bgColor: '#0b1220', bgImage: null,
     theme: 'green', bgLibId: null, bgLibGradient: null,
     bgLibPhotoUrl: null, bgLibFallback: null,
@@ -3060,8 +3074,8 @@ function loadGameUI(){
   playerDisplay.innerText=state.player;
   levelUI.innerText=state.level;
   scoreUI.innerText=state.score;
-  multiplierUI.innerText=`${state.level} × 10`;
-  rewardUI.innerText=state.level*10;
+  multiplierUI.innerText = state.level + ' × 5';
+  rewardUI.innerText = Math.max(5, state.level * 5);
 }
 
 /*
@@ -3073,8 +3087,22 @@ function loadGameUI(){
   Seviye 30 → toplama/çıkarma: 1–2000, çarpma: 1–99×1–99,  bölme: büyük
 */
 function difficultyMax(lvl){
-  // Üstel büyüme: lvl 1 ≈ 10, lvl 10 ≈ 150, lvl 20 ≈ 600, lvl 30 ≈ 2000
-  return Math.min(Math.floor(8 * Math.pow(1.22, lvl)), 9999);
+  /* lvl 1→12, lvl 5→50, lvl 10→250, lvl 20→3000, lvl 30→30000 */
+  return Math.min(Math.floor(6 * Math.pow(1.45, lvl)), 99999);
+}
+
+/* Seviyeye göre soru tipi belirle */
+function getQuestionType(lvl) {
+  /* Seviye 1-4: normal işlem
+     Seviye 5-9: eksik sayı (? + 3 = 7)
+     Seviye 10-14: çift işlem (a + b + c)
+     Seviye 15-19: denklem (2x + 3 = 11, x = ?)
+     Seviye 20+: eşitsizlik (a + b > ? kaçtan büyükse doğru) */
+  if (lvl >= 20) return 'equation';
+  if (lvl >= 15) return 'equation';
+  if (lvl >= 10) return 'missing';
+  if (lvl >= 5)  return Math.random() < 0.4 ? 'missing' : 'normal';
+  return 'normal';
 }
 
 /* ── MATH SORU HAVUZU ──────────────────────────────── */
@@ -3089,6 +3117,8 @@ function nextQuestion(reset=false){
   const ops  = state.ops&&state.ops.length ? state.ops : ['+'];
   let a, b, op, key;
   let attempts = 0;
+  let questionStr = '';
+  let questionTypeUsed = 'normal';
 
   do {
     op = ops[randInt(0, ops.length-1)];
@@ -3109,22 +3139,55 @@ function nextQuestion(reset=false){
       const maxMultiplier = Math.max(2, Math.floor(divMax / b));
       a = b * randInt(2, maxMultiplier);
     }
-    key = `${a}|${op}|${b}`;
+    key = a + '|' + op + '|' + b;
     attempts++;
-    // havuz doluysa sıfırla
     if(attempts > MAX_POOL){ askedQuestions.clear(); break; }
   } while(askedQuestions.has(key));
 
   askedQuestions.add(key);
-  correctAnswer = Math.round(safeCalc(a, op, b) * 100) / 100;
-  const opDisplay = {'+':`+`, '-':`−`, '*':`×`, '/':'÷'}[op]||op;
+  const result = Math.round(safeCalc(a, op, b) * 100) / 100;
+  const opDisp = {'+':'+', '-':'−', '*':'×', '/':'÷'}[op]||op;
+
+  /* Soru tipini belirle */
+  const qType = getQuestionType(lvl);
+
+  if (qType === 'missing' && Math.random() < 0.5) {
+    /* Eksik sayı: ? + b = result veya a + ? = result */
+    questionTypeUsed = 'missing';
+    const missingA = Math.random() < 0.5;
+    if (missingA) {
+      correctAnswer = a;
+      questionStr = '? ' + opDisp + ' ' + b + ' = ' + result;
+    } else {
+      correctAnswer = b;
+      if (op === '-') {
+        questionStr = a + ' ' + opDisp + ' ? = ' + result;
+      } else {
+        questionStr = a + ' ' + opDisp + ' ? = ' + result;
+      }
+    }
+  } else if (qType === 'equation' && (op === '+' || op === '-') && Math.random() < 0.5) {
+    /* Basit denklem: 2x + b = result → x = ? */
+    questionTypeUsed = 'equation';
+    const coeff = randInt(2, Math.min(10, Math.floor(lvl / 2) + 2));
+    const eqB   = randInt(1, Math.max(1, Math.floor(max * 0.3)));
+    const eqRes = coeff * a + eqB;
+    correctAnswer = a;
+    questionStr = coeff + 'x ' + opDisp + ' ' + eqB + ' = ' + eqRes + ',  x = ?';
+  } else {
+    /* Normal soru */
+    questionTypeUsed = 'normal';
+    correctAnswer = result;
+    questionStr = a + ' ' + opDisp + ' ' + b + ' = ?';
+  }
+
   var badge = document.getElementById('levelBadge');
   if (badge) {
-    badge.innerText = 'Seviye ' + lvl;
+    badge.innerText = 'Seviye ' + lvl + (questionTypeUsed === 'missing' ? ' — Eksik Sayı' : questionTypeUsed === 'equation' ? ' — Denklem' : '');
   }
-  questionText.innerText = a + ' ' + opDisplay + ' ' + b + ' = ?';
-  rewardUI.innerText = lvl*10;
-  multiplierUI.innerText = `${lvl} × 10`;
+  questionText.innerText = questionStr;
+  rewardUI.innerText = Math.max(5, lvl*5);
+  multiplierUI.innerText = lvl + ' × 5';
   resultMsg.style.opacity = 0;
   answerInput.value = '';
   answerInput.focus();
@@ -3164,8 +3227,8 @@ function checkAnswer(){
     if (Math.abs(user - correctAnswer) < 0.01) {
       successSound();
 
-      /* Puan hesapla */
-      const gained = state.level * 10;
+      /* Puan hesapla — seviye arttıkça kazanım daha zorlu */
+      const gained = Math.max(5, state.level * 5);
       state.score  = Math.max(0, (state.score || 0) + gained);
       const board  = getCurrentBoard();
       board[state.player] = state.score;
@@ -3190,7 +3253,7 @@ function checkAnswer(){
       resultMsg.style.opacity = 1;
 
       /* Level up kontrolü */
-      const every = state.levelUpEvery || 4;
+      const every = state.levelUpEvery || 6;
       const didLevelUp = state.correctStreak > 0 && state.correctStreak % every === 0;
       if (didLevelUp) {
         state.level = Math.min(99, (state.level || 1) + 1);
@@ -3250,7 +3313,7 @@ function checkAnswer(){
       /* ── YANLIŞ ── */
       failSound();
 
-      const penalty = Math.max(5, Math.floor((state.level || 1) * 5));
+      const penalty = Math.max(10, Math.floor((state.level || 1) * 8));
       state.score   = Math.max(0, (state.score || 0) - penalty);
       const board   = getCurrentBoard();
       board[state.player] = state.score;
@@ -5394,6 +5457,7 @@ function adminSwitchTab(tab) {
   if (tab === 'bans') adminLoadBans();
   if (tab === 'requests') adminLoadRequests('open');
   if (tab === 'stats') adminLoadStats();
+  if (tab === 'logs')  adminLoadLogs();
 }
 
 function getAdminTarget() {
@@ -5595,6 +5659,51 @@ async function adminListPlayers() {
     adminLog('📋 ' + r.players.length + ' oyuncu:\n' +
       r.players.map((p,i) => (i+1) + '. ' + p.name + ' — ' + p.score + 'p' + (p.banned ? ' 🚫' : '')).join('\n'));
   } else adminLog('❌ ' + (r?.error || 'Hata'));
+}
+
+async function adminLoadLogs() {
+  adminLog('⏳ Loglar yükleniyor...');
+  var r = await adminCall('admin/logs', { limit: 100 });
+  var el = document.getElementById('adminLogList');
+  if (!el) { return; }
+  if (!r || !r.ok) { adminLog('❌ ' + (r ? r.error : 'Hata')); return; }
+  if (!r.logs || r.logs.length === 0) {
+    el.innerHTML = '<div style="color:var(--muted);font-size:12px;text-align:center;padding:8px">Log yok</div>';
+    return;
+  }
+  var actionLabels = {
+    'ban': '🚫 Banlama',
+    'unban': '✅ Ban kaldırma',
+    'reset-password': '🔑 Şifre sıfırlama',
+    'give-admin': '👑 Admin verme',
+    'remove-admin': '❌ Admin alma',
+  };
+  el.innerHTML = r.logs.map(function(log) {
+    var time = new Date(log.ts).toLocaleString('tr-TR');
+    var label = actionLabels[log.action] || ('⚡ ' + log.action);
+    return '<div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:8px;padding:8px 10px;">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center">' +
+        '<span style="font-size:12px;font-weight:700;color:#e6f7ea">' + label + '</span>' +
+        '<span style="font-size:10px;color:var(--muted)">' + time + '</span>' +
+      '</div>' +
+      '<div style="font-size:11px;color:var(--muted);margin-top:2px">' + log.detail + '</div>' +
+      '<div style="font-size:10px;color:#38bdf8;margin-top:2px">Admin: ' + log.adminName + '</div>' +
+    '</div>';
+  }).join('');
+  adminLog('✅ ' + r.logs.length + ' log yüklendi');
+}
+
+async function adminClearLogs() {
+  var ok = await showConfirm('Logları Temizle', 'Tüm admin logları silinecek. Emin misin?');
+  if (!ok) { return; }
+  var r = await adminCall('admin/clear-logs');
+  if (r && r.ok) {
+    adminLog('✅ Loglar temizlendi');
+    var el = document.getElementById('adminLogList');
+    if (el) { el.innerHTML = ''; }
+  } else {
+    adminLog('❌ ' + (r ? r.error : 'Hata'));
+  }
 }
 
 async function adminGiveAdmin() {
@@ -6009,6 +6118,7 @@ document.addEventListener('pointerdown', e => {
         <button class="admin-tab-btn" onclick="adminSwitchTab('players')">👥 Oyuncular</button>
         <button class="admin-tab-btn" onclick="adminSwitchTab('bans')">🚫 Banlar</button>
         <button class="admin-tab-btn" onclick="adminSwitchTab('requests')">📬 İstekler</button>
+        <button class="admin-tab-btn" onclick="adminSwitchTab('logs')">📜 Log</button>
         <button class="admin-tab-btn" onclick="adminSwitchTab('system')">⚙️ Sistem</button>
       </div>
 
@@ -6070,6 +6180,15 @@ document.addEventListener('pointerdown', e => {
           <button class="admin-btn admin-btn-gray" onclick="adminLoadRequests('all')" style="flex:1">📁 Hepsi</button>
         </div>
         <div id="adminRequestList" style="display:flex;flex-direction:column;gap:8px;margin-top:4px"></div>
+      </div>
+
+      <!-- LOG -->
+      <div class="admin-tab-panel" id="adminTab-logs">
+        <div style="display:flex;gap:6px">
+          <button class="admin-btn admin-btn-gray" onclick="adminLoadLogs()" style="flex:1">🔄 Logları Yükle</button>
+          <button class="admin-btn admin-btn-red"  onclick="adminClearLogs()" style="flex:1">🗑 Temizle</button>
+        </div>
+        <div id="adminLogList" style="display:flex;flex-direction:column;gap:6px;margin-top:4px;max-height:300px;overflow-y:auto"></div>
       </div>
 
       <!-- SİSTEM -->
