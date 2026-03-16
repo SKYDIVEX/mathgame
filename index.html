@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>MathGame — v2.0-beta.release — SKYDIVEX</title>
+<title>MathGame — v2.0 — SKYDIVEX</title>
 <script>
 /* 🐛 HATA GÖSTERGE — beta için */
 window.onerror = function(msg, src, line, col, err) {
@@ -18,39 +18,10 @@ window.onerror = function(msg, src, line, col, err) {
   return false;
 };
 </script>
-<script>
-/* 🔒 BETA KORUMA — HTML ekranı ile */
-window.addEventListener('load', function() {
-  var PASS = 'emineningotunegirsinbuproje';
-  var screen = document.getElementById('betaLockScreen');
-  if (!screen) return;
-  screen.style.display = 'flex';
 
-  var input = document.getElementById('betaLockInput');
-  var btn   = document.getElementById('betaLockBtn');
-  var err   = document.getElementById('betaLockErr');
-
-  function tryUnlock() {
-    if ((input.value || '').trim() === PASS) {
-      screen.style.display = 'none';
-      try { showLoginChoice(); } catch(e) { try { openAuthModal(); } catch(e2) {} }
-    } else {
-      err.textContent = 'Şifre yanlış';
-      err.style.opacity = '1';
-      input.value = '';
-      input.focus();
-    }
-  }
-
-  btn.addEventListener('click', tryUnlock);
-  input.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') tryUnlock();
-  });
-});
-</script>
 <style>
 /* ---------------------------
-   MathGame v2.0-beta.release - SKYDIVEX
+   MathGame v2.0 - SKYDIVEX
    Siyah - Yeşil final tasarım
    ---------------------------*/
 
@@ -1535,9 +1506,9 @@ body.has-bg-image .card {
 
 
 /* Admin panel sekmeleri */
-.admin-tabs { display: flex; gap: 4px; margin-bottom: 12px; flex-wrap: wrap; }
+.admin-tabs { display: flex; gap: 3px; margin-bottom: 12px; flex-wrap: wrap; }
 .admin-tab-btn {
-  flex: 1; min-width: 60px;
+  flex: 1; min-width: 44px;
   padding: 8px 6px; border: 1px solid rgba(239,68,68,0.2);
   background: transparent; color: var(--muted); font-size: 11px; font-weight: 700;
   font-family: inherit; border-radius: 8px; cursor: pointer; text-align: center;
@@ -1643,65 +1614,149 @@ body.has-bg-image .card {
 .pin-link { font-size: 12px; color: var(--muted); cursor: pointer; text-decoration: underline; text-align: center; }
 
 
-/* ── Beta Lock Screen ─────────────────────────────── */
-#betaLockScreen {
+.pin-link { font-size: 12px; color: var(--muted); cursor: pointer; text-decoration: underline; text-align: center; }
+
+
+
+
+/* ── Mesajlaşma Modalı ──────────────────────────────── */
+#chatModal {
   display: none;
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
-  z-index: 99999;
-  background: #060708;
-  flex-direction: column;
-  align-items: center;
+  z-index: 9600 !important;
+  background: rgba(2,4,10,0.97) !important;
+  background-image: none !important;
+  align-items: flex-end;
   justify-content: center;
-  padding: 24px;
+  padding: 0;
   box-sizing: border-box;
-  gap: 16px;
 }
-#betaLockCard {
+#chatModal.show { display: flex !important; }
+#chatBox {
   background: #0b1220;
-  border: 1.5px solid #1a2f28;
-  border-radius: 20px;
-  padding: 32px 24px;
+  border-top: 1.5px solid #1a2f28;
+  border-radius: 20px 20px 0 0;
   width: 100%;
-  max-width: 360px;
+  max-width: 480px;
+  height: 80vh;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 14px;
-  box-sizing: border-box;
+  overflow: hidden;
 }
-#betaLockErr {
-  font-size: 12px;
-  color: #ef4444;
-  min-height: 16px;
-  opacity: 0;
-  transition: opacity .2s;
+#chatHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid #1a2f28;
+  flex-shrink: 0;
+}
+#chatTitle { font-size: 15px; font-weight: 800; color: #e6f7ea; }
+#chatSubtitle { font-size: 11px; color: var(--muted); margin-top: 1px; }
+#chatClosBtn {
+  background: none; border: none; color: var(--muted);
+  font-size: 20px; cursor: pointer; padding: 0;
+}
+#chatMessages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.chat-msg {
+  max-width: 78%;
+  padding: 9px 13px;
+  border-radius: 16px;
+  font-size: 13px;
+  line-height: 1.5;
+  word-break: break-word;
+}
+.chat-msg.from-me {
+  align-self: flex-end;
+  background: #00cc55;
+  color: #030608;
+  border-bottom-right-radius: 4px;
+}
+.chat-msg.from-admin {
+  align-self: flex-start;
+  background: #1a2f28;
+  color: #e6f7ea;
+  border-bottom-left-radius: 4px;
+}
+.chat-msg.from-system {
+  align-self: center;
+  background: rgba(245,158,11,0.1);
+  color: #f59e0b;
+  font-size: 11px;
+  border-radius: 8px;
+  max-width: 90%;
+  text-align: center;
+}
+.chat-msg-time {
+  font-size: 10px;
+  opacity: 0.6;
+  margin-top: 3px;
+  text-align: right;
+}
+#chatInputRow {
+  display: flex;
+  gap: 8px;
+  padding: 10px 12px;
+  border-top: 1px solid #1a2f28;
+  flex-shrink: 0;
+}
+#chatInput {
+  flex: 1;
+  background: #060c18;
+  border: 1.5px solid #1a2f28;
+  border-radius: 20px;
+  color: #e6f7ea;
+  font-size: 14px;
+  padding: 10px 14px;
+  font-family: inherit;
+  outline: none;
+  resize: none;
+  max-height: 80px;
+}
+#chatInput:focus { border-color: #00ff6644; }
+#chatSendBtn {
+  background: #00ff66;
+  color: #030608;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  font-size: 18px;
+  cursor: pointer;
+  flex-shrink: 0;
+  align-self: flex-end;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#chatUnreadBadge {
+  position: absolute;
+  top: -4px; right: -4px;
+  background: #ef4444;
+  color: white;
+  font-size: 10px;
+  font-weight: 800;
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  display: none;
+  align-items: center;
+  justify-content: center;
 }
 
 </style>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 </head>
 <body>
-
-<!-- Beta Şifre Ekranı -->
-<div id="betaLockScreen">
-  <div id="betaLockCard">
-    <div style="font-size:48px">🔐</div>
-    <div style="font-size:22px;font-weight:900;color:#e6f7ea">MathGame</div>
-    <div style="font-size:13px;color:#9fb3b0;text-align:center">Beta sürümüne erişmek için şifreyi gir</div>
-    <div id="betaLockErr"></div>
-    <input id="betaLockInput" type="password"
-      placeholder="Şifre"
-      autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
-      style="width:100%;box-sizing:border-box;background:#060c18;border:1.5px solid #1a2f28;border-radius:12px;color:#e6f7ea;font-size:16px;padding:13px 16px;font-family:inherit;outline:none">
-    <button id="betaLockBtn"
-      style="width:100%;background:#00ff66;color:#030608;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:800;font-family:inherit;cursor:pointer">
-      Devam Et →
-    </button>
-    <div style="font-size:11px;color:#2a3a38">© SKYDIVEX — Yetkisiz erişim yasaktır</div>
-  </div>
-</div>
 
 <div id="bgLayer"></div>
 <div id="comboDisplay"></div>
@@ -1958,7 +2013,7 @@ body.has-bg-image .card {
           </div>
           <!-- Online ops sekmeleri -->
           <div id="lbOpsRow" style="display:none;gap:4px;flex-wrap:wrap;margin-bottom:6px" class="lb-tab-row">
-            <button class="lb-tab active" id="lbOpsAll"  onclick="switchOnlineLbOps('all')">🔢 Hepsi</button>
+            <button class="lb-tab active" id="lbOpsAll"  onclick="switchOnlineLbOps('all')">🌍 Tümü</button>
             <button class="lb-tab"        id="lbOpsPlus" onclick="switchOnlineLbOps('+')">➕</button>
             <button class="lb-tab"        id="lbOpsMinus"onclick="switchOnlineLbOps('-')">➖</button>
             <button class="lb-tab"        id="lbOpsMul"  onclick="switchOnlineLbOps('*')">✖️</button>
@@ -2061,7 +2116,7 @@ body.has-bg-image .card {
   <div class="card" style="padding:10px;font-size:12px;color:var(--muted)">
     <div style="display:flex;justify-content:space-between">
       <div>Geliştirici: <strong>SKYDIVEX</strong></div>
-      <div>Sürüm: <strong>v2.0-beta.release</strong></div>
+      <div>Sürüm: <strong>v2.0</strong></div>
     </div>
   </div>
 </div>
@@ -2100,7 +2155,7 @@ body.has-bg-image .card {
     <div style="display:flex;justify-content:space-between;align-items:center">
       <div>
         <div style="font-weight:900;font-size:18px">⚙️ Ayarlar</div>
-        <div style="color:var(--muted);margin-top:4px;font-size:13px">MathGame v2.0-beta.release — SKYDIVEX</div>
+        <div style="color:var(--muted);margin-top:4px;font-size:13px">MathGame v2.0 — SKYDIVEX</div>
       </div>
     </div>
 
@@ -2199,8 +2254,8 @@ body.has-bg-image .card {
       <div style="display:flex;justify-content:space-between;align-items:flex-start">
         <div>
           <div class="about-hero-title">MathGame</div>
-          <div class="about-hero-sub">Skydivex Edition — v2.0 beta</div>
-          <div class="about-badge">⚡ v2.0-beta.release</div>
+          <div class="about-hero-sub">Skydivex Edition — v2.0</div>
+          <div class="about-badge">⚡ v2.0</div>
         </div>
         <button id="closeAboutModal" class="btn ghost" style="padding:7px 14px;font-size:13px">✕</button>
       </div>
@@ -2215,7 +2270,7 @@ body.has-bg-image .card {
           <div class="about-how-item">
             <div class="how-icon">🧮</div>
             <div class="how-title">Matematik Modu</div>
-            <div class="how-desc">Gelen soruyu cevapla, seviye atla. Ödül = Seviye × 10p.</div>
+            <div class="how-desc">Gelen soruyu cevapla, seviye atla. Ödül = Seviye × 5p.</div>
           </div>
           <div class="about-how-item">
             <div class="how-icon">🤪</div>
@@ -2224,18 +2279,28 @@ body.has-bg-image .card {
           </div>
           <div class="about-how-item">
             <div class="how-icon">📈</div>
-            <div class="how-title">Seviye Sistemi</div>
-            <div class="how-desc">Her doğruda seri artar. Belirlenen seriye ulaşınca seviye atlanır.</div>
+            <div class="how-title">Artan Zorluk</div>
+            <div class="how-desc">Seviye 5'ten itibaren eksik sayı, seviye 15'ten denklem soruları çıkar.</div>
           </div>
           <div class="about-how-item">
             <div class="how-icon">💥</div>
             <div class="how-title">Ceza Sistemi</div>
-            <div class="how-desc">Yanlış cevapta puan kesilir: max(5, Seviye × 5) puan.</div>
+            <div class="how-desc">Yanlış cevapta puan kesilir: max(10, Seviye × 8) puan.</div>
+          </div>
+          <div class="about-how-item">
+            <div class="how-icon">🌐</div>
+            <div class="how-title">Online Liderlik</div>
+            <div class="how-desc">Kategoriye göre ayrı tablolar: Toplama, Çıkarma, Çarpma, Bölme, Karma.</div>
+          </div>
+          <div class="about-how-item">
+            <div class="how-icon">🔐</div>
+            <div class="how-title">Hesap Sistemi</div>
+            <div class="how-desc">Google veya e-posta ile giriş yap. PIN belirle — Google olmadan da giriş yap.</div>
           </div>
           <div class="about-how-item">
             <div class="how-icon">🏆</div>
             <div class="how-title">Başarılar</div>
-            <div class="how-desc">16 farklı başarı rozeti — oyna, kazan, kilitleri aç!</div>
+            <div class="how-desc">32 farklı başarı rozeti — seri, seviye, puan ve daha fazlası.</div>
           </div>
           <div class="about-how-item">
             <div class="how-icon">📅</div>
@@ -2267,7 +2332,11 @@ body.has-bg-image .card {
           </div>
           <div class="about-changelog-item">
             <span class="cl-ver">v2.0</span>
-            <span class="cl-text">Absürt Mod (AI destekli, Groq/Cloudflare Worker), başarı sistemi, günlük görevler, 5 tema, arka plan kütüphanesi, partikül & konfeti efektleri, level-up tam ekran, istatistik paneli.</span>
+            <span class="cl-text">Absürt Mod (AI/Groq), başarı sistemi (32 rozet), günlük görevler, 5 tema, arka plan kütüphanesi, partikül & konfeti, level-up ekranı, istatistik paneli.</span>
+          </div>
+          <div class="about-changelog-item" style="border-left:2px solid var(--neon)">
+            <span class="cl-ver" style="background:rgba(0,255,102,0.15);color:var(--neon)">v2.0</span>
+            <span class="cl-text">Google + e-posta girişi, oyuna özel PIN sistemi, online liderlik tablosu (kategori bazlı), istatistik & başarım bulut kaydı, admin paneli (ban/unban, istek havuzu, admin log), artan zorluk sistemi (eksik sayı & denklem soruları), yeniden dengelenmiş puanlama.</span>
           </div>
         </div>
       </div>
@@ -2275,7 +2344,7 @@ body.has-bg-image .card {
     </div>
 
     <div class="about-footer">
-      <div style="font-size:12px;color:var(--muted)">Yapımcı: <strong style="color:var(--neon)">SKYDIVEX</strong> • 2025</div>
+      <div style="font-size:12px;color:var(--muted)">Yapımcı: <strong style="color:var(--neon)">SKYDIVEX</strong> • 2026</div>
       <div style="font-size:11px;color:rgba(255,255,255,0.3)">Tüm hakları saklıdır</div>
     </div>
 
@@ -2284,7 +2353,7 @@ body.has-bg-image .card {
 
 <script>
 /* --------------------------
-   MathGame v2.0-beta.release - Logic JS
+   MathGame v2.0 - Logic JS
    -------------------------- */
 
 /* State */
@@ -2309,7 +2378,7 @@ function defaultState() {
   return {
     player: null, score: 0, level: 1,
     leaderboard: {}, ops: ['+','-','*','/'],
-    soundOn: true, levelUpEvery: 4,
+    soundOn: true, levelUpEvery: 6,
     btnColor: '#00ff66', bgColor: '#0b1220', bgImage: null,
     theme: 'green', bgLibId: null, bgLibGradient: null,
     bgLibPhotoUrl: null, bgLibFallback: null,
@@ -2866,7 +2935,7 @@ if (authUser && authUser.uid) {
   levelDisplay.innerText = state.level;
   updateMiniInfo();
 } else {
-  /* Giriş yapılmamış */
+  /* Giriş yapılmamış — beta şifresi geçtiyse aç */
   setTimeout(function() {
     try { openAuthModal(); } catch(e) {}
   }, 300);
@@ -3055,8 +3124,8 @@ function loadGameUI(){
   playerDisplay.innerText=state.player;
   levelUI.innerText=state.level;
   scoreUI.innerText=state.score;
-  multiplierUI.innerText=`${state.level} × 10`;
-  rewardUI.innerText=state.level*10;
+  multiplierUI.innerText = state.level + ' × 5';
+  rewardUI.innerText = Math.max(5, state.level * 5);
 }
 
 /*
@@ -3068,8 +3137,22 @@ function loadGameUI(){
   Seviye 30 → toplama/çıkarma: 1–2000, çarpma: 1–99×1–99,  bölme: büyük
 */
 function difficultyMax(lvl){
-  // Üstel büyüme: lvl 1 ≈ 10, lvl 10 ≈ 150, lvl 20 ≈ 600, lvl 30 ≈ 2000
-  return Math.min(Math.floor(8 * Math.pow(1.22, lvl)), 9999);
+  /* lvl 1→12, lvl 5→50, lvl 10→250, lvl 20→3000, lvl 30→30000 */
+  return Math.min(Math.floor(6 * Math.pow(1.45, lvl)), 99999);
+}
+
+/* Seviyeye göre soru tipi belirle */
+function getQuestionType(lvl) {
+  /* Seviye 1-4: normal işlem
+     Seviye 5-9: eksik sayı (? + 3 = 7)
+     Seviye 10-14: çift işlem (a + b + c)
+     Seviye 15-19: denklem (2x + 3 = 11, x = ?)
+     Seviye 20+: eşitsizlik (a + b > ? kaçtan büyükse doğru) */
+  if (lvl >= 20) return 'equation';
+  if (lvl >= 15) return 'equation';
+  if (lvl >= 10) return 'missing';
+  if (lvl >= 5)  return Math.random() < 0.4 ? 'missing' : 'normal';
+  return 'normal';
 }
 
 /* ── MATH SORU HAVUZU ──────────────────────────────── */
@@ -3084,6 +3167,8 @@ function nextQuestion(reset=false){
   const ops  = state.ops&&state.ops.length ? state.ops : ['+'];
   let a, b, op, key;
   let attempts = 0;
+  let questionStr = '';
+  let questionTypeUsed = 'normal';
 
   do {
     op = ops[randInt(0, ops.length-1)];
@@ -3104,22 +3189,55 @@ function nextQuestion(reset=false){
       const maxMultiplier = Math.max(2, Math.floor(divMax / b));
       a = b * randInt(2, maxMultiplier);
     }
-    key = `${a}|${op}|${b}`;
+    key = a + '|' + op + '|' + b;
     attempts++;
-    // havuz doluysa sıfırla
     if(attempts > MAX_POOL){ askedQuestions.clear(); break; }
   } while(askedQuestions.has(key));
 
   askedQuestions.add(key);
-  correctAnswer = Math.round(safeCalc(a, op, b) * 100) / 100;
-  const opDisplay = {'+':`+`, '-':`−`, '*':`×`, '/':'÷'}[op]||op;
+  const result = Math.round(safeCalc(a, op, b) * 100) / 100;
+  const opDisp = {'+':'+', '-':'−', '*':'×', '/':'÷'}[op]||op;
+
+  /* Soru tipini belirle */
+  const qType = getQuestionType(lvl);
+
+  if (qType === 'missing' && Math.random() < 0.5) {
+    /* Eksik sayı: ? + b = result veya a + ? = result */
+    questionTypeUsed = 'missing';
+    const missingA = Math.random() < 0.5;
+    if (missingA) {
+      correctAnswer = a;
+      questionStr = '? ' + opDisp + ' ' + b + ' = ' + result;
+    } else {
+      correctAnswer = b;
+      if (op === '-') {
+        questionStr = a + ' ' + opDisp + ' ? = ' + result;
+      } else {
+        questionStr = a + ' ' + opDisp + ' ? = ' + result;
+      }
+    }
+  } else if (qType === 'equation' && (op === '+' || op === '-') && Math.random() < 0.5) {
+    /* Basit denklem: 2x + b = result → x = ? */
+    questionTypeUsed = 'equation';
+    const coeff = randInt(2, Math.min(10, Math.floor(lvl / 2) + 2));
+    const eqB   = randInt(1, Math.max(1, Math.floor(max * 0.3)));
+    const eqRes = coeff * a + eqB;
+    correctAnswer = a;
+    questionStr = coeff + 'x ' + opDisp + ' ' + eqB + ' = ' + eqRes + ',  x = ?';
+  } else {
+    /* Normal soru */
+    questionTypeUsed = 'normal';
+    correctAnswer = result;
+    questionStr = a + ' ' + opDisp + ' ' + b + ' = ?';
+  }
+
   var badge = document.getElementById('levelBadge');
   if (badge) {
-    badge.innerText = 'Seviye ' + lvl;
+    badge.innerText = 'Seviye ' + lvl + (questionTypeUsed === 'missing' ? ' — Eksik Sayı' : questionTypeUsed === 'equation' ? ' — Denklem' : '');
   }
-  questionText.innerText = a + ' ' + opDisplay + ' ' + b + ' = ?';
-  rewardUI.innerText = lvl*10;
-  multiplierUI.innerText = `${lvl} × 10`;
+  questionText.innerText = questionStr;
+  rewardUI.innerText = Math.max(5, lvl*5);
+  multiplierUI.innerText = lvl + ' × 5';
   resultMsg.style.opacity = 0;
   answerInput.value = '';
   answerInput.focus();
@@ -3159,8 +3277,8 @@ function checkAnswer(){
     if (Math.abs(user - correctAnswer) < 0.01) {
       successSound();
 
-      /* Puan hesapla */
-      const gained = state.level * 10;
+      /* Puan hesapla — seviye arttıkça kazanım daha zorlu */
+      const gained = Math.max(5, state.level * 5);
       state.score  = Math.max(0, (state.score || 0) + gained);
       const board  = getCurrentBoard();
       board[state.player] = state.score;
@@ -3185,7 +3303,7 @@ function checkAnswer(){
       resultMsg.style.opacity = 1;
 
       /* Level up kontrolü */
-      const every = state.levelUpEvery || 4;
+      const every = state.levelUpEvery || 6;
       const didLevelUp = state.correctStreak > 0 && state.correctStreak % every === 0;
       if (didLevelUp) {
         state.level = Math.min(99, (state.level || 1) + 1);
@@ -3245,7 +3363,7 @@ function checkAnswer(){
       /* ── YANLIŞ ── */
       failSound();
 
-      const penalty = Math.max(5, Math.floor((state.level || 1) * 5));
+      const penalty = Math.max(10, Math.floor((state.level || 1) * 8));
       state.score   = Math.max(0, (state.score || 0) - penalty);
       const board   = getCurrentBoard();
       board[state.player] = state.score;
@@ -4630,6 +4748,7 @@ const firebaseConfig = {
 
 let fbApp  = null;
 let fbAuth = null;
+let fbDB   = null;
 var fbReady = false; /* Firebase hazır mı? */
 
 /* Protokol kontrolü — file/content protokolünde Firebase çalışmaz */
@@ -4640,6 +4759,7 @@ try {
   if (typeof firebase === 'undefined') throw new Error('Firebase SDK yüklenmedi');
   fbApp  = firebase.initializeApp(firebaseConfig);
   fbAuth = firebase.auth();
+  fbDB   = firebase.database();
   fbReady = true;
 
   /* Google giriş sonrası */
@@ -4693,6 +4813,9 @@ try {
       try { await syncOnlineScore(); } catch(e) { console.warn('syncOnlineScore hata:', e); }
       try { await loadProfileFromCloud(); } catch(e) { console.warn('loadProfileFromCloud hata:', e); }
     }
+
+    /* Okunmamış mesaj listener'ı başlat */
+    try { startUnreadListener(); } catch(e) {}
 
     /* PIN ayarlanmamışsa belirleme ekranı göster */
     if (workerToken && !workerHasPin) {
@@ -4952,17 +5075,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* Google */
   const googleBtn = document.getElementById('authGoogleBtn');
-  if (googleBtn) googleBtn.addEventListener('click', async () => {
-    if (!fbAuth) { showAuthError('Google girişi şu an kullanılamıyor'); return; }
-    try {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      await fbAuth.signInWithPopup(provider);
-    } catch(e) {
-      if (e.code !== 'auth/popup-closed-by-user') {
-        showAuthError('Google girişi başarısız: ' + (e.message || e.code));
-      }
-    }
-  });
+  if (googleBtn) googleBtn.addEventListener('click', function() { handleGoogleLogin(); });
 
   /* Misafir */
   const skipBtn = document.getElementById('authSkipBtn');
@@ -5028,10 +5141,11 @@ function getFirebaseErrorMsg(code) {
 
 async function handleEmailAuth() {
   if (!fbAuth) { showAuthError('Firebase yüklenemedi, sayfayı yenile.'); return; }
-  const isRegister  = document.getElementById('authTabRegister').classList.contains('active');
-  const email       = (document.getElementById('authEmail').value || '').trim();
-  const displayName = (document.getElementById('authDisplayName').value || '').trim();
-  const password    = (document.getElementById('authPassword').value || '');
+
+  var isRegister  = document.getElementById('authTabRegister').classList.contains('active');
+  var email       = (document.getElementById('authEmail').value || '').trim();
+  var displayName = (document.getElementById('authDisplayName').value || '').trim();
+  var password    = (document.getElementById('authPassword').value || '');
   clearAuthError();
 
   if (!email)    { showAuthError('E-posta adresi gerekli'); return; }
@@ -5039,23 +5153,47 @@ async function handleEmailAuth() {
   if (password.length < 6) { showAuthError('Şifre en az 6 karakter olmalı'); return; }
   if (isRegister && displayName.length < 2) { showAuthError('Kullanıcı adı en az 2 karakter olmalı'); return; }
 
-  const btn = document.getElementById('authSubmitBtn');
-  const origText = btn.textContent;
-  btn.textContent = '⏳'; btn.disabled = true;
+  var btn = document.getElementById('authSubmitBtn');
+  var origText = btn ? btn.textContent : '';
+  if (btn) { btn.textContent = '⏳'; btn.disabled = true; }
 
   try {
+    var cred;
+    var name;
     if (isRegister) {
-      const cred = await fbAuth.createUserWithEmailAndPassword(email, password);
-      const name = sanitizeUsername(displayName || email.split('@')[0]);
+      /* Kayıt ol */
+      cred = await fbAuth.createUserWithEmailAndPassword(email, password);
+      name = sanitizeUsername(displayName || email.split('@')[0]);
       await cred.user.updateProfile({ displayName: name });
-      /* onAuthStateChanged otomatik devam eder */
     } else {
-      await fbAuth.signInWithEmailAndPassword(email, password);
-      /* onAuthStateChanged otomatik devam eder */
+      /* Giriş yap */
+      cred = await fbAuth.signInWithEmailAndPassword(email, password);
+      name = sanitizeUsername(cred.user.displayName || email.split('@')[0]);
     }
+
+    /* Sonucu direkt işle — onAuthStateChanged'ı bekleme */
+    var user = cred.user;
+    var workerToken = null;
+    try {
+      var fbRes = await workerPost('firebase-login', { uid: user.uid, name: name, email: email });
+      if (fbRes && fbRes.ok) { workerToken = fbRes.token; }
+    } catch(e) { console.warn('Worker hata:', e); }
+
+    saveAuth({ uid: user.uid, name: name, email: email, provider: 'email', token: workerToken || null });
+    loadState(user.uid);
+    state.player = name;
+    closeModal(document.getElementById('authModal'));
+    updateProfileBtn();
+    showScreen('menu');
+    refreshMenuPanels();
+    showToast('✅ Hoş geldin, ' + name + '!');
+    try { await syncOnlineScore(); } catch(e) {}
+    try { await loadProfileFromCloud(); } catch(e) {}
+    try { startUnreadListener(); } catch(e) {}
+
   } catch(e) {
     showAuthError(getFirebaseErrorMsg(e.code));
-    btn.textContent = origText; btn.disabled = false;
+    if (btn) { btn.textContent = origText; btn.disabled = false; }
   }
 }
 
@@ -5366,6 +5504,8 @@ async function openAdminPanel() {
   clickSound();
   adminLog('Admin paneli açıldı. Hoş geldin ' + authUser.name + '!');
   adminLoadStats();
+  /* Panel açılışını da logla */
+  try { await workerPost('admin/write-log', { token: authUser.token, action: 'panel-open', detail: authUser.name + ' paneli açtı' }); } catch(e) {}
 }
 
 function adminLog(msg) {
@@ -5389,6 +5529,7 @@ function adminSwitchTab(tab) {
   if (tab === 'bans') adminLoadBans();
   if (tab === 'requests') adminLoadRequests('open');
   if (tab === 'stats') adminLoadStats();
+  if (tab === 'logs')  adminLoadLogs();
 }
 
 function getAdminTarget() {
@@ -5400,6 +5541,14 @@ function getAdminOps() {
 }
 
 async function adminCall(endpoint, extra = {}) {
+  if (!authUser) {
+    adminLog('❌ Giriş yapılmamış');
+    return null;
+  }
+  if (!authUser.token) {
+    adminLog('❌ Token yok — çıkış yapıp tekrar giriş yap');
+    return null;
+  }
   try {
     const result = await workerPost(endpoint, { token: authUser.token, ...extra });
     return result;
@@ -5432,7 +5581,7 @@ async function adminPlayerInfo() {
     const banInfo = r.banned ? '🚫 ' + r.banned.reason : '✅ Temiz';
     box.style.display = 'block';
     box.innerHTML = '<b style="color:#e6f7ea">' + r.name + '</b><br>' +
-      'UID: ' + r.uid.slice(0,12) + '...<br>' +
+      'UID: <span style="font-size:10px;word-break:break-all">' + r.uid + '</span><br>' +
       'Giriş: ' + (r.provider === 'google' ? '🔵 Google' : '📧 E-posta') + '<br>' +
       'Kayıt: ' + created + '<br>' +
       'Skor: ' + r.score + 'p | Sıra: ' + (r.rank || '?') + '<br>' +
@@ -5465,6 +5614,15 @@ async function adminRemovePlayer() {
   const r = await adminCall('admin/remove-player', { targetName: name, ops });
   if (r?.ok) { adminLog('✅ ' + r.removed + ' tablodan çıkarıldı'); fetchOnlineLeaderboard(); }
   else adminLog('❌ ' + (r?.error || 'Hata'));
+}
+
+function adminOpenChat() {
+  var btn = document.getElementById('adminChatBtn');
+  if (!btn || !btn.dataset.uid) { adminLog('❌ Önce oyuncu bilgisini çek'); return; }
+  closeModal(document.getElementById('adminModal'));
+  setTimeout(function() {
+    openAdminChatFor(btn.dataset.uid, btn.dataset.name);
+  }, 200);
 }
 
 async function adminBan() {
@@ -5512,42 +5670,61 @@ async function adminUnbanById(name) {
   else adminLog('❌ ' + (r?.error || 'Hata'));
 }
 
-async function adminLoadRequests(status = 'open') {
+async function adminLoadRequests(status) {
+  if (!status) { status = 'open'; }
   adminLog('⏳ İstekler yükleniyor...');
-  const r = await adminCall('admin/requests', { status });
-  const el = document.getElementById('adminRequestList');
-  if (!el) return;
-  if (r?.ok) {
-    if (r.requests.length === 0) { el.innerHTML = '<div style="color:var(--muted);font-size:12px;text-align:center;padding:8px">İstek yok</div>'; return; }
-    el.innerHTML = r.requests.map(req => {
-      const typeClass = 'req-type-' + req.type;
-      const statusClass = 'status-' + req.status;
-      const typeLabel = {bug:'🐛 Bug',unban:'🔓 Unban',suggestion:'💡 Öneri',report:'⚠️ Şikayet',reset:'🔑 Şifre',other:'📝 Diğer'}[req.type] || req.type;
-      const statusLabel = {open:'⏳ Açık',resolved:'✅ Çözüldü',rejected:'❌ Reddedildi'}[req.status] || req.status;
-      const codeHtml = req.code ? '<div class="admin-req-code">Kod: ' + req.code + '</div>' : '';
-      const actionsHtml = req.status === 'open' ?
-        '<div class="admin-req-actions">' +
-          '<button class="admin-btn admin-btn-green" style="font-size:11px;padding:5px 10px" onclick="adminResolveReq(`' + req.id + '`,`resolved`)">✅ Çöz</button>' +
-          '<button class="admin-btn admin-btn-red" style="font-size:11px;padding:5px 10px" onclick="adminResolveReq(`' + req.id + '`,`rejected`)">❌ Reddet</button>' +
-        '</div>' : '';
-      return '<div class="admin-req-card">' +
-        '<div class="admin-req-header">' +
-          '<span class="admin-req-type ' + typeClass + '">' + typeLabel + '</span>' +
-          '<span class="admin-req-status ' + statusClass + '">' + statusLabel + '</span>' +
+  var r = await adminCall('admin/requests', { status: status });
+  var el = document.getElementById('adminRequestList');
+  if (!el) { return; }
+  if (!r || !r.ok) { adminLog('❌ ' + (r ? r.error : 'Hata')); return; }
+  if (!r.requests || r.requests.length === 0) {
+    el.innerHTML = '<div style="color:var(--muted);font-size:12px;text-align:center;padding:8px">İstek yok</div>';
+    adminLog('✅ İstek yok');
+    return;
+  }
+  el.innerHTML = r.requests.map(function(req) {
+    var typeLabels   = { bug:'🐛 Bug', unban:'🔓 Unban', suggestion:'💡 Öneri', report:'⚠️ Şikayet', reset:'🔑 Şifre', other:'📝 Diğer' };
+    var statusLabels = { open:'⏳ Açık', resolved:'✅ Çözüldü', rejected:'❌ Reddedildi' };
+    var typeClass    = 'req-type-' + (req.type || 'other');
+    var statusClass  = 'status-' + (req.status || 'open');
+    var typeLabel    = typeLabels[req.type]   || req.type;
+    var statusLabel  = statusLabels[req.status] || req.status;
+    var codeHtml     = req.code ? '<div class="admin-req-code">Kod: ' + req.code + '</div>' : '';
+    var adminNoteHtml = req.adminNote ?
+      '<div style="font-size:11px;color:#38bdf8;margin-top:4px;padding:4px 8px;background:rgba(56,189,248,0.08);border-radius:6px">💬 Admin yanıtı: ' + req.adminNote + '</div>' : '';
+    var actionsHtml = req.status === 'open' ?
+      '<div style="display:flex;flex-direction:column;gap:4px;margin-top:6px">' +
+        '<input id="note_' + req.id + '" class="admin-input" placeholder="Yanıt yaz (isteğe bağlı)" style="font-size:11px;padding:6px 10px">' +
+        '<div style="display:flex;gap:6px">' +
+          '<button class="admin-btn admin-btn-green" style="font-size:11px;padding:5px 10px;flex:1" onclick="adminResolveReqWithNote(`' + req.id + '`,`resolved`)">✅ Çöz</button>' +
+          '<button class="admin-btn admin-btn-red" style="font-size:11px;padding:5px 10px;flex:1" onclick="adminResolveReqWithNote(`' + req.id + '`,`rejected`)">❌ Reddet</button>' +
         '</div>' +
-        '<div class="admin-req-name">' + req.name + '</div>' +
-        '<div class="admin-req-msg">' + req.message + '</div>' +
-        codeHtml + actionsHtml +
-      '</div>';
-    }).join('');
-    adminLog('✅ ' + r.requests.length + ' istek yüklendi');
-  } else adminLog('❌ ' + (r?.error || 'Hata'));
+      '</div>' : adminNoteHtml;
+    return '<div class="admin-req-card">' +
+      '<div class="admin-req-header">' +
+        '<span class="admin-req-type ' + typeClass + '">' + typeLabel + '</span>' +
+        '<span class="admin-req-status ' + statusClass + '">' + statusLabel + '</span>' +
+      '</div>' +
+      '<div class="admin-req-name">' + req.name + '</div>' +
+      '<div class="admin-req-msg">' + req.message + '</div>' +
+      codeHtml + actionsHtml +
+    '</div>';
+  }).join('');
+  adminLog('✅ ' + r.requests.length + ' istek yüklendi');
 }
 
 async function adminResolveReq(id, status) {
   const r = await adminCall('admin/resolve-request', { id, status });
-  if (r?.ok) { adminLog('✅ İstek güncellendi'); adminLoadRequests('open'); }
-  else adminLog('❌ ' + (r?.error || 'Hata'));
+  if (r && r.ok) { adminLog('✅ İstek güncellendi'); adminLoadRequests('open'); }
+  else adminLog('❌ ' + (r ? r.error : 'Hata'));
+}
+
+async function adminResolveReqWithNote(id, status) {
+  var noteEl = document.getElementById('note_' + id);
+  var adminNote = noteEl ? noteEl.value.trim() : '';
+  const r = await adminCall('admin/resolve-request', { id, status, adminNote });
+  if (r && r.ok) { adminLog('✅ İstek güncellendi' + (adminNote ? ' (yanıt eklendi)' : '')); adminLoadRequests('open'); }
+  else adminLog('❌ ' + (r ? r.error : 'Hata'));
 }
 
 async function adminResetPass() {
@@ -5590,6 +5767,51 @@ async function adminListPlayers() {
     adminLog('📋 ' + r.players.length + ' oyuncu:\n' +
       r.players.map((p,i) => (i+1) + '. ' + p.name + ' — ' + p.score + 'p' + (p.banned ? ' 🚫' : '')).join('\n'));
   } else adminLog('❌ ' + (r?.error || 'Hata'));
+}
+
+async function adminLoadLogs() {
+  adminLog('⏳ Loglar yükleniyor...');
+  var r = await adminCall('admin/logs', { limit: 100 });
+  var el = document.getElementById('adminLogList');
+  if (!el) { return; }
+  if (!r || !r.ok) { adminLog('❌ ' + (r ? r.error : 'Hata')); return; }
+  if (!r.logs || r.logs.length === 0) {
+    el.innerHTML = '<div style="color:var(--muted);font-size:12px;text-align:center;padding:8px">Log yok</div>';
+    return;
+  }
+  var actionLabels = {
+    'ban': '🚫 Banlama',
+    'unban': '✅ Ban kaldırma',
+    'reset-password': '🔑 Şifre sıfırlama',
+    'give-admin': '👑 Admin verme',
+    'remove-admin': '❌ Admin alma',
+  };
+  el.innerHTML = r.logs.map(function(log) {
+    var time = new Date(log.ts).toLocaleString('tr-TR');
+    var label = actionLabels[log.action] || ('⚡ ' + log.action);
+    return '<div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:8px;padding:8px 10px;">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center">' +
+        '<span style="font-size:12px;font-weight:700;color:#e6f7ea">' + label + '</span>' +
+        '<span style="font-size:10px;color:var(--muted)">' + time + '</span>' +
+      '</div>' +
+      '<div style="font-size:11px;color:var(--muted);margin-top:2px">' + log.detail + '</div>' +
+      '<div style="font-size:10px;color:#38bdf8;margin-top:2px">Admin: ' + log.adminName + '</div>' +
+    '</div>';
+  }).join('');
+  adminLog('✅ ' + r.logs.length + ' log yüklendi');
+}
+
+async function adminClearLogs() {
+  var ok = await showConfirm('Logları Temizle', 'Tüm admin logları silinecek. Emin misin?');
+  if (!ok) { return; }
+  var r = await adminCall('admin/clear-logs');
+  if (r && r.ok) {
+    adminLog('✅ Loglar temizlendi');
+    var el = document.getElementById('adminLogList');
+    if (el) { el.innerHTML = ''; }
+  } else {
+    adminLog('❌ ' + (r ? r.error : 'Hata'));
+  }
 }
 
 async function adminGiveAdmin() {
@@ -5705,6 +5927,49 @@ function switchAuthTab(tab) {
     if (divider)    { divider.style.display = 'none'; }
   }
   try { clearAuthError(); } catch(e) {}
+}
+
+
+async function handleGoogleLogin() {
+  if (!fbAuth) { showToast('Google girişi şu an kullanılamıyor', '#ef4444'); return; }
+  try {
+    var provider = new firebase.auth.GoogleAuthProvider();
+    var result = await fbAuth.signInWithPopup(provider);
+    if (!result || !result.user) { return; }
+    var user = result.user;
+    var name = sanitizeUsername(user.displayName || user.email.split('@')[0]);
+    var workerToken  = null;
+    var workerHasPin = false;
+    try {
+      var fbRes = await workerPost('firebase-login', { uid: user.uid, name: name, email: user.email || '' });
+      if (fbRes && fbRes.ok) {
+        workerToken  = fbRes.token;
+        workerHasPin = fbRes.hasPin === true;
+      }
+    } catch(e) { console.warn('Worker firebase-login hata:', e); }
+    saveAuth({ uid: user.uid, name: name, email: user.email || '', provider: 'google', token: workerToken || null });
+    loadState(user.uid);
+    state.player = name;
+    closeModal(document.getElementById('authModal'));
+    updateProfileBtn();
+    showScreen('menu');
+    refreshMenuPanels();
+    showToast('✅ Hoş geldin, ' + name + '!');
+    try { await syncOnlineScore(); } catch(e) {}
+    try { await loadProfileFromCloud(); } catch(e) {}
+    try { startUnreadListener(); } catch(e) {}
+    if (workerToken && !workerHasPin) {
+      var pinSkipped = localStorage.getItem('mathgame_pin_skipped_' + user.uid);
+      if (!pinSkipped) {
+        setTimeout(function() { openPinModal('set'); }, 1000);
+      }
+    }
+  } catch(e) {
+    if (e.code !== 'auth/popup-closed-by-user') {
+      showToast('Google girişi başarısız: ' + (e.message || e.code), '#ef4444');
+      try { showAuthError('Google girişi başarısız: ' + (e.message || e.code)); } catch(ex) {}
+    }
+  }
 }
 
 /* ══════════════════════════════════════════════════════
@@ -5928,6 +6193,175 @@ document.addEventListener('DOMContentLoaded', function() {
 
 /* Profil modalına PIN değiştir butonu */
 
+/* ══════════════════════════════════════════════════════
+   ANLIK MESAJLAŞMA — Firebase Realtime Database
+   ══════════════════════════════════════════════════════ */
+
+var _chatListener   = null;  /* Firebase listener referansı */
+var _chatUid        = null;  /* Şu an açık olan konuşmanın UID'i */
+var _chatIsAdmin    = false; /* Admin modunda mı açık */
+
+/* Kullanıcı kendi chat'ini açar */
+function openChatModal() {
+  if (!authUser) { showToast('Önce giriş yap', '#ef4444'); return; }
+  if (!fbDB) { showToast('Anlık mesajlaşma şu an kullanılamıyor', '#ef4444'); return; }
+  _chatIsAdmin = false;
+  _chatUid     = authUser.uid;
+  var title    = document.getElementById('chatTitle');
+  var subtitle = document.getElementById('chatSubtitle');
+  if (title)    { title.textContent    = '💬 Mesajlar'; }
+  if (subtitle) { subtitle.textContent = 'Admin ile iletişim'; }
+  document.getElementById('chatModal').classList.add('show');
+  loadChatMessages(_chatUid);
+  markChatRead(_chatUid);
+}
+
+/* Admin başka birinin chat'ini açar */
+function openAdminChatFor(uid, name) {
+  if (!fbDB) { showToast('Database bağlantısı yok', '#ef4444'); return; }
+  _chatIsAdmin = true;
+  _chatUid     = uid;
+  var title    = document.getElementById('chatTitle');
+  var subtitle = document.getElementById('chatSubtitle');
+  if (title)    { title.textContent    = '💬 ' + name; }
+  if (subtitle) { subtitle.textContent = 'Admin olarak yazıyorsun'; }
+  document.getElementById('chatModal').classList.add('show');
+  loadChatMessages(uid);
+}
+
+function closeChatModal() {
+  document.getElementById('chatModal').classList.remove('show');
+  if (_chatListener) {
+    try { _chatListener(); } catch(e) {}
+    _chatListener = null;
+  }
+  _chatUid = null;
+}
+
+function loadChatMessages(uid) {
+  var messagesEl = document.getElementById('chatMessages');
+  if (!messagesEl) { return; }
+  messagesEl.innerHTML = '<div class="chat-msg from-system">Yükleniyor...</div>';
+
+  /* Eski listener'ı kaldır */
+  if (_chatListener) {
+    try { _chatListener(); } catch(e) {}
+  }
+
+  var ref = fbDB.ref('chats/' + uid + '/messages');
+
+  /* Son 100 mesajı dinle */
+  var query = ref.limitToLast(100);
+
+  _chatListener = query.on('value', function(snapshot) {
+    var msgs = [];
+    snapshot.forEach(function(child) {
+      msgs.push(child.val());
+    });
+
+    if (msgs.length === 0) {
+      messagesEl.innerHTML = '<div class="chat-msg from-system">Henüz mesaj yok. Bir şeyler yaz!</div>';
+      return;
+    }
+
+    messagesEl.innerHTML = msgs.map(function(msg) {
+      var isMe    = _chatIsAdmin ? (msg.sender === 'admin') : (msg.sender === 'user');
+      var cls     = isMe ? 'from-me' : (_chatIsAdmin ? 'from-user' : 'from-admin');
+      var timeStr = new Date(msg.ts).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+      var senderName = msg.sender === 'admin' ? '⚡ Admin' : (msg.senderName || 'Sen');
+      return '<div class="chat-msg ' + cls + '">' +
+        '<div>' + escapeHtml(msg.text) + '</div>' +
+        '<div class="chat-msg-time">' + (isMe ? '' : senderName + ' · ') + timeStr + '</div>' +
+      '</div>';
+    }).join('');
+
+    /* En alta kaydır */
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+
+    /* Okundu işaretle */
+    if (!_chatIsAdmin) {
+      markChatRead(uid);
+    }
+  });
+}
+
+async function sendChatMsg() {
+  if (!fbDB || !_chatUid) { return; }
+  var input = document.getElementById('chatInput');
+  var text  = (input.value || '').trim();
+  if (!text) { return; }
+
+  input.value = '';
+  input.style.height = 'auto';
+
+  var sender     = _chatIsAdmin ? 'admin' : 'user';
+  var senderName = authUser ? authUser.name : 'Admin';
+
+  try {
+    var ref = fbDB.ref('chats/' + _chatUid + '/messages');
+    await ref.push({
+      text:       text,
+      sender:     sender,
+      senderName: senderName,
+      ts:         Date.now(),
+      read:       _chatIsAdmin ? false : true,
+    });
+
+    /* Okunmamış sayacını güncelle (admin mesaj attıysa user için unread++) */
+    if (_chatIsAdmin) {
+      var unreadRef = fbDB.ref('chats/' + _chatUid + '/unread');
+      unreadRef.transaction(function(current) {
+        return (current || 0) + 1;
+      });
+    }
+  } catch(e) {
+    showToast('Mesaj gönderilemedi: ' + e.message, '#ef4444');
+  }
+}
+
+function markChatRead(uid) {
+  if (!fbDB) { return; }
+  fbDB.ref('chats/' + uid + '/unread').set(0);
+  /* Badge gizle */
+  var badge = document.getElementById('chatUnreadBadge');
+  if (badge) { badge.style.display = 'none'; }
+}
+
+/* Okunmamış mesaj sayısını dinle (kullanıcı için) */
+function startUnreadListener() {
+  if (!fbDB || !authUser) { return; }
+  fbDB.ref('chats/' + authUser.uid + '/unread').on('value', function(snap) {
+    var count = snap.val() || 0;
+    var badge = document.getElementById('chatUnreadBadge');
+    if (!badge) { return; }
+    if (count > 0) {
+      badge.style.display = 'flex';
+      badge.textContent   = count > 9 ? '9+' : count;
+    } else {
+      badge.style.display = 'none';
+    }
+  });
+}
+
+/* Chat input — Enter gönder, Shift+Enter yeni satır */
+document.addEventListener('DOMContentLoaded', function() {
+  var chatInput = document.getElementById('chatInput');
+  if (chatInput) {
+    chatInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendChatMsg();
+      }
+    });
+    /* Auto resize */
+    chatInput.addEventListener('input', function() {
+      this.style.height = 'auto';
+      this.style.height = Math.min(this.scrollHeight, 80) + 'px';
+    });
+  }
+});
+
+
 window._mathgame={ state, nextQuestion, checkAnswer };
 
 /* ── LIQUID RIPPLE ─────────────────────────────────── */
@@ -6000,11 +6434,12 @@ document.addEventListener('pointerdown', e => {
 
       <!-- Sekmeler -->
       <div class="admin-tabs">
-        <button class="admin-tab-btn active" onclick="adminSwitchTab('stats')">📊 Genel</button>
-        <button class="admin-tab-btn" onclick="adminSwitchTab('players')">👥 Oyuncular</button>
-        <button class="admin-tab-btn" onclick="adminSwitchTab('bans')">🚫 Banlar</button>
-        <button class="admin-tab-btn" onclick="adminSwitchTab('requests')">📬 İstekler</button>
-        <button class="admin-tab-btn" onclick="adminSwitchTab('system')">⚙️ Sistem</button>
+        <button class="admin-tab-btn active" onclick="adminSwitchTab('stats')" style="font-size:10px">📊 Genel</button>
+        <button class="admin-tab-btn" onclick="adminSwitchTab('players')" style="font-size:10px">👥 Oyuncular</button>
+        <button class="admin-tab-btn" onclick="adminSwitchTab('bans')" style="font-size:10px">🚫 Banlar</button>
+        <button class="admin-tab-btn" onclick="adminSwitchTab('requests')" style="font-size:10px">📬 İstekler</button>
+        <button class="admin-tab-btn" onclick="adminSwitchTab('logs')" style="font-size:10px">📜 Log</button>
+        <button class="admin-tab-btn" onclick="adminSwitchTab('system')" style="font-size:10px">⚙️ Sistem</button>
       </div>
 
       <!-- GENEL BAKIŞ -->
@@ -6026,6 +6461,7 @@ document.addEventListener('pointerdown', e => {
           <button class="admin-btn admin-btn-gray" onclick="adminPlayerInfo()">Detay</button>
         </div>
         <div id="adminPlayerInfoBox" style="display:none;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:12px;font-size:12px;color:var(--muted);line-height:1.8"></div>
+
 
         <div class="admin-section-title" style="margin-top:4px">Skor & Tablo</div>
         <div class="admin-row">
@@ -6065,6 +6501,15 @@ document.addEventListener('pointerdown', e => {
           <button class="admin-btn admin-btn-gray" onclick="adminLoadRequests('all')" style="flex:1">📁 Hepsi</button>
         </div>
         <div id="adminRequestList" style="display:flex;flex-direction:column;gap:8px;margin-top:4px"></div>
+      </div>
+
+      <!-- LOG -->
+      <div class="admin-tab-panel" id="adminTab-logs">
+        <div style="display:flex;gap:6px">
+          <button class="admin-btn admin-btn-gray" onclick="adminLoadLogs()" style="flex:1">🔄 Logları Yükle</button>
+          <button class="admin-btn admin-btn-red"  onclick="adminClearLogs()" style="flex:1">🗑 Temizle</button>
+        </div>
+        <div id="adminLogList" style="display:flex;flex-direction:column;gap:6px;margin-top:4px;max-height:300px;overflow-y:auto"></div>
       </div>
 
       <!-- SİSTEM -->
@@ -6121,6 +6566,27 @@ document.addEventListener('pointerdown', e => {
         <button id="resetConfirmBtn" style="background:rgba(45,212,191,0.1);border:1.5px solid rgba(45,212,191,0.3);color:#2dd4bf;border-radius:10px;padding:9px 14px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer">✓</button>
       </div>
       <div id="resetMsg" style="font-size:12px;text-align:center;min-height:16px;margin-top:4px"></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Mesajlaşma Modalı -->
+<div id="chatModal">
+  <div id="chatBox">
+    <div id="chatHeader">
+      <div>
+        <div id="chatTitle">💬 Mesajlar</div>
+        <div id="chatSubtitle">Admin ile iletişim</div>
+      </div>
+      <button id="chatClosBtn" onclick="closeChatModal()">✕</button>
+    </div>
+    <div id="chatMessages">
+      <div class="chat-msg from-system">Admin ile yazışabilirsin. Mesajların güvende.</div>
+    </div>
+    <div id="chatInputRow">
+      <textarea id="chatInput" placeholder="Mesajını yaz..." rows="1" maxlength="500"></textarea>
+      <button id="chatSendBtn" onclick="sendChatMsg()">➤</button>
     </div>
   </div>
 </div>
