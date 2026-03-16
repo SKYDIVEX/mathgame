@@ -1397,19 +1397,21 @@ body.has-bg-image .card {
   z-index: 9000 !important;
   background: rgba(2,4,10,0.97) !important;
   background-image: none !important;
-  align-items: center;
+  align-items: flex-end;
   justify-content: center;
-  padding: 20px;
+  padding: 0;
   box-sizing: border-box;
 }
 #profileModal.show { display: flex !important; }
 #profileCard {
   background: #0b1220;
   border: 1.5px solid #1a2f28;
-  border-radius: 20px;
+  border-radius: 24px 24px 0 0;
   padding: 24px 20px;
   width: 100%;
-  max-width: 400px;
+  max-width: 480px;
+  max-height: 90vh;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -5084,6 +5086,21 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       /* Takma adı güncelle */
       const sanitized = sanitizeUsername(newName);
+
+      /* İsim değiştiyse Worker'da çakışma kontrolü yap */
+      if (sanitized !== authUser.name) {
+        if(msg){ msg.textContent='⏳ İsim kontrol ediliyor...'; msg.style.color='#9fb3b0'; }
+        try {
+          var checkRes = await workerPost('check-name', { name: sanitized, uid: authUser.uid, token: authUser.token });
+          if (checkRes && checkRes.taken) {
+            if(msg){ msg.textContent='❌ Bu takma ad zaten alınmış!'; msg.style.color='#ef4444'; }
+            return;
+          }
+          /* Worker'da ismi güncelle */
+          await workerPost('update-name', { token: authUser.token, name: sanitized });
+        } catch(e) { /* Worker erişilemiyorsa yine de devam et */ }
+      }
+
       authUser.name = sanitized;
       saveAuth(authUser);
       state.player = sanitized;
