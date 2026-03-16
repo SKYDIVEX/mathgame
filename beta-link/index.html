@@ -5665,7 +5665,7 @@ async function adminPlayerInfo() {
     const banInfo = r.banned ? '🚫 ' + r.banned.reason : '✅ Temiz';
     box.style.display = 'block';
     box.innerHTML = '<b style="color:#e6f7ea">' + r.name + '</b><br>' +
-      'UID: ' + r.uid.slice(0,12) + '...<br>' +
+      'UID: <span style="font-size:10px;word-break:break-all">' + r.uid + '</span><br>' +
       'Giriş: ' + (r.provider === 'google' ? '🔵 Google' : '📧 E-posta') + '<br>' +
       'Kayıt: ' + created + '<br>' +
       'Skor: ' + r.score + 'p | Sıra: ' + (r.rank || '?') + '<br>' +
