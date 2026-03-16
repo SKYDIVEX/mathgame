@@ -3130,7 +3130,10 @@ function checkAnswer(){
       saveState();
       loadGameUI();
       renderLeaderboard();
+      try { renderStats(); } catch(e) {}
       updateMiniInfo();
+      /* Stats panelini anlık güncelle */
+      try { renderStats(); } catch(e) {}
 
       /* Online skoru gönder */
       try { pushScoreToWorker(); } catch(e) {}
@@ -4588,13 +4591,9 @@ try {
     var existingAuth = authUser;
     saveAuth({ uid: user.uid, name, email: user.email || '', provider: 'google', token: workerToken || (existingAuth ? existingAuth.token : null) });
 
-    /* Aynı kullanıcı zaten yüklüyse — sadece UI güncelle, state'e dokunma */
-    if (existingAuth && existingAuth.uid === user.uid) {
-      state.player = name;
+    /* Aynı kullanıcı zaten yüklüyse — sadece token güncelle, state'e dokunma */
+    if (existingAuth && existingAuth.uid === user.uid && state.player) {
       updateProfileBtn();
-      if (menuCard && menuCard.style.display !== 'none') {
-        refreshMenuPanels();
-      }
     } else {
       /* Farklı kullanıcı veya ilk giriş — state'i uid key'den yükle */
       loadState(user.uid);
@@ -4904,12 +4903,13 @@ document.addEventListener('DOMContentLoaded', () => {
     lbLocal.classList.add('active'); lbOnline.classList.remove('active');
     document.getElementById('leaderboard').style.display = '';
     document.getElementById('onlineLbEl').style.display = 'none';
+    stopLbAutoRefresh();
   });
   if (lbOnline) lbOnline.addEventListener('click', () => {
     lbOnline.classList.add('active'); lbLocal.classList.remove('active');
     document.getElementById('leaderboard').style.display = 'none';
     document.getElementById('onlineLbEl').style.display = '';
-    fetchOnlineLeaderboard();
+    startLbAutoRefresh();
   });
 });
 
@@ -5137,6 +5137,26 @@ async function loadProfileFromCloud() {
 }
 
 /* ── Online Leaderboard çek ──────────────────────────── */
+var _lbAutoRefreshTimer = null;
+
+function startLbAutoRefresh() {
+  stopLbAutoRefresh();
+  fetchOnlineLeaderboard();
+  _lbAutoRefreshTimer = setInterval(function() {
+    var lbEl = document.getElementById('onlineLbEl');
+    if (lbEl && lbEl.style.display !== 'none') {
+      fetchOnlineLeaderboard();
+    }
+  }, 30000); /* 30 saniyede bir */
+}
+
+function stopLbAutoRefresh() {
+  if (_lbAutoRefreshTimer !== null) {
+    clearInterval(_lbAutoRefreshTimer);
+    _lbAutoRefreshTimer = null;
+  }
+}
+
 async function fetchOnlineLeaderboard() {
   const el       = document.getElementById('onlineLbEl');
   const statusEl = document.getElementById('onlineLbStatus');
