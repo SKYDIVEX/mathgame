@@ -6679,6 +6679,10 @@ document.addEventListener('pointerdown', e => {
       <div style="font-size:16px;font-weight:900;color:#e6f7ea">📬 İstek / Şikayet</div>
       <button id="closeRequestModal" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer">✕</button>
     </div>
+    <div style="display:flex;gap:6px">
+      <button id="reqTabNew" onclick="switchReqTab('new')" style="flex:1;padding:8px;border-radius:8px;border:1px solid #00ff6644;background:rgba(0,255,102,0.1);color:#00ff66;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer">✏️ Yeni İstek</button>
+      <button id="reqTabMy"  onclick="switchReqTab('my')"  style="flex:1;padding:8px;border-radius:8px;border:1px solid #1a2f28;background:transparent;color:var(--muted);font-size:12px;font-weight:700;font-family:inherit;cursor:pointer">📋 İsteklerim</button>
+    </div>
     <div id="reqPanelNew">
     <select id="reqType" style="background:#060c18;border:1.5px solid #1a2f28;border-radius:10px;color:#e6f7ea;font-size:14px;padding:10px 14px;font-family:inherit;width:100%;box-sizing:border-box">
       <option value="bug">🐛 Bug / Hata</option>
