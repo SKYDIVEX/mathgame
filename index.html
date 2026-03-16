@@ -7097,6 +7097,44 @@ function toggleAvatarPicker() {
   }
 }
 
+
+function uploadAvatarPhoto(input) {
+  var file = input.files[0];
+  if (!file) { return; }
+  /* Max 500KB */
+  if (file.size > 500 * 1024) {
+    showToast('Fotoğraf çok büyük (max 500KB)', '#ef4444');
+    return;
+  }
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var dataUrl = e.target.result;
+    /* Avatar preview'ı fotoğraf olarak göster */
+    var preview = document.getElementById('pmAvatarPreview');
+    if (preview) {
+      preview.style.backgroundImage = 'url(' + dataUrl + ')';
+      preview.style.backgroundSize = 'cover';
+      preview.style.backgroundPosition = 'center';
+      preview.textContent = '';
+    }
+    var bigAvatar = document.getElementById('pmAvatar');
+    if (bigAvatar) {
+      bigAvatar.style.backgroundImage = 'url(' + dataUrl + ')';
+      bigAvatar.style.backgroundSize = 'cover';
+      bigAvatar.style.backgroundPosition = 'center';
+      bigAvatar.textContent = '';
+    }
+    if (!state.profile) { state.profile = {}; }
+    state.profile.avatar = dataUrl;
+    state._selectedAvatar = dataUrl;
+    /* Picker'ı kapat */
+    var row = document.getElementById('avatarPickerRow');
+    if (row) { row.style.display = 'none'; }
+    showToast('✅ Fotoğraf seçildi — kaydetmeyi unutma', '#00ff66');
+  };
+  reader.readAsDataURL(file);
+}
+
 function selectAvatar(emoji) {
   var preview = document.getElementById('pmAvatarPreview');
   if (preview) { preview.textContent = emoji; }
@@ -7108,20 +7146,27 @@ function selectAvatar(emoji) {
   if (row) { row.style.display = 'none'; }
 }
 
-function applyAvatar(emoji) {
-  if (!emoji) { return; }
-  /* Profil avatarı */
-  var bigAvatar = document.getElementById('pmAvatar');
-  if (bigAvatar) { bigAvatar.textContent = emoji; }
-  var preview = document.getElementById('pmAvatarPreview');
-  if (preview) { preview.textContent = emoji; }
-  /* Header profil butonu */
-  var pbAvatar = document.getElementById('pbAvatar');
-  if (pbAvatar) { pbAvatar.textContent = emoji; }
-  /* state'e kaydet */
+function applyAvatar(val) {
+  if (!val) { return; }
+  var isPhoto = val.startsWith('data:') || val.startsWith('http');
+  function setEl(el, v) {
+    if (!el) { return; }
+    if (isPhoto) {
+      el.style.backgroundImage = 'url(' + v + ')';
+      el.style.backgroundSize = 'cover';
+      el.style.backgroundPosition = 'center';
+      el.textContent = '';
+    } else {
+      el.style.backgroundImage = '';
+      el.textContent = v;
+    }
+  }
+  setEl(document.getElementById('pmAvatar'), val);
+  setEl(document.getElementById('pmAvatarPreview'), val);
+  setEl(document.getElementById('pbAvatar'), val);
   if (!state.profile) { state.profile = {}; }
-  state.profile.avatar = emoji;
-  state._selectedAvatar = emoji;
+  state.profile.avatar = val;
+  state._selectedAvatar = val;
 }
 
 /* Profil yüklenince bio ve avatar doldur */
