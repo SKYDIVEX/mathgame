@@ -19,23 +19,34 @@ window.onerror = function(msg, src, line, col, err) {
 };
 </script>
 <script>
-/* 🔒 BETA KORUMA */
-(function(){
-  const betaPassword = "emineningotunegirsinbuproje";
-  const pass = prompt("MathGame v2.0-beta.release için parola:");
-  if (pass !== betaPassword) {
-    document.addEventListener("DOMContentLoaded", function() {
-      document.body.innerHTML =
-      "<div style='display:flex;flex-direction:column;justify-content:center;align-items:center;height:100vh;background:#060708;font-family:Inter,sans-serif;gap:16px;padding:24px;text-align:center'>" +
-        "<div style='font-size:64px'>🔒</div>" +
-        "<div style='font-size:28px;font-weight:900;color:#ef4444'>Erişim Engellendi</div>" +
-        "<div style='font-size:14px;color:#4a5568;max-width:280px;line-height:1.6'>Bu sayfaya erişim yetkiniz bulunmamaktadır.</div>" +
-        "<div style='margin-top:8px;padding:10px 20px;border-radius:10px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);font-size:12px;color:#ef4444'>© SKYDIVEX — Yetkisiz erişim yasaktır</div>" +
-      "</div>";
-    });
-    throw new Error("Beta erişim reddedildi");
+/* 🔒 BETA KORUMA — HTML ekranı ile */
+window.addEventListener('load', function() {
+  var PASS = 'emineningotunegirsinbuproje';
+  var screen = document.getElementById('betaLockScreen');
+  if (!screen) return;
+  screen.style.display = 'flex';
+
+  var input = document.getElementById('betaLockInput');
+  var btn   = document.getElementById('betaLockBtn');
+  var err   = document.getElementById('betaLockErr');
+
+  function tryUnlock() {
+    if ((input.value || '').trim() === PASS) {
+      screen.style.display = 'none';
+      try { showLoginChoice(); } catch(e) { try { openAuthModal(); } catch(e2) {} }
+    } else {
+      err.textContent = 'Şifre yanlış';
+      err.style.opacity = '1';
+      input.value = '';
+      input.focus();
+    }
   }
-})();
+
+  btn.addEventListener('click', tryUnlock);
+  input.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') tryUnlock();
+  });
+});
 </script>
 <style>
 /* ---------------------------
@@ -1631,11 +1642,67 @@ body.has-bg-image .card {
 .pin-msg { font-size: 12px; min-height: 18px; text-align: center; }
 .pin-link { font-size: 12px; color: var(--muted); cursor: pointer; text-decoration: underline; text-align: center; }
 
+
+/* ── Beta Lock Screen ─────────────────────────────── */
+#betaLockScreen {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 99999;
+  background: #060708;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  box-sizing: border-box;
+  gap: 16px;
+}
+#betaLockCard {
+  background: #0b1220;
+  border: 1.5px solid #1a2f28;
+  border-radius: 20px;
+  padding: 32px 24px;
+  width: 100%;
+  max-width: 360px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  box-sizing: border-box;
+}
+#betaLockErr {
+  font-size: 12px;
+  color: #ef4444;
+  min-height: 16px;
+  opacity: 0;
+  transition: opacity .2s;
+}
+
 </style>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 </head>
 <body>
+
+<!-- Beta Şifre Ekranı -->
+<div id="betaLockScreen">
+  <div id="betaLockCard">
+    <div style="font-size:48px">🔐</div>
+    <div style="font-size:22px;font-weight:900;color:#e6f7ea">MathGame</div>
+    <div style="font-size:13px;color:#9fb3b0;text-align:center">Beta sürümüne erişmek için şifreyi gir</div>
+    <div id="betaLockErr"></div>
+    <input id="betaLockInput" type="password"
+      placeholder="Şifre"
+      autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+      style="width:100%;box-sizing:border-box;background:#060c18;border:1.5px solid #1a2f28;border-radius:12px;color:#e6f7ea;font-size:16px;padding:13px 16px;font-family:inherit;outline:none">
+    <button id="betaLockBtn"
+      style="width:100%;background:#00ff66;color:#030608;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:800;font-family:inherit;cursor:pointer">
+      Devam Et →
+    </button>
+    <div style="font-size:11px;color:#2a3a38">© SKYDIVEX — Yetkisiz erişim yasaktır</div>
+  </div>
+</div>
+
 <div id="bgLayer"></div>
 <div id="comboDisplay"></div>
 
