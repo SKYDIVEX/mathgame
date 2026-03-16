@@ -4945,9 +4945,10 @@ try {
       }
     } catch(e) { console.warn('Worker firebase-login hata:', e); }
 
-    /* Token güncelle — ama state'i dokunma, init'te zaten yüklendi */
+    /* Token güncelle — eski token varsa koru, yeni geldiyse güncelle */
     var existingAuth = authUser;
-    saveAuth({ uid: user.uid, name, email: user.email || '', provider: 'google', token: workerToken || (existingAuth ? existingAuth.token : null) });
+    var finalToken = workerToken || (existingAuth ? existingAuth.token : null);
+    saveAuth({ uid: user.uid, name, email: user.email || '', provider: 'google', token: finalToken });
 
     /* Aynı kullanıcı zaten yüklüyse — sadece token güncelle, state'e dokunma */
     if (existingAuth && existingAuth.uid === user.uid && state.player) {
@@ -5763,12 +5764,20 @@ async function adminCall(endpoint, extra = {}) {
     adminLog('❌ Giriş yapılmamış');
     return null;
   }
-  if (!authUser.token) {
-    adminLog('❌ Token yok — çıkış yapıp tekrar giriş yap');
+  /* Token yoksa Firebase UID'den fb_ prefix token üret */
+  var token = authUser.token;
+  if (!token && authUser.uid) {
+    token = 'fb_' + authUser.uid;
+    authUser.token = token;
+    saveAuth(authUser);
+    adminLog('⚡ Token yenilendi');
+  }
+  if (!token) {
+    adminLog('❌ Token alınamadı — çıkış yapıp tekrar giriş yap');
     return null;
   }
   try {
-    const result = await workerPost(endpoint, { token: authUser.token, ...extra });
+    const result = await workerPost(endpoint, { token: token, ...extra });
     return result;
   } catch(e) {
     adminLog('❌ Hata: ' + e.message);
@@ -6066,6 +6075,31 @@ async function adminClearLogs() {
   } else {
     adminLog('❌ ' + (r ? r.error : 'Hata'));
   }
+}
+
+
+async function adminGiveBadge() {
+  var name = getAdminTarget();
+  var icon = (document.getElementById('badgeIcon').value || '').trim() || '🏅';
+  var label = (document.getElementById('badgeLabel').value || '').trim();
+  var color = (document.getElementById('badgeColor').value || '').trim() || '99,179,237';
+  var textColor = (document.getElementById('badgeTextColor').value || '').trim() || '63b3ed';
+  if (!name) { adminLog('❌ Oyuncu adı gerekli'); return; }
+  if (!label) { adminLog('❌ Badge adı gerekli'); return; }
+  var badge = { id: Date.now().toString(), icon, label, color, textColor };
+  var r = await adminCall('admin/give-badge', { targetName: name, badge });
+  if (r && r.ok) { adminLog('✅ Badge verildi: ' + label); }
+  else adminLog('❌ ' + (r ? r.error : 'Hata'));
+}
+
+async function adminRemoveBadge() {
+  var name = getAdminTarget();
+  if (!name) { adminLog('❌ Oyuncu adı gerekli'); return; }
+  var badgeId = prompt('Kaldırılacak badge ID (oyuncu profilinden görünür):');
+  if (!badgeId) { return; }
+  var r = await adminCall('admin/remove-badge', { targetName: name, badgeId });
+  if (r && r.ok) { adminLog('✅ Badge kaldırıldı'); }
+  else adminLog('❌ ' + (r ? r.error : 'Hata'));
 }
 
 async function adminGiveAdmin() {
@@ -6809,6 +6843,9 @@ async function openPublicProfile(data) {
         }
       }
 
+      /* Admin verdiği badge'leri _pubProfileData'ya kaydet */
+      _pubProfileData.badges = r.badges || [];
+
       /* Profil verisini çek — başarımlar için */
       try {
         var profileRes = await workerPost('load-profile', { token: authUser ? authUser.token : '' });
@@ -6885,13 +6922,32 @@ async function openPublicProfile(data) {
       }
 
       document.getElementById('pubBadges').innerHTML = badges.join('');
+
+      /* Admin verdiği özel badge'ler */
+      if (r.badges && r.badges.length > 0) {
+        var customBadges = r.badges.map(function(b) {
+          return '<span class="pub-badge-tag" style="background:rgba(' + (b.color||'99,179,237') + ',0.15);border:1px solid rgba(' + (b.color||'99,179,237') + ',0.3);color:#' + (b.textColor||'63b3ed') + '">' + (b.icon||'🏅') + ' ' + b.label + '</span>';
+        }).join('');
+        document.getElementById('pubBadges').innerHTML += customBadges;
+      }
     }
   } catch(e) {
     document.getElementById('pubRank').textContent   = '?';
     document.getElementById('pubJoined').textContent = '?';
   }
 
-  if (adminActions && isViewerAdmin) { adminActions.style.display = 'flex'; }
+  if (adminActions && isViewerAdmin) { 
+    adminActions.style.display = 'flex';
+    /* Mevcut badge'leri göster */
+    var pubBadgeList = document.getElementById('pubCurrentBadges');
+    if (pubBadgeList && _pubProfileData.badges && _pubProfileData.badges.length > 0) {
+      pubBadgeList.style.display = '';
+      pubBadgeList.innerHTML = '<div style="font-size:10px;color:var(--muted);margin-bottom:4px">Mevcut badge\u2019ler:</div>' +
+        _pubProfileData.badges.map(function(b) {
+          return '<div style="font-size:11px;color:var(--muted)">' + b.icon + ' ' + b.label + ' <span style="opacity:0.4">(' + b.id + ')</span></div>';
+        }).join('');
+    }
+  }
 
   /* Kendi profiliyse başarımları göster */
   var pubAch = document.getElementById('pubAchievements');
@@ -7499,6 +7555,7 @@ document.addEventListener('pointerdown', e => {
           <button class="pub-admin-btn pub-admin-btn-gray"  onclick="pubAdminRemoveAdmin()">❌ Admin Al</button>
         </div>
         <div id="pubBanInfo" style="display:none;margin-top:4px;padding:8px;background:rgba(239,68,68,0.08);border-radius:8px;font-size:11px;color:#ef4444"></div>
+        <div id="pubCurrentBadges" style="display:none;margin-top:4px;padding:6px;background:rgba(255,255,255,0.02);border-radius:8px"></div>
       </div>
     </div>
 
