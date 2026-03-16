@@ -7098,8 +7098,8 @@ function uploadAvatarPhoto(input) {
   var file = input.files[0];
   if (!file) { return; }
   /* Max 500KB */
-  if (file.size > 500 * 1024) {
-    showToast('Fotoğraf çok büyük (max 500KB)', '#ef4444');
+  if (file.size > 5 * 1024 * 1024) {
+    showToast('Fotoğraf çok büyük (max 5MB)', '#ef4444');
     return;
   }
   var reader = new FileReader();
