@@ -4571,11 +4571,9 @@ try {
       }
       return;
     }
-    /* Not: Her zaman tam login flow çalışsın — token yenilenir, state doğru yüklenir */
-
     const name = sanitizeUsername(user.displayName || user.email.split('@')[0]);
 
-    /* Worker'a firebase-login gönder — hata olsa bile girişi tamamla */
+    /* Worker'a firebase-login gönder — token yenile */
     var workerToken = null;
     var workerHasPin = false;
     try {
@@ -4586,46 +4584,32 @@ try {
       }
     } catch(e) { console.warn('Worker firebase-login hata:', e); }
 
-    /* Worker token — geçici değil, gerçek worker token'ı kullan */
-    saveAuth({ uid: user.uid, name, email: user.email || '', provider: 'google', token: workerToken || null });
+    /* Token güncelle — ama state'i dokunma, init'te zaten yüklendi */
+    var existingAuth = authUser;
+    saveAuth({ uid: user.uid, name, email: user.email || '', provider: 'google', token: workerToken || (existingAuth ? existingAuth.token : null) });
 
-    /* Kişisel veriyi yükle — uid bazlı key, state tamamen yenilenir */
-    const savedSettings = {
-      soundOn: state.soundOn, levelUpEvery: state.levelUpEvery,
-      btnColor: state.btnColor, bgColor: state.bgColor,
-      bgImage: state.bgImage, theme: state.theme,
-      bgLibId: state.bgLibId, bgLibGradient: state.bgLibGradient,
-      bgLibPhotoUrl: state.bgLibPhotoUrl, bgLibFallback: state.bgLibFallback,
-      ops: state.ops,
-    };
-    loadState(user.uid); /* uid key'den yükle — authUser set edildi, parametre de geç */
-    /* Ayarları geri yaz — uid key'de kayıtlı veri yoksa (yeni hesap) global ayarları kullan */
-    if (!state.btnColor || state.btnColor === '#00ff66') {
-      state.soundOn       = savedSettings.soundOn;
-      state.levelUpEvery  = savedSettings.levelUpEvery;
-      state.btnColor      = savedSettings.btnColor;
-      state.bgColor       = savedSettings.bgColor;
-      state.bgImage       = savedSettings.bgImage;
-      state.theme         = savedSettings.theme;
-      state.bgLibId       = savedSettings.bgLibId;
-      state.bgLibGradient = savedSettings.bgLibGradient;
-      state.bgLibPhotoUrl = savedSettings.bgLibPhotoUrl;
-      state.bgLibFallback = savedSettings.bgLibFallback;
-      state.ops           = savedSettings.ops;
+    /* Aynı kullanıcı zaten yüklüyse — sadece UI güncelle, state'e dokunma */
+    if (existingAuth && existingAuth.uid === user.uid) {
+      state.player = name;
+      updateProfileBtn();
+      if (menuCard && menuCard.style.display !== 'none') {
+        refreshMenuPanels();
+      }
+    } else {
+      /* Farklı kullanıcı veya ilk giriş — state'i uid key'den yükle */
+      loadState(user.uid);
+      state.player = name;
+      closeModal(document.getElementById('authModal'));
+      hideLoginChoice();
+      updateProfileBtn();
+      showScreen('menu');
+      refreshMenuPanels();
+      showToast('✅ Hoş geldin, ' + name + '!');
+      try { await syncOnlineScore(); } catch(e) { console.warn('syncOnlineScore hata:', e); }
+      try { await loadProfileFromCloud(); } catch(e) { console.warn('loadProfileFromCloud hata:', e); }
     }
-    state.player = name;
 
-    closeModal(document.getElementById('authModal'));
-    hideLoginChoice();
-    updateProfileBtn();
-    showScreen('menu');
-    refreshMenuPanels();
-    /* saveState() ÇAĞIRMA — loadState'ten gelen veriyi ezmesin */
-    showToast('✅ Hoş geldin, ' + name + '!');
-    try { await syncOnlineScore(); } catch(e) { console.warn('syncOnlineScore hata:', e); }
-    try { await loadProfileFromCloud(); } catch(e) { console.warn('loadProfileFromCloud hata:', e); }
-
-    /* PIN ayarlanmamışsa belirleme ekranı göster — ama daha önce atlandıysa tekrar sorma */
+    /* PIN ayarlanmamışsa belirleme ekranı göster */
     if (workerToken && !workerHasPin) {
       var pinSkipped = localStorage.getItem('mathgame_pin_skipped_' + user.uid);
       if (!pinSkipped) {
