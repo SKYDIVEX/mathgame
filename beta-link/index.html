@@ -1899,12 +1899,6 @@ body.has-bg-image .card {
       🔐 PIN Belirle / Değiştir
     </button>
 
-    <!-- Mesajlaşma -->
-    <button class="profile-action-btn" id="pmChatBtn" style="position:relative">
-      💬 Admin ile Mesajlaş
-      <span id="chatUnreadBadge">!</span>
-    </button>
-
     <!-- İstek / Şikayet -->
     <button class="profile-action-btn" id="pmRequestBtn">
       📬 İstek / Şikayet Gönder
@@ -5745,36 +5739,47 @@ async function adminUnbanById(name) {
   else adminLog('❌ ' + (r?.error || 'Hata'));
 }
 
-async function adminLoadRequests(status = 'open') {
+async function adminLoadRequests(status) {
+  if (!status) { status = 'open'; }
   adminLog('⏳ İstekler yükleniyor...');
-  const r = await adminCall('admin/requests', { status });
-  const el = document.getElementById('adminRequestList');
-  if (!el) return;
-  if (r?.ok) {
-    if (r.requests.length === 0) { el.innerHTML = '<div style="color:var(--muted);font-size:12px;text-align:center;padding:8px">İstek yok</div>'; return; }
-    el.innerHTML = r.requests.map(req => {
-      const typeClass = 'req-type-' + req.type;
-      const statusClass = 'status-' + req.status;
-      const typeLabel = {bug:'🐛 Bug',unban:'🔓 Unban',suggestion:'💡 Öneri',report:'⚠️ Şikayet',reset:'🔑 Şifre',other:'📝 Diğer'}[req.type] || req.type;
-      const statusLabel = {open:'⏳ Açık',resolved:'✅ Çözüldü',rejected:'❌ Reddedildi'}[req.status] || req.status;
-      const codeHtml = req.code ? '<div class="admin-req-code">Kod: ' + req.code + '</div>' : '';
-      const actionsHtml = req.status === 'open' ?
-        '<div class="admin-req-actions">' +
-          '<button class="admin-btn admin-btn-green" style="font-size:11px;padding:5px 10px" onclick="adminResolveReq(`' + req.id + '`,`resolved`)">✅ Çöz</button>' +
-          '<button class="admin-btn admin-btn-red" style="font-size:11px;padding:5px 10px" onclick="adminResolveReq(`' + req.id + '`,`rejected`)">❌ Reddet</button>' +
-        '</div>' : '';
-      return '<div class="admin-req-card">' +
-        '<div class="admin-req-header">' +
-          '<span class="admin-req-type ' + typeClass + '">' + typeLabel + '</span>' +
-          '<span class="admin-req-status ' + statusClass + '">' + statusLabel + '</span>' +
+  var r = await adminCall('admin/requests', { status: status });
+  var el = document.getElementById('adminRequestList');
+  if (!el) { return; }
+  if (!r || !r.ok) { adminLog('❌ ' + (r ? r.error : 'Hata')); return; }
+  if (!r.requests || r.requests.length === 0) {
+    el.innerHTML = '<div style="color:var(--muted);font-size:12px;text-align:center;padding:8px">İstek yok</div>';
+    adminLog('✅ İstek yok');
+    return;
+  }
+  el.innerHTML = r.requests.map(function(req) {
+    var typeLabels   = { bug:'🐛 Bug', unban:'🔓 Unban', suggestion:'💡 Öneri', report:'⚠️ Şikayet', reset:'🔑 Şifre', other:'📝 Diğer' };
+    var statusLabels = { open:'⏳ Açık', resolved:'✅ Çözüldü', rejected:'❌ Reddedildi' };
+    var typeClass    = 'req-type-' + (req.type || 'other');
+    var statusClass  = 'status-' + (req.status || 'open');
+    var typeLabel    = typeLabels[req.type]   || req.type;
+    var statusLabel  = statusLabels[req.status] || req.status;
+    var codeHtml     = req.code ? '<div class="admin-req-code">Kod: ' + req.code + '</div>' : '';
+    var adminNoteHtml = req.adminNote ?
+      '<div style="font-size:11px;color:#38bdf8;margin-top:4px;padding:4px 8px;background:rgba(56,189,248,0.08);border-radius:6px">💬 Admin yanıtı: ' + req.adminNote + '</div>' : '';
+    var actionsHtml = req.status === 'open' ?
+      '<div style="display:flex;flex-direction:column;gap:4px;margin-top:6px">' +
+        '<input id="note_' + req.id + '" class="admin-input" placeholder="Yanıt yaz (isteğe bağlı)" style="font-size:11px;padding:6px 10px">' +
+        '<div style="display:flex;gap:6px">' +
+          '<button class="admin-btn admin-btn-green" style="font-size:11px;padding:5px 10px;flex:1" onclick="adminResolveReqWithNote(`' + req.id + '`,`resolved`)">✅ Çöz</button>' +
+          '<button class="admin-btn admin-btn-red" style="font-size:11px;padding:5px 10px;flex:1" onclick="adminResolveReqWithNote(`' + req.id + '`,`rejected`)">❌ Reddet</button>' +
         '</div>' +
-        '<div class="admin-req-name">' + req.name + '</div>' +
-        '<div class="admin-req-msg">' + req.message + '</div>' +
-        codeHtml + noteHtml + actionsHtml +
-      '</div>';
-    }).join('');
-    adminLog('✅ ' + r.requests.length + ' istek yüklendi');
-  } else adminLog('❌ ' + (r?.error || 'Hata'));
+      '</div>' : adminNoteHtml;
+    return '<div class="admin-req-card">' +
+      '<div class="admin-req-header">' +
+        '<span class="admin-req-type ' + typeClass + '">' + typeLabel + '</span>' +
+        '<span class="admin-req-status ' + statusClass + '">' + statusLabel + '</span>' +
+      '</div>' +
+      '<div class="admin-req-name">' + req.name + '</div>' +
+      '<div class="admin-req-msg">' + req.message + '</div>' +
+      codeHtml + actionsHtml +
+    '</div>';
+  }).join('');
+  adminLog('✅ ' + r.requests.length + ' istek yüklendi');
 }
 
 async function adminResolveReq(id, status) {
@@ -6366,14 +6371,6 @@ function startUnreadListener() {
 
 /* Chat input — Enter gönder, Shift+Enter yeni satır */
 document.addEventListener('DOMContentLoaded', function() {
-  var pmChatBtn = document.getElementById('pmChatBtn');
-  if (pmChatBtn) {
-    pmChatBtn.addEventListener('click', function() {
-      closeProfileModal();
-      setTimeout(openChatModal, 200);
-    });
-  }
-
   var chatInput = document.getElementById('chatInput');
   if (chatInput) {
     chatInput.addEventListener('keydown', function(e) {
@@ -6490,7 +6487,7 @@ document.addEventListener('pointerdown', e => {
           <button class="admin-btn admin-btn-gray" onclick="adminPlayerInfo()">Detay</button>
         </div>
         <div id="adminPlayerInfoBox" style="display:none;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:12px;font-size:12px;color:var(--muted);line-height:1.8"></div>
-        <button class="admin-btn admin-btn-gray" id="adminChatBtn" style="display:none;width:100%;margin-top:4px" onclick="adminOpenChat()">💬 Bu Oyuncu ile Yaz</button>
+
 
         <div class="admin-section-title" style="margin-top:4px">Skor & Tablo</div>
         <div class="admin-row">
