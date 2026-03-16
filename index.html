@@ -6182,6 +6182,45 @@ async function adminGiveBadgeFromLib(badgeId) {
   else adminLog('❌ ' + (r ? r.error : 'Hata'));
 }
 
+
+function selectLibIcon(el) {
+  /* Önceki seçimi kaldır */
+  document.querySelectorAll('#libIconPicker span').forEach(function(s) {
+    s.style.border = '2px solid transparent';
+    s.style.background = '';
+  });
+  el.style.border = '2px solid var(--neon)';
+  el.style.background = 'rgba(0,255,102,0.1)';
+  var input = document.getElementById('libBadgeIcon');
+  if (input) { input.value = el.textContent; }
+  updateLibPreview();
+}
+
+function selectLibColor(el, rgb, hex) {
+  document.querySelectorAll('#libColorPicker div').forEach(function(d) {
+    d.style.border = '2px solid transparent';
+  });
+  el.style.border = '2px solid white';
+  var colorInput = document.getElementById('libBadgeColor');
+  var textInput  = document.getElementById('libBadgeTextColor');
+  if (colorInput) { colorInput.value = rgb; }
+  if (textInput)  { textInput.value  = hex; }
+  updateLibPreview();
+}
+
+function updateLibPreview() {
+  var preview   = document.getElementById('libBadgePreview');
+  var icon      = (document.getElementById('libBadgeIcon')?.value  || '🏅');
+  var label     = (document.getElementById('libBadgeLabel')?.value || 'Önizleme');
+  var color     = (document.getElementById('libBadgeColor')?.value || '251,191,36');
+  var textColor = (document.getElementById('libBadgeTextColor')?.value || 'fbbf24');
+  if (!preview) { return; }
+  preview.style.background  = 'rgba(' + color + ',0.15)';
+  preview.style.borderColor = 'rgba(' + color + ',0.3)';
+  preview.style.color       = '#' + textColor;
+  preview.textContent       = icon + ' ' + (label || 'Önizleme');
+}
+
 async function adminAddBadgeToLibrary() {
   var icon      = (document.getElementById('libBadgeIcon')?.value || '').trim() || '🏅';
   var label     = (document.getElementById('libBadgeLabel')?.value || '').trim();
@@ -7633,14 +7672,48 @@ document.addEventListener('pointerdown', e => {
           <button class="admin-btn admin-btn-gray" onclick="adminRemoveMod()">❌ Al</button>
         </div>
         <div class="admin-section-title">🏅 Badge Kütüphanesi</div>
-        <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px">
-          <div style="display:flex;gap:6px">
-            <input class="admin-input" id="libBadgeIcon" placeholder="🏅" style="width:48px;flex:none">
-            <input class="admin-input" id="libBadgeLabel" placeholder="Badge adı">
+        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:8px">
+          <!-- İkon seçici -->
+          <div>
+            <div style="font-size:11px;color:var(--muted);margin-bottom:4px">İkon seç:</div>
+            <div style="display:flex;flex-wrap:wrap;gap:4px" id="libIconPicker">
+              <span onclick="selectLibIcon(this)" style="font-size:20px;cursor:pointer;padding:4px;border-radius:6px;border:2px solid transparent">🏅</span>
+              <span onclick="selectLibIcon(this)" style="font-size:20px;cursor:pointer;padding:4px;border-radius:6px;border:2px solid transparent">⭐</span>
+              <span onclick="selectLibIcon(this)" style="font-size:20px;cursor:pointer;padding:4px;border-radius:6px;border:2px solid transparent">🌟</span>
+              <span onclick="selectLibIcon(this)" style="font-size:20px;cursor:pointer;padding:4px;border-radius:6px;border:2px solid transparent">👑</span>
+              <span onclick="selectLibIcon(this)" style="font-size:20px;cursor:pointer;padding:4px;border-radius:6px;border:2px solid transparent">💎</span>
+              <span onclick="selectLibIcon(this)" style="font-size:20px;cursor:pointer;padding:4px;border-radius:6px;border:2px solid transparent">🔥</span>
+              <span onclick="selectLibIcon(this)" style="font-size:20px;cursor:pointer;padding:4px;border-radius:6px;border:2px solid transparent">⚡</span>
+              <span onclick="selectLibIcon(this)" style="font-size:20px;cursor:pointer;padding:4px;border-radius:6px;border:2px solid transparent">🎯</span>
+              <span onclick="selectLibIcon(this)" style="font-size:20px;cursor:pointer;padding:4px;border-radius:6px;border:2px solid transparent">🚀</span>
+              <span onclick="selectLibIcon(this)" style="font-size:20px;cursor:pointer;padding:4px;border-radius:6px;border:2px solid transparent">🏆</span>
+              <span onclick="selectLibIcon(this)" style="font-size:20px;cursor:pointer;padding:4px;border-radius:6px;border:2px solid transparent">🎖️</span>
+              <span onclick="selectLibIcon(this)" style="font-size:20px;cursor:pointer;padding:4px;border-radius:6px;border:2px solid transparent">🛡️</span>
+              <span onclick="selectLibIcon(this)" style="font-size:20px;cursor:pointer;padding:4px;border-radius:6px;border:2px solid transparent">✨</span>
+              <span onclick="selectLibIcon(this)" style="font-size:20px;cursor:pointer;padding:4px;border-radius:6px;border:2px solid transparent">🎪</span>
+              <span onclick="selectLibIcon(this)" style="font-size:20px;cursor:pointer;padding:4px;border-radius:6px;border:2px solid transparent">🦁</span>
+            </div>
+            <input id="libBadgeIcon" type="text" value="🏅" style="display:none">
           </div>
-          <div style="display:flex;gap:6px">
-            <input class="admin-input" id="libBadgeColor" placeholder="Renk RGB (ör: 251,191,36)" style="flex:1">
-            <input class="admin-input" id="libBadgeTextColor" placeholder="Yazı hex (ör: fbbf24)" style="flex:1">
+          <!-- Badge adı -->
+          <input class="admin-input" id="libBadgeLabel" placeholder="Badge adı (ör: Matematik Ustası)" oninput="updateLibPreview()">
+          <!-- Renk paleti -->
+          <div>
+            <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Renk seç:</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap" id="libColorPicker">
+              <div onclick="selectLibColor(this,'251,191,36','fbbf24')" style="width:28px;height:28px;border-radius:8px;background:#fbbf24;cursor:pointer;border:2px solid transparent" title="Altın"></div>
+              <div onclick="selectLibColor(this,'0,255,102','00ff66')" style="width:28px;height:28px;border-radius:8px;background:#00ff66;cursor:pointer;border:2px solid transparent" title="Yeşil"></div>
+              <div onclick="selectLibColor(this,'56,189,248','38bdf8')" style="width:28px;height:28px;border-radius:8px;background:#38bdf8;cursor:pointer;border:2px solid transparent" title="Mavi"></div>
+              <div onclick="selectLibColor(this,'167,139,250','a78bfa')" style="width:28px;height:28px;border-radius:8px;background:#a78bfa;cursor:pointer;border:2px solid transparent" title="Mor"></div>
+              <div onclick="selectLibColor(this,'249,115,22','f97316')" style="width:28px;height:28px;border-radius:8px;background:#f97316;cursor:pointer;border:2px solid transparent" title="Turuncu"></div>
+              <div onclick="selectLibColor(this,'239,68,68','ef4444')" style="width:28px;height:28px;border-radius:8px;background:#ef4444;cursor:pointer;border:2px solid transparent" title="Kırmızı"></div>
+              <div onclick="selectLibColor(this,'236,72,153','ec4899')" style="width:28px;height:28px;border-radius:8px;background:#ec4899;cursor:pointer;border:2px solid transparent" title="Pembe"></div>
+              <div onclick="selectLibColor(this,'20,184,166','14b8a6')" style="width:28px;height:28px;border-radius:8px;background:#14b8a6;cursor:pointer;border:2px solid transparent" title="Turkuaz"></div>
+            </div>
+            <!-- Seçili renk önizleme -->
+            <div id="libBadgePreview" style="margin-top:8px;display:inline-flex;align-items:center;gap:4px;padding:5px 12px;border-radius:20px;background:rgba(251,191,36,0.15);border:1px solid rgba(251,191,36,0.3);color:#fbbf24;font-size:12px;font-weight:800">🏅 Önizleme</div>
+            <input id="libBadgeColor" type="hidden" value="251,191,36">
+            <input id="libBadgeTextColor" type="hidden" value="fbbf24">
           </div>
           <button class="admin-btn admin-btn-green" onclick="adminAddBadgeToLibrary()" style="width:100%">➕ Kütüphaneye Ekle</button>
         </div>
