@@ -6685,7 +6685,7 @@ async function openPublicProfile(data) {
   document.getElementById('pubAvatar').textContent = (data.name || '?')[0].toUpperCase();
   document.getElementById('pubName').textContent   = data.name || '—';
   document.getElementById('pubScore').textContent  = (data.score || 0) + 'p';
-  document.getElementById('pubLevel').textContent  = 'Svye ' + (data.level || 1);
+  document.getElementById('pubLevel').textContent  = data.level || 1;
   document.getElementById('pubRank').textContent   = '...';
   document.getElementById('pubJoined').textContent = '...';
   document.getElementById('pubUid').textContent    = '...';
@@ -6700,13 +6700,47 @@ async function openPublicProfile(data) {
 
   try {
     var token = authUser ? authUser.token : '';
-    var r = await workerPost('admin/player-info', { token: token, targetName: data.name });
+    var r = await workerPost('public-profile', { targetName: data.name });
     if (r && r.ok) {
       _pubProfileData.uid = r.uid;
       document.getElementById('pubRank').textContent   = r.rank ? '#' + r.rank : '—';
       document.getElementById('pubJoined').textContent = r.createdAt ? new Date(r.createdAt).toLocaleDateString('tr-TR') : '?';
-      document.getElementById('pubUid').textContent    = r.uid || '—';
+      document.getElementById('pubUid').textContent    = '';  /* UID sadece adminlere */
       document.getElementById('pubProvider').textContent = r.provider === 'google' ? '🔵 Google ile giriş' : '📧 E-posta ile giriş';
+
+      /* Profil verisini çek — başarımlar için */
+      try {
+        var profileRes = await workerPost('load-profile', { token: authUser ? authUser.token : '' });
+        /* Kendi profilimiz değil, başkasının — admin olarak çekebiliriz */
+        /* Şimdilik UID'e göre profile key kullanacağız */
+        if (r.uid) {
+          var pubProfileRes = await workerPost('admin/player-profile', { token: authUser ? authUser.token : '', uid: r.uid });
+          var achSection = document.getElementById('pubAchSection');
+          var achGrid    = document.getElementById('pubAchGrid');
+          var achEmpty   = document.getElementById('pubAchEmpty');
+          if (pubProfileRes && pubProfileRes.ok && pubProfileRes.achievements) {
+            var unlockedIds = Object.keys(pubProfileRes.achievements);
+            if (unlockedIds.length > 0) {
+              achSection.style.display = '';
+              achEmpty.style.display   = 'none';
+              /* ACHIEVEMENTS listesinden ikonları bul */
+              var achHtml = '';
+              ACHIEVEMENTS.forEach(function(ach) {
+                if (pubProfileRes.achievements[ach.id]) {
+                  achHtml += '<div title="' + ach.name + ': ' + ach.desc + '" style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;font-size:18px;cursor:default">' + ach.icon + '</div>';
+                }
+              });
+              achGrid.innerHTML = achHtml;
+            } else {
+              achSection.style.display = '';
+              achEmpty.style.display   = '';
+              achGrid.innerHTML        = '';
+            }
+          } else {
+            achSection.style.display = 'none';
+          }
+        }
+      } catch(e) { document.getElementById('pubAchSection').style.display = 'none'; }
 
       /* Badge'ler — herkes görür */
       var badges = [];
@@ -6714,16 +6748,14 @@ async function openPublicProfile(data) {
       else if (r.rank === 2) { badges.push('<span class="pub-badge-tag pub-badge-top">🥈 #2</span>'); }
       else if (r.rank === 3) { badges.push('<span class="pub-badge-tag pub-badge-top">🥉 #3</span>'); }
 
-      /* Admin rozeti — herkese göster */
-      try {
-        var adminInfo = await workerPost('admin/info', { token: token });
-        var adminList = (adminInfo && adminInfo.admins) ? adminInfo.admins : [];
+      /* Admin rozeti — public-profile'dan gelen isAdmin bayrağını kullan */
+      if (r.isAdmin) {
         if (ADMIN_UIDS_CLIENT.includes(r.uid)) {
           badges.push('<span class="pub-badge-tag pub-badge-admin">⚡ Süper Admin</span>');
-        } else if (adminList.includes(r.uid)) {
+        } else {
           badges.push('<span class="pub-badge-tag pub-badge-admin">⚡ Admin</span>');
         }
-      } catch(e) {}
+      }
 
       /* Ban — sadece adminler görür */
       if (isViewerAdmin && r.banned) {
@@ -6734,8 +6766,21 @@ async function openPublicProfile(data) {
         }
       }
 
-      /* UID — herkes görsün ama küçük ve gri */
-      document.getElementById('pubUid').textContent = 'UID: ' + r.uid;
+
+      /* Admin için ek bilgiler */
+      if (isViewerAdmin) {
+        try {
+          var ra = await workerPost('admin/player-info', { token: token, targetName: data.name });
+          if (ra && ra.ok) {
+            document.getElementById('pubUid').textContent = ra.uid || '—';
+            if (ra.banned) {
+              badges.push('<span class="pub-badge-tag" style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#ef4444">🚫 Banlı</span>');
+              var bi = document.getElementById('pubBanInfo');
+              if (bi) { bi.style.display = ''; bi.textContent = 'Ban sebebi: ' + (ra.banned.reason || 'belirtilmedi'); }
+            }
+          }
+        } catch(e) {}
+      }
 
       document.getElementById('pubBadges').innerHTML = badges.join('');
     }
@@ -6745,6 +6790,19 @@ async function openPublicProfile(data) {
   }
 
   if (adminActions && isViewerAdmin) { adminActions.style.display = 'flex'; }
+
+  /* Kendi profiliyse başarımları göster */
+  var pubAch = document.getElementById('pubAchievements');
+  var pubAchGrid = document.getElementById('pubAchievementsGrid');
+  if (pubAch && pubAchGrid && authUser && data.name === authUser.name) {
+    var unlockedAchs = ACHIEVEMENTS.filter(function(a) { return state.achievements && state.achievements[a.id]; });
+    if (unlockedAchs.length > 0) {
+      pubAch.style.display = '';
+      pubAchGrid.innerHTML = unlockedAchs.map(function(a) {
+        return '<span title="' + a.name + ': ' + a.desc + '" style="font-size:22px;cursor:help">' + a.icon + '</span>';
+      }).join('');
+    }
+  }
 }
 
 function copyPubUid() {
@@ -7195,6 +7253,19 @@ document.addEventListener('pointerdown', e => {
 
       <!-- Giriş yöntemi -->
       <div style="font-size:12px;color:var(--muted);text-align:center" id="pubProvider"></div>
+
+      <!-- Başarımlar -->
+      <div id="pubAchievements" style="display:none">
+        <div style="font-size:11px;color:var(--muted);font-weight:700;margin-bottom:6px">🏆 Başarımlar</div>
+        <div id="pubAchievementsGrid" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+      </div>
+
+      <!-- Başarımlar -->
+      <div id="pubAchSection" style="display:none">
+        <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:6px">🏆 Başarımlar</div>
+        <div id="pubAchGrid" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+        <div id="pubAchEmpty" style="font-size:12px;color:var(--muted);text-align:center;display:none">Henüz başarım yok</div>
+      </div>
 
       <!-- Admin bölümü -->
       <div class="pub-admin-section" id="pubAdminActions" style="display:none">
