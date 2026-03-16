@@ -5225,10 +5225,11 @@ function getFirebaseErrorMsg(code) {
 
 async function handleEmailAuth() {
   if (!fbAuth) { showAuthError('Firebase yüklenemedi, sayfayı yenile.'); return; }
-  const isRegister  = document.getElementById('authTabRegister').classList.contains('active');
-  const email       = (document.getElementById('authEmail').value || '').trim();
-  const displayName = (document.getElementById('authDisplayName').value || '').trim();
-  const password    = (document.getElementById('authPassword').value || '');
+
+  var isRegister  = document.getElementById('authTabRegister').classList.contains('active');
+  var email       = (document.getElementById('authEmail').value || '').trim();
+  var displayName = (document.getElementById('authDisplayName').value || '').trim();
+  var password    = (document.getElementById('authPassword').value || '');
   clearAuthError();
 
   if (!email)    { showAuthError('E-posta adresi gerekli'); return; }
@@ -5236,23 +5237,47 @@ async function handleEmailAuth() {
   if (password.length < 6) { showAuthError('Şifre en az 6 karakter olmalı'); return; }
   if (isRegister && displayName.length < 2) { showAuthError('Kullanıcı adı en az 2 karakter olmalı'); return; }
 
-  const btn = document.getElementById('authSubmitBtn');
-  const origText = btn.textContent;
-  btn.textContent = '⏳'; btn.disabled = true;
+  var btn = document.getElementById('authSubmitBtn');
+  var origText = btn ? btn.textContent : '';
+  if (btn) { btn.textContent = '⏳'; btn.disabled = true; }
 
   try {
+    var cred;
+    var name;
     if (isRegister) {
-      const cred = await fbAuth.createUserWithEmailAndPassword(email, password);
-      const name = sanitizeUsername(displayName || email.split('@')[0]);
+      /* Kayıt ol */
+      cred = await fbAuth.createUserWithEmailAndPassword(email, password);
+      name = sanitizeUsername(displayName || email.split('@')[0]);
       await cred.user.updateProfile({ displayName: name });
-      /* onAuthStateChanged otomatik devam eder */
     } else {
-      await fbAuth.signInWithEmailAndPassword(email, password);
-      /* onAuthStateChanged otomatik devam eder */
+      /* Giriş yap */
+      cred = await fbAuth.signInWithEmailAndPassword(email, password);
+      name = sanitizeUsername(cred.user.displayName || email.split('@')[0]);
     }
+
+    /* Sonucu direkt işle — onAuthStateChanged'ı bekleme */
+    var user = cred.user;
+    var workerToken = null;
+    try {
+      var fbRes = await workerPost('firebase-login', { uid: user.uid, name: name, email: email });
+      if (fbRes && fbRes.ok) { workerToken = fbRes.token; }
+    } catch(e) { console.warn('Worker hata:', e); }
+
+    saveAuth({ uid: user.uid, name: name, email: email, provider: 'email', token: workerToken || null });
+    loadState(user.uid);
+    state.player = name;
+    closeModal(document.getElementById('authModal'));
+    updateProfileBtn();
+    showScreen('menu');
+    refreshMenuPanels();
+    showToast('✅ Hoş geldin, ' + name + '!');
+    try { await syncOnlineScore(); } catch(e) {}
+    try { await loadProfileFromCloud(); } catch(e) {}
+    try { startUnreadListener(); } catch(e) {}
+
   } catch(e) {
     showAuthError(getFirebaseErrorMsg(e.code));
-    btn.textContent = origText; btn.disabled = false;
+    if (btn) { btn.textContent = origText; btn.disabled = false; }
   }
 }
 
