@@ -5469,6 +5469,14 @@ function getAdminOps() {
 }
 
 async function adminCall(endpoint, extra = {}) {
+  if (!authUser) {
+    adminLog('❌ Giriş yapılmamış');
+    return null;
+  }
+  if (!authUser.token) {
+    adminLog('❌ Token yok — çıkış yapıp tekrar giriş yap');
+    return null;
+  }
   try {
     const result = await workerPost(endpoint, { token: authUser.token, ...extra });
     return result;
