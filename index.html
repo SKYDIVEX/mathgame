@@ -1758,38 +1758,114 @@ body.has-bg-image .card {
   position: fixed;
   inset: 0;
   z-index: 9400;
-  background: rgba(2,4,10,0.96);
-  align-items: center;
+  background: rgba(2,4,10,0.97);
+  align-items: flex-end;
   justify-content: center;
-  padding: 20px;
+  padding: 0;
   box-sizing: border-box;
 }
 #publicProfileModal.show { display: flex; }
 #pubProfileCard {
   background: #0b1220;
-  border: 1.5px solid #1a2f28;
-  border-radius: 20px;
-  padding: 24px 20px;
+  border-top: 1.5px solid #1a2f28;
+  border-radius: 24px 24px 0 0;
+  padding: 0;
   width: 100%;
-  max-width: 360px;
+  max-width: 480px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  overflow: hidden;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+.pub-header-bg {
+  background: linear-gradient(160deg, #071a12 0%, #0b1220 100%);
+  padding: 20px 20px 24px;
+  position: relative;
+}
+.pub-close-btn {
+  position: absolute;
+  top: 14px; right: 14px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 50%;
+  width: 32px; height: 32px;
+  color: var(--muted);
+  font-size: 16px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
 }
 .pub-avatar {
-  width: 64px; height: 64px;
+  width: 72px; height: 72px;
   border-radius: 50%;
   background: linear-gradient(135deg, #00ff66, #00cc55);
   display: flex; align-items: center; justify-content: center;
-  font-size: 28px; font-weight: 900; color: #030608;
-  margin: 0 auto;
+  font-size: 30px; font-weight: 900; color: #030608;
+  margin: 0 auto 12px;
+  box-shadow: 0 0 0 3px rgba(0,255,102,0.15), 0 8px 24px rgba(0,0,0,0.4);
 }
-.pub-name { text-align: center; font-size: 20px; font-weight: 900; color: #e6f7ea; }
-.pub-badge { text-align: center; font-size: 12px; color: #f59e0b; font-weight: 700; }
+.pub-name { text-align: center; font-size: 22px; font-weight: 900; color: #e6f7ea; line-height: 1.2; }
+.pub-badges { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; margin-top: 6px; }
+.pub-badge-tag {
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 800;
+}
+.pub-badge-admin { background: rgba(245,158,11,0.15); border: 1px solid rgba(245,158,11,0.3); color: #f59e0b; }
+.pub-badge-top { background: rgba(0,255,102,0.1); border: 1px solid rgba(0,255,102,0.2); color: #00ff66; }
+.pub-uid {
+  text-align: center;
+  font-size: 10px;
+  color: #2a3a38;
+  margin-top: 6px;
+  word-break: break-all;
+  padding: 0 8px;
+  cursor: pointer;
+}
+.pub-uid:hover { color: var(--muted); }
+.pub-body { padding: 16px 16px 24px; display: flex; flex-direction: column; gap: 12px; }
 .pub-stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.pub-stat { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 10px; text-align: center; }
-.pub-stat-val { font-size: 18px; font-weight: 900; color: var(--neon); }
-.pub-stat-lbl { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.pub-stat {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 12px;
+  padding: 12px 10px;
+  text-align: center;
+}
+.pub-stat-val { font-size: 20px; font-weight: 900; color: var(--neon); }
+.pub-stat-lbl { font-size: 11px; color: var(--muted); margin-top: 3px; }
+.pub-admin-section {
+  background: rgba(239,68,68,0.04);
+  border: 1px solid rgba(239,68,68,0.12);
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.pub-admin-title {
+  font-size: 11px;
+  font-weight: 800;
+  color: #ef4444;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+.pub-admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.pub-admin-btn {
+  padding: 9px 8px;
+  border-radius: 9px;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  border: 1px solid;
+  text-align: center;
+}
+.pub-admin-btn-red   { background: rgba(239,68,68,0.1);  border-color: rgba(239,68,68,0.25);  color: #ef4444; }
+.pub-admin-btn-green { background: rgba(0,255,102,0.07); border-color: rgba(0,255,102,0.2);   color: #00ff66; }
+.pub-admin-btn-blue  { background: rgba(56,189,248,0.07); border-color: rgba(56,189,248,0.2); color: #38bdf8; }
+.pub-admin-btn-gray  { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.1); color: var(--muted); }
 
 </style>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -6599,48 +6675,84 @@ function openPublicProfileByIndex(i) {
   openPublicProfile(board[i]);
 }
 
+var ADMIN_UIDS_CLIENT = ['BvXY0zGZtle3fFoHHUnbW1UkaMu1'];
+
 async function openPublicProfile(data) {
   _pubProfileData = data;
   document.getElementById('publicProfileModal').classList.add('show');
+
+  /* Temel bilgiler */
   document.getElementById('pubAvatar').textContent = (data.name || '?')[0].toUpperCase();
   document.getElementById('pubName').textContent   = data.name || '—';
-  document.getElementById('pubScore').textContent  = data.score || 0;
-  document.getElementById('pubLevel').textContent  = data.level || 1;
+  document.getElementById('pubScore').textContent  = (data.score || 0) + 'p';
+  document.getElementById('pubLevel').textContent  = 'Svye ' + (data.level || 1);
   document.getElementById('pubRank').textContent   = '...';
   document.getElementById('pubJoined').textContent = '...';
-
-  /* Admin badge ve butonlar */
-  var isAdmin = await checkAdminStatus();
-  var adminBadge   = document.getElementById('pubAdminBadge');
+  document.getElementById('pubUid').textContent    = '...';
+  document.getElementById('pubBadges').innerHTML   = '';
+  document.getElementById('pubProvider').textContent = '';
+  var banInfo = document.getElementById('pubBanInfo');
+  if (banInfo) { banInfo.style.display = 'none'; }
   var adminActions = document.getElementById('pubAdminActions');
+  if (adminActions) { adminActions.style.display = 'none'; }
 
-  /* Worker'dan detay çek */
+  var isViewerAdmin = await checkAdminStatus();
+
   try {
-    var r = await workerPost('admin/player-info', { token: authUser ? authUser.token : '', targetName: data.name });
+    var token = authUser ? authUser.token : '';
+    var r = await workerPost('admin/player-info', { token: token, targetName: data.name });
     if (r && r.ok) {
-      document.getElementById('pubRank').textContent = r.rank || '?';
-      if (r.createdAt) {
-        document.getElementById('pubJoined').textContent = new Date(r.createdAt).toLocaleDateString('tr-TR');
+      _pubProfileData.uid = r.uid;
+      document.getElementById('pubRank').textContent   = r.rank ? '#' + r.rank : '—';
+      document.getElementById('pubJoined').textContent = r.createdAt ? new Date(r.createdAt).toLocaleDateString('tr-TR') : '?';
+      document.getElementById('pubUid').textContent    = r.uid || '—';
+      document.getElementById('pubProvider').textContent = r.provider === 'google' ? '🔵 Google ile giriş' : '📧 E-posta ile giriş';
+
+      /* Badge'ler — herkes görür */
+      var badges = [];
+      if (r.rank === 1)      { badges.push('<span class="pub-badge-tag pub-badge-top">🥇 #1</span>'); }
+      else if (r.rank === 2) { badges.push('<span class="pub-badge-tag pub-badge-top">🥈 #2</span>'); }
+      else if (r.rank === 3) { badges.push('<span class="pub-badge-tag pub-badge-top">🥉 #3</span>'); }
+
+      /* Admin rozeti — herkese göster */
+      try {
+        var adminInfo = await workerPost('admin/info', { token: token });
+        var adminList = (adminInfo && adminInfo.admins) ? adminInfo.admins : [];
+        if (ADMIN_UIDS_CLIENT.includes(r.uid)) {
+          badges.push('<span class="pub-badge-tag pub-badge-admin">⚡ Süper Admin</span>');
+        } else if (adminList.includes(r.uid)) {
+          badges.push('<span class="pub-badge-tag pub-badge-admin">⚡ Admin</span>');
+        }
+      } catch(e) {}
+
+      /* Ban — sadece adminler görür */
+      if (isViewerAdmin && r.banned) {
+        badges.push('<span class="pub-badge-tag" style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#ef4444">🚫 Banlı</span>');
+        if (banInfo) {
+          banInfo.style.display = '';
+          banInfo.textContent = 'Ban sebebi: ' + (r.banned.reason || 'belirtilmedi');
+        }
       }
-      /* Admin mi kontrol et */
-      if (adminBadge) {
-        try {
-          var adminList = await workerPost('admin/info', { token: authUser ? authUser.token : '' });
-          var admins = (adminList && adminList.admins) ? adminList.admins : [];
-          var isTargetAdmin = admins.includes(r.uid);
-          adminBadge.style.display = isTargetAdmin ? '' : 'none';
-        } catch(e) { adminBadge.style.display = 'none'; }
-      }
+
+      /* UID — herkes görsün ama küçük ve gri */
+      document.getElementById('pubUid').textContent = 'UID: ' + r.uid;
+
+      document.getElementById('pubBadges').innerHTML = badges.join('');
     }
   } catch(e) {
     document.getElementById('pubRank').textContent   = '?';
     document.getElementById('pubJoined').textContent = '?';
   }
 
-  /* Admin butonları */
-  if (adminActions) {
-    adminActions.style.display = isAdmin ? 'flex' : 'none';
-  }
+  if (adminActions && isViewerAdmin) { adminActions.style.display = 'flex'; }
+}
+
+function copyPubUid() {
+  var uid = document.getElementById('pubUid').textContent;
+  if (!uid || uid === '—' || uid === '...') { return; }
+  try {
+    navigator.clipboard.writeText(uid).then(function() { showToast('📋 UID kopyalandı', '#38bdf8'); });
+  } catch(e) { showToast(uid, '#38bdf8'); }
 }
 
 function closePublicProfile() {
@@ -6652,10 +6764,21 @@ async function pubAdminBan() {
   if (!_pubProfileData) { return; }
   var reason = prompt('Ban sebebi:');
   if (!reason) { return; }
-  var r = await workerPost('admin/ban', { token: authUser.token, targetName: _pubProfileData.name, reason });
+  var r = await workerPost('admin/ban', { token: authUser.token, targetName: _pubProfileData.name, reason: reason });
   if (r && r.ok) {
     showToast('🚫 ' + _pubProfileData.name + ' banlandı', '#ef4444');
-    closePublicProfile();
+    openPublicProfile(_pubProfileData);
+  } else {
+    showToast('❌ ' + (r ? r.error : 'Hata'), '#ef4444');
+  }
+}
+
+async function pubAdminUnban() {
+  if (!_pubProfileData) { return; }
+  var r = await workerPost('admin/unban', { token: authUser.token, targetName: _pubProfileData.name });
+  if (r && r.ok) {
+    showToast('✅ ' + _pubProfileData.name + ' banı kaldırıldı', '#00ff66');
+    openPublicProfile(_pubProfileData);
   } else {
     showToast('❌ ' + (r ? r.error : 'Hata'), '#ef4444');
   }
@@ -6664,12 +6787,52 @@ async function pubAdminBan() {
 async function pubAdminSetScore() {
   if (!_pubProfileData) { return; }
   var score = prompt(_pubProfileData.name + ' için yeni puan:');
-  if (!score || isNaN(Number(score))) { return; }
+  if (score === null || score === '' || isNaN(Number(score))) { return; }
   var r = await workerPost('admin/set-score', { token: authUser.token, targetName: _pubProfileData.name, score: Number(score) });
   if (r && r.ok) {
     showToast('✅ Skor güncellendi: ' + r.newScore + 'p', '#00ff66');
-    closePublicProfile();
     fetchOnlineLeaderboard();
+    openPublicProfile(_pubProfileData);
+  } else {
+    showToast('❌ ' + (r ? r.error : 'Hata'), '#ef4444');
+  }
+}
+
+async function pubAdminRemove() {
+  if (!_pubProfileData) { return; }
+  var ok = await showConfirm('Tablodan Çıkar', '"' + _pubProfileData.name + '" tüm liderlik tablolarından çıkarılacak.');
+  if (!ok) { return; }
+  var r = await workerPost('admin/remove-player', { token: authUser.token, targetName: _pubProfileData.name });
+  if (r && r.ok) {
+    showToast('🗑 ' + _pubProfileData.name + ' tablodan çıkarıldı', '#f59e0b');
+    fetchOnlineLeaderboard();
+    closePublicProfile();
+  } else {
+    showToast('❌ ' + (r ? r.error : 'Hata'), '#ef4444');
+  }
+}
+
+async function pubAdminGiveAdmin() {
+  if (!_pubProfileData) { return; }
+  var ok = await showConfirm('Admin Ver', '"' + _pubProfileData.name + '" admin yapılacak.');
+  if (!ok) { return; }
+  var r = await workerPost('admin/give-admin', { token: authUser.token, targetName: _pubProfileData.name });
+  if (r && r.ok) {
+    showToast('👑 ' + _pubProfileData.name + ' artık admin', '#f59e0b');
+    openPublicProfile(_pubProfileData);
+  } else {
+    showToast('❌ ' + (r ? r.error : 'Hata'), '#ef4444');
+  }
+}
+
+async function pubAdminRemoveAdmin() {
+  if (!_pubProfileData) { return; }
+  var ok = await showConfirm('Admin Al', '"' + _pubProfileData.name + '" adminlikten çıkarılacak.');
+  if (!ok) { return; }
+  var r = await workerPost('admin/remove-admin', { token: authUser.token, targetName: _pubProfileData.name });
+  if (r && r.ok) {
+    showToast('❌ ' + _pubProfileData.name + ' adminlikten çıkarıldı', '#9fb3b0');
+    openPublicProfile(_pubProfileData);
   } else {
     showToast('❌ ' + (r ? r.error : 'Hata'), '#ef4444');
   }
@@ -6999,26 +7162,55 @@ document.addEventListener('pointerdown', e => {
 <!-- Genel Profil Modalı -->
 <div id="publicProfileModal">
   <div id="pubProfileCard">
-    <div style="display:flex;justify-content:flex-end">
-      <button onclick="closePublicProfile()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer">✕</button>
+
+    <!-- Üst kısım -->
+    <div class="pub-header-bg">
+      <button class="pub-close-btn" onclick="closePublicProfile()">✕</button>
+      <div class="pub-avatar" id="pubAvatar">?</div>
+      <div class="pub-name" id="pubName">—</div>
+      <div class="pub-badges" id="pubBadges"></div>
+      <div class="pub-uid" id="pubUid" title="UID'yi kopyala" onclick="copyPubUid()">—</div>
     </div>
-    <div class="pub-avatar" id="pubAvatar">?</div>
-    <div class="pub-name" id="pubName">—</div>
-    <div class="pub-badge" id="pubAdminBadge" style="display:none">⚡ Admin</div>
-    <div class="pub-stats-grid">
-      <div class="pub-stat"><div class="pub-stat-val" id="pubScore">0</div><div class="pub-stat-lbl">Puan</div></div>
-      <div class="pub-stat"><div class="pub-stat-val" id="pubLevel">1</div><div class="pub-stat-lbl">Seviye</div></div>
-      <div class="pub-stat"><div class="pub-stat-val" id="pubRank">?</div><div class="pub-stat-lbl">Sıra</div></div>
-      <div class="pub-stat"><div class="pub-stat-val" id="pubJoined">—</div><div class="pub-stat-lbl">Kayıt</div></div>
-    </div>
-    <!-- Admin butonları — sadece adminlere görünür -->
-    <div id="pubAdminActions" style="display:none;display:flex;flex-direction:column;gap:6px">
-      <div style="font-size:11px;color:var(--muted);font-weight:700;text-align:center">⚡ Admin İşlemleri</div>
-      <div style="display:flex;gap:6px">
-        <button onclick="pubAdminBan()" style="flex:1;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:8px;color:#ef4444;padding:8px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer">🚫 Banla</button>
-        <button onclick="pubAdminSetScore()" style="flex:1;background:rgba(0,255,102,0.08);border:1px solid rgba(0,255,102,0.2);border-radius:8px;color:#00ff66;padding:8px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer">🏆 Skor Ayarla</button>
+
+    <!-- İstatistikler -->
+    <div class="pub-body">
+      <div class="pub-stats-grid">
+        <div class="pub-stat">
+          <div class="pub-stat-val" id="pubScore">0</div>
+          <div class="pub-stat-lbl">🏆 Puan</div>
+        </div>
+        <div class="pub-stat">
+          <div class="pub-stat-val" id="pubLevel">1</div>
+          <div class="pub-stat-lbl">📈 Seviye</div>
+        </div>
+        <div class="pub-stat">
+          <div class="pub-stat-val" id="pubRank">—</div>
+          <div class="pub-stat-lbl">🥇 Sıra</div>
+        </div>
+        <div class="pub-stat">
+          <div class="pub-stat-val" id="pubJoined">—</div>
+          <div class="pub-stat-lbl">📅 Kayıt</div>
+        </div>
+      </div>
+
+      <!-- Giriş yöntemi -->
+      <div style="font-size:12px;color:var(--muted);text-align:center" id="pubProvider"></div>
+
+      <!-- Admin bölümü -->
+      <div class="pub-admin-section" id="pubAdminActions" style="display:none">
+        <div class="pub-admin-title">⚡ Admin İşlemleri</div>
+        <div class="pub-admin-grid">
+          <button class="pub-admin-btn pub-admin-btn-red"   onclick="pubAdminBan()">🚫 Banla</button>
+          <button class="pub-admin-btn pub-admin-btn-gray"  onclick="pubAdminUnban()">✅ Ban Kaldır</button>
+          <button class="pub-admin-btn pub-admin-btn-green" onclick="pubAdminSetScore()">🏆 Skor Ayarla</button>
+          <button class="pub-admin-btn pub-admin-btn-blue"  onclick="pubAdminRemove()">🗑 Tablodan Çıkar</button>
+          <button class="pub-admin-btn pub-admin-btn-blue"  onclick="pubAdminGiveAdmin()">👑 Admin Ver</button>
+          <button class="pub-admin-btn pub-admin-btn-gray"  onclick="pubAdminRemoveAdmin()">❌ Admin Al</button>
+        </div>
+        <div id="pubBanInfo" style="display:none;margin-top:4px;padding:8px;background:rgba(239,68,68,0.08);border-radius:8px;font-size:11px;color:#ef4444"></div>
       </div>
     </div>
+
   </div>
 </div>
 
