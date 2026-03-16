@@ -19,7 +19,34 @@ window.onerror = function(msg, src, line, col, err) {
 };
 </script>
 <script>
-/* 🔓 PUBLIC MOD — beta şifresi geçici olarak kaldırıldı */
+/* 🔒 BETA KORUMA — HTML ekranı ile */
+document.addEventListener('DOMContentLoaded', function() {
+  var PASS = 'emineningotunegirsinbuproje';
+  var screen = document.getElementById('betaLockScreen');
+  if (!screen) return;
+  screen.style.display = 'flex';
+
+  var input = document.getElementById('betaLockInput');
+  var btn   = document.getElementById('betaLockBtn');
+  var err   = document.getElementById('betaLockErr');
+
+  function tryUnlock() {
+    if ((input.value || '').trim() === PASS) {
+      screen.style.display = 'none';
+      try { showLoginChoice(); } catch(e) { try { openAuthModal(); } catch(e2) {} }
+    } else {
+      err.textContent = 'Şifre yanlış';
+      err.style.opacity = '1';
+      input.value = '';
+      input.focus();
+    }
+  }
+
+  btn.addEventListener('click', tryUnlock);
+  input.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') tryUnlock();
+  });
+});
 </script>
 <style>
 /* ---------------------------
@@ -1615,11 +1642,67 @@ body.has-bg-image .card {
 .pin-msg { font-size: 12px; min-height: 18px; text-align: center; }
 .pin-link { font-size: 12px; color: var(--muted); cursor: pointer; text-decoration: underline; text-align: center; }
 
+
+/* ── Beta Lock Screen ─────────────────────────────── */
+#betaLockScreen {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 99999;
+  background: #060708;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  box-sizing: border-box;
+  gap: 16px;
+}
+#betaLockCard {
+  background: #0b1220;
+  border: 1.5px solid #1a2f28;
+  border-radius: 20px;
+  padding: 32px 24px;
+  width: 100%;
+  max-width: 360px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  box-sizing: border-box;
+}
+#betaLockErr {
+  font-size: 12px;
+  color: #ef4444;
+  min-height: 16px;
+  opacity: 0;
+  transition: opacity .2s;
+}
+
 </style>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 </head>
 <body>
+
+<!-- Beta Şifre Ekranı -->
+<div id="betaLockScreen">
+  <div id="betaLockCard">
+    <div style="font-size:48px">🔐</div>
+    <div style="font-size:22px;font-weight:900;color:#e6f7ea">MathGame</div>
+    <div style="font-size:13px;color:#9fb3b0;text-align:center">Beta sürümüne erişmek için şifreyi gir</div>
+    <div id="betaLockErr"></div>
+    <input id="betaLockInput" type="password"
+      placeholder="Şifre"
+      autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+      style="width:100%;box-sizing:border-box;background:#060c18;border:1.5px solid #1a2f28;border-radius:12px;color:#e6f7ea;font-size:16px;padding:13px 16px;font-family:inherit;outline:none">
+    <button id="betaLockBtn"
+      style="width:100%;background:#00ff66;color:#030608;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:800;font-family:inherit;cursor:pointer">
+      Devam Et →
+    </button>
+    <div style="font-size:11px;color:#2a3a38">© SKYDIVEX — Yetkisiz erişim yasaktır</div>
+  </div>
+</div>
+
 <div id="bgLayer"></div>
 <div id="comboDisplay"></div>
 
@@ -1872,6 +1955,15 @@ body.has-bg-image .card {
           <div class="lb-tab-row">
             <button class="lb-tab active" id="lbTabLocal">📱 Lokal</button>
             <button class="lb-tab" id="lbTabOnline">🌐 Online</button>
+          </div>
+          <!-- Online ops sekmeleri -->
+          <div id="lbOpsRow" style="display:none;gap:4px;flex-wrap:wrap;margin-bottom:6px" class="lb-tab-row">
+            <button class="lb-tab active" id="lbOpsAll"  onclick="switchOnlineLbOps('all')">🔢 Hepsi</button>
+            <button class="lb-tab"        id="lbOpsPlus" onclick="switchOnlineLbOps('+')">➕</button>
+            <button class="lb-tab"        id="lbOpsMinus"onclick="switchOnlineLbOps('-')">➖</button>
+            <button class="lb-tab"        id="lbOpsMul"  onclick="switchOnlineLbOps('*')">✖️</button>
+            <button class="lb-tab"        id="lbOpsDiv"  onclick="switchOnlineLbOps('/')">➗</button>
+            <button class="lb-tab"        id="lbOpsMixed"onclick="switchOnlineLbOps('+-*/')">🌀 Karma</button>
           </div>
           <div id="leaderboard" class="lb">Henüz kimse yok</div>
           <div id="onlineLbEl" style="display:none"></div>
@@ -2774,9 +2866,13 @@ if (authUser && authUser.uid) {
   levelDisplay.innerText = state.level;
   updateMiniInfo();
 } else {
-  /* Giriş yapılmamış */
+  /* Giriş yapılmamış — beta şifresi geçtiyse aç */
   setTimeout(function() {
-    try { openAuthModal(); } catch(e) {}
+    var lock = document.getElementById('betaLockScreen');
+    if (!lock || lock.style.display === 'none' || lock.style.display === '') {
+      try { openAuthModal(); } catch(e) {}
+    }
+    /* Aksi halde betaLockScreen unlock olunca openAuthModal çağrılacak */
   }, 300);
 }
 renderLeaderboard();
@@ -4897,12 +4993,16 @@ document.addEventListener('DOMContentLoaded', () => {
     lbLocal.classList.add('active'); lbOnline.classList.remove('active');
     document.getElementById('leaderboard').style.display = '';
     document.getElementById('onlineLbEl').style.display = 'none';
+    var opsRow = document.getElementById('lbOpsRow');
+    if (opsRow) { opsRow.style.display = 'none'; }
     stopLbAutoRefresh();
   });
   if (lbOnline) lbOnline.addEventListener('click', () => {
     lbOnline.classList.add('active'); lbLocal.classList.remove('active');
     document.getElementById('leaderboard').style.display = 'none';
     document.getElementById('onlineLbEl').style.display = '';
+    var opsRow = document.getElementById('lbOpsRow');
+    if (opsRow) { opsRow.style.display = 'flex'; }
     startLbAutoRefresh();
   });
 });
@@ -5151,6 +5251,24 @@ function stopLbAutoRefresh() {
   }
 }
 
+var _currentLbOps = 'all'; /* Seçili ops filtresi */
+
+function switchOnlineLbOps(ops) {
+  _currentLbOps = ops;
+  /* Aktif sekmeyi güncelle */
+  var ids = { 'all':'lbOpsAll', '+':'lbOpsPlus', '-':'lbOpsMinus', '*':'lbOpsMul', '/':'lbOpsDiv', '+-*/':'lbOpsMixed' };
+  Object.values(ids).forEach(function(id) {
+    var btn = document.getElementById(id);
+    if (btn) { btn.classList.remove('active'); }
+  });
+  var activeId = ids[ops];
+  if (activeId) {
+    var activeBtn = document.getElementById(activeId);
+    if (activeBtn) { activeBtn.classList.add('active'); }
+  }
+  fetchOnlineLeaderboard();
+}
+
 async function fetchOnlineLeaderboard() {
   const el       = document.getElementById('onlineLbEl');
   const statusEl = document.getElementById('onlineLbStatus');
@@ -5159,17 +5277,20 @@ async function fetchOnlineLeaderboard() {
   el.innerHTML = '<div style="color:var(--muted);font-size:12px;padding:8px">⏳ Yükleniyor...</div>';
 
   try {
-    const ops   = opsKey(state.ops);
+    const ops   = _currentLbOps === 'all' ? 'all' : opsKey(_currentLbOps.split(''));
     const board = await workerGet('leaderboard', { ops });
 
     if (statusEl) statusEl.textContent = '🟢 online';
 
+    const opsLabels = { 'all':'Tüm Kategoriler', '+':'Toplama', '-':'Çıkarma', '*':'Çarpma', '/':'Bölme', '+-*/':'Karma (+-×÷)' };
+    const opsLabel = opsLabels[_currentLbOps] || _currentLbOps;
     if (!Array.isArray(board) || board.length === 0) {
-      el.innerHTML = '<div style="color:var(--muted);font-size:12px;padding:8px">Henüz kayıt yok — ilk sen ol!</div>';
+      el.innerHTML = '<div style="color:var(--muted);font-size:12px;padding:8px">' + opsLabel + ': Henüz kayıt yok — ilk sen ol!</div>';
       return;
     }
+    el.innerHTML = '<div style="font-size:11px;color:var(--neon);font-weight:700;margin-bottom:6px;opacity:0.7">' + opsLabel + '</div>';
 
-    el.innerHTML = board.map((e, i) => {
+    el.innerHTML += board.map((e, i) => {
       const isMe  = authUser && e.uid === authUser.uid;
       const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i+1) + '.';
       return '<div class="lb-online-item' + (isMe ? ' lb-me' : '') + '">' +
