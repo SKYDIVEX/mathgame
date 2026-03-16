@@ -1691,10 +1691,11 @@ body.has-bg-image .card {
     <div style="font-size:22px;font-weight:900;color:#e6f7ea">MathGame</div>
     <div style="font-size:13px;color:#9fb3b0;text-align:center">Beta sürümüne erişmek için şifreyi gir</div>
     <div id="betaLockErr"></div>
-    <input id="betaLockInput" type="password"
+    <input id="betaLockInput" type="text"
       placeholder="Şifre"
       autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
-      style="width:100%;box-sizing:border-box;background:#060c18;border:1.5px solid #1a2f28;border-radius:12px;color:#e6f7ea;font-size:16px;padding:13px 16px;font-family:inherit;outline:none">
+      inputmode="text"
+      style="width:100%;box-sizing:border-box;background:#060c18;border:1.5px solid #1a2f28;border-radius:12px;color:#e6f7ea;font-size:16px;padding:13px 16px;font-family:inherit;outline:none;-webkit-text-security:disc">
     <button id="betaLockBtn"
       style="width:100%;background:#00ff66;color:#030608;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:800;font-family:inherit;cursor:pointer">
       Devam Et →
