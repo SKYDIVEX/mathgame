@@ -5713,6 +5713,22 @@ async function adminLoadRequests(status) {
   adminLog('✅ ' + r.requests.length + ' istek yüklendi');
 }
 
+
+async function adminSendReqMsg(requestId) {
+  var input = document.getElementById('note_' + requestId);
+  if (!input) { return; }
+  var text = (input.value || '').trim();
+  if (!text) { adminLog('❌ Mesaj boş'); return; }
+  input.value = '';
+  var r = await adminCall('request-message', { requestId: requestId, message: text });
+  if (r && r.ok) {
+    adminLog('✅ Mesaj gönderildi');
+    adminLoadRequests('open');
+  } else {
+    adminLog('❌ ' + (r ? r.error : 'Hata'));
+  }
+}
+
 async function adminResolveReq(id, status) {
   const r = await adminCall('admin/resolve-request', { id, status });
   if (r && r.ok) { adminLog('✅ İstek güncellendi'); adminLoadRequests('open'); }
@@ -6362,6 +6378,126 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 
+function switchReqTab(tab) {
+  var panelNew = document.getElementById('reqPanelNew');
+  var panelMy  = document.getElementById('reqPanelMy');
+  var btnNew   = document.getElementById('reqTabNew');
+  var btnMy    = document.getElementById('reqTabMy');
+  if (tab === 'new') {
+    if (panelNew) { panelNew.style.display = ''; }
+    if (panelMy)  { panelMy.style.display  = 'none'; }
+    if (btnNew) { btnNew.style.background = 'rgba(0,255,102,0.1)'; btnNew.style.color = '#00ff66'; btnNew.style.borderColor = '#00ff6644'; }
+    if (btnMy)  { btnMy.style.background  = 'transparent';         btnMy.style.color  = 'var(--muted)'; btnMy.style.borderColor = '#1a2f28'; }
+  } else {
+    if (panelNew) { panelNew.style.display = 'none'; }
+    if (panelMy)  { panelMy.style.display  = ''; }
+    if (btnNew) { btnNew.style.background = 'transparent';          btnNew.style.color = 'var(--muted)'; btnNew.style.borderColor = '#1a2f28'; }
+    if (btnMy)  { btnMy.style.background  = 'rgba(0,255,102,0.1)'; btnMy.style.color  = '#00ff66'; btnMy.style.borderColor = '#00ff6644'; }
+    loadMyRequests();
+  }
+}
+
+async function loadMyRequests() {
+  var el = document.getElementById('myRequestList');
+  if (!el) { return; }
+  if (!authUser || !authUser.token) {
+    el.innerHTML = '<div style="color:var(--muted);font-size:12px;text-align:center;padding:8px">Giriş yapman gerekiyor</div>';
+    return;
+  }
+  el.innerHTML = '<div style="color:var(--muted);font-size:12px;text-align:center;padding:8px">&#x23F3; Yükleniyor...</div>';
+  try {
+    var result = await fetch(WORKER_URL + '/my-requests', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: authUser.token })
+    }).then(function(r) { return r.json(); });
+
+    if (!result || !result.ok) {
+      el.innerHTML = '<div style="color:#ef4444;font-size:12px;text-align:center;padding:8px">&#x274C; Yüklenemedi</div>';
+      return;
+    }
+    if (!result.requests || result.requests.length === 0) {
+      el.innerHTML = '<div style="color:var(--muted);font-size:12px;text-align:center;padding:8px">Henüz istek göndermedin</div>';
+      return;
+    }
+    var typeLabels   = { bug:'&#x1F41B; Bug', unban:'&#x1F513; Unban', suggestion:'&#x1F4A1; Öneri', report:'&#x26A0;&#xFE0F; Şikayet', other:'&#x1F4DD; Diğer' };
+    var statusColors = { open:'#f59e0b', resolved:'#00ff66', rejected:'#ef4444' };
+    var statusLabels = { open:'&#x23F3; Açık', resolved:'&#x2705; Yanıtlandı', rejected:'&#x274C; Reddedildi' };
+    el.innerHTML = result.requests.map(function(req) {
+      var typeLabel   = typeLabels[req.type] || req.type;
+      var statusColor = statusColors[req.status] || '#9fb3b0';
+      var statusLabel = statusLabels[req.status] || req.status;
+      var date = req.createdAt ? new Date(req.createdAt).toLocaleDateString('tr-TR') : '';
+
+      /* Thread mesajları */
+      var threadHtml = '';
+      if (req.thread && req.thread.length > 0) {
+        threadHtml = '<div style="margin-top:8px;display:flex;flex-direction:column;gap:4px">';
+        req.thread.forEach(function(msg) {
+          var isAdmin = msg.role === 'admin';
+          var bg    = isAdmin ? 'rgba(56,189,248,0.08)' : 'rgba(0,255,102,0.06)';
+          var color = isAdmin ? '#38bdf8' : '#00ff66';
+          var align = isAdmin ? 'flex-start' : 'flex-end';
+          var time  = new Date(msg.ts).toLocaleTimeString('tr-TR', {hour:'2-digit',minute:'2-digit'});
+          threadHtml += '<div style="display:flex;justify-content:' + align + '">' +
+            '<div style="max-width:85%;padding:6px 10px;background:' + bg + ';border-radius:10px;font-size:12px;color:' + color + '">' +
+              '<span style="font-weight:700;font-size:10px;opacity:0.8">' + (isAdmin ? '⚡ Admin' : '👤 Sen') + ' · ' + time + '</span><br>' +
+              escapeHtml(msg.text) +
+            '</div>' +
+          '</div>';
+        });
+        threadHtml += '</div>';
+      }
+
+      /* Yanıt kutusu */
+      var replyHtml = '<div style="display:flex;gap:6px;margin-top:8px">' +
+        '<input id="reply_' + req.id + '" placeholder="Yanıt yaz..." style="flex:1;background:#060c18;border:1px solid #1a2f28;border-radius:8px;color:#e6f7ea;font-size:12px;padding:7px 10px;font-family:inherit;outline:none">' +
+        '<button onclick="sendReqReply(\`' + req.id + '\`)" style="background:#00ff66;color:#030608;border:none;border-radius:8px;padding:7px 12px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit">&#x27A4;</button>' +
+      '</div>';
+
+      return '<div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:10px 12px">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">' +
+          '<span style="font-size:11px;font-weight:700;color:#e6f7ea">' + typeLabel + '</span>' +
+          '<span style="font-size:11px;font-weight:700;color:' + statusColor + '">' + statusLabel + '</span>' +
+        '</div>' +
+        '<div style="font-size:12px;color:var(--muted)">' + req.message + '</div>' +
+        '<div style="font-size:10px;color:#3a4a48;margin-top:2px">' + date + '</div>' +
+        threadHtml + replyHtml +
+      '</div>';
+    }).join('');
+  } catch(e) {
+    el.innerHTML = '<div style="color:#ef4444;font-size:12px;text-align:center;padding:8px">&#x274C; Bağlantı hatası</div>';
+  }
+}
+
+
+async function sendReqReply(requestId) {
+  var input = document.getElementById('reply_' + requestId);
+  if (!input) { return; }
+  var text = (input.value || '').trim();
+  if (!text) { return; }
+  if (!authUser || !authUser.token) { showToast('Giriş yapman gerekiyor', '#ef4444'); return; }
+  input.value = '';
+  input.disabled = true;
+  try {
+    var result = await fetch(WORKER_URL + '/request-message', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: authUser.token, requestId: requestId, message: text })
+    }).then(function(r) { return r.json(); });
+    if (result && result.ok) {
+      loadMyRequests(); /* Yenile */
+    } else {
+      showToast('&#x274C; ' + (result ? result.error : 'Hata'), '#ef4444');
+      input.disabled = false;
+    }
+  } catch(e) {
+    showToast('Bağlantı hatası', '#ef4444');
+    input.disabled = false;
+  }
+}
+
+
 window._mathgame={ state, nextQuestion, checkAnswer };
 
 /* ── LIQUID RIPPLE ─────────────────────────────────── */
@@ -6543,6 +6679,7 @@ document.addEventListener('pointerdown', e => {
       <div style="font-size:16px;font-weight:900;color:#e6f7ea">📬 İstek / Şikayet</div>
       <button id="closeRequestModal" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer">✕</button>
     </div>
+    <div id="reqPanelNew">
     <select id="reqType" style="background:#060c18;border:1.5px solid #1a2f28;border-radius:10px;color:#e6f7ea;font-size:14px;padding:10px 14px;font-family:inherit;width:100%;box-sizing:border-box">
       <option value="bug">🐛 Bug / Hata</option>
       <option value="suggestion">💡 Öneri</option>
@@ -6553,6 +6690,11 @@ document.addEventListener('pointerdown', e => {
     <textarea id="reqMessage" placeholder="Mesajını yaz... (min 5 karakter)" maxlength="500" style="background:#060c18;border:1.5px solid #1a2f28;border-radius:10px;color:#e6f7ea;font-size:14px;padding:10px 14px;font-family:inherit;width:100%;box-sizing:border-box;min-height:100px;resize:none;outline:none"></textarea>
     <div id="reqMsg" style="font-size:12px;text-align:center;min-height:16px"></div>
     <button id="reqSendBtn" style="background:#00ff66;color:#030608;border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:800;font-family:inherit;cursor:pointer;width:100%">Gönder</button>
+    </div>
+    <div id="reqPanelMy" style="display:none">
+      <div id="myRequestList" style="display:flex;flex-direction:column;gap:8px;max-height:300px;overflow-y:auto"></div>
+      <button onclick="loadMyRequests()" style="margin-top:8px;width:100%;background:rgba(255,255,255,0.05);border:1px solid #1a2f28;border-radius:10px;color:var(--muted);font-size:12px;padding:8px;font-family:inherit;cursor:pointer">&#x1F504; Yenile</button>
+    </div>
 
     <div style="border-top:1px solid #1a2f28;padding-top:12px">
       <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:8px">🔑 Şifremi Unuttum (e-posta girişi)</div>
