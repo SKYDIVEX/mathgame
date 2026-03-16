@@ -1751,6 +1751,46 @@ body.has-bg-image .card {
   justify-content: center;
 }
 
+
+/* ── Genel Profil (Public) ──────────────────────────── */
+#publicProfileModal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9400;
+  background: rgba(2,4,10,0.96);
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  box-sizing: border-box;
+}
+#publicProfileModal.show { display: flex; }
+#pubProfileCard {
+  background: #0b1220;
+  border: 1.5px solid #1a2f28;
+  border-radius: 20px;
+  padding: 24px 20px;
+  width: 100%;
+  max-width: 360px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.pub-avatar {
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #00ff66, #00cc55);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px; font-weight: 900; color: #030608;
+  margin: 0 auto;
+}
+.pub-name { text-align: center; font-size: 20px; font-weight: 900; color: #e6f7ea; }
+.pub-badge { text-align: center; font-size: 12px; color: #f59e0b; font-weight: 700; }
+.pub-stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.pub-stat { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 10px; text-align: center; }
+.pub-stat-val { font-size: 18px; font-weight: 900; color: var(--neon); }
+.pub-stat-lbl { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
 </style>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -1966,6 +2006,9 @@ body.has-bg-image .card {
     <button id="enterBtn" style="display:none"></button>
     <button id="guestBtn" style="display:none"></button>
   </div>
+
+  <!-- Event Banner -->
+  <div id="eventBanner" style="display:none;margin-top:10px;padding:10px 14px;background:linear-gradient(135deg,rgba(255,215,0,0.12),rgba(255,165,0,0.08));border:1px solid rgba(255,215,0,0.25);border-radius:12px;font-size:13px;color:#ffd700;text-align:center"></div>
 
   <!-- Main menu -->
   <div id="menuCard" class="card" style="margin-top:12px">
@@ -2738,7 +2781,8 @@ settingClearBgBtn.addEventListener('click', ()=>{
 settingResetScores.addEventListener('click', async ()=>{
   const ok = await showConfirm('Skorları Sıfırla', 'Tüm modlardaki tüm skorlar silinecek.');
   if(!ok) return;
-  state.leaderboard={}; saveState(); renderLeaderboard(); clickSound();
+  state.leaderboard={}; saveState(); renderLeaderboard();
+try { loadActiveEvents(); } catch(e) {} clickSound();
   showToast('🗑 Tüm skorlar silindi','#ff6b6b');
 });
 
@@ -3286,7 +3330,8 @@ function checkAnswer(){
       successSound();
 
       /* Puan hesapla — seviye arttıkça kazanım daha zorlu */
-      const gained = Math.max(5, state.level * 5);
+      const eventMult = window._activeEventMultiplier || 1;
+      const gained = Math.max(5, state.level * 5) * eventMult;
       state.score  = Math.max(0, (state.score || 0) + gained);
       const board  = getCurrentBoard();
       board[state.player] = state.score;
@@ -4885,10 +4930,16 @@ async function workerPost(endpoint, data) {
   return resp.json();
 }
 
-async function workerGet(endpoint, params = {}) {
-  const qs  = new URLSearchParams(params).toString();
-  const url = WORKER_URL + '/' + endpoint + (qs ? '?' + qs : '');
-  const resp = await fetch(url);
+async function workerGet(endpoint, params) {
+  if (!params) { params = {}; }
+  /* URLSearchParams + işaretini boşluk olarak encode eder — manuel yap */
+  var parts = [];
+  Object.keys(params).forEach(function(k) {
+    parts.push(encodeURIComponent(k) + '=' + encodeURIComponent(params[k]));
+  });
+  var qs  = parts.join('&');
+  var url = WORKER_URL + '/' + endpoint + (qs ? '?' + qs : '');
+  var resp = await fetch(url);
   return resp.json();
 }
 
@@ -5195,6 +5246,7 @@ async function handleEmailAuth() {
     showScreen('menu');
     refreshMenuPanels();
     showToast('✅ Hoş geldin, ' + name + '!');
+    try { stopSessionTimer(); startSessionTimer(); } catch(e) {}
     try { await syncOnlineScore(); } catch(e) {}
     try { await loadProfileFromCloud(); } catch(e) {}
     try { startUnreadListener(); } catch(e) {}
@@ -5307,23 +5359,32 @@ async function syncOnlineScore() {
   if (!authUser) { return; }
   if (!authUser.token) { return; }
   try {
-    var ops   = opsKey(state.ops);
-    var board = await workerGet('leaderboard', { ops: ops });
-    if (!Array.isArray(board)) { return; }
+    /* lb:all'dan en güncel skoru çek */
+    var boardAll = await workerGet('leaderboard', { ops: 'all' });
+    if (!Array.isArray(boardAll)) { return; }
     var myEntry = null;
-    for (var i = 0; i < board.length; i++) {
-      if (board[i].uid === authUser.uid) {
-        myEntry = board[i];
+    for (var i = 0; i < boardAll.length; i++) {
+      if (boardAll[i].uid === authUser.uid) {
+        myEntry = boardAll[i];
         break;
       }
     }
-    if (myEntry && myEntry.score > state.score) {
+    if (myEntry && myEntry.score > (state.score || 0)) {
+      /* Online skor daha yüksek — hem state hem lokal board güncelle */
       state.score = myEntry.score;
       state.level = myEntry.level || state.level;
+      /* Lokal board'u da güncelle — tek kaynak olsun */
+      var localBoard = getCurrentBoard();
+      localBoard[state.player] = state.score;
+      setCurrentBoard(localBoard);
+      saveState();
       if (scoreDisplay) { scoreDisplay.innerText = state.score; }
       if (levelDisplay) { levelDisplay.innerText = state.level; }
       updateProfileBtn();
       showToast('☁️ Bulut skoru geri yüklendi: ' + myEntry.score + 'p', '#38bdf8');
+    } else if (state.score > 0) {
+      /* Lokal daha yüksek veya eşit — online'ı güncelle */
+      try { pushScoreToWorker(); } catch(e) {}
     }
   } catch(e) {
     console.warn('syncScore hata:', e);
@@ -5359,6 +5420,9 @@ async function loadProfileFromCloud() {
     }
     if (result.achievements) {
       state.achievements = Object.assign(state.achievements, result.achievements);
+    }
+    if (result.correctStreak && result.correctStreak > (state.correctStreak || 0)) {
+      state.correctStreak = result.correctStreak;
     }
     if (result.level && result.level > state.level) {
       state.level = result.level;
@@ -5435,9 +5499,12 @@ async function fetchOnlineLeaderboard() {
     el.innerHTML += board.map((e, i) => {
       const isMe  = authUser && e.uid === authUser.uid;
       const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i+1) + '.';
+      const nameHtml = isMe
+        ? '<span class="lb-name">' + escapeHtml(e.name) + ' 👈</span>'
+        : '<span class="lb-name" style="cursor:pointer;text-decoration:underline;text-underline-offset:2px;text-decoration-color:rgba(255,255,255,0.2)" onclick="openPublicProfile(' + JSON.stringify({uid:e.uid,name:e.name,score:e.score,level:e.level||1}) + ')">' + escapeHtml(e.name) + '</span>';
       return '<div class="lb-online-item' + (isMe ? ' lb-me' : '') + '">' +
         '<span class="lb-rank">' + medal + '</span>' +
-        '<span class="lb-name">' + escapeHtml(e.name) + (isMe ? ' 👈' : '') + '</span>' +
+        nameHtml +
         '<span class="lb-score">' + e.score + 'p</span>' +
         '</div>';
     }).join('');
@@ -5969,6 +6036,17 @@ async function handleGoogleLogin() {
       if (fbRes && fbRes.ok) {
         workerToken  = fbRes.token;
         workerHasPin = fbRes.hasPin === true;
+      } else if (fbRes && fbRes.error && fbRes.error.indexOf('takma ad') !== -1) {
+        /* Takma ad çakışması */
+        var suggestion = fbRes.suggestion || (name + '_' + user.uid.slice(0,4));
+        showToast('⚠️ "' + name + '" takma adı alınmış. Senin adın: ' + suggestion, '#f59e0b');
+        /* Öneri isimle tekrar dene */
+        var retry = await workerPost('firebase-login', { uid: user.uid, name: suggestion, email: user.email || '' });
+        if (retry && retry.ok) {
+          workerToken  = retry.token;
+          workerHasPin = retry.hasPin === true;
+          name = suggestion;
+        }
       }
     } catch(e) { console.warn('Worker firebase-login hata:', e); }
     saveAuth({ uid: user.uid, name: name, email: user.email || '', provider: 'google', token: workerToken || null });
@@ -5979,6 +6057,7 @@ async function handleGoogleLogin() {
     showScreen('menu');
     refreshMenuPanels();
     showToast('✅ Hoş geldin, ' + name + '!');
+    try { stopSessionTimer(); startSessionTimer(); } catch(e) {}
     try { await syncOnlineScore(); } catch(e) {}
     try { await loadProfileFromCloud(); } catch(e) {}
     try { startUnreadListener(); } catch(e) {}
@@ -6506,6 +6585,172 @@ async function sendReqReply(requestId) {
 }
 
 
+/* ══════════════════════════════════════════════════════
+   GENEL PROFİL (PUBLIC)
+   ══════════════════════════════════════════════════════ */
+
+var _pubProfileData = null;
+
+async function openPublicProfile(data) {
+  _pubProfileData = data;
+  document.getElementById('publicProfileModal').classList.add('show');
+  document.getElementById('pubAvatar').textContent = (data.name || '?')[0].toUpperCase();
+  document.getElementById('pubName').textContent   = data.name || '—';
+  document.getElementById('pubScore').textContent  = data.score || 0;
+  document.getElementById('pubLevel').textContent  = data.level || 1;
+  document.getElementById('pubRank').textContent   = '...';
+  document.getElementById('pubJoined').textContent = '...';
+
+  /* Admin badge ve butonlar */
+  var isAdmin = await checkAdminStatus();
+  var adminBadge   = document.getElementById('pubAdminBadge');
+  var adminActions = document.getElementById('pubAdminActions');
+
+  /* Worker'dan detay çek */
+  try {
+    var r = await workerPost('admin/player-info', { token: authUser ? authUser.token : '', targetName: data.name });
+    if (r && r.ok) {
+      document.getElementById('pubRank').textContent = r.rank || '?';
+      if (r.createdAt) {
+        document.getElementById('pubJoined').textContent = new Date(r.createdAt).toLocaleDateString('tr-TR');
+      }
+      /* Admin mi kontrol et */
+      if (adminBadge) {
+        try {
+          var adminList = await workerPost('admin/info', { token: authUser ? authUser.token : '' });
+          var admins = (adminList && adminList.admins) ? adminList.admins : [];
+          var isTargetAdmin = admins.includes(r.uid);
+          adminBadge.style.display = isTargetAdmin ? '' : 'none';
+        } catch(e) { adminBadge.style.display = 'none'; }
+      }
+    }
+  } catch(e) {
+    document.getElementById('pubRank').textContent   = '?';
+    document.getElementById('pubJoined').textContent = '?';
+  }
+
+  /* Admin butonları */
+  if (adminActions) {
+    adminActions.style.display = isAdmin ? 'flex' : 'none';
+  }
+}
+
+function closePublicProfile() {
+  document.getElementById('publicProfileModal').classList.remove('show');
+  _pubProfileData = null;
+}
+
+async function pubAdminBan() {
+  if (!_pubProfileData) { return; }
+  var reason = prompt('Ban sebebi:');
+  if (!reason) { return; }
+  var r = await workerPost('admin/ban', { token: authUser.token, targetName: _pubProfileData.name, reason });
+  if (r && r.ok) {
+    showToast('🚫 ' + _pubProfileData.name + ' banlandı', '#ef4444');
+    closePublicProfile();
+  } else {
+    showToast('❌ ' + (r ? r.error : 'Hata'), '#ef4444');
+  }
+}
+
+async function pubAdminSetScore() {
+  if (!_pubProfileData) { return; }
+  var score = prompt(_pubProfileData.name + ' için yeni puan:');
+  if (!score || isNaN(Number(score))) { return; }
+  var r = await workerPost('admin/set-score', { token: authUser.token, targetName: _pubProfileData.name, score: Number(score) });
+  if (r && r.ok) {
+    showToast('✅ Skor güncellendi: ' + r.newScore + 'p', '#00ff66');
+    closePublicProfile();
+    fetchOnlineLeaderboard();
+  } else {
+    showToast('❌ ' + (r ? r.error : 'Hata'), '#ef4444');
+  }
+}
+
+
+/* ══════════════════════════════════════════════════════
+   EVENT SİSTEMİ
+   ══════════════════════════════════════════════════════ */
+
+async function adminCreateEvent() {
+  var title = (document.getElementById('eventTitle').value || '').trim();
+  var desc  = (document.getElementById('eventDesc').value || '').trim();
+  var start = document.getElementById('eventStart').value;
+  var end   = document.getElementById('eventEnd').value;
+  var mult  = Number(document.getElementById('eventMult').value) || 2;
+  if (!title) { adminLog('❌ Event adı gerekli'); return; }
+  if (!start || !end) { adminLog('❌ Başlangıç ve bitiş tarihi gerekli'); return; }
+  var startTs = new Date(start).getTime();
+  var endTs   = new Date(end + 'T23:59:59').getTime();
+  if (endTs <= startTs) { adminLog('❌ Bitiş tarihi başlangıçtan sonra olmalı'); return; }
+  var r = await adminCall('admin/create-event', { title, desc, startAt: startTs, endAt: endTs, multiplier: mult });
+  if (r && r.ok) {
+    adminLog('✅ Event oluşturuldu: ' + title);
+    document.getElementById('eventTitle').value = '';
+    document.getElementById('eventDesc').value  = '';
+    adminLoadEvents();
+    loadActiveEvents();
+  } else {
+    adminLog('❌ ' + (r ? r.error : 'Hata'));
+  }
+}
+
+async function adminLoadEvents() {
+  var r = await adminCall('admin/info', {});
+  var el = document.getElementById('adminEventList');
+  if (!el) { return; }
+  try {
+    var resp = await fetch(WORKER_URL + '/events');
+    var events = await resp.json();
+    if (!events || events.length === 0) {
+      el.innerHTML = '<div style="color:var(--muted);font-size:11px;text-align:center;padding:4px">Aktif event yok</div>';
+      return;
+    }
+    el.innerHTML = events.map(function(ev) {
+      var end = new Date(ev.endAt).toLocaleDateString('tr-TR');
+      return '<div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:8px;padding:8px;display:flex;justify-content:space-between;align-items:center">' +
+        '<div>' +
+          '<div style="font-size:12px;font-weight:700;color:#e6f7ea">' + ev.title + ' (×' + ev.multiplier + ')</div>' +
+          '<div style="font-size:10px;color:var(--muted)">Bitiş: ' + end + '</div>' +
+        '</div>' +
+        '<button onclick="adminDeleteEvent(\`' + ev.id + '\`)" style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);border-radius:6px;color:#ef4444;padding:4px 8px;font-size:11px;cursor:pointer;font-family:inherit">🗑</button>' +
+      '</div>';
+    }).join('');
+  } catch(e) {
+    el.innerHTML = '<div style="color:#ef4444;font-size:11px">Hata</div>';
+  }
+}
+
+async function adminDeleteEvent(eventId) {
+  var r = await adminCall('admin/delete-event', { eventId });
+  if (r && r.ok) { adminLog('✅ Event silindi'); adminLoadEvents(); loadActiveEvents(); }
+  else adminLog('❌ ' + (r ? r.error : 'Hata'));
+}
+
+/* Aktif event varsa oyun ekranında göster */
+async function loadActiveEvents() {
+  try {
+    var resp = await fetch(WORKER_URL + '/events');
+    var events = await resp.json();
+    var now = Date.now();
+    var active = (events || []).filter(function(e) { return e.active && e.endAt > now && e.startAt <= now; });
+    var banner = document.getElementById('eventBanner');
+    if (!banner) { return; }
+    if (active.length === 0) {
+      banner.style.display = 'none';
+      return;
+    }
+    var ev = active[0];
+    banner.style.display = '';
+    banner.innerHTML = '🎉 <b>' + ev.title + '</b> — ×' + ev.multiplier + ' puan!';
+    /* Çarpanı state'e kaydet */
+    window._activeEventMultiplier = ev.multiplier;
+  } catch(e) {
+    window._activeEventMultiplier = 1;
+  }
+}
+
+
 window._mathgame={ state, nextQuestion, checkAnswer };
 
 /* ── LIQUID RIPPLE ─────────────────────────────────── */
@@ -6658,7 +6903,24 @@ document.addEventListener('pointerdown', e => {
 
       <!-- SİSTEM -->
       <div class="admin-tab-panel" id="adminTab-system">
-        <div class="admin-section-title">Admin Yönetimi</div>
+        <div class="admin-section-title">🎉 Event Oluştur</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <input class="admin-input" id="eventTitle" placeholder="Event adı (ör: 2x Puan Haftası)">
+          <input class="admin-input" id="eventDesc" placeholder="Açıklama (isteğe bağlı)">
+          <div style="display:flex;gap:6px">
+            <input class="admin-input" id="eventStart" type="date" style="flex:1">
+            <input class="admin-input" id="eventEnd"   type="date" style="flex:1">
+          </div>
+          <div style="display:flex;gap:6px;align-items:center">
+            <label style="font-size:12px;color:var(--muted)">Çarpan:</label>
+            <input class="admin-input" id="eventMult" type="number" value="2" min="1" max="10" style="width:60px">
+            <button class="admin-btn admin-btn-green" onclick="adminCreateEvent()" style="flex:1">🎉 Oluştur</button>
+          </div>
+        </div>
+        <div id="adminEventList" style="margin-top:6px;display:flex;flex-direction:column;gap:4px"></div>
+        <button class="admin-btn admin-btn-gray" onclick="adminLoadEvents()" style="width:100%;margin-top:4px">📋 Eventleri Listele</button>
+
+        <div class="admin-section-title" style="margin-top:12px">Admin Yönetimi</div>
         <div class="admin-row">
           <input class="admin-input" id="adminNewAdminName" placeholder="Kullanıcı adı">
           <button class="admin-btn admin-btn-green" onclick="adminGiveAdmin()">Admin Ver</button>
@@ -6724,6 +6986,33 @@ document.addEventListener('pointerdown', e => {
   </div>
 </div>
 
+
+
+<!-- Genel Profil Modalı -->
+<div id="publicProfileModal">
+  <div id="pubProfileCard">
+    <div style="display:flex;justify-content:flex-end">
+      <button onclick="closePublicProfile()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer">✕</button>
+    </div>
+    <div class="pub-avatar" id="pubAvatar">?</div>
+    <div class="pub-name" id="pubName">—</div>
+    <div class="pub-badge" id="pubAdminBadge" style="display:none">⚡ Admin</div>
+    <div class="pub-stats-grid">
+      <div class="pub-stat"><div class="pub-stat-val" id="pubScore">0</div><div class="pub-stat-lbl">Puan</div></div>
+      <div class="pub-stat"><div class="pub-stat-val" id="pubLevel">1</div><div class="pub-stat-lbl">Seviye</div></div>
+      <div class="pub-stat"><div class="pub-stat-val" id="pubRank">?</div><div class="pub-stat-lbl">Sıra</div></div>
+      <div class="pub-stat"><div class="pub-stat-val" id="pubJoined">—</div><div class="pub-stat-lbl">Kayıt</div></div>
+    </div>
+    <!-- Admin butonları — sadece adminlere görünür -->
+    <div id="pubAdminActions" style="display:none;display:flex;flex-direction:column;gap:6px">
+      <div style="font-size:11px;color:var(--muted);font-weight:700;text-align:center">⚡ Admin İşlemleri</div>
+      <div style="display:flex;gap:6px">
+        <button onclick="pubAdminBan()" style="flex:1;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:8px;color:#ef4444;padding:8px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer">🚫 Banla</button>
+        <button onclick="pubAdminSetScore()" style="flex:1;background:rgba(0,255,102,0.08);border:1px solid rgba(0,255,102,0.2);border-radius:8px;color:#00ff66;padding:8px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer">🏆 Skor Ayarla</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- Mesajlaşma Modalı -->
 <div id="chatModal">
