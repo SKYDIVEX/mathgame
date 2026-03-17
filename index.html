@@ -2011,64 +2011,135 @@ body.has-bg-image .card {
   .pub-stats-grid { grid-template-columns: 1fr 1fr 1fr 1fr !important; }
 }
 
-/* ── Mobil (<768px) — Bottom Navigation ────────────── */
-@media (max-width: 767px) {
-  /* Sayfanın altına boşluk bırak (bottom nav için) */
-  .app {
-    padding-bottom: 70px;
-  }
 
-  #bottomNav {
-    display: flex !important;
-  }
-}
 
-/* Bottom navigation bar */
-#bottomNav {
-  display: none;
-  position: fixed;
-  bottom: 0; left: 0; right: 0;
-  z-index: 8000;
-  background: rgba(10,15,26,0.97);
+/* ── Sticky Header ─────────────────────────────────── */
+#stickyHeader {
+  position: sticky;
+  top: 0;
+  z-index: 500;
   backdrop-filter: blur(20px);
-  border-top: 1px solid rgba(255,255,255,0.07);
-  padding: 8px 0 calc(8px + env(safe-area-inset-bottom));
-  justify-content: space-around;
-  align-items: center;
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 0 !important;
+  border-left: none !important;
+  border-right: none !important;
+  border-top: none !important;
+  margin: 0 !important;
+  padding: 10px 16px !important;
 }
 
-.bn-item {
+/* App padding-bottom kaldır — bottom nav yok */
+@media (max-width: 767px) {
+  .app { padding-bottom: 0 !important; }
+  #bottomNav { display: none !important; }
+}
+
+
+/* ══════════════════════════════════════════════════════
+   FAB — Floating Action Button
+   ══════════════════════════════════════════════════════ */
+#fab {
+  position: fixed;
+  bottom: 24px; right: 20px;
+  z-index: 7000;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 3px;
-  cursor: pointer;
-  padding: 4px 16px;
-  border-radius: 10px;
-  transition: all .2s;
-  position: relative;
+  align-items: flex-end;
+  gap: 10px;
 }
 
-.bn-item.active .bn-icon { color: var(--neon); }
-.bn-item.active .bn-label { color: var(--neon); }
-.bn-icon  { font-size: 20px; color: var(--muted); transition: color .2s; }
-.bn-label { font-size: 10px; font-weight: 700; color: var(--muted); transition: color .2s; }
+#fabMain {
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #00ff66, #00cc55);
+  border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  box-shadow: 0 4px 20px rgba(0,255,102,0.4);
+  transition: all .25s cubic-bezier(.25,.9,.3,1.1);
+}
+#fabMain:active { transform: scale(0.92); }
+#fabMain.open { transform: rotate(45deg); background: linear-gradient(135deg,#ef4444,#dc2626); box-shadow: 0 4px 20px rgba(239,68,68,0.4); }
 
-.bn-badge {
-  position: absolute;
-  top: 2px; right: 8px;
-  background: #ef4444;
-  color: white;
-  font-size: 9px;
-  font-weight: 800;
-  min-width: 16px;
-  height: 16px;
+#fabMenu {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all .2s ease;
+}
+#fabMenu.open {
+  pointer-events: all;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.fab-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+.fab-item-label {
+  background: rgba(10,15,26,0.95);
+  border: 1px solid rgba(255,255,255,0.08);
   border-radius: 8px;
+  padding: 5px 10px;
+  font-size: 12px; font-weight: 700;
+  color: #e6f7ea;
+  white-space: nowrap;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+}
+.fab-item-btn {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  background: rgba(10,15,26,0.95);
+  border: 1px solid rgba(255,255,255,0.1);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+  transition: transform .15s;
+}
+.fab-item:active .fab-item-btn { transform: scale(0.9); }
+
+/* Scroll to top butonu */
+#scrollTopBtn {
+  position: fixed;
+  bottom: 90px; right: 20px;
+  z-index: 6999;
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  background: rgba(10,15,26,0.9);
+  border: 1px solid rgba(255,255,255,0.1);
+  display: none;
+  align-items: center; justify-content: center;
+  font-size: 16px; cursor: pointer;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+  transition: opacity .2s;
+}
+#scrollTopBtn.visible { display: flex; }
+
+/* Sticky oyun skoru — oyundayken üstte sabit */
+#stickyGameBar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 6000;
+  background: rgba(10,15,26,0.97);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  padding: 8px 16px;
   display: none;
   align-items: center;
-  justify-content: center;
-  padding: 0 3px;
+  justify-content: space-between;
+  font-size: 13px; font-weight: 700;
 }
+#stickyGameBar.visible { display: flex; }
+.sgb-score { color: var(--neon); }
+.sgb-level { color: var(--muted); }
+.sgb-streak { color: #f59e0b; }
 
 </style>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -2281,20 +2352,25 @@ body.has-bg-image .card {
 
 <div class="app">
   <!-- Header -->
-  <div class="card header">
-    <div>
-      <div class="title">MathGame</div>
-      <div class="subtitle">Skydivex Edition — final</div>
-    </div>
-    <div class="space-between">
-      <div class="signature">© SKYDIVEX</div>
-      <div style="display:flex;align-items:center;gap:8px">
-        <div id="miniInfo" style="display:none"></div>
-        <button id="profileBtn" title="Hesabım" style="display:none;align-items:center;gap:8px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:5px 12px 5px 5px">
-          <span class="pb-avatar" id="pbAvatar" style="width:28px;height:28px;font-size:13px">?</span>
-          <span id="pbName" style="font-size:12px;font-weight:800;color:#e6f7ea">—</span>
-        </button>
+  <div class="card header" id="stickyHeader">
+    <div style="display:flex;align-items:center;gap:8px">
+      <div>
+        <div class="title">MathGame</div>
+        <div class="subtitle" style="display:none" id="headerSubtitle">Skydivex Edition</div>
       </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:6px">
+      <!-- Hızlı erişim butonları (oyun ekranında görünür) -->
+      <div id="quickActions" style="display:none;align-items:center;gap:4px">
+        <button onclick="scrollToTop()" title="Yukarı çık" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:10px;color:var(--muted);padding:5px 8px;font-size:13px;cursor:pointer">🏠</button>
+        <button onclick="scrollToLeaderboard()" title="Liderlik tablosu" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:10px;color:var(--muted);padding:5px 8px;font-size:13px;cursor:pointer">🏆</button>
+        <button onclick="scrollToAchievements()" title="Başarımlar" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:10px;color:var(--muted);padding:5px 8px;font-size:13px;cursor:pointer">🎖</button>
+      </div>
+      <div id="miniInfo" style="display:none"></div>
+      <button id="profileBtn" title="Hesabım" style="display:none;align-items:center;gap:8px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:5px 12px 5px 5px">
+        <span class="pb-avatar" id="pbAvatar" style="width:28px;height:28px;font-size:13px">?</span>
+        <span id="pbName" style="font-size:12px;font-weight:800;color:#e6f7ea">—</span>
+      </button>
     </div>
   </div>
 
@@ -3546,7 +3622,21 @@ function nextQuestion(reset=false){
   } while(askedQuestions.has(key));
 
   askedQuestions.add(key);
-  const result = Math.round(safeCalc(a, op, b) * 100) / 100;
+  var rawResult = safeCalc(a, op, b);
+  /* Bölme: devirli veya uzun ondalıklıları engelle — tam bölünen sayılar seç */
+  if (op === '/') {
+    /* a = b * k garantisi zaten var ama float hatası olabilir */
+    rawResult = Math.round(rawResult * 100) / 100;
+    /* Eğer hâlâ 2 ondalıktan fazlaysa yeniden üret — döngü dışında handle et */
+    var resultStr = String(rawResult);
+    var decPart = resultStr.includes('.') ? resultStr.split('.')[1] : '';
+    if (decPart.length > 2) {
+      /* Temiz bölünmüyor — a'yı yeniden ayarla */
+      a = b * Math.floor(rawResult);
+      rawResult = a / b;
+    }
+  }
+  const result = Math.round(rawResult * 100) / 100;
   const opDisp = {'+':'+', '-':'−', '*':'×', '/':'÷'}[op]||op;
 
   /* Soru tipini belirle */
@@ -3625,7 +3715,12 @@ function checkAnswer(){
     if (!state.stats.highestLevel) state.stats.highestLevel = 1;
 
     /* ── DOĞRU ── */
-    if (Math.abs(user - correctAnswer) < 0.01) {
+    /* Tolerans: max(0.01, correctAnswer'ın 0.5%) — devirli sayılar için */
+    var tolerance = Math.max(0.01, Math.abs(correctAnswer) * 0.005);
+    /* Kullanıcının cevabını 2 ondalığa yuvarla ve karşılaştır */
+    var userRounded    = Math.round(user * 100) / 100;
+    var correctRounded = Math.round(correctAnswer * 100) / 100;
+    if (Math.abs(userRounded - correctRounded) < tolerance) {
       successSound();
 
       /* Puan hesapla — seviye arttıkça kazanım daha zorlu */
@@ -3747,7 +3842,7 @@ function checkAnswer(){
       setTimeout(() => {
         try {
           resultMsg.style.color = '#ffd166';
-          resultMsg.innerText   = 'Doğrusu: ' + correctAnswer;
+          resultMsg.innerText   = 'Doğrusu: ' + (Math.round(correctAnswer * 100) / 100);
         } catch(e) {}
       }, 900);
 
@@ -5706,15 +5801,22 @@ function showProfileMenu() {
 }
 
 /* ── Online skoru Worker'a gönder ────────────────────── */
+var _lastPushScore = 0;
+var _lastPushTime  = 0;
+
 async function pushScoreToWorker() {
   if (!authUser || !authUser.uid) { return; }
-  /* Token yoksa fb2_ ile üret */
   if (!authUser.token) {
     authUser.token = 'fb2_' + authUser.uid;
     saveAuth(authUser);
   }
+  /* Throttle: aynı skor tekrar gönderme, en az 60sn bekle */
+  var now = Date.now();
+  if (state.score <= _lastPushScore && (now - _lastPushTime) < 60000) { return; }
+  _lastPushScore = state.score;
+  _lastPushTime  = now;
   try {
-    var ops = opsKey(state.ops);
+    var ops = state.ops ? opsKey(state.ops) : 'all';
     var result = await workerPost('score', {
       token: authUser.token,
       score: state.score,
@@ -5722,7 +5824,6 @@ async function pushScoreToWorker() {
       level: state.level,
     });
     if (result && result.ok) {
-      /* Lokal board da güncelle */
       var board = getCurrentBoard();
       board[state.player] = state.score;
       setCurrentBoard(board);
@@ -5812,6 +5913,8 @@ async function loadProfileFromCloud() {
     if (!state.profile) { state.profile = {}; }
     if (result.bio !== undefined) { state.profile.bio = result.bio; }
     if (result.avatar) { state.profile.avatar = result.avatar; applyAvatar(result.avatar); }
+    if (result.theme) { localStorage.setItem('mathgame_theme', result.theme); try { applyTheme(result.theme); } catch(e) {} }
+    if (result.bg !== undefined) { localStorage.setItem('mathgame_bg', result.bg); try { if (result.bg) applyBg(result.bg); } catch(e) {} }
     if (result.level && result.level > state.level) {
       state.level = result.level;
       if (levelDisplay) { levelDisplay.innerText = state.level; }
@@ -5871,7 +5974,7 @@ async function fetchOnlineLeaderboard() {
   el.innerHTML = '<div style="color:var(--muted);font-size:12px;padding:8px">⏳ Yükleniyor...</div>';
 
   try {
-    const ops   = _currentLbOps === 'all' ? 'all' : opsKey(_currentLbOps.split(''));
+    const ops   = _currentLbOps; /* Direkt kullan — zaten doğru format */
     const board = await workerGet('leaderboard', { ops });
 
     if (statusEl) statusEl.textContent = '🟢 online';
@@ -6075,8 +6178,8 @@ async function adminSetScore() {
   if (!name || isNaN(score)) { adminLog('❌ Oyuncu adı ve skor gerekli'); return; }
   adminLog('⏳ ' + name + ' → ' + score + 'p...');
   const r = await adminCall('admin/set-score', { targetName: name, score, ops });
-  if (r?.ok) { adminLog('✅ ' + r.name + ' skoru: ' + r.newScore + 'p'); fetchOnlineLeaderboard(); }
-  else adminLog('❌ ' + (r?.error || 'Hata'));
+  if (r && r.ok) { adminLog('✅ ' + r.name + ' skoru: ' + r.newScore + 'p'); fetchOnlineLeaderboard(); }
+  else adminLog('❌ ' + (r ? (r.error || JSON.stringify(r)) : 'Sunucu yanıt vermedi — Worker deploy edildi mi?'));
 }
 
 async function adminRemovePlayer() {
@@ -6363,6 +6466,41 @@ async function adminShowUserList(filter) {
   }).join('');
   adminLog('✅ ' + r.total + ' kullanici listelendi');
 }
+
+
+/* ── Scroll yardımcıları + Header quick actions ───── */
+function scrollToTop() {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function scrollToLeaderboard() {
+  var el = document.getElementById('lbSection') || document.querySelector('.lb');
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
+function scrollToAchievements() {
+  var el = document.getElementById('achievementsSection') || document.querySelector('.ach-grid-new');
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } else {
+    /* Başarımlar modalını aç */
+    try { openAchModal(); } catch(e) {}
+  }
+}
+
+/* Sayfa scroll edilince quick actions göster/gizle */
+window.addEventListener('scroll', function() {
+  var qa = document.getElementById('quickActions');
+  if (!qa) { return; }
+  /* 150px aşağı inince göster */
+  if (window.scrollY > 150) {
+    qa.style.display = 'flex';
+  } else {
+    qa.style.display = 'none';
+  }
+}, { passive: true });
 
 async function adminLoadBadgeLibrary() {
   var r = await adminCall('admin/badge-library', {});
@@ -6892,11 +7030,7 @@ document.addEventListener('DOMContentLoaded', function() {
       if (errEl) { errEl.textContent = '⏳ Giriş yapılıyor...'; errEl.classList.add('show'); errEl.style.color = '#9fb3b0'; }
 
       try {
-        var result = await fetch(WORKER_URL + '/pin-login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username: nameVal, pin: pinVal })
-        }).then(function(r) { return r.json(); });
+        var result = await workerPost('pin-login', { username: nameVal, pin: pinVal });
 
         if (result && result.ok) {
           /* Giriş başarılı */
@@ -7376,7 +7510,8 @@ async function openPublicProfile(data) {
         var customBadges = r.badges.map(function(b) {
           return '<span class="pub-badge-tag" style="background:rgba(' + (b.color||'99,179,237') + ',0.15);border:1px solid rgba(' + (b.color||'99,179,237') + ',0.3);color:#' + (b.textColor||'63b3ed') + '">' + (b.icon||'🏅') + ' ' + b.label + '</span>';
         }).join('');
-        document.getElementById('pubBadges').innerHTML += customBadges;
+        var pubBadgesEl = document.getElementById('pubBadges');
+        if (pubBadgesEl) { pubBadgesEl.innerHTML += customBadges; }
       }
     }
   } catch(e) {
@@ -7702,83 +7837,56 @@ function populateProfileSocial() {
 }
 
 
-/* ══════════════════════════════════════════════════════
-   BOTTOM NAVIGATION + RESPONSIVE
-   ══════════════════════════════════════════════════════ */
+/* ── FAB (Floating Action Button) ─────────────────── */
+var _fabOpen = false;
 
-function bnGo(tab) {
-  /* Aktif tab güncelle */
-  document.querySelectorAll('.bn-item').forEach(function(el) {
-    el.classList.remove('active');
-  });
-  var activeEl = document.getElementById('bn-' + tab);
-  if (activeEl) { activeEl.classList.add('active'); }
+function toggleFab() {
+  if (_fabOpen) { closeFab(); } else { openFab(); }
+}
 
-  if (tab === 'home') {
-    /* Ana sayfa — menü göster */
-    if (authUser || state.player) {
-      showScreen('menu');
-    } else {
-      try { openAuthModal(); } catch(e) {}
-    }
-  } else if (tab === 'play') {
-    /* Oyun başlat */
+function openFab() {
+  _fabOpen = true;
+  var menu = document.getElementById('fabMenu');
+  var overlay = document.getElementById('fabOverlay');
+  var btn = document.getElementById('fabBtn');
+  if (menu) { menu.style.display = 'flex'; }
+  if (overlay) { overlay.style.display = 'block'; }
+  if (btn) { btn.style.transform = 'rotate(45deg)'; }
+}
+
+function closeFab() {
+  _fabOpen = false;
+  var menu = document.getElementById('fabMenu');
+  var overlay = document.getElementById('fabOverlay');
+  var btn = document.getElementById('fabBtn');
+  if (menu) { menu.style.display = 'none'; }
+  if (overlay) { overlay.style.display = 'none'; }
+  if (btn) { btn.style.transform = 'rotate(0deg)'; }
+}
+
+function fabGo(target) {
+  closeFab();
+  if (target === 'home') {
+    showScreen('menu');
+  } else if (target === 'play') {
     if (!authUser && !state.player) { try { openAuthModal(); } catch(e) {} return; }
-    try { startGame(); } catch(e) { try { startMathMode(); } catch(e2) {} }
-  } else if (tab === 'lb') {
-    /* Liderlik tablosuna scroll */
+    showScreen('game');
+    try { startGame(); } catch(e) {}
+  } else if (target === 'lb') {
     showScreen('menu');
     setTimeout(function() {
-      var lbEl = document.querySelector('.card');
+      var el = document.getElementById('lbTabOnline');
+      if (el) { el.click(); }
+      var lbEl = document.querySelector('.lb');
       if (lbEl) { lbEl.scrollIntoView({ behavior: 'smooth' }); }
-      /* Online tabloyu aç */
-      var onlineBtn = document.getElementById('lbTabOnline');
-      if (onlineBtn) { onlineBtn.click(); }
     }, 200);
-  } else if (tab === 'profile') {
+  } else if (target === 'profile') {
     if (!authUser) { try { openAuthModal(); } catch(e) {} return; }
     try { openProfileModal(); } catch(e) {}
+  } else if (target === 'top') {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 }
-
-/* Bottom nav'ı aktif taba göre güncelle */
-function updateBottomNav(screen) {
-  document.querySelectorAll('.bn-item').forEach(function(el) {
-    el.classList.remove('active');
-  });
-  if (screen === 'menu')   { var el = document.getElementById('bn-home');    if (el) el.classList.add('active'); }
-  if (screen === 'game')   { var el = document.getElementById('bn-play');    if (el) el.classList.add('active'); }
-}
-
-/* Masaüstü klavye kısayolları */
-document.addEventListener('keydown', function(e) {
-  /* Sadece masaüstünde */
-  if (window.innerWidth < 1024) { return; }
-  /* Input odaklanmışsa atlat */
-  if (document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA')) { return; }
-
-  if (e.key === 'Escape') {
-    /* Açık modal varsa kapat */
-    document.querySelectorAll('.modal.show, [id$="Modal"].show').forEach(function(m) {
-      try { closeModal(m); } catch(ex) {}
-    });
-  }
-  if (e.key === 'Enter' && document.getElementById('gameArea') && document.getElementById('gameArea').style.display !== 'none') {
-    /* Oyundayken Enter = cevap gönder */
-    try { checkAnswer(); } catch(ex) {}
-  }
-});
-
-/* showScreen çağrıldığında bottom nav güncelle — DOMContentLoaded'da bağla */
-document.addEventListener('DOMContentLoaded', function() {
-  var _orig = window.showScreen;
-  if (typeof _orig === 'function') {
-    window.showScreen = function(name) {
-      _orig(name);
-      try { updateBottomNav(name); } catch(e) {}
-    };
-  }
-});
 
 
 window._mathgame={ state, nextQuestion, checkAnswer };
@@ -8195,26 +8303,74 @@ document.addEventListener('pointerdown', e => {
   </div>
 </div>
 
-<!-- Bottom Navigation (mobil) -->
-<div id="bottomNav">
-  <div class="bn-item active" id="bn-home" onclick="bnGo('home')">
-    <span class="bn-icon">🏠</span>
-    <span class="bn-label">Ana Sayfa</span>
+<!-- Floating Action Button -->
+<div id="fab">
+  <div id="fabMenu">
+    <div class="fab-item" onclick="fabAction('top')">
+      <span class="fab-item-label">Yukarı Çık</span>
+      <span class="fab-item-btn">⬆️</span>
+    </div>
+    <div class="fab-item" onclick="fabAction('chat')">
+      <span class="fab-item-label">Sohbet</span>
+      <span class="fab-item-btn">💬</span>
+    </div>
+    <div class="fab-item" onclick="fabAction('daily')">
+      <span class="fab-item-label">Günlük Görevler</span>
+      <span class="fab-item-btn">📅</span>
+    </div>
+    <div class="fab-item" onclick="fabAction('achievements')">
+      <span class="fab-item-label">Başarımlar</span>
+      <span class="fab-item-btn">🏅</span>
+    </div>
+    <div class="fab-item" onclick="fabAction('lb')">
+      <span class="fab-item-label">Liderlik Tablosu</span>
+      <span class="fab-item-btn">🏆</span>
+    </div>
+    <div class="fab-item" onclick="fabAction('absurd')">
+      <span class="fab-item-label">Absürt Mod</span>
+      <span class="fab-item-btn">🤪</span>
+    </div>
+    <div class="fab-item" onclick="fabAction('math')">
+      <span class="fab-item-label">Matematik Modu</span>
+      <span class="fab-item-btn">➕</span>
+    </div>
+    <div class="fab-item" onclick="fabAction('bg')">
+      <span class="fab-item-label">Arka Plan</span>
+      <span class="fab-item-btn">🖼️</span>
+    </div>
+    <div class="fab-item" onclick="fabAction('settings')">
+      <span class="fab-item-label">Ayarlar</span>
+      <span class="fab-item-btn">⚙️</span>
+    </div>
+    <div class="fab-item" onclick="fabAction('profile')">
+      <span class="fab-item-label">Profil</span>
+      <span class="fab-item-btn">👤</span>
+    </div>
   </div>
-  <div class="bn-item" id="bn-play" onclick="bnGo('play')">
-    <span class="bn-icon">🎮</span>
-    <span class="bn-label">Oyna</span>
-  </div>
-  <div class="bn-item" id="bn-lb" onclick="bnGo('lb')">
-    <span class="bn-icon">🏆</span>
-    <span class="bn-label">Tablo</span>
-  </div>
-  <div class="bn-item" id="bn-profile" onclick="bnGo('profile')">
-    <span class="bn-icon">👤</span>
-    <span class="bn-label">Profil</span>
-    <span class="bn-badge" id="bnProfileBadge"></span>
-  </div>
+  <button id="fabMain" onclick="toggleFab()">⚡</button>
 </div>
+
+<!-- Scroll to top -->
+<div id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})">⬆️</div>
+
+<!-- Sticky oyun bar -->
+<div id="stickyGameBar">
+  <span class="sgb-score" id="sgbScore">0p</span>
+  <span class="sgb-level" id="sgbLevel">Seviye 1</span>
+  <span class="sgb-streak" id="sgbStreak"></span>
+</div>
+
+
+<!-- Floating Action Button -->
+<div id="fabBtn" onclick="toggleFab()" style="position:fixed;bottom:24px;right:20px;z-index:8500;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#00ff66,#00cc55);display:flex;align-items:center;justify-content:center;font-size:22px;cursor:pointer;box-shadow:0 4px 20px rgba(0,255,102,0.4);transition:transform .2s">⚡</div>
+<div id="fabMenu" style="position:fixed;bottom:84px;right:20px;z-index:8500;display:none;flex-direction:column;gap:8px;align-items:flex-end">
+  <div onclick="fabGo('home')" style="display:flex;align-items:center;gap:8px;cursor:pointer"><span style="font-size:12px;font-weight:700;color:#e6f7ea;background:rgba(10,15,26,0.97);padding:7px 14px;border-radius:20px;border:1px solid rgba(255,255,255,0.1)">🏠 Ana Sayfa</span></div>
+  <div onclick="fabGo('play')" style="display:flex;align-items:center;gap:8px;cursor:pointer"><span style="font-size:12px;font-weight:700;color:#e6f7ea;background:rgba(10,15,26,0.97);padding:7px 14px;border-radius:20px;border:1px solid rgba(255,255,255,0.1)">🎮 Yeni Oyun</span></div>
+  <div onclick="fabGo('lb')" style="display:flex;align-items:center;gap:8px;cursor:pointer"><span style="font-size:12px;font-weight:700;color:#e6f7ea;background:rgba(10,15,26,0.97);padding:7px 14px;border-radius:20px;border:1px solid rgba(255,255,255,0.1)">🏆 Liderlik</span></div>
+  <div onclick="fabGo('profile')" style="display:flex;align-items:center;gap:8px;cursor:pointer"><span style="font-size:12px;font-weight:700;color:#e6f7ea;background:rgba(10,15,26,0.97);padding:7px 14px;border-radius:20px;border:1px solid rgba(255,255,255,0.1)">👤 Profil</span></div>
+  <div onclick="fabGo('top')" style="display:flex;align-items:center;gap:8px;cursor:pointer"><span style="font-size:12px;font-weight:700;color:#e6f7ea;background:rgba(10,15,26,0.97);padding:7px 14px;border-radius:20px;border:1px solid rgba(255,255,255,0.1)">⬆️ Yukarı Git</span></div>
+</div>
+<div id="fabOverlay" onclick="closeFab()" style="position:fixed;inset:0;z-index:8400;display:none"></div>
 
 </body>
 </html>
