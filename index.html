@@ -5531,20 +5531,26 @@ function showProfileMenu() {
 
 /* ── Online skoru Worker'a gönder ────────────────────── */
 async function pushScoreToWorker() {
-  if (!authUser) {
-    return;
-  }
+  if (!authUser || !authUser.uid) { return; }
+  /* Token yoksa fb2_ ile üret */
   if (!authUser.token) {
-    return;
+    authUser.token = 'fb2_' + authUser.uid;
+    saveAuth(authUser);
   }
   try {
     var ops = opsKey(state.ops);
-    await workerPost('score', {
+    var result = await workerPost('score', {
       token: authUser.token,
       score: state.score,
       ops: ops,
       level: state.level,
     });
+    if (result && result.ok) {
+      /* Lokal board da güncelle */
+      var board = getCurrentBoard();
+      board[state.player] = state.score;
+      setCurrentBoard(board);
+    }
   } catch(e) {
     console.warn('pushScore hata:', e);
   }
@@ -5552,8 +5558,11 @@ async function pushScoreToWorker() {
 
 /* ── Online skoru çek + senkronize et ───────────────── */
 async function syncOnlineScore() {
-  if (!authUser) { return; }
-  if (!authUser.token) { return; }
+  if (!authUser || !authUser.uid) { return; }
+  if (!authUser.token) {
+    authUser.token = 'fb2_' + authUser.uid;
+    saveAuth(authUser);
+  }
   try {
     /* lb:all'dan en güncel skoru çek */
     var boardAll = await workerGet('leaderboard', { ops: 'all' });
@@ -6147,6 +6156,37 @@ async function adminClearLogs() {
    ══════════════════════════════════════════════════════ */
 
 var _badgeLibrary = []; /* Cache */
+
+
+async function adminShowUserList(filter) {
+  var box = document.getElementById('adminUserListBox');
+  if (!box) { return; }
+  box.style.display = 'flex';
+  box.innerHTML = '<div style="color:var(--muted);font-size:12px;text-align:center;padding:8px">&#x23F3; Yükleniyor...</div>';
+  var r = await adminCall('admin/user-list', { filter: filter });
+  if (!r || !r.ok) { box.innerHTML = '<div style="color:#ef4444;font-size:12px;padding:8px">Hata</div>'; return; }
+  var users = r.users || [];
+  if (users.length === 0) {
+    box.innerHTML = '<div style="color:var(--muted);font-size:12px;text-align:center;padding:8px">Kimse yok</div>';
+    return;
+  }
+  var roleColors = { superadmin: '#f59e0b', admin: '#f59e0b', moderator: '#38bdf8', banned: '#ef4444', user: 'var(--muted)' };
+  var roleLabels = { superadmin: '👑', admin: '⚡', moderator: '🛡', banned: '🚫', user: '👤' };
+  box.innerHTML = users.map(function(u) {
+    if (u.note) return '<div style="color:var(--muted);font-size:11px;padding:4px">' + u.note + '</div>';
+    var col = roleColors[u.role] || 'var(--muted)';
+    var icon = roleLabels[u.role] || '👤';
+    var extra = u.score ? ' — ' + u.score + 'p' : '';
+    var banInfo = u.banReason ? '<div style="font-size:10px;color:#ef4444;opacity:0.7">' + u.banReason + '</div>' : '';
+    return '<div style="display:flex;align-items:center;justify-content:space-between;padding:5px 8px;background:rgba(255,255,255,0.02);border-radius:8px;border:1px solid rgba(255,255,255,0.05)">' +
+      '<div>' +
+        '<span style="color:' + col + ';font-size:11px;font-weight:700">' + icon + ' ' + u.name + extra + '</span>' +
+        banInfo +
+      '</div>' +
+    '</div>';
+  }).join('');
+  adminLog('✅ ' + r.total + ' kullanici listelendi');
+}
 
 async function adminLoadBadgeLibrary() {
   var r = await adminCall('admin/badge-library', {});
@@ -7574,7 +7614,16 @@ document.addEventListener('pointerdown', e => {
           <div class="admin-stat-card"><div class="admin-stat-num" id="statRequests">—</div><div class="admin-stat-label">İstek</div></div>
           <div class="admin-stat-card"><div class="admin-stat-num" id="statOpenReqs">—</div><div class="admin-stat-label">Açık İstek</div></div>
         </div>
-        <button class="admin-btn admin-btn-gray" onclick="adminLoadStats()" style="width:100%">🔄 Yenile</button>
+        <button class="admin-btn admin-btn-gray" onclick="adminLoadStats()" style="width:100%;margin-bottom:8px">🔄 Yenile</button>
+
+        <div class="admin-section-title">Kullanıcı Listeleri</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+          <button class="admin-btn admin-btn-orange" onclick="adminShowUserList('admin')" style="font-size:11px">👑 Adminler</button>
+          <button class="admin-btn admin-btn-blue"   onclick="adminShowUserList('moderator')" style="font-size:11px">🛡 Moderatörler</button>
+          <button class="admin-btn admin-btn-gray"   onclick="adminShowUserList('all')" style="font-size:11px">👥 Tüm Oyuncular</button>
+          <button class="admin-btn admin-btn-red"    onclick="adminShowUserList('banned')" style="font-size:11px">🚫 Banlılar</button>
+        </div>
+        <div id="adminUserListBox" style="display:none;margin-top:8px;display:flex;flex-direction:column;gap:4px;max-height:250px;overflow-y:auto"></div>
       </div>
 
       <!-- OYUNCU YÖNETİMİ -->
