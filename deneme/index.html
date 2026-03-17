@@ -20,6 +20,21 @@ window.onerror = function(msg, src, line, col, err) {
 </script>
 
 <style>
+/* ══ GLOBAL MODAL HIDE — OVERRIDE ══════════════════════ */
+#levelUpScreen, #levelUpOverlay,
+#authModal, #profileModal, #pinModal, #adminModal, #achModal,
+#bgLibModal, #aboutModal, #pauseOverlay, #publicProfileModal,
+#settingsModal, #confirmModal, #achPopup, #requestModal,
+#chatModal, #reqPanelNew, #reqPanelMy, #settingsPanel,
+#achNotif, #streakDisplay, #toastEl, #toast,
+#announcementBanner, #eventBanner, #fabBtn, #fabMenu, #fabOverlay,
+#bottomNav, #bgLayer, #projectLock {
+  display: none;
+}
+#bgLayer { display: block; }  /* bgLayer görünür kalmalı */
+/* ════════════════════════════════════════════════════ */
+
+
 /* ═══════════════════════════════════════════════════════
    MathGame v3.0 — SKYDIVEX Premium Design
    Dark glass aesthetic, iOS-inspired, game-focused
@@ -1549,6 +1564,40 @@ a { color: var(--neon); text-decoration: none; }
   .play-grid { grid-template-columns: 1fr 1fr; }
 }
 
+/* ── Public Profile Modal ───────────────────────────── */
+#publicProfileModal {
+  position: fixed;
+  inset: 0;
+  z-index: 9100;
+  background: rgba(8,11,18,0.85);
+  backdrop-filter: blur(16px);
+  align-items: flex-end;
+  justify-content: center;
+}
+#publicProfileModal.show { display: flex !important; }
+
+/* ── Pause Overlay ──────────────────────────────────── */
+#pauseOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 8000;
+  background: rgba(8,11,18,0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+#pauseOverlay.show { display: flex !important; }
+#pauseCard {
+  width: 100%;
+  max-width: 360px;
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: 24px;
+  padding: 28px 24px;
+}
+
 /* ── Project lock ───────────────────────────────────── */
 #projectLock {
   display: flex;
@@ -1605,6 +1654,21 @@ a { color: var(--neon); text-decoration: none; }
 /* Announcement */
 #announcementBanner { animation: slideDown .4s ease; }
 
+
+/* ══ MODAL SHOW RULES ══════════════════════════════════ */
+#levelUpScreen.show,
+#authModal.show, #profileModal.show, #pinModal.show,
+#adminModal.show, #achModal.show, #bgLibModal.show,
+#aboutModal.show, #pauseOverlay.show, #publicProfileModal.show,
+#settingsModal.show, #confirmModal.show, #achPopup.show,
+#requestModal.show, #chatModal.show {
+  display: flex !important;
+}
+#settingsPanel.show, #reqPanelNew.show, #reqPanelMy.show {
+  display: block !important;
+}
+/* ════════════════════════════════════════════════════ */
+
 </style>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -1624,7 +1688,7 @@ a { color: var(--neon); text-decoration: none; }
 <div id="comboDisplay"></div>
 
 <!-- Level-up tam ekran -->
-<div id="levelUpScreen">
+<div id="levelUpScreen" style="display:none">
   <div style="font-size:36px;margin-bottom:8px">🎉</div>
   <div class="lu-label">Seviye Atladın!</div>
   <div class="lu-level" id="luLevelNum">2</div>
@@ -1745,7 +1809,7 @@ a { color: var(--neon); text-decoration: none; }
   </div>
 </div>
 
-<div id="authModal">
+<div id="authModal" style="display:none">
   <div id="authCard">
     <!-- Logo -->
     <div style="text-align:center;padding:32px 24px 0">
@@ -2034,10 +2098,10 @@ a { color: var(--neon); text-decoration: none; }
 </div>
 
 <!-- Toast -->
-<div id="toast"><span id="toast-msg"></span><div id="toast-bar"></div></div>
+<div id="toast" style="display:none"><span id="toast-msg"></span><div id="toast-bar"></div></div>
 
 <!-- Pause overlay -->
-<div id="pauseOverlay">
+<div id="pauseOverlay" style="display:none">
   <div id="pauseCard" class="card" style="width:420px;max-width:94%">
     <div style="display:flex;justify-content:space-between;align-items:center">
       <div>
@@ -2062,7 +2126,7 @@ a { color: var(--neon); text-decoration: none; }
 </div>
 
 <!-- Settings Modal -->
-<div id="settingsModal">
+<div id="settingsModal" style="display:none">
   <div id="settingsCard">
     <div style="display:flex;justify-content:space-between;align-items:center">
       <div>
@@ -2146,7 +2210,7 @@ a { color: var(--neon); text-decoration: none; }
 </div>
 
 <!-- Confirm Modal -->
-<div id="confirmModal">
+<div id="confirmModal" style="display:none">
   <div id="confirmCard">
     <div style="font-weight:800;font-size:16px" id="confirmTitle">Emin misin?</div>
     <div class="confirm-msg" id="confirmMsg"></div>
@@ -3032,7 +3096,7 @@ function compressAndSetBgImage(file, callback) {
 }
 
 /* ── GAME ENGINE ───────────────────────────────────── */
-let correctAnswer=null, questionCount=0;
+var correctAnswer=null, questionCount=0;
 
 function loadGameUI(){
   playerDisplay.innerText=state.player;
@@ -7519,8 +7583,8 @@ document.addEventListener('pointerdown', e => {
 
 
 <!-- Başarı Detay Popup -->
-<div id="achPopup">
-  <div id="achPopupCard">
+<div id="achPopup" style="display:none">
+  <div id="achPopupCard" style="display:none">
     <div class="ap-icon" id="apIcon">🏆</div>
     <div class="ap-name" id="apName"></div>
     <div class="ap-desc" id="apDesc"></div>
@@ -7584,7 +7648,7 @@ document.addEventListener('pointerdown', e => {
 
 
 <!-- Genel Profil Modalı -->
-<div id="publicProfileModal">
+<div id="publicProfileModal" style="display:none">
   <div id="pubProfileCard">
 
     <!-- Üst kısım -->
@@ -7656,7 +7720,7 @@ document.addEventListener('pointerdown', e => {
 </div>
 
 <!-- Mesajlaşma Modalı -->
-<div id="chatModal">
+<div id="chatModal" style="display:none">
   <div id="chatBox">
     <div id="chatHeader">
       <div>
