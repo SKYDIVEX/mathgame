@@ -1634,7 +1634,7 @@ a { color: var(--neon); text-decoration: none; }
 <div id="streakBadge">🔥 <span id="streakCount">0</span> seri</div>
 
 <!-- Profil Modalı -->
-<div id="profileModal">
+<div id="profileModal" style="display:none">
   <div id="profileCard">
     <!-- Başlık -->
     <div class="profile-header">
@@ -1716,7 +1716,7 @@ a { color: var(--neon); text-decoration: none; }
 <!-- Auth Modal -->
 
 <!-- PIN Modal -->
-<div id="pinModal">
+<div id="pinModal" style="display:none">
   <div id="pinCard">
     <div style="font-size:40px">🔐</div>
     <div class="pin-title" id="pinTitle">PIN Belirle</div>
@@ -1979,6 +1979,8 @@ a { color: var(--neon); text-decoration: none; }
         <button id="clearBgBtn" class="btn ghost sm">✕ BG Sıfırla</button>
       </div>
       <input id="bgImageInput2" type="file" accept="image/*" style="display:none">
+      <input id="btnColor" type="hidden" value="#00ff66">
+      <input id="bgColor" type="hidden" value="#08121a">
     </div><!-- /ayarlar -->
   </div><!-- /menuCard -->
 
@@ -2156,7 +2158,7 @@ a { color: var(--neon); text-decoration: none; }
 </div>
 
 <!-- About modal -->
-<div id="aboutModal">
+<div id="aboutModal" style="display:none">
   <div id="aboutCard">
 
     <!-- Hero başlık -->
@@ -2821,12 +2823,12 @@ document.documentElement.style.setProperty('--neon',   state.btnColor||'#00ff66'
 document.documentElement.style.setProperty('--bg-mid', state.bgColor||'#0b1220');
 applyBgImage();
 
-quickSoundToggle.checked = !!state.soundOn;
-btnColorInput.value = state.btnColor||'#00ff66';
-bgColorInput.value  = state.bgColor||'#0b1220';
-settingBtnColor.value = state.btnColor||'#00ff66';
-settingBgColor.value  = state.bgColor||'#0b1220';
-settingSound.checked  = !!state.soundOn;
+if (quickSoundToggle) quickSoundToggle.checked = !!state.soundOn;
+if (btnColorInput) btnColorInput.value = state.btnColor||'#00ff66';
+if (bgColorInput) bgColorInput.value  = state.bgColor||'#0b1220';
+if (settingBtnColor) settingBtnColor.value = state.btnColor||'#00ff66';
+if (settingBgColor) settingBgColor.value  = state.bgColor||'#0b1220';
+if (settingSound) settingSound.checked  = !!state.soundOn;
 
 // Show correct initial screen
 if (authUser && authUser.uid) {
@@ -7681,7 +7683,7 @@ document.addEventListener('pointerdown', e => {
 
 
 
-<div id="bgLibModal">
+<div id="bgLibModal" style="display:none">
   <div id="bgLibInner">
     <div class="bglib-close">
       <h2>🖼 Arka Plan Kütüphanesi</h2>
@@ -7691,7 +7693,7 @@ document.addEventListener('pointerdown', e => {
   </div>
 </div>
 
-<div id="achModal">
+<div id="achModal" style="display:none">
   <div id="achModalCard">
     <div class="ach-modal-hero">
       <div style="display:flex;justify-content:space-between;align-items:flex-start">
@@ -7714,7 +7716,7 @@ document.addEventListener('pointerdown', e => {
   </div>
 </div>
 
-<div id="adminModal">
+<div id="adminModal" style="display:none">
   <div id="adminCard">
     <div class="admin-hero">
       <div>
