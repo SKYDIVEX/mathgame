@@ -1826,38 +1826,30 @@ a { color: var(--neon); text-decoration: none; }
 
 <div class="app">
   <!-- Header -->
-  <div class="card header" id="stickyHeader">
-    <div style="display:flex;align-items:center;gap:8px">
-      <div>
-        <div class="title">MathGame</div>
-        <div class="subtitle" style="display:none" id="headerSubtitle">Skydivex Edition</div>
-      </div>
-    </div>
-    <div style="display:flex;align-items:center;gap:6px">
-      <!-- Hızlı erişim butonları (oyun ekranında görünür) -->
-      <div id="quickActions" style="display:none;align-items:center;gap:4px">
-        <button onclick="scrollToTop()" title="Yukarı çık" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:10px;color:var(--muted);padding:5px 8px;font-size:13px;cursor:pointer">🏠</button>
-        <button onclick="scrollToLeaderboard()" title="Liderlik tablosu" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:10px;color:var(--muted);padding:5px 8px;font-size:13px;cursor:pointer">🏆</button>
-        <button onclick="scrollToAchievements()" title="Başarımlar" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:10px;color:var(--muted);padding:5px 8px;font-size:13px;cursor:pointer">🎖</button>
+  <div class="header" id="stickyHeader">
+    <div class="header-logo">🧮 <span>Math</span>Game</div>
+    <div class="header-right">
+      <div id="quickActions" style="display:none;align-items:center;gap:6px">
+        <button onclick="window.scrollTo({top:0,behavior:'smooth'})" style="background:var(--glass2);border:1px solid var(--border);border-radius:10px;color:var(--muted);padding:6px 10px;font-size:13px;cursor:pointer">🏠</button>
+        <button onclick="scrollToLeaderboard()" style="background:var(--glass2);border:1px solid var(--border);border-radius:10px;color:var(--muted);padding:6px 10px;font-size:13px;cursor:pointer">🏆</button>
       </div>
       <div id="miniInfo" style="display:none"></div>
-      <button id="profileBtn" title="Hesabım" style="display:none;align-items:center;gap:8px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:5px 12px 5px 5px">
-        <span class="pb-avatar" id="pbAvatar" style="width:28px;height:28px;font-size:13px">?</span>
-        <span id="pbName" style="font-size:12px;font-weight:800;color:#e6f7ea">—</span>
-      </button>
+      <div id="profileBtnWrap">
+        <button class="profile-btn" id="profileBtn" onclick="openProfileModal()" style="display:none">
+          <div id="pbAvatar">E</div>
+          <span id="pbName">—</span>
+        </button>
+        <button class="btn primary sm" id="loginBtnHeader" onclick="openAuthModal()" style="display:none">Giriş Yap</button>
+      </div>
     </div>
   </div>
-
-  <!-- Entry card (simple) -->
-  <!-- entryCard — gizli, auth modal kullanılıyor -->
+      <!-- old profileBtn removed -->
+  <!-- Entry card hidden -->
   <div id="entryCard" style="display:none">
     <input id="playerName" style="display:none">
     <button id="enterBtn" style="display:none"></button>
     <button id="guestBtn" style="display:none"></button>
   </div>
-
-  <!-- Event Banner -->
-  <div id="eventBanner" style="display:none;margin-top:10px;padding:10px 14px;background:linear-gradient(135deg,rgba(255,215,0,0.12),rgba(255,165,0,0.08));border:1px solid rgba(255,215,0,0.25);border-radius:12px;font-size:13px;color:#ffd700;text-align:center"></div>
 
   <!-- Main menu -->
   <!-- DUYURU BANDI -->
@@ -1873,117 +1865,122 @@ a { color: var(--neon); text-decoration: none; }
     </div>
   </div>
 
-  <div id="menuCard" class="card" style="margin-top:12px">
-    <div class="main-grid">
-      <div>
-        <div style="display:flex;justify-content:space-between;align-items:center">
-          <div>
-            <div class="small muted">Oyuncu</div>
-            <div id="playerLabel" style="font-weight:800">—</div>
-            <div class="small muted" style="margin-top:6px">Seviye <span id="levelDisplay">1</span> &nbsp;— &nbsp;<span id="scoreDisplay">0</span>p</div>
-          </div>
-          <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end">
-            <button id="startGameBtn" class="btn">▶ Matematik Modu</button>
-            <button id="startAbsurdBtn" class="btn" style="background:linear-gradient(180deg,#a855f7,#7c3aed);box-shadow:0 8px 30px rgba(168,85,247,0.15)">🤪 Absürt Mod</button>
-            <button id="logoutBtn" class="btn ghost">Oturumu Kapat</button>
-          </div>
-        </div>
+  <div id="menuCard" style="margin-top:8px">
 
-        <hr style="margin:12px 0;border:none;border-top:1px solid rgba(255,255,255,0.03)" />
-
-        <div style="display:flex;gap:8px;margin-top:8px">
-          <button id="openSettings" class="btn ghost">Ayarlar</button>
-          <button id="openAbout" class="btn ghost">Hakkında</button>
-          <button id="resetScores" class="btn ghost">Skorları Sıfırla</button>
-        </div>
-
-        <!-- optional settings quick area -->
-        <div id="quickSettings" style="margin-top:12px;display:flex;gap:8px;align-items:center">
-          <label style="color:var(--muted)"><input type="checkbox" id="soundToggle" checked> Ses açık</label>
-          <div style="margin-left:auto;display:flex;gap:6px;align-items:center">
-            <span style="font-size:11px;color:var(--muted)">Tema:</span>
-            <button class="theme-btn active" data-theme="green"  style="background:#00ff66" title="Yeşil"></button>
-            <button class="theme-btn"        data-theme="purple" style="background:#a855f7" title="Mor"></button>
-            <button class="theme-btn"        data-theme="blue"   style="background:#38bdf8" title="Mavi"></button>
-            <button class="theme-btn"        data-theme="red"    style="background:#ff6b6b" title="Kırmızı"></button>
-            <button class="theme-btn"        data-theme="gold"   style="background:#ffd700" title="Altın"></button>
-          </div>
-        </div>
+    <!-- Oyuncu şeridi -->
+    <div style="display:flex;align-items:center;gap:12px;padding:16px;background:var(--glass);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:10px">
+      <div id="menuAvatar" style="width:48px;height:48px;border-radius:16px;background:linear-gradient(135deg,var(--neon),#00cc66);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:#030608;flex-shrink:0;overflow:hidden;background-size:cover;background-position:center">E</div>
+      <div style="flex:1;min-width:0">
+        <div id="playerLabel" style="font-family:'Syne',sans-serif;font-size:17px;font-weight:800;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">—</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px">Seviye <span id="levelDisplay" style="color:var(--neon);font-weight:700">1</span> &nbsp;·&nbsp; <span id="scoreDisplay" style="color:var(--neon);font-weight:700">0</span>p</div>
       </div>
+      <button id="logoutBtn" class="btn ghost sm">Çıkış</button>
+    </div>
 
-      <div>
-        <div class="card" style="padding:12px">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-            <div class="small muted">Liderlik Tablosu</div>
-            <div style="display:flex;align-items:center;gap:8px">
-              <div id="onlineLbStatus" style="font-size:10px;color:var(--muted)"></div>
-              <button onclick="fetchOnlineLeaderboard()" title="Yenile" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:var(--muted);font-size:11px;cursor:pointer;padding:3px 8px;line-height:1;font-family:inherit">↺ Yenile</button>
-            </div>
-          </div>
-          <div class="lb-tab-row">
-            <button class="lb-tab active" id="lbTabLocal">📱 Lokal</button>
-            <button class="lb-tab" id="lbTabOnline">🌐 Online</button>
-          </div>
-          <!-- Online ops sekmeleri -->
-          <div id="lbOpsRow" style="display:none;gap:4px;flex-wrap:wrap;margin-bottom:6px" class="lb-tab-row">
-            <button class="lb-tab active" id="lbOpsAll"  onclick="switchOnlineLbOps('all')">🌍 Tümü</button>
-            <button class="lb-tab"        id="lbOpsPlus" onclick="switchOnlineLbOps('+')">➕</button>
-            <button class="lb-tab"        id="lbOpsMinus"onclick="switchOnlineLbOps('-')">➖</button>
-            <button class="lb-tab"        id="lbOpsMul"  onclick="switchOnlineLbOps('*')">✖️</button>
-            <button class="lb-tab"        id="lbOpsDiv"  onclick="switchOnlineLbOps('/')">➗</button>
-            <button class="lb-tab"        id="lbOpsMixed"onclick="switchOnlineLbOps('+-*/')">🌀 Karma</button>
-          </div>
-          <div id="leaderboard" class="lb">Henüz kimse yok</div>
-          <div id="onlineLbEl" style="display:none"></div>
-        </div>
+    <!-- Event banner -->
+    <div id="eventBanner" style="margin-bottom:10px">
+      <span id="eventBannerIcon">🎉</span>
+      <div style="flex:1"><div id="eventBannerTitle" style="font-weight:800"></div><div id="eventBannerSub" style="font-size:11px;opacity:0.7"></div></div>
+    </div>
 
-        <!-- Günlük Görevler -->
-        <div class="card" id="dailyPanel" style="padding:12px;margin-top:12px">
-          <div class="small muted" style="margin-bottom:8px;display:flex;justify-content:space-between">
-            <span>📅 Günlük Görevler</span>
-            <span id="dailyTimer" style="color:var(--muted);font-size:11px"></span>
-          </div>
-          <div id="dailyTasksList"></div>
-          <div id="dailyBonusMsg" style="display:none;text-align:center;padding:8px;color:#ffd700;font-size:13px;font-weight:800"></div>
+    <!-- Oyun butonları -->
+    <div class="play-grid" style="margin-bottom:10px">
+      <div class="play-card play-card-math" id="startGameBtn">
+        <div class="play-card-icon">➕</div>
+        <div>
+          <div class="play-card-title">Matematik</div>
+          <div class="play-card-sub">Klasik mod</div>
         </div>
-
-        <!-- İstatistik Paneli -->
-        <div class="card" id="statsPanel" style="padding:12px;margin-top:12px">
-          <div class="small muted" style="margin-bottom:8px;display:flex;justify-content:space-between;align-items:center">
-            <span>📊 İstatistikler</span>
-            <button onclick="renderStats()" title="Yenile" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:var(--muted);font-size:11px;cursor:pointer;padding:3px 8px;line-height:1;font-family:inherit">↺ Yenile</button>
-          </div>
-          <div id="statsGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:6px"></div>
+        <div class="play-card-badge">OYNA</div>
+      </div>
+      <div class="play-card play-card-absurd" id="startAbsurdBtn">
+        <div class="play-card-icon">🤪</div>
+        <div>
+          <div class="play-card-title">Absürt</div>
+          <div class="play-card-sub">AI sorular</div>
         </div>
-
-        <!-- Başarılar Butonu -->
-        <div class="card" id="achievementsPanel" style="padding:12px;margin-top:12px;cursor:pointer" onclick="openAchModal()" title="Başarıları görüntüle">
-          <div style="display:flex;justify-content:space-between;align-items:center">
-            <div class="small muted">🏆 Başarılar</div>
-            <div style="font-size:12px;color:var(--neon);font-weight:700" id="achBadgeCount"></div>
-          </div>
-          <div id="achievementsGrid" style="display:flex;flex-wrap:wrap;gap:5px;margin-top:8px"></div>
-        </div>
-
-        <div class="card" style="padding:12px;margin-top:12px">
-          <div class="small muted">Hızlı Ayarlar</div>
-          <div style="margin-top:8px;display:flex;gap:8px;align-items:center">
-            <label class="small muted">Buton rengi</label>
-            <input type="color" id="btnColor" value="#00ff66">
-            <div style="margin-left:auto" class="small muted">Arka plan</div>
-            <input type="color" id="bgColor" value="#08121a">
-          </div>
-          <div style="margin-top:10px" class="small muted">Arka plan:</div>
-          <div style="margin-top:6px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-            <button id="bgLibBtn" class="btn ghost">🖼 Kütüphane</button>
-            <button id="bgImageBtn" class="btn ghost">📁 Fotoğraf Yükle</button>
-            <input id="bgImageInput" type="file" accept="image/*" style="display:none">
-            <button id="clearBgBtn" class="btn ghost">✕ Sıfırla</button>
-          </div>
-        </div>
+        <div class="play-card-badge">AI</div>
       </div>
     </div>
-  </div>
+
+    <!-- Liderlik tablosu -->
+    <div style="background:var(--glass);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:10px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:800;color:var(--text)">🏆 Liderlik</div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span id="onlineLbStatus" style="font-size:10px;color:var(--muted)"></span>
+          <button onclick="fetchOnlineLeaderboard()" style="background:var(--glass2);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:11px;cursor:pointer;padding:4px 10px;font-family:inherit">↺</button>
+        </div>
+      </div>
+      <div class="lb-tabs">
+        <button class="lb-tab active" id="lbTabLocal">📱 Lokal</button>
+        <button class="lb-tab" id="lbTabOnline">🌐 Online</button>
+      </div>
+      <div id="lbOpsRow" style="display:none;gap:4px;margin-bottom:8px" class="lb-ops-row">
+        <button class="lb-ops-btn active" id="lbOpsAll"   onclick="switchOnlineLbOps('all')">🌍 Tümü</button>
+        <button class="lb-ops-btn"        id="lbOpsPlus"  onclick="switchOnlineLbOps('+')">➕</button>
+        <button class="lb-ops-btn"        id="lbOpsMinus" onclick="switchOnlineLbOps('-')">➖</button>
+        <button class="lb-ops-btn"        id="lbOpsMul"   onclick="switchOnlineLbOps('*')">✖️</button>
+        <button class="lb-ops-btn"        id="lbOpsDiv"   onclick="switchOnlineLbOps('/')">➗</button>
+        <button class="lb-ops-btn"        id="lbOpsMixed" onclick="switchOnlineLbOps('+-*/')">🌀 Karma</button>
+      </div>
+      <div id="leaderboard" class="lb">Henüz kimse yok</div>
+      <div id="onlineLbEl" style="display:none"></div>
+    </div>
+
+    <!-- Günlük görevler -->
+    <div style="background:var(--glass);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:10px" id="dailyPanel">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:800;color:var(--text)">📅 Günlük Görevler</div>
+        <span id="dailyTimer" style="font-size:11px;color:var(--muted)"></span>
+      </div>
+      <div id="dailyTasksList"></div>
+      <div id="dailyBonusMsg" style="display:none;text-align:center;padding:8px;color:var(--gold);font-size:13px;font-weight:800"></div>
+    </div>
+
+    <!-- İstatistikler -->
+    <div style="background:var(--glass);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:10px" id="statsPanel">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:800;color:var(--text)">📊 İstatistikler</div>
+        <button onclick="renderStats()" style="background:var(--glass2);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:11px;cursor:pointer;padding:4px 10px;font-family:inherit">↺</button>
+      </div>
+      <div id="statsGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:8px"></div>
+    </div>
+
+    <!-- Başarılar -->
+    <div style="background:var(--glass);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:10px;cursor:pointer" id="achievementsPanel" onclick="openAchModal()">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:800;color:var(--text)">🎖 Başarımlar</div>
+        <div id="achBadgeCount" style="font-size:12px;color:var(--neon);font-weight:700"></div>
+      </div>
+      <div id="achievementsGrid" style="display:flex;flex-wrap:wrap;gap:5px"></div>
+    </div>
+
+    <!-- Ayarlar -->
+    <div style="background:var(--glass);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:10px">
+      <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:800;color:var(--text);margin-bottom:12px">⚙️ Ayarlar</div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <label style="font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;cursor:pointer">
+          <input type="checkbox" id="soundToggle" checked style="width:16px;height:16px;accent-color:var(--neon)"> Ses
+        </label>
+        <div style="margin-left:auto;display:flex;gap:6px">
+          <button class="theme-btn active" data-theme="green"  style="width:24px;height:24px;border-radius:8px;background:#00ff66;border:2px solid transparent;cursor:pointer" title="Yeşil"></button>
+          <button class="theme-btn"        data-theme="purple" style="width:24px;height:24px;border-radius:8px;background:#a855f7;border:2px solid transparent;cursor:pointer" title="Mor"></button>
+          <button class="theme-btn"        data-theme="blue"   style="width:24px;height:24px;border-radius:8px;background:#38bdf8;border:2px solid transparent;cursor:pointer" title="Mavi"></button>
+          <button class="theme-btn"        data-theme="red"    style="width:24px;height:24px;border-radius:8px;background:#ff6b6b;border:2px solid transparent;cursor:pointer" title="Kırmızı"></button>
+          <button class="theme-btn"        data-theme="gold"   style="width:24px;height:24px;border-radius:8px;background:#ffd700;border:2px solid transparent;cursor:pointer" title="Altın"></button>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button id="bgLibBtn" class="btn ghost sm">🖼 Arka Plan</button>
+        <button id="bgImageBtn" class="btn ghost sm">📁 Yükle</button>
+        <button id="openAbout" class="btn ghost sm">ℹ️ Hakkında</button>
+        <button id="resetScores" class="btn ghost sm">🗑 Sıfırla</button>
+        <button id="clearBgBtn" class="btn ghost sm">✕ BG Sıfırla</button>
+      </div>
+      <input id="bgImageInput2" type="file" accept="image/*" style="display:none">
+    </div><!-- /ayarlar -->
+  </div><!-- /menuCard -->
 
   <!-- Game area -->
   <div id="gameArea" class="card" style="margin-top:12px;display:none">
@@ -7532,6 +7529,168 @@ document.addEventListener('pointerdown', e => {
 </div>
 
 <!-- Başarılar Modal -->
+
+
+<!-- Admin Panel Modal -->
+
+
+
+<!-- İstek Gönder Modalı -->
+<div id="requestModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:9500;background:rgba(2,4,10,0.97);align-items:center;justify-content:center;padding:20px;box-sizing:border-box">
+  <div style="background:#0b1220;border:1.5px solid #1a2f28;border-radius:20px;padding:22px 18px;width:100%;max-width:400px;display:flex;flex-direction:column;gap:12px;box-sizing:border-box">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div style="font-size:16px;font-weight:900;color:#e6f7ea">📬 İstek / Şikayet</div>
+      <button id="closeRequestModal" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer">✕</button>
+    </div>
+    <div style="display:flex;gap:6px">
+      <button id="reqTabNew" onclick="switchReqTab('new')" style="flex:1;padding:8px;border-radius:8px;border:1px solid #00ff6644;background:rgba(0,255,102,0.1);color:#00ff66;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer">✏️ Yeni İstek</button>
+      <button id="reqTabMy"  onclick="switchReqTab('my')"  style="flex:1;padding:8px;border-radius:8px;border:1px solid #1a2f28;background:transparent;color:var(--muted);font-size:12px;font-weight:700;font-family:inherit;cursor:pointer">📋 İsteklerim</button>
+    </div>
+    <div id="reqPanelNew">
+    <select id="reqType" style="background:#060c18;border:1.5px solid #1a2f28;border-radius:10px;color:#e6f7ea;font-size:14px;padding:10px 14px;font-family:inherit;width:100%;box-sizing:border-box">
+      <option value="bug">🐛 Bug / Hata</option>
+      <option value="suggestion">💡 Öneri</option>
+      <option value="report">⚠️ Kullanıcı Şikayet</option>
+      <option value="unban">🔓 Ban İtiraz</option>
+      <option value="other">📝 Diğer</option>
+    </select>
+    <textarea id="reqMessage" placeholder="Mesajını yaz... (min 5 karakter)" maxlength="500" style="background:#060c18;border:1.5px solid #1a2f28;border-radius:10px;color:#e6f7ea;font-size:14px;padding:10px 14px;font-family:inherit;width:100%;box-sizing:border-box;min-height:100px;resize:none;outline:none"></textarea>
+    <div id="reqMsg" style="font-size:12px;text-align:center;min-height:16px"></div>
+    <button id="reqSendBtn" style="background:#00ff66;color:#030608;border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:800;font-family:inherit;cursor:pointer;width:100%">Gönder</button>
+    </div>
+    <div id="reqPanelMy" style="display:none">
+      <div id="myRequestList" style="display:flex;flex-direction:column;gap:8px;max-height:300px;overflow-y:auto"></div>
+      <button onclick="loadMyRequests()" style="margin-top:8px;width:100%;background:rgba(255,255,255,0.05);border:1px solid #1a2f28;border-radius:10px;color:var(--muted);font-size:12px;padding:8px;font-family:inherit;cursor:pointer">&#x1F504; Yenile</button>
+    </div>
+
+    <div style="border-top:1px solid #1a2f28;padding-top:12px">
+      <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:8px">🔑 Şifremi Unuttum (e-posta girişi)</div>
+      <div style="display:flex;gap:8px">
+        <input id="resetUsername" placeholder="Kullanıcı adın" style="background:#060c18;border:1.5px solid #1a2f28;border-radius:10px;color:#e6f7ea;font-size:13px;padding:9px 12px;font-family:inherit;flex:1;outline:none;box-sizing:border-box">
+        <button id="resetRequestBtn" style="background:rgba(45,212,191,0.1);border:1.5px solid rgba(45,212,191,0.3);color:#2dd4bf;border-radius:10px;padding:9px 14px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;white-space:nowrap">Kod İste</button>
+      </div>
+      <div style="margin-top:8px;display:flex;gap:8px">
+        <input id="resetCode" placeholder="6 haneli kod" maxlength="6" style="background:#060c18;border:1.5px solid #1a2f28;border-radius:10px;color:#e6f7ea;font-size:13px;padding:9px 12px;font-family:inherit;width:100px;outline:none;box-sizing:border-box">
+        <input id="resetNewPass" placeholder="Yeni şifre" type="password" style="background:#060c18;border:1.5px solid #1a2f28;border-radius:10px;color:#e6f7ea;font-size:13px;padding:9px 12px;font-family:inherit;flex:1;outline:none;box-sizing:border-box">
+        <button id="resetConfirmBtn" style="background:rgba(45,212,191,0.1);border:1.5px solid rgba(45,212,191,0.3);color:#2dd4bf;border-radius:10px;padding:9px 14px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer">✓</button>
+      </div>
+      <div id="resetMsg" style="font-size:12px;text-align:center;min-height:16px;margin-top:4px"></div>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- Genel Profil Modalı -->
+<div id="publicProfileModal">
+  <div id="pubProfileCard">
+
+    <!-- Üst kısım -->
+    <div class="pub-header-bg">
+      <button class="pub-close-btn" onclick="closePublicProfile()">✕</button>
+      <div class="pub-avatar" id="pubAvatar">?</div>
+      <div class="pub-name" id="pubName">—</div>
+      <div class="pub-badges" id="pubBadges"></div>
+      <div class="pub-uid" id="pubUid" title="UID'yi kopyala" onclick="copyPubUid()">—</div>
+    </div>
+
+    <!-- İstatistikler -->
+    <div class="pub-body">
+      <div class="pub-stats-grid">
+        <div class="pub-stat">
+          <div class="pub-stat-val" id="pubScore">0</div>
+          <div class="pub-stat-lbl">🏆 Puan</div>
+        </div>
+        <div class="pub-stat">
+          <div class="pub-stat-val" id="pubLevel">1</div>
+          <div class="pub-stat-lbl">📈 Seviye</div>
+        </div>
+        <div class="pub-stat">
+          <div class="pub-stat-val" id="pubRank">—</div>
+          <div class="pub-stat-lbl">🥇 Sıra</div>
+        </div>
+        <div class="pub-stat">
+          <div class="pub-stat-val" id="pubJoined">—</div>
+          <div class="pub-stat-lbl">📅 Kayıt</div>
+        </div>
+      </div>
+
+      <!-- Giriş yöntemi -->
+      <div style="font-size:12px;color:var(--muted);text-align:center" id="pubProvider"></div>
+
+      <!-- Bio -->
+      <div id="pubBioSection" style="display:none;padding:10px 12px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:10px;font-size:13px;color:#c8dcd8;line-height:1.5;font-style:italic"></div>
+
+      <!-- Başarımlar -->
+      <div id="pubAchievements" style="display:none">
+        <div style="font-size:11px;color:var(--muted);font-weight:700;margin-bottom:6px">🏆 Başarımlar</div>
+        <div id="pubAchievementsGrid" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+      </div>
+
+      <!-- Başarımlar -->
+      <div id="pubAchSection" style="display:none">
+        <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:6px">🏆 Başarımlar</div>
+        <div id="pubAchGrid" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+        <div id="pubAchEmpty" style="font-size:12px;color:var(--muted);text-align:center;display:none">Henüz başarım yok</div>
+      </div>
+
+      <!-- Admin bölümü -->
+      <div class="pub-admin-section" id="pubAdminActions" style="display:none">
+        <div class="pub-admin-title">⚡ Admin İşlemleri</div>
+        <div class="pub-admin-grid">
+          <button class="pub-admin-btn pub-admin-btn-red"   onclick="pubAdminBan()">🚫 Banla</button>
+          <button class="pub-admin-btn pub-admin-btn-gray"  onclick="pubAdminUnban()">✅ Ban Kaldır</button>
+          <button class="pub-admin-btn pub-admin-btn-green" onclick="pubAdminSetScore()">🏆 Skor Ayarla</button>
+          <button class="pub-admin-btn pub-admin-btn-blue"  onclick="pubAdminRemove()">🗑 Tablodan Çıkar</button>
+          <button class="pub-admin-btn pub-admin-btn-blue"  onclick="pubAdminGiveAdmin()">👑 Admin Ver</button>
+          <button class="pub-admin-btn pub-admin-btn-gray"  onclick="pubAdminRemoveAdmin()">❌ Admin Al</button>
+        </div>
+        <div id="pubBanInfo" style="display:none;margin-top:4px;padding:8px;background:rgba(239,68,68,0.08);border-radius:8px;font-size:11px;color:#ef4444"></div>
+        <div id="pubCurrentBadges" style="display:none;margin-top:4px;padding:6px;background:rgba(255,255,255,0.02);border-radius:8px"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Mesajlaşma Modalı -->
+<div id="chatModal">
+  <div id="chatBox">
+    <div id="chatHeader">
+      <div>
+        <div id="chatTitle">💬 Mesajlar</div>
+        <div id="chatSubtitle">Admin ile iletişim</div>
+      </div>
+      <button id="chatClosBtn" onclick="closeChatModal()">✕</button>
+    </div>
+    <div id="chatMessages">
+      <div class="chat-msg from-system">Admin ile yazışabilirsin. Mesajların güvende.</div>
+    </div>
+    <div id="chatInputRow">
+      <textarea id="chatInput" placeholder="Mesajını yaz..." rows="1" maxlength="500"></textarea>
+      <button id="chatSendBtn" onclick="sendChatMsg()">➤</button>
+    </div>
+  </div>
+</div>
+
+<!-- Arka Plan Kütüphanesi Modal -->
+
+
+
+
+
+
+
+<div id="bgLibModal">
+  <div id="bgLibInner">
+    <div class="bglib-close">
+      <h2>🖼 Arka Plan Kütüphanesi</h2>
+      <button id="bgLibClose" class="btn ghost" style="padding:6px 14px">✕ Kapat</button>
+    </div>
+    <div id="bgLibContent"></div>
+  </div>
+</div>
+
 <div id="achModal">
   <div id="achModalCard">
     <div class="ach-modal-hero">
@@ -7555,7 +7714,6 @@ document.addEventListener('pointerdown', e => {
   </div>
 </div>
 
-<!-- Admin Panel Modal -->
 <div id="adminModal">
   <div id="adminCard">
     <div class="admin-hero">
@@ -7786,158 +7944,5 @@ document.addEventListener('pointerdown', e => {
     </div>
   </div>
 </div>
-
-
-<!-- İstek Gönder Modalı -->
-<div id="requestModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:9500;background:rgba(2,4,10,0.97);align-items:center;justify-content:center;padding:20px;box-sizing:border-box">
-  <div style="background:#0b1220;border:1.5px solid #1a2f28;border-radius:20px;padding:22px 18px;width:100%;max-width:400px;display:flex;flex-direction:column;gap:12px;box-sizing:border-box">
-    <div style="display:flex;justify-content:space-between;align-items:center">
-      <div style="font-size:16px;font-weight:900;color:#e6f7ea">📬 İstek / Şikayet</div>
-      <button id="closeRequestModal" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer">✕</button>
-    </div>
-    <div style="display:flex;gap:6px">
-      <button id="reqTabNew" onclick="switchReqTab('new')" style="flex:1;padding:8px;border-radius:8px;border:1px solid #00ff6644;background:rgba(0,255,102,0.1);color:#00ff66;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer">✏️ Yeni İstek</button>
-      <button id="reqTabMy"  onclick="switchReqTab('my')"  style="flex:1;padding:8px;border-radius:8px;border:1px solid #1a2f28;background:transparent;color:var(--muted);font-size:12px;font-weight:700;font-family:inherit;cursor:pointer">📋 İsteklerim</button>
-    </div>
-    <div id="reqPanelNew">
-    <select id="reqType" style="background:#060c18;border:1.5px solid #1a2f28;border-radius:10px;color:#e6f7ea;font-size:14px;padding:10px 14px;font-family:inherit;width:100%;box-sizing:border-box">
-      <option value="bug">🐛 Bug / Hata</option>
-      <option value="suggestion">💡 Öneri</option>
-      <option value="report">⚠️ Kullanıcı Şikayet</option>
-      <option value="unban">🔓 Ban İtiraz</option>
-      <option value="other">📝 Diğer</option>
-    </select>
-    <textarea id="reqMessage" placeholder="Mesajını yaz... (min 5 karakter)" maxlength="500" style="background:#060c18;border:1.5px solid #1a2f28;border-radius:10px;color:#e6f7ea;font-size:14px;padding:10px 14px;font-family:inherit;width:100%;box-sizing:border-box;min-height:100px;resize:none;outline:none"></textarea>
-    <div id="reqMsg" style="font-size:12px;text-align:center;min-height:16px"></div>
-    <button id="reqSendBtn" style="background:#00ff66;color:#030608;border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:800;font-family:inherit;cursor:pointer;width:100%">Gönder</button>
-    </div>
-    <div id="reqPanelMy" style="display:none">
-      <div id="myRequestList" style="display:flex;flex-direction:column;gap:8px;max-height:300px;overflow-y:auto"></div>
-      <button onclick="loadMyRequests()" style="margin-top:8px;width:100%;background:rgba(255,255,255,0.05);border:1px solid #1a2f28;border-radius:10px;color:var(--muted);font-size:12px;padding:8px;font-family:inherit;cursor:pointer">&#x1F504; Yenile</button>
-    </div>
-
-    <div style="border-top:1px solid #1a2f28;padding-top:12px">
-      <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:8px">🔑 Şifremi Unuttum (e-posta girişi)</div>
-      <div style="display:flex;gap:8px">
-        <input id="resetUsername" placeholder="Kullanıcı adın" style="background:#060c18;border:1.5px solid #1a2f28;border-radius:10px;color:#e6f7ea;font-size:13px;padding:9px 12px;font-family:inherit;flex:1;outline:none;box-sizing:border-box">
-        <button id="resetRequestBtn" style="background:rgba(45,212,191,0.1);border:1.5px solid rgba(45,212,191,0.3);color:#2dd4bf;border-radius:10px;padding:9px 14px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;white-space:nowrap">Kod İste</button>
-      </div>
-      <div style="margin-top:8px;display:flex;gap:8px">
-        <input id="resetCode" placeholder="6 haneli kod" maxlength="6" style="background:#060c18;border:1.5px solid #1a2f28;border-radius:10px;color:#e6f7ea;font-size:13px;padding:9px 12px;font-family:inherit;width:100px;outline:none;box-sizing:border-box">
-        <input id="resetNewPass" placeholder="Yeni şifre" type="password" style="background:#060c18;border:1.5px solid #1a2f28;border-radius:10px;color:#e6f7ea;font-size:13px;padding:9px 12px;font-family:inherit;flex:1;outline:none;box-sizing:border-box">
-        <button id="resetConfirmBtn" style="background:rgba(45,212,191,0.1);border:1.5px solid rgba(45,212,191,0.3);color:#2dd4bf;border-radius:10px;padding:9px 14px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer">✓</button>
-      </div>
-      <div id="resetMsg" style="font-size:12px;text-align:center;min-height:16px;margin-top:4px"></div>
-    </div>
-  </div>
-</div>
-
-
-
-<!-- Genel Profil Modalı -->
-<div id="publicProfileModal">
-  <div id="pubProfileCard">
-
-    <!-- Üst kısım -->
-    <div class="pub-header-bg">
-      <button class="pub-close-btn" onclick="closePublicProfile()">✕</button>
-      <div class="pub-avatar" id="pubAvatar">?</div>
-      <div class="pub-name" id="pubName">—</div>
-      <div class="pub-badges" id="pubBadges"></div>
-      <div class="pub-uid" id="pubUid" title="UID'yi kopyala" onclick="copyPubUid()">—</div>
-    </div>
-
-    <!-- İstatistikler -->
-    <div class="pub-body">
-      <div class="pub-stats-grid">
-        <div class="pub-stat">
-          <div class="pub-stat-val" id="pubScore">0</div>
-          <div class="pub-stat-lbl">🏆 Puan</div>
-        </div>
-        <div class="pub-stat">
-          <div class="pub-stat-val" id="pubLevel">1</div>
-          <div class="pub-stat-lbl">📈 Seviye</div>
-        </div>
-        <div class="pub-stat">
-          <div class="pub-stat-val" id="pubRank">—</div>
-          <div class="pub-stat-lbl">🥇 Sıra</div>
-        </div>
-        <div class="pub-stat">
-          <div class="pub-stat-val" id="pubJoined">—</div>
-          <div class="pub-stat-lbl">📅 Kayıt</div>
-        </div>
-      </div>
-
-      <!-- Giriş yöntemi -->
-      <div style="font-size:12px;color:var(--muted);text-align:center" id="pubProvider"></div>
-
-      <!-- Bio -->
-      <div id="pubBioSection" style="display:none;padding:10px 12px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:10px;font-size:13px;color:#c8dcd8;line-height:1.5;font-style:italic"></div>
-
-      <!-- Başarımlar -->
-      <div id="pubAchievements" style="display:none">
-        <div style="font-size:11px;color:var(--muted);font-weight:700;margin-bottom:6px">🏆 Başarımlar</div>
-        <div id="pubAchievementsGrid" style="display:flex;flex-wrap:wrap;gap:6px"></div>
-      </div>
-
-      <!-- Başarımlar -->
-      <div id="pubAchSection" style="display:none">
-        <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:6px">🏆 Başarımlar</div>
-        <div id="pubAchGrid" style="display:flex;flex-wrap:wrap;gap:6px"></div>
-        <div id="pubAchEmpty" style="font-size:12px;color:var(--muted);text-align:center;display:none">Henüz başarım yok</div>
-      </div>
-
-      <!-- Admin bölümü -->
-      <div class="pub-admin-section" id="pubAdminActions" style="display:none">
-        <div class="pub-admin-title">⚡ Admin İşlemleri</div>
-        <div class="pub-admin-grid">
-          <button class="pub-admin-btn pub-admin-btn-red"   onclick="pubAdminBan()">🚫 Banla</button>
-          <button class="pub-admin-btn pub-admin-btn-gray"  onclick="pubAdminUnban()">✅ Ban Kaldır</button>
-          <button class="pub-admin-btn pub-admin-btn-green" onclick="pubAdminSetScore()">🏆 Skor Ayarla</button>
-          <button class="pub-admin-btn pub-admin-btn-blue"  onclick="pubAdminRemove()">🗑 Tablodan Çıkar</button>
-          <button class="pub-admin-btn pub-admin-btn-blue"  onclick="pubAdminGiveAdmin()">👑 Admin Ver</button>
-          <button class="pub-admin-btn pub-admin-btn-gray"  onclick="pubAdminRemoveAdmin()">❌ Admin Al</button>
-        </div>
-        <div id="pubBanInfo" style="display:none;margin-top:4px;padding:8px;background:rgba(239,68,68,0.08);border-radius:8px;font-size:11px;color:#ef4444"></div>
-        <div id="pubCurrentBadges" style="display:none;margin-top:4px;padding:6px;background:rgba(255,255,255,0.02);border-radius:8px"></div>
-      </div>
-    </div>
-
-  </div>
-</div>
-
-<!-- Mesajlaşma Modalı -->
-<div id="chatModal">
-  <div id="chatBox">
-    <div id="chatHeader">
-      <div>
-        <div id="chatTitle">💬 Mesajlar</div>
-        <div id="chatSubtitle">Admin ile iletişim</div>
-      </div>
-      <button id="chatClosBtn" onclick="closeChatModal()">✕</button>
-    </div>
-    <div id="chatMessages">
-      <div class="chat-msg from-system">Admin ile yazışabilirsin. Mesajların güvende.</div>
-    </div>
-    <div id="chatInputRow">
-      <textarea id="chatInput" placeholder="Mesajını yaz..." rows="1" maxlength="500"></textarea>
-      <button id="chatSendBtn" onclick="sendChatMsg()">➤</button>
-    </div>
-  </div>
-</div>
-
-<!-- Arka Plan Kütüphanesi Modal -->
-<div id="bgLibModal">
-  <div id="bgLibInner">
-    <div class="bglib-close">
-      <h2>🖼 Arka Plan Kütüphanesi</h2>
-      <button id="bgLibClose" class="btn ghost" style="padding:6px 14px">✕ Kapat</button>
-    </div>
-    <div id="bgLibContent"></div>
-  </div>
-</div>
-
-
-
 </body>
 </html>
