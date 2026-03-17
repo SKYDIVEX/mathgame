@@ -7769,12 +7769,16 @@ document.addEventListener('keydown', function(e) {
   }
 });
 
-/* showScreen'e bottom nav güncellemesi ekle */
-var _origShowScreen = showScreen;
-function showScreen(name) {
-  _origShowScreen(name);
-  try { updateBottomNav(name); } catch(e) {}
-}
+/* showScreen çağrıldığında bottom nav güncelle — DOMContentLoaded'da bağla */
+document.addEventListener('DOMContentLoaded', function() {
+  var _orig = window.showScreen;
+  if (typeof _orig === 'function') {
+    window.showScreen = function(name) {
+      _orig(name);
+      try { updateBottomNav(name); } catch(e) {}
+    };
+  }
+});
 
 
 window._mathgame={ state, nextQuestion, checkAnswer };
