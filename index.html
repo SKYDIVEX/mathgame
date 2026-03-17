@@ -1894,6 +1894,182 @@ body.has-bg-image .card {
 .pub-admin-btn-blue  { background: rgba(56,189,248,0.07); border-color: rgba(56,189,248,0.2); color: #38bdf8; }
 .pub-admin-btn-gray  { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.1); color: var(--muted); }
 
+
+/* ══════════════════════════════════════════════════════
+   RESPONSIVE — Masaüstü / Tablet / Mobil
+   ══════════════════════════════════════════════════════ */
+
+/* ── Masaüstü (1024px+) ─────────────────────────────── */
+@media (min-width: 1024px) {
+  .app {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0;
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    grid-template-rows: auto 1fr;
+    gap: 0;
+    min-height: 100vh;
+  }
+
+  /* Header tam genişlik */
+  .app > .card:first-child {
+    grid-column: 1 / -1;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    border-top: none;
+    padding: 14px 28px;
+  }
+
+  /* Sol panel — menu */
+  #menuCard {
+    grid-column: 1;
+    margin: 0;
+    border-radius: 0;
+    border-top: none;
+    border-bottom: none;
+    border-left: none;
+    min-height: calc(100vh - 60px);
+    overflow-y: auto;
+    position: sticky;
+    top: 0;
+  }
+
+  /* Sağ panel — oyun alanı */
+  #gameArea {
+    grid-column: 2;
+    margin: 0;
+    padding: 32px;
+    min-height: calc(100vh - 60px);
+    border-left: 1px solid rgba(255,255,255,0.05);
+  }
+
+  /* Oyun sorusu daha büyük */
+  #questionText {
+    font-size: 32px !important;
+  }
+
+  #answerInput {
+    font-size: 22px !important;
+    padding: 14px 18px !important;
+    width: 220px !important;
+  }
+
+  /* Submit butonu daha büyük */
+  #submitAnswerBtn {
+    font-size: 16px !important;
+    padding: 14px 28px !important;
+  }
+
+  /* Liderlik tablosu tam görünür */
+  .lb { max-height: none !important; }
+
+  /* Menü kartı içi main-grid zaten var */
+  .main-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Profil bölümü yatay */
+  .desktop-profile-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+
+  /* Keyboard shortcut hint */
+  .kb-hint {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .kb-key {
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 10px;
+    font-family: monospace;
+  }
+}
+
+/* ── Tablet (768–1024px) ────────────────────────────── */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .app {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 16px;
+  }
+
+  #questionText { font-size: 26px !important; }
+  #answerInput  { font-size: 18px !important; width: 200px !important; }
+
+  .pub-stats-grid { grid-template-columns: 1fr 1fr 1fr 1fr !important; }
+}
+
+/* ── Mobil (<768px) — Bottom Navigation ────────────── */
+@media (max-width: 767px) {
+  /* Sayfanın altına boşluk bırak (bottom nav için) */
+  .app {
+    padding-bottom: 70px;
+  }
+
+  #bottomNav {
+    display: flex !important;
+  }
+}
+
+/* Bottom navigation bar */
+#bottomNav {
+  display: none;
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  z-index: 8000;
+  background: rgba(10,15,26,0.97);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(255,255,255,0.07);
+  padding: 8px 0 calc(8px + env(safe-area-inset-bottom));
+  justify-content: space-around;
+  align-items: center;
+}
+
+.bn-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  cursor: pointer;
+  padding: 4px 16px;
+  border-radius: 10px;
+  transition: all .2s;
+  position: relative;
+}
+
+.bn-item.active .bn-icon { color: var(--neon); }
+.bn-item.active .bn-label { color: var(--neon); }
+.bn-icon  { font-size: 20px; color: var(--muted); transition: color .2s; }
+.bn-label { font-size: 10px; font-weight: 700; color: var(--muted); transition: color .2s; }
+
+.bn-badge {
+  position: absolute;
+  top: 2px; right: 8px;
+  background: #ef4444;
+  color: white;
+  font-size: 9px;
+  font-weight: 800;
+  min-width: 16px;
+  height: 16px;
+  border-radius: 8px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 0 3px;
+}
+
 </style>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -7526,6 +7702,81 @@ function populateProfileSocial() {
 }
 
 
+/* ══════════════════════════════════════════════════════
+   BOTTOM NAVIGATION + RESPONSIVE
+   ══════════════════════════════════════════════════════ */
+
+function bnGo(tab) {
+  /* Aktif tab güncelle */
+  document.querySelectorAll('.bn-item').forEach(function(el) {
+    el.classList.remove('active');
+  });
+  var activeEl = document.getElementById('bn-' + tab);
+  if (activeEl) { activeEl.classList.add('active'); }
+
+  if (tab === 'home') {
+    /* Ana sayfa — menü göster */
+    if (authUser || state.player) {
+      showScreen('menu');
+    } else {
+      try { openAuthModal(); } catch(e) {}
+    }
+  } else if (tab === 'play') {
+    /* Oyun başlat */
+    if (!authUser && !state.player) { try { openAuthModal(); } catch(e) {} return; }
+    try { startGame(); } catch(e) { try { startMathMode(); } catch(e2) {} }
+  } else if (tab === 'lb') {
+    /* Liderlik tablosuna scroll */
+    showScreen('menu');
+    setTimeout(function() {
+      var lbEl = document.querySelector('.card');
+      if (lbEl) { lbEl.scrollIntoView({ behavior: 'smooth' }); }
+      /* Online tabloyu aç */
+      var onlineBtn = document.getElementById('lbTabOnline');
+      if (onlineBtn) { onlineBtn.click(); }
+    }, 200);
+  } else if (tab === 'profile') {
+    if (!authUser) { try { openAuthModal(); } catch(e) {} return; }
+    try { openProfileModal(); } catch(e) {}
+  }
+}
+
+/* Bottom nav'ı aktif taba göre güncelle */
+function updateBottomNav(screen) {
+  document.querySelectorAll('.bn-item').forEach(function(el) {
+    el.classList.remove('active');
+  });
+  if (screen === 'menu')   { var el = document.getElementById('bn-home');    if (el) el.classList.add('active'); }
+  if (screen === 'game')   { var el = document.getElementById('bn-play');    if (el) el.classList.add('active'); }
+}
+
+/* Masaüstü klavye kısayolları */
+document.addEventListener('keydown', function(e) {
+  /* Sadece masaüstünde */
+  if (window.innerWidth < 1024) { return; }
+  /* Input odaklanmışsa atlat */
+  if (document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA')) { return; }
+
+  if (e.key === 'Escape') {
+    /* Açık modal varsa kapat */
+    document.querySelectorAll('.modal.show, [id$="Modal"].show').forEach(function(m) {
+      try { closeModal(m); } catch(ex) {}
+    });
+  }
+  if (e.key === 'Enter' && document.getElementById('gameArea') && document.getElementById('gameArea').style.display !== 'none') {
+    /* Oyundayken Enter = cevap gönder */
+    try { checkAnswer(); } catch(ex) {}
+  }
+});
+
+/* showScreen'e bottom nav güncellemesi ekle */
+var _origShowScreen = showScreen;
+function showScreen(name) {
+  _origShowScreen(name);
+  try { updateBottomNav(name); } catch(e) {}
+}
+
+
 window._mathgame={ state, nextQuestion, checkAnswer };
 
 /* ── LIQUID RIPPLE ─────────────────────────────────── */
@@ -7939,5 +8190,27 @@ document.addEventListener('pointerdown', e => {
     <div id="bgLibContent"></div>
   </div>
 </div>
+
+<!-- Bottom Navigation (mobil) -->
+<div id="bottomNav">
+  <div class="bn-item active" id="bn-home" onclick="bnGo('home')">
+    <span class="bn-icon">🏠</span>
+    <span class="bn-label">Ana Sayfa</span>
+  </div>
+  <div class="bn-item" id="bn-play" onclick="bnGo('play')">
+    <span class="bn-icon">🎮</span>
+    <span class="bn-label">Oyna</span>
+  </div>
+  <div class="bn-item" id="bn-lb" onclick="bnGo('lb')">
+    <span class="bn-icon">🏆</span>
+    <span class="bn-label">Tablo</span>
+  </div>
+  <div class="bn-item" id="bn-profile" onclick="bnGo('profile')">
+    <span class="bn-icon">👤</span>
+    <span class="bn-label">Profil</span>
+    <span class="bn-badge" id="bnProfileBadge"></span>
+  </div>
+</div>
+
 </body>
 </html>
