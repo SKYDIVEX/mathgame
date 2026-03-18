@@ -21,6 +21,23 @@ window.onerror = function(msg, src, line, col, err) {
 };
 </script>
 
+/* ══ BUTON BÜYÜME KESİN ENGEL ══════════════════════════ */
+* { -webkit-tap-highlight-color: transparent !important; }
+button, .btn, .play-card, .admin-btn, .lb-tab, .lb-ops-btn,
+.auth-google-btn, .profile-btn, .profile-save-btn, .pin-key,
+.ach-card, .absurd-choice, .admin-tab-btn, .theme-btn,
+.theme-dot, .pub-admin-btn, [onclick] {
+  touch-action: manipulation !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  transform: none !important;
+  transition: opacity 0.15s !important;
+}
+button:active, .btn:active, [onclick]:active {
+  opacity: 0.6 !important;
+  transform: none !important;
+}
+/* ════════════════════════════════════════════════════ */
 <style>
 /* ══ GLOBAL MODAL HIDE — OVERRIDE ══════════════════════ */
 #levelUpScreen, #levelUpOverlay,
@@ -620,7 +637,6 @@ button, .btn, .play-card, .admin-btn, .auth-google-btn, .pin-key, .ach-card, .ab
   animation: slideUp .4s cubic-bezier(.25,.9,.3,1);
   overflow: hidden;
 }
-@keyframes slideUp { from { transform: translateY(100%); opacity:0; } to { transform: translateY(0); opacity:1; } }
 
 .auth-input {
   width: 100%;
@@ -1328,7 +1344,6 @@ button, .btn, .play-card, .admin-btn, .auth-google-btn, .pin-key, .ach-card, .ab
   text-align: center;
   animation: popIn .3s cubic-bezier(.25,.9,.3,1.2);
 }
-@keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 .ap-icon   { font-size: 44px; margin-bottom: 12px; }
 .ap-name   { font-family: var(--font-head); font-size: 18px; font-weight: 800; color: var(--text); }
 .ap-desc   { font-size: 13px; color: var(--muted); margin-top: 6px; line-height: 1.5; }
@@ -1397,7 +1412,6 @@ button, .btn, .play-card, .admin-btn, .auth-google-btn, .pin-key, .ach-card, .ab
   transition: var(--transition);
   border: 2px solid transparent;
 }
-.theme-dot.active, .theme-dot:hover { border-color: var(--text); transform: scale(1.05); }
 
 /* ── BG Library ─────────────────────────────────────── */
 #bgLibModal {
@@ -1442,7 +1456,6 @@ button, .btn, .play-card, .admin-btn, .auth-google-btn, .pin-key, .ach-card, .ab
   background-size: cover;
   background-position: center;
 }
-.bglib-item:hover { border-color: var(--neon); transform: scale(1.02); }
 
 /* ── Chat ───────────────────────────────────────────── */
 .chat-messages {
@@ -1510,13 +1523,9 @@ button, .btn, .play-card, .admin-btn, .auth-google-btn, .pin-key, .ach-card, .ab
 }
 
 /* ── Animations ─────────────────────────────────────── */
-@keyframes dropIn { from { opacity:0; transform:translateY(-16px) scale(.96); } to { opacity:1; transform:translateY(0) scale(1); } }
 @keyframes modalOverlayIn { from { opacity: 0; } to { opacity: 1; } }
-@keyframes slideUpOut { from { transform: translateY(0); } to { transform: translateY(100%); } }
-@keyframes pulse { 0%,100% { transform:scale(1); } 50% { transform:scale(1.06); } }
 @keyframes fadeIn  { from { opacity:0; } to { opacity:1; } }
 @keyframes fadeOut { from { opacity:1; } to { opacity:0; } }
-@keyframes slideDown { from { opacity:0; transform:translateY(-10px); } to { opacity:1; transform:translateY(0); } }
 
 /* Card entrance */
 #menuCard { animation: dropIn .4s cubic-bezier(.25,.9,.3,1) both; }
