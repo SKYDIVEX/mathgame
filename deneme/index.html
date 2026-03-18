@@ -43,6 +43,8 @@ window.onerror = function(msg, src, line, col, err) {
 
 <style>
 /* ══ BUTON BÜYÜME KESİN ENGEL ══════════════════════════ */
+/* Android font zoom engeli */
+input, textarea, select { font-size: 16px !important; }
 * { -webkit-tap-highlight-color: transparent !important; }
 button, .btn, .play-card, .admin-btn, .lb-tab, .lb-ops-btn,
 .auth-google-btn, .profile-btn, .profile-save-btn, .pin-key,
@@ -2282,7 +2284,7 @@ a { color: var(--neon); text-decoration: none; }
     <div class="topbar">
       <div>
         <div class="stat">Oyuncu: <strong id="playerDisplay">—</strong></div>
-        <div id="modeBadge" style="display:none;margin-top:4px;font-size:11px;font-weight:800;letter-spacing:1px;padding:2px 8px;border-radius:20px;background:rgba(168,85,247,0.18);color:#c084fc;border:1px solid rgba(168,85,247,0.3)">🤪 ABSÜRT MOD</div>
+        <div id="modeBadge" style="display:none;margin-top:6px;font-size:11px;font-weight:800;letter-spacing:1px;padding:4px 12px;border-radius:20px;background:rgba(168,85,247,0.18);color:#c084fc;border:1px solid rgba(168,85,247,0.3);display:inline-block">🤪 ABSÜRT MOD</div>
       </div>
       <div style="text-align:center">
         <div class="stat">Seviye <strong id="levelUI">1</strong></div>
@@ -3652,22 +3654,24 @@ async function fetchAbsurdBatch(){
   const usedList = Array.from(absurdSessionUsed).slice(-20).join(' | ');
 
   function parseQuestions(raw){
+    /* Tüm markdown temizle */
     raw = raw.replace(/```json/gi,'').replace(/```/g,'').trim();
+    /* Gemini wrapped response kontrolü */
     try {
       const obj = JSON.parse(raw);
-      /* Gemini format kontrolü */
       if(obj?.candidates?.[0]?.content?.parts?.[0]?.text) {
-        raw = obj.candidates[0].content.parts[0].text;
-      } else if(obj?.choices?.[0]?.message?.content) {
-        raw = obj.choices[0].message.content;
-      } else if(obj?.content) {
-        raw = obj.content;
+        raw = obj.candidates[0].content.parts[0].text.replace(/```json/gi,'').replace(/```/g,'').trim();
+      } else if(Array.isArray(obj)) {
+        /* Direkt array döndü */
+        raw = JSON.stringify(obj);
       }
     } catch(e){}
+    /* JSON array bul */
     const match = raw.match(/\[[\s\S]*\]/);
-    if(!match) return [];
+    if(!match) { console.warn('Parse: array bulunamadı', raw.slice(0,200)); return []; }
     try {
       const parsed = JSON.parse(match[0]);
+      if(!Array.isArray(parsed)) return [];
       return parsed.filter(q =>
         q?.q && Array.isArray(q.choices) && q.choices.length === 4 &&
         typeof q.correct === 'number' && !absurdSessionUsed.has(q.q)
@@ -3675,11 +3679,10 @@ async function fetchAbsurdBatch(){
         ...q,
         choices: q.choices.map(c => String(c).replace(/^[A-Da-d][\)\.\s]+/,'').trim())
       })).filter(q => {
-        // Aynı şık iki kez varsa soruyu at
         const unique = new Set(q.choices.map(c => c.toLowerCase()));
         return unique.size === 4;
       });
-    } catch(e){ return []; }
+    } catch(e){ console.warn('Parse JSON hata:', e); return []; }
   }
 
   try {
