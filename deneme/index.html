@@ -42,6 +42,17 @@ window.onerror = function(msg, src, line, col, err) {
 </script>
 
 <style>
+
+/* Chrome Android text-autosizing ve zoom engeli */
+html {
+  -webkit-text-size-adjust: 100% !important;
+  text-size-adjust: 100% !important;
+  touch-action: pan-x pan-y;
+}
+body {
+  -webkit-text-size-adjust: 100% !important;
+  text-size-adjust: 100% !important;
+}
 /* ══ BUTON BÜYÜME KESİN ENGEL ══════════════════════════ */
 /* Android font zoom engeli */
 input, textarea, select { font-size: 16px !important; }
@@ -4002,10 +4013,12 @@ function showAchTooltip(achId, el) {
 
 function renderAchievements() {
   try {
+    if (typeof ACHIEVEMENTS === 'undefined' || !ACHIEVEMENTS) { return; }
     const grid = document.getElementById('achievementsGrid');
     if (!grid) return;
     if (!state.achievements) state.achievements = {};
 
+    if (typeof ACHIEVEMENTS === 'undefined' || !ACHIEVEMENTS) return;
     const total    = ACHIEVEMENTS.length;
     const unlocked = ACHIEVEMENTS.filter(a => !!state.achievements[a.id]).length;
 
