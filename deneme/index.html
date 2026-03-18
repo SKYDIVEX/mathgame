@@ -1669,6 +1669,40 @@ a { color: var(--neon); text-decoration: none; }
 }
 /* ════════════════════════════════════════════════════ */
 
+
+/* ── Leaderboard items ───────────────────────────────── */
+.lbItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 9px 12px;
+  background: var(--glass);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.lbItem:last-child { margin-bottom: 0; }
+.lb-online-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  background: var(--glass);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  margin-bottom: 4px;
+  font-size: 13px;
+}
+.lb-online-item.lb-me {
+  background: var(--neon-dim);
+  border-color: rgba(0,255,136,0.3);
+}
+.lb-online-item .lb-rank { min-width: 28px; color: var(--muted); font-family: var(--font-mono); }
+.lb-online-item .lb-name { flex: 1; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lb-online-item .lb-score { color: var(--neon); font-family: var(--font-mono); font-weight: 600; }
+
 </style>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -1977,10 +2011,10 @@ a { color: var(--neon); text-decoration: none; }
         </div>
       </div>
       <div class="lb-tabs">
-        <button class="lb-tab active" id="lbTabLocal">📱 Lokal</button>
-        <button class="lb-tab" id="lbTabOnline">🌐 Online</button>
+        <button class="lb-tab" id="lbTabLocal">📱 Lokal</button>
+        <button class="lb-tab active" id="lbTabOnline">🌐 Online</button>
       </div>
-      <div id="lbOpsRow" style="display:none;gap:4px;margin-bottom:8px" class="lb-ops-row">
+      <div id="lbOpsRow" style="display:flex;gap:4px;margin-bottom:8px" class="lb-ops-row">
         <button class="lb-ops-btn active" id="lbOpsAll"   onclick="switchOnlineLbOps('all')">🌍 Tümü</button>
         <button class="lb-ops-btn"        id="lbOpsPlus"  onclick="switchOnlineLbOps('+')">➕</button>
         <button class="lb-ops-btn"        id="lbOpsMinus" onclick="switchOnlineLbOps('-')">➖</button>
@@ -1988,8 +2022,8 @@ a { color: var(--neon); text-decoration: none; }
         <button class="lb-ops-btn"        id="lbOpsDiv"   onclick="switchOnlineLbOps('/')">➗</button>
         <button class="lb-ops-btn"        id="lbOpsMixed" onclick="switchOnlineLbOps('+-*/')">🌀 Karma</button>
       </div>
-      <div id="leaderboard" class="lb">Henüz kimse yok</div>
-      <div id="onlineLbEl" style="display:none"></div>
+      <div id="leaderboard" class="lb" style="display:none">Henüz kimse yok</div>
+      <div id="onlineLbEl"></div>
     </div>
 
     <!-- Günlük görevler -->
@@ -4167,6 +4201,7 @@ function refreshMenuPanels() {
   try { renderStats();        } catch(e) { console.warn('renderStats hata:', e); }
   try { renderAchievements(); } catch(e) { console.warn('renderAchievements hata:', e); }
   try { updateDailyTasks();   } catch(e) { console.warn('updateDailyTasks hata:', e); }
+  try { fetchOnlineLeaderboard(); } catch(e) {}
   try {
     if (state && state.theme && THEMES[state.theme]) {
       applyTheme(state.theme);
@@ -5550,10 +5585,17 @@ async function fetchOnlineLeaderboard() {
     const ops   = _currentLbOps; /* Direkt kullan — zaten doğru format */
     const board = await workerGet('leaderboard', { ops });
 
-    if (statusEl) statusEl.textContent = '🟢 online';
-
     const opsLabels = { 'all':'Tüm Kategoriler', '+':'Toplama', '-':'Çıkarma', '*':'Çarpma', '/':'Bölme', '+-*/':'Karma (+-×÷)' };
     const opsLabel = opsLabels[_currentLbOps] || _currentLbOps;
+
+    if (board === null || board === undefined) {
+      if (statusEl) statusEl.textContent = '🔴 hata';
+      el.innerHTML = '<div style="color:var(--muted);font-size:12px;padding:8px">🔴 Sunucuya bağlanılamadı</div>';
+      return;
+    }
+
+    if (statusEl) statusEl.textContent = '🟢 online';
+
     if (!Array.isArray(board) || board.length === 0) {
       el.innerHTML = '<div style="color:var(--muted);font-size:12px;padding:8px">' + opsLabel + ': Henüz kayıt yok — ilk sen ol!</div>';
       return;
