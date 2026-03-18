@@ -2,11 +2,31 @@
 <html lang="tr">
 <head>
 <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
 <title>MathGame — v2.0 — SKYDIVEX</title>
 <script>
 /* Kritik global değişkenler — en başta tanımla */
 var WORKER_URL = 'https://mathgame.enesseker2113.workers.dev';
+
+/* Zoom ve double-tap engelleyici */
+document.addEventListener('touchstart', function(e) {
+  if (e.touches.length > 1) { e.preventDefault(); }
+}, { passive: false });
+
+var lastTouch = 0;
+document.addEventListener('touchend', function(e) {
+  var now = Date.now();
+  if (now - lastTouch < 300) {
+    e.preventDefault();
+  }
+  lastTouch = now;
+}, { passive: false });
+
+/* iOS safari zoom fix */
+document.addEventListener('gesturestart', function(e) {
+  e.preventDefault();
+}, { passive: false });
+
 /* 🐛 HATA GÖSTERGE — beta için */
 window.onerror = function(msg, src, line, col, err) {
   var d = document.getElementById('_dbg');
@@ -587,9 +607,17 @@ button, .btn, .play-card, .admin-btn, .auth-google-btn, .pin-key, .ach-card, .ab
   font-weight: 700;
   font-family: var(--font-body);
   cursor: pointer;
-  transition: var(--transition);
   white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  outline: none;
+  /* KESİNLİKLE transform yok */
+  transform: none !important;
+  transition: background 0.15s, border-color 0.15s, opacity 0.15s;
 }
+.btn:active { opacity: 0.7; }
 .btn { touch-action: manipulation; }
 
 .btn.primary {
@@ -2236,12 +2264,12 @@ a { color: var(--neon); text-decoration: none; }
           <button class="theme-btn"        data-theme="gold"   style="width:24px;height:24px;border-radius:8px;background:#ffd700;border:2px solid transparent;cursor:pointer" title="Altın"></button>
         </div>
       </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button id="bgLibBtn" class="btn ghost sm">🖼 Arka Plan</button>
-        <button id="bgImageBtn" class="btn ghost sm">📁 Yükle</button>
-        <button id="openAbout" class="btn ghost sm">ℹ️ Hakkında</button>
-        <button id="resetScores" class="btn ghost sm">🗑 Sıfırla</button>
-        <button id="clearBgBtn" class="btn ghost sm">✕ BG Sıfırla</button>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <button id="bgLibBtn" class="btn ghost sm" style="flex:none">🖼 Arka Plan</button>
+        <button id="bgImageBtn" class="btn ghost sm" style="flex:none">📁 Yükle</button>
+        <button id="openAbout" class="btn ghost sm" style="flex:none">ℹ️ Hakkında</button>
+        <button id="resetScores" class="btn ghost sm" style="flex:none">🗑 Sıfırla</button>
+        <button id="clearBgBtn" class="btn ghost sm" style="flex:none">✕ BG</button>
       </div>
       <input id="bgImageInput2" type="file" accept="image/*" style="display:none">
       <input id="btnColor" type="hidden" value="#00ff66">
@@ -2591,7 +2619,7 @@ const levelDisplay = document.getElementById('levelDisplay');
 const btnColorInput = document.getElementById('btnColor');
 const bgColorInput = document.getElementById('bgColor');
 const bgImageBtn = document.getElementById('bgImageBtn');
-const bgImageInput = document.getElementById('bgImageInput');
+const bgImageInput = document.getElementById('bgImageInput') || document.getElementById('bgImageInput2');
 const clearBgBtn = document.getElementById('clearBgBtn');
 const gameArea = document.getElementById('gameArea');
 const playerDisplay = document.getElementById('playerDisplay');
@@ -3182,7 +3210,7 @@ startAbsurdBtn.addEventListener('click', async ()=>{
   nextAbsurdQuestion();
 });
 
-logoutBtn.addEventListener('click', async ()=>{
+if(logoutBtn) logoutBtn.addEventListener('click', async ()=>{
   try { if(fbAuth && fbAuth.currentUser) await fbAuth.signOut(); } catch(e){}
   clearAuth();
   authUser = null;
@@ -3197,11 +3225,11 @@ logoutBtn.addEventListener('click', async ()=>{
   showLoginChoice();
 });
 
-openSettings.addEventListener('click', ()=>{ clickSound(); openSettingsModal(); });
-openAbout.addEventListener('click', ()=>{ clickSound(); aboutModal.classList.add('show'); });
+if(openSettings) openSettings.addEventListener('click', ()=>{ clickSound(); openSettingsModal(); });
+if(openAbout) openAbout.addEventListener('click', ()=>{ clickSound(); aboutModal.classList.add('show'); });
 document.getElementById('closeAboutModal').addEventListener('click', ()=>{ closeModal(aboutModal); clickSound(); });
 
-resetScores.addEventListener('click', async ()=>{
+if(resetScores) resetScores.addEventListener('click', async ()=>{
   const ok = await showConfirm('Skorları Sıfırla', 'Tüm skorlar silinecek.');
   if(!ok) return;
   state.leaderboard={}; saveState(); renderLeaderboard(); clickSound();
@@ -6457,6 +6485,20 @@ function loadBadgeIconImage(input) {
   };
   reader.readAsDataURL(file);
 }
+
+async function adminRemoveBadgeById(targetName, badgeId) {
+  var r = await adminCall('admin/remove-badge', { targetName: targetName, badgeId: badgeId });
+  if (r && r.ok) {
+    adminLog('Badge kaldirildi');
+    /* Profili yenile */
+    if (_pubProfileData && _pubProfileData.name) {
+      _pubProfileData.badges = (_pubProfileData.badges || []).filter(function(b) { return b.id !== badgeId; });
+      /* pubCurrentBadges'ı güncelle */
+      if (typeof openPublicProfile === 'function') { openPublicProfile(_pubProfileData); }
+    }
+    showToast('Badge kaldırıldı');
+  } else adminLog('Hata: ' + (r ? r.error : 'bilinmiyor'));
+}
 async function adminRemoveBadgePrompt() {
   var name = getAdminTarget();
   if (!name) { adminLog('❌ Oyuncu adı gerekli'); return; }
@@ -7374,9 +7416,15 @@ async function openPublicProfile(data) {
     var pubBadgeList = document.getElementById('pubCurrentBadges');
     if (pubBadgeList && _pubProfileData.badges && _pubProfileData.badges.length > 0) {
       pubBadgeList.style.display = '';
-      pubBadgeList.innerHTML = '<div style="font-size:10px;color:var(--muted);margin-bottom:4px">Mevcut badge\u2019ler:</div>' +
+      pubBadgeList.innerHTML = '<div style="font-size:10px;color:var(--muted);margin-bottom:6px;font-weight:700">Verilen Badge\u2019ler:</div>' +
         _pubProfileData.badges.map(function(b) {
-          return '<div style="font-size:11px;color:var(--muted)">' + b.icon + ' ' + b.label + ' <span style="opacity:0.4">(' + b.id + ')</span></div>';
+          var iconHtml = (b.icon && b.icon.startsWith('data:'))
+            ? '<img src="' + b.icon + '" style="width:14px;height:14px;border-radius:3px;vertical-align:middle">'
+            : b.icon;
+          return '<div style="display:flex;align-items:center;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.04)">' +
+            '<span style="font-size:12px;color:var(--text)">' + iconHtml + ' ' + b.label + '</span>' +
+            '<button onclick="adminRemoveBadgeById(\`' + _pubProfileData.name + '\`, \`' + b.id + '\`)" style="background:none;border:none;color:#ef4444;font-size:12px;cursor:pointer;padding:2px 6px">✕</button>' +
+          '</div>';
         }).join('');
     }
   }
