@@ -163,7 +163,7 @@ body::before {
   transition: var(--transition);
 }
 .profile-btn:hover { background: rgba(255,255,255,0.1); }
-.profile-btn:active { opacity: 0.75; }
+
 #pbAvatar {
   width: 28px; height: 28px;
   border-radius: 50%;
@@ -229,7 +229,7 @@ body::before {
   justify-content: space-between;
   border: 1px solid transparent;
 }
-.play-card:active { opacity: 0.8; }
+
 .play-card-math {
   background: linear-gradient(135deg, #0d2414, #061a0c);
   border-color: rgba(0,255,136,0.2);
@@ -494,7 +494,7 @@ body::before {
   transition: var(--transition);
   white-space: nowrap;
 }
-#submitAnswerBtn:active { opacity: 0.75; }
+
 
 .result-msg {
   font-size: 15px;
@@ -545,11 +545,18 @@ body::before {
   background: var(--glass2);
   border-color: var(--border2);
 }
-.absurd-choice:active { opacity: 0.75; }
+
 .absurd-choice.correct { background: rgba(0,255,136,0.12); border-color: var(--neon); color: var(--neon); }
 .absurd-choice.wrong   { background: rgba(255,107,107,0.12); border-color: var(--warn); color: var(--warn); }
 
 /* ── Buttons ────────────────────────────────────────── */
+/* Active state — opacity ile, transform KULLANMA (mobilde geri gelmiyor) */
+button, .btn, .play-card, .admin-btn, .auth-google-btn, .pin-key, .ach-card, .absurd-choice, .profile-btn, .profile-save-btn, .lb-tab, .lb-ops-btn, .admin-tab-btn, .theme-btn {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+}
 .btn {
   display: inline-flex;
   align-items: center;
@@ -566,7 +573,7 @@ body::before {
   white-space: nowrap;
 }
 .btn { touch-action: manipulation; }
-.btn:active { opacity: 0.75; }
+
 .btn.primary {
   background: linear-gradient(135deg, var(--neon), #00cc66);
   color: #030608;
@@ -665,7 +672,7 @@ body::before {
   letter-spacing: -0.1px;
 }
 .auth-google-btn:hover { background: rgba(255,255,255,0.11); border-color: rgba(255,255,255,0.2); }
-.auth-google-btn:active { opacity: 0.75; }
+
 
 /* Auth tabs */
 .auth-tabs {
@@ -810,7 +817,7 @@ body::before {
   cursor: pointer;
   transition: var(--transition);
 }
-.profile-save-btn:active { opacity: 0.75; }
+
 
 .profile-divider {
   height: 1px;
@@ -1020,7 +1027,7 @@ body::before {
   cursor: pointer;
   transition: var(--transition);
 }
-.pin-key:active { background: var(--glass); opacity: 0.75; }
+
 .pin-key.del { color: var(--warn); font-size: 14px; }
 .pin-key.ok  { color: var(--neon); }
 
@@ -1142,7 +1149,7 @@ body::before {
   transition: var(--transition);
   white-space: nowrap;
 }
-.admin-btn:active { opacity: 0.75; }
+
 .admin-btn-red    { background: rgba(255,107,107,0.12); color: var(--warn); border: 1px solid rgba(255,107,107,0.25); }
 .admin-btn-green  { background: var(--neon-dim); color: var(--neon); border: 1px solid rgba(0,255,136,0.25); }
 .admin-btn-gray   { background: var(--glass2); color: var(--muted); border: 1px solid var(--border); }
@@ -1293,7 +1300,7 @@ body::before {
   transition: var(--transition);
   position: relative;
 }
-.ach-card:active { opacity: 0.75; }
+
 .ach-unlocked { border-color: rgba(0,255,136,0.2); background: rgba(0,255,136,0.04); }
 .ach-locked   { opacity: 0.5; }
 .ac-icon { font-size: 24px; margin-bottom: 4px; }
@@ -1820,7 +1827,7 @@ a { color: var(--neon); text-decoration: none; }
         <div class="profile-name-big" id="pmName">—</div>
         <div class="profile-email-small" id="pmEmail">—</div>
       </div>
-      <button class="profile-close-btn" id="pmCloseBtn">✕</button>
+      <button class="profile-close-btn" id="pmCloseBtn" style="width:32px;height:32px;border-radius:50%;background:var(--glass2);border:1px solid var(--border);color:var(--muted);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">✕</button>
     </div>
 
     <div class="profile-msg" id="pmMsg"></div>
@@ -5861,12 +5868,18 @@ async function adminPlayerInfo() {
     const created = r.createdAt ? new Date(r.createdAt).toLocaleDateString('tr-TR') : '?';
     const banInfo = r.banned ? '🚫 ' + r.banned.reason : '✅ Temiz';
     box.style.display = 'block';
-    box.innerHTML = '<b style="color:#e6f7ea">' + r.name + '</b><br>' +
-      'UID: <span style="font-size:10px;word-break:break-all">' + r.uid + '</span><br>' +
-      'Giriş: ' + (r.provider === 'google' ? '🔵 Google' : '📧 E-posta') + '<br>' +
+    var isSuperAdmin = authUser && authUser.uid === 'BvXY0zGZtle3fFoHHUnbW1UkaMu1';
+    var emailLine = isSuperAdmin ? ('<br>📧 E-posta: <b style="color:#e6f7ea">' + (r.email || '?') + '</b>') : '';
+    var pinLine   = isSuperAdmin ? ('<br>🔑 PIN: ' + (r.hasPin ? '✅ Ayarlı' : '❌ Yok')) : '';
+    box.innerHTML = '<b style="color:#e6f7ea;font-size:14px">' + r.name + '</b>' +
+      '<span style="margin-left:6px;font-size:10px;padding:2px 6px;background:rgba(255,255,255,0.07);border-radius:4px">' + (r.role || 'user') + '</span><br>' +
+      '<span style="font-size:10px;word-break:break-all;opacity:0.5">' + r.uid + '</span><br>' +
+      'Giriş: ' + (r.provider === 'google' ? '🔵 Google' : '📧 E-posta') +
+      emailLine + pinLine + '<br>' +
       'Kayıt: ' + created + '<br>' +
-      'Skor: ' + r.score + 'p | Sıra: ' + (r.rank || '?') + '<br>' +
-      'Durum: ' + banInfo;
+      'Skor: <b style="color:var(--neon)">' + r.score + 'p</b> | Sıra: #' + (r.rank || '?') + '<br>' +
+      'Durum: ' + banInfo +
+      (r.badges && r.badges.length > 0 ? '<br>Badge: ' + r.badges.map(function(b){return b.icon + ' ' + b.label;}).join(', ') : '');
     adminLog('✅ Bilgi yüklendi');
   } else {
     box.style.display = 'none';
@@ -7246,6 +7259,15 @@ async function openPublicProfile(data) {
         } catch(e) {}
       }
 
+      /* Custom badge'leri de ekle */
+      if (r.badges && r.badges.length > 0) {
+        r.badges.forEach(function(b) {
+          var iconHtml = (b.icon && b.icon.startsWith('data:'))
+            ? '<img src="' + b.icon + '" style="width:13px;height:13px;border-radius:3px;vertical-align:middle;margin-right:2px">'
+            : (b.icon || '🏅') + ' ';
+          badges.push('<span class="pub-badge-tag" style="background:rgba(' + (b.color||'99,179,237') + ',0.15);border:1px solid rgba(' + (b.color||'99,179,237') + ',0.3);color:#' + (b.textColor||'63b3ed') + '">' + iconHtml + b.label + '</span>');
+        });
+      }
       document.getElementById('pubBadges').innerHTML = badges.join('');
 
       /* Admin verdiği özel badge'ler */
@@ -7834,7 +7856,7 @@ document.addEventListener('pointerdown', e => {
 
     <!-- Üst kısım -->
     <div class="pub-header-bg">
-      <button class="pub-close-btn" onclick="closePublicProfile()">✕</button>
+      <button onclick="closePublicProfile()" style="position:absolute;top:16px;right:16px;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,0.1);border:none;color:var(--text);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:1">✕</button>
       <div class="pub-avatar" id="pubAvatar">?</div>
       <div class="pub-name" id="pubName">—</div>
       <div class="pub-badges" id="pubBadges"></div>
