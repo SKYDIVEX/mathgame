@@ -3677,7 +3677,7 @@ window.addEventListener('beforeunload', ()=>saveState());
    ════════════════════════════════════════════════════════════ */
 
 /* ── BAŞARI TANIMI ─────────────────────────────────────────── */
-const ACHIEVEMENTS = [
+var ACHIEVEMENTS = [
   /* ── Seri ── */
   { id:'streak_3',   icon:'🔥', cat:'🔥 Seri',       name:'Isındım',         desc:'3 doğru arka arkaya',                   check: s => (s.stats ? (s.stats.bestStreak || 0) : 0) >= 3    },
   { id:'streak_5',   icon:'⚡', cat:'🔥 Seri',       name:'Voltaj',          desc:'5 doğru arka arkaya',                   check: s => (s.stats ? (s.stats.bestStreak || 0) : 0) >= 5    },
@@ -4216,7 +4216,7 @@ function refreshMenuPanels() {
    ════════════════════════════════════════════════════════════ */
 
 /* ── TEMA SİSTEMİ ────────────────────────────────────────── */
-const THEMES = {
+var THEMES = {
   green:  { neon:'#00ff66', bg:'#060708', bgMid:'#0b1220', btnText:'#041a0c' },
   purple: { neon:'#a855f7', bg:'#07060d', bgMid:'#0f0b1a', btnText:'#18083a' },
   blue:   { neon:'#38bdf8', bg:'#060810', bgMid:'#090e1c', btnText:'#031524' },
@@ -4520,7 +4520,7 @@ setInterval(() => { try { if(document.getElementById('gameArea').style.display !
    ARKA PLAN KÜTÜPHANESİ — CSS gradient koleksiyonu
    ════════════════════════════════════════════════════════════ */
 
-const BG_LIBRARY = [
+var BG_LIBRARY = [
   {
     cat: '🌿 Doğa & Orman',
     items: [
