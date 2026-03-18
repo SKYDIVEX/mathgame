@@ -565,7 +565,7 @@ body::before {
   transition: var(--transition);
   white-space: nowrap;
 }
-.btn:active { transform: scale(0.97); }
+.btn:active { transform: scale(0.97); } .btn { touch-action: manipulation; }
 .btn.primary {
   background: linear-gradient(135deg, var(--neon), #00cc66);
   color: #030608;
@@ -1704,6 +1704,82 @@ a { color: var(--neon); text-decoration: none; }
 .lb-online-item .lb-rank { min-width: 28px; color: var(--muted); font-family: var(--font-mono); }
 .lb-online-item .lb-name { flex: 1; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .lb-online-item .lb-score { color: var(--neon); font-family: var(--font-mono); font-weight: 600; }
+
+
+/* ── Confirm Modal ───────────────────────────────────── */
+#confirmModal {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 99999 !important;
+  background: rgba(8,11,18,0.85) !important;
+  backdrop-filter: blur(12px) !important;
+  display: none;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 20px !important;
+}
+#confirmModal.show { display: flex !important; }
+#confirmCard {
+  width: 100%;
+  max-width: 320px;
+  background: #0f1622;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 20px;
+  padding: 24px 20px;
+  animation: popIn .25s cubic-bezier(.25,.9,.3,1.2);
+}
+.confirm-msg { font-size: 13px; color: var(--muted); margin: 8px 0 16px; line-height: 1.5; }
+.confirm-btns { display: flex; gap: 8px; }
+.confirm-btns .btn { flex: 1; }
+
+
+/* ── Stats Grid ──────────────────────────────────────── */
+.stat-box {
+  background: var(--glass);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px 10px;
+  text-align: center;
+}
+.stat-val {
+  font-family: var(--font-head);
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--neon);
+  line-height: 1;
+}
+.stat-lbl {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 4px;
+}
+
+/* ── Public profile admin buttons ─────────────────────── */
+.pub-admin-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 14px;
+  background: var(--glass);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: var(--transition);
+  text-align: left;
+  margin-bottom: 6px;
+}
+.pub-admin-btn:hover { background: var(--glass2); }
+.pub-admin-btn.danger { color: var(--warn); border-color: rgba(255,107,107,0.2); }
+.pub-admin-btn.success { color: var(--neon); border-color: rgba(0,255,136,0.2); }
+.pub-admin-btn.blue { color: #38bdf8; border-color: rgba(56,189,248,0.2); }
 
 </style>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -3170,8 +3246,8 @@ function getQuestionType(lvl) {
 }
 
 /* ── MATH SORU HAVUZU ──────────────────────────────── */
-const askedQuestions = new Set(); // "a|op|b" formatında
-const MAX_POOL = 500; // sonsuz döngüyü önlemek için limit
+var askedQuestions = new Set(); // "a|op|b" formatında
+var MAX_POOL = 500; // sonsuz döngüyü önlemek için limit
 
 function nextQuestion(reset=false){
   if(reset){ state.level=state.level||1; questionCount=0; askedQuestions.clear(); }
@@ -4116,8 +4192,8 @@ function spawnParticlesFromElement(el, count = 18) {
 }
 
 /* ── KONFETİ (level up) ─────────────────────────────────── */
-const CONFETTI_COLORS = ['#00ff66','#ffd700','#ff6b6b','#a855f7','#38bdf8','#fb923c','#f472b6','#fff'];
-const CONFETTI_SHAPES = ['border-radius:50%', 'border-radius:2px', 'transform:rotate(45deg)'];
+var CONFETTI_COLORS = ['#00ff66','#ffd700','#ff6b6b','#a855f7','#38bdf8','#fb923c','#f472b6','#fff'];
+var CONFETTI_SHAPES = ['border-radius:50%', 'border-radius:2px', 'transform:rotate(45deg)'];
 
 function spawnConfetti(count = 60) {
   try {
@@ -6152,11 +6228,11 @@ async function adminLoadBadgeLibrary() {
 
 async function adminGiveBadgeFromLib(badgeId) {
   var name = getAdminTarget();
-  if (!name) { adminLog('Oyuncu adi gir, Detay bas'); return; }
+  if (!name) { adminLog('Oyuncu adini gir'); return; }
   var badge = _badgeLibrary.find(function(b) { return b.id === badgeId; });
-  if (!badge) { adminLog('❌ Badge bulunamadı'); return; }
-  var ok = await showConfirm('Badge Ver', name + ' oyuncusuna ' + badge.icon + ' ' + badge.label + ' verilecek.');
-  if (!ok) { return; }
+  if (!badge) { adminLog('Badge bulunamadi'); return; }
+  /* showConfirm yerine direkt ver — z-index sorunu var */
+  adminLog('Veriliyor: ' + badge.icon + ' ' + badge.label + ' → ' + name);
   var r = await adminCall('admin/badge-library-give', { targetName: name, badgeId: badgeId });
   if (r && r.ok) { adminLog('✅ ' + badge.icon + ' ' + badge.label + ' → ' + name); }
   else adminLog('❌ ' + (r ? r.error : 'Hata'));
