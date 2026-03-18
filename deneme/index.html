@@ -4912,25 +4912,40 @@ function sanitizeUsername(name) {
 
 /* ── Worker API yardımcısı ───────────────────────────── */
 async function workerPost(endpoint, data) {
-  const resp = await fetch(WORKER_URL + '/' + endpoint, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  });
-  return resp.json();
+  try {
+    const resp = await fetch(WORKER_URL + '/' + endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    const text = await resp.text();
+    try {
+      return JSON.parse(text);
+    } catch(e) {
+      if (text.includes('limit exceeded') || text.includes('KV put')) {
+        return { error: 'KV limit doldu — gece 03:00\'de sıfırlanır', kvLimit: true };
+      }
+      return { error: 'Sunucu hatası (' + resp.status + ')' };
+    }
+  } catch(e) {
+    return { error: e.message };
+  }
 }
 
 async function workerGet(endpoint, params) {
   if (!params) { params = {}; }
-  /* URLSearchParams + işaretini boşluk olarak encode eder — manuel yap */
   var parts = [];
   Object.keys(params).forEach(function(k) {
     parts.push(encodeURIComponent(k) + '=' + encodeURIComponent(params[k]));
   });
   var qs  = parts.join('&');
   var url = WORKER_URL + '/' + endpoint + (qs ? '?' + qs : '');
-  var resp = await fetch(url);
-  return resp.json();
+  try {
+    var resp = await fetch(url);
+    var text = await resp.text();
+    try { return JSON.parse(text); }
+    catch(e) { return null; }
+  } catch(e) { return null; }
 }
 
 /* ── Auth Modal kontrol ──────────────────────────────── */
@@ -5692,6 +5707,10 @@ async function adminCall(endpoint, extra = {}) {
   }
   try {
     const result = await workerPost(endpoint, { token: token, ...extra });
+    if (result && result.kvLimit) {
+      adminLog('\u23F0 KV limit doldu \u2014 gece 03:00da sifirlanir');
+      return null;
+    }
     return result;
   } catch(e) {
     adminLog('❌ Hata: ' + e.message);
