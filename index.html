@@ -1212,41 +1212,180 @@ input, textarea, select {
 #achModalCard {
   width: 100%;
   max-width: 480px;
-  max-height: 90vh;
-  background: #0d1117;
+  max-height: 92vh;
+  background: #0b0f18;
   border: 1px solid var(--border2);
-  border-radius: 24px 24px 0 0;
+  border-radius: 28px 28px 0 0;
   overflow-y: auto;
   animation: slideUp .35s ease;
-}
-.ach-modal-hero {
-  padding: 20px 20px 16px;
-  border-bottom: 1px solid var(--border);
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  flex-direction: column;
 }
-.ach-grid {
+/* Header */
+.ach-modal-hero {
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  background: #0b0f18;
+  z-index: 2;
+  flex-shrink: 0;
+}
+.ach-modal-title {
+  font-family: var(--font-head);
+  font-size: 18px;
+  font-weight: 900;
+  color: var(--text);
+}
+.ach-modal-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+/* Progress bar */
+.ach-progress-bar-wrap {
+  height: 4px;
+  background: var(--glass2);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-top: 10px;
+}
+.ach-progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--neon), #00cc66);
+  border-radius: 4px;
+  transition: width 0.6s cubic-bezier(0.34,1.56,0.64,1);
+}
+/* Kategori başlığı */
+.ach-cat-title {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--muted2);
+  padding: 14px 16px 6px;
+}
+/* Yeni grid — her kart daha büyük, güzel */
+.ach-grid-new {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 8px;
-  padding: 16px;
+  padding: 0 16px 8px;
 }
 .ach-card {
-  background: var(--glass);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 12px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 16px;
+  padding: 14px 10px 12px;
   cursor: pointer;
   position: relative;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 6px;
+  transition: background 0.15s, border-color 0.15s, transform 0.1s;
 }
-.ach-card::after { content: ''; position: absolute; inset: 0; background: rgba(255,255,255,0); transition: background 0.15s; }
-.ach-card:active::after { background: rgba(255,255,255,0.1); }
-.ach-card.unlocked { background: var(--neon-dim); border-color: rgba(0,255,136,0.25); }
-.ach-icon { font-size: 24px; margin-bottom: 4px; }
-.ach-name { font-size: 12px; font-weight: 700; }
-.ach-desc { font-size: 10px; color: var(--muted); margin-top: 2px; }
+.ach-card:active { transform: scale(0.96); }
+.ach-card.ach-unlocked {
+  background: linear-gradient(135deg, rgba(0,255,136,0.08), rgba(0,204,102,0.03));
+  border-color: rgba(0,255,136,0.25);
+}
+.ach-card.ach-unlocked::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 0%, rgba(0,255,136,0.1), transparent 70%);
+  pointer-events: none;
+}
+.ach-card.ach-locked {
+  opacity: 0.55;
+  filter: grayscale(0.3);
+}
+/* Nadirlik renkleri */
+.ach-card.rarity-efsane { border-color: rgba(245,158,11,0.4); background: linear-gradient(135deg, rgba(245,158,11,0.08), rgba(251,191,36,0.02)); }
+.ach-card.rarity-nadir  { border-color: rgba(167,139,250,0.4); background: linear-gradient(135deg, rgba(167,139,250,0.08), rgba(139,92,246,0.02)); }
+.ach-card.rarity-degerli{ border-color: rgba(56,189,248,0.35);  background: linear-gradient(135deg, rgba(56,189,248,0.07),  rgba(14,165,233,0.02));  }
+.ac-icon { font-size: 28px; line-height: 1; }
+.ac-name { font-size: 11px; font-weight: 700; color: var(--text); line-height: 1.3; }
+.ac-rarity {
+  font-size: 9px;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 8px;
+  margin-top: 1px;
+}
+.ac-lock { font-size: 14px; position: absolute; top: 6px; right: 7px; opacity: 0.5; }
+/* Footer */
+.ach-modal-footer {
+  padding: 10px 16px 28px;
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+/* ── Başarım Detay Modal ── */
+#achDetailModal {
+  position: fixed;
+  inset: 0;
+  z-index: 9500;
+  background: rgba(8,11,18,0.7);
+  backdrop-filter: blur(10px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+#achDetailModal.show { display: flex !important; }
+#achDetailCard {
+  width: 100%;
+  max-width: 340px;
+  background: #0f1622;
+  border: 1px solid var(--border2);
+  border-radius: 24px;
+  padding: 0;
+  overflow: hidden;
+  animation: popIn 0.35s cubic-bezier(0.34,1.56,0.64,1);
+}
+.ach-detail-hero {
+  padding: 28px 20px 20px;
+  text-align: center;
+  position: relative;
+}
+.ach-detail-icon { font-size: 52px; display: block; margin-bottom: 10px; }
+.ach-detail-name { font-family: var(--font-head); font-size: 20px; font-weight: 900; color: var(--text); }
+.ach-detail-cat  { font-size: 11px; color: var(--muted); margin-top: 3px; }
+.ach-detail-body { padding: 0 20px 20px; display: flex; flex-direction: column; gap: 8px; }
+.ach-detail-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 12px;
+  font-size: 13px;
+}
+.ach-detail-row .ach-detail-lbl { color: var(--muted); font-size: 11px; }
+.ach-detail-row .ach-detail-val { font-weight: 700; color: var(--text); margin-top: 1px; }
+.ach-detail-rarity-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 800;
+  margin: 0 auto 4px;
+}
+.ach-detail-close {
+  width: 100%;
+  padding: 13px;
+  background: var(--glass2);
+  border: none;
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+  font-family: var(--font-body);
+  cursor: pointer;
+}
 
 /* ── Public profil ───────────────────────────────────── */
 #publicProfileModal {
@@ -3963,59 +4102,66 @@ function renderAchievements() {
 /* ── Başarılar Modal Render ───────────────────────────── */
 function renderAchModal() {
   try {
-    const body = document.getElementById('achModalBody');
+    var body = document.getElementById('achModalBody');
     if (!body) return;
     if (!state.achievements) state.achievements = {};
 
-    const total    = ACHIEVEMENTS.length;
-    const unlocked = ACHIEVEMENTS.filter(a => !!state.achievements[a.id]).length;
+    var total    = ACHIEVEMENTS.length;
+    var unlocked = ACHIEVEMENTS.filter(function(a) { return !!state.achievements[a.id]; }).length;
 
-    /* İlerleme */
-    const countEl = document.getElementById('achUnlockedCount');
-    const totalEl = document.getElementById('achTotalCount');
-    const fillEl  = document.getElementById('achProgressFill');
+    var countEl = document.getElementById('achUnlockedCount');
+    var totalEl = document.getElementById('achTotalCount');
+    var fillEl  = document.getElementById('achProgressFill');
     if (countEl) countEl.textContent = unlocked;
     if (totalEl) totalEl.textContent = total;
     if (fillEl)  fillEl.style.width  = Math.round(unlocked / total * 100) + '%';
 
     /* Kategorilere göre grupla */
-    const cats = {};
-    ACHIEVEMENTS.forEach(a => {
-      const cat = a.cat || '🎖 Diğer';
+    var cats = {};
+    ACHIEVEMENTS.forEach(function(a) {
+      var cat = a.cat || '🎖 Diğer';
       if (!cats[cat]) cats[cat] = [];
       cats[cat].push(a);
     });
 
+    var RARITY_CONFIG = {
+      'Efsane':  { color: '#f59e0b', bg: 'rgba(245,158,11,0.15)',  border: 'rgba(245,158,11,0.4)',  icon: '🔥', cls: 'rarity-efsane' },
+      'Nadir':   { color: '#a78bfa', bg: 'rgba(167,139,250,0.15)', border: 'rgba(167,139,250,0.4)', icon: '💎', cls: 'rarity-nadir'  },
+      'Değerli': { color: '#38bdf8', bg: 'rgba(56,189,248,0.12)',  border: 'rgba(56,189,248,0.35)', icon: '⭐', cls: 'rarity-degerli'},
+    };
+
     body.innerHTML = '';
-    Object.entries(cats).forEach(([cat, items]) => {
-      const title = document.createElement('div');
+    Object.entries(cats).forEach(function(entry) {
+      var cat = entry[0];
+      var items = entry[1];
+
+      var title = document.createElement('div');
       title.className = 'ach-cat-title';
-      title.textContent = cat;
+      /* Kaç tanesi açık? */
+      var catUnlocked = items.filter(function(a) { return !!state.achievements[a.id]; }).length;
+      title.innerHTML = cat + ' <span style="color:var(--neon);font-size:9px">' + catUnlocked + '/' + items.length + '</span>';
       body.appendChild(title);
 
-      const grid = document.createElement('div');
+      var grid = document.createElement('div');
       grid.className = 'ach-grid-new';
 
-      items.forEach(ach => {
-        const isUnlocked = !!state.achievements[ach.id];
-        const card = document.createElement('div');
-        card.className = 'ach-card ' + (isUnlocked ? 'ach-unlocked' : 'ach-locked');
+      items.forEach(function(ach) {
+        var isUnlocked = !!state.achievements[ach.id];
+        var rarity = ACH_RARITY ? ACH_RARITY[ach.id] : '';
+        var rc = rarity ? RARITY_CONFIG[rarity] : null;
 
-        if (!isUnlocked) {
-          const lockIcon = document.createElement('span');
-          lockIcon.className = 'ac-lock';
-          lockIcon.textContent = '🔒';
-          card.appendChild(lockIcon);
-        }
+        var card = document.createElement('div');
+        card.className = 'ach-card ' + (isUnlocked ? 'ach-unlocked' : 'ach-locked') + (rc ? ' ' + rc.cls : '');
 
-        var rarity2 = ACH_RARITY ? ACH_RARITY[ach.id] : '';
-        var rarityTag = rarity2 ? '<div style="font-size:9px;font-weight:800;margin-top:2px;color:' +
-          ({'Efsane':'#f59e0b','Nadir':'#a78bfa','Değerli':'#38bdf8'}[rarity2]||'var(--muted)') + '">' +
-          ({'Efsane':'🔥','Nadir':'💎','Değerli':'⭐'}[rarity2]||'') + '</div>' : '';
-        card.innerHTML += '<div class="ac-icon">' + (isUnlocked ? ach.icon : '❓') + '</div>' +
-                          '<div class="ac-name">' + ach.name + '</div>' + rarityTag;
+        var rarityTag = rc ? '<div class="ac-rarity" style="background:' + rc.bg + ';color:' + rc.color + ';border:1px solid ' + rc.border + '">' + rc.icon + ' ' + rarity + '</div>' : '';
+        var lockTag = !isUnlocked ? '<span class="ac-lock">🔒</span>' : '';
 
-        card.addEventListener('click', () => {
+        card.innerHTML = lockTag +
+          '<div class="ac-icon">' + (isUnlocked ? ach.icon : '❓') + '</div>' +
+          '<div class="ac-name">' + ach.name + '</div>' +
+          rarityTag;
+
+        card.addEventListener('click', function() {
           try { clickSound(); showAchievementDetail(ach); } catch(e) {}
         });
         grid.appendChild(card);
@@ -4025,59 +4171,96 @@ function renderAchModal() {
   } catch(e) { console.warn('renderAchModal hata:', e); }
 }
 
-
 function showAchievementDetail(ach) {
   try {
-    const popup  = document.getElementById('achPopup');
-    const icon   = document.getElementById('apIcon');
-    const name   = document.getElementById('apName');
-    const desc   = document.getElementById('apDesc');
-    const status = document.getElementById('apStatus');
-    const dateEl = document.getElementById('apDate');
-    if (!popup) return;
+    var modal   = document.getElementById('achDetailModal');
+    var iconEl  = document.getElementById('achDetailIcon');
+    var nameEl  = document.getElementById('achDetailName');
+    var catEl   = document.getElementById('achDetailCat');
+    var descEl  = document.getElementById('achDetailDesc');
+    var statusEl  = document.getElementById('achDetailStatus');
+    var statusIcon= document.getElementById('achDetailStatusIcon');
+    var dateRow = document.getElementById('achDetailDateRow');
+    var dateEl  = document.getElementById('achDetailDate');
+    var rarityRow = document.getElementById('achDetailRarityRow');
+    var rarityEl  = document.getElementById('achDetailRarity');
+    var rarityIconEl = document.getElementById('achDetailRarityIcon');
+    var rarityBadge = document.getElementById('achDetailRarityBadge');
+    var hero = document.getElementById('achDetailHero');
+    if (!modal) return;
 
-    const unlocked = !!(state.achievements && state.achievements[ach.id]);
+    var isUnlocked = !!(state.achievements && state.achievements[ach.id]);
 
-    icon.textContent = unlocked ? ach.icon : '🔒';
-    name.textContent = ach.name;
-    desc.textContent = ach.desc;
+    /* İkon + isim + kategori */
+    if (iconEl) iconEl.textContent = isUnlocked ? ach.icon : '🔒';
+    if (nameEl) nameEl.textContent = ach.name;
+    if (catEl)  catEl.textContent  = ach.cat || '🎖 Başarım';
+    if (descEl) descEl.textContent = ach.desc;
 
     /* Nadirlik */
+    var RARITY_CONFIG = {
+      'Efsane':  { color: '#f59e0b', bg: 'rgba(245,158,11,0.15)',  border: 'rgba(245,158,11,0.3)',  icon: '🔥' },
+      'Nadir':   { color: '#a78bfa', bg: 'rgba(167,139,250,0.15)', border: 'rgba(167,139,250,0.3)', icon: '💎' },
+      'Değerli': { color: '#38bdf8', bg: 'rgba(56,189,248,0.12)',  border: 'rgba(56,189,248,0.25)', icon: '⭐' },
+    };
     var rarity = ACH_RARITY ? ACH_RARITY[ach.id] : '';
-    var rarityColors = { 'Efsane': '#f59e0b', 'Nadir': '#a78bfa', 'Değerli': '#38bdf8' };
-    var rarityIcons  = { 'Efsane': '🔥', 'Nadir': '💎', 'Değerli': '⭐' };
-    var rarityEl = document.getElementById('apRarity');
-    if (rarityEl) {
-      if (rarity) {
-        rarityEl.style.display = '';
-        rarityEl.style.color = rarityColors[rarity] || 'var(--muted)';
-        rarityEl.textContent = (rarityIcons[rarity] || '') + ' ' + rarity + ' Başarım';
+    var rc = rarity ? RARITY_CONFIG[rarity] : null;
+
+    /* Hero arkaplan */
+    if (hero) {
+      hero.style.background = rc
+        ? 'linear-gradient(135deg, ' + rc.bg + ', transparent)'
+        : (isUnlocked ? 'linear-gradient(135deg, rgba(0,255,136,0.06), transparent)' : 'transparent');
+    }
+
+    /* Nadirlik rozeti — hero içinde */
+    if (rarityBadge) {
+      if (rc) {
+        rarityBadge.style.display = 'flex';
+        rarityBadge.style.justifyContent = 'center';
+        rarityBadge.innerHTML = '<span class="ach-detail-rarity-badge" style="background:' + rc.bg + ';color:' + rc.color + ';border:1px solid ' + rc.border + '">' + rc.icon + ' ' + rarity + ' Başarım</span>';
       } else {
-        rarityEl.style.display = 'none';
+        rarityBadge.style.display = 'none';
       }
     }
 
-    if (unlocked) {
-      status.className   = 'ap-status unlocked';
-      status.textContent = '✅ Kazanıldı';
-      try {
-        const ts  = state.achievements[ach.id];
-        const d   = new Date(ts);
-        const str = d.toLocaleDateString('tr-TR', { day:'2-digit', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit' });
-        dateEl.textContent = '📅 ' + str + ' tarihinde açıldı';
-      } catch(e) { dateEl.textContent = ''; }
-    } else {
-      status.className   = 'ap-status locked';
-      status.textContent = '🔒 Henüz kazanılmadı';
-      dateEl.textContent = '💡 ' + ach.desc;
+    /* Durum */
+    if (statusEl && statusIcon) {
+      if (isUnlocked) {
+        statusIcon.textContent = '✅';
+        statusEl.textContent = 'Kazanıldı!';
+        statusEl.style.color = 'var(--neon)';
+      } else {
+        statusIcon.textContent = '🔒';
+        statusEl.textContent = 'Henüz kazanılmadı';
+        statusEl.style.color = 'var(--muted)';
+      }
     }
 
-    /* Popup'ı animasyonla aç — önce DOM'u sıfırla */
-    popup.classList.remove('show');
-    popup.querySelector('#achPopupCard').style.animation = 'none';
-    popup.querySelector('#achPopupCard').offsetHeight; /* reflow */
-    popup.querySelector('#achPopupCard').style.animation = '';
-    popup.classList.add('show');
+    /* Tarih */
+    if (dateRow && dateEl) {
+      if (isUnlocked && state.achievements[ach.id]) {
+        var d = new Date(state.achievements[ach.id]);
+        dateEl.textContent = d.toLocaleDateString('tr-TR', { day: '2-digit', month: 'long', year: 'numeric' });
+        dateRow.style.display = 'flex';
+      } else {
+        dateRow.style.display = 'none';
+      }
+    }
+
+    /* Nadirlik satırı */
+    if (rarityRow && rarityEl && rarityIconEl) {
+      if (rc) {
+        rarityIconEl.textContent = rc.icon;
+        rarityEl.textContent = rarity;
+        rarityEl.style.color = rc.color;
+        rarityRow.style.display = 'flex';
+      } else {
+        rarityRow.style.display = 'none';
+      }
+    }
+
+    modal.classList.add('show');
     clickSound();
   } catch(e) { console.warn('showAchievementDetail hata:', e); }
 }
@@ -8199,22 +8382,65 @@ document.addEventListener('pointerdown', e => {
   <div id="achModalCard">
     <div class="ach-modal-hero">
       <div style="display:flex;justify-content:space-between;align-items:flex-start">
-        <div>
-          <div class="ach-modal-title">🏆 Başarılar</div>
+        <div style="flex:1">
+          <div class="ach-modal-title">🏆 Başarımlar</div>
           <div class="ach-modal-sub">
             <span id="achUnlockedCount">0</span> / <span id="achTotalCount">0</span> rozet kazanıldı
           </div>
-          <div class="ach-progress-bar-wrap" style="margin-top:12px;width:200px">
+          <div class="ach-progress-bar-wrap" style="margin-top:10px">
             <div class="ach-progress-bar-fill" id="achProgressFill" style="width:0%"></div>
           </div>
         </div>
-        <button id="closeAchModal" class="btn ghost" style="padding:7px 14px;font-size:13px">✕</button>
+        <button id="closeAchModal" class="btn ghost sm" style="flex-shrink:0;margin-left:12px">✕</button>
       </div>
     </div>
-    <div class="ach-modal-body" id="achModalBody"></div>
+    <div class="ach-modal-body" id="achModalBody" style="flex:1;overflow-y:auto"></div>
     <div class="ach-modal-footer">
-      <div style="font-size:12px;color:var(--muted)">Rozete tıkla → detay gör</div>
+      <div style="font-size:11px;color:var(--muted);text-align:center">Rozete tıkla → detay ve nadirlik gör</div>
     </div>
+  </div>
+</div>
+
+<!-- Başarım Detay Modal -->
+<div id="achDetailModal">
+  <div id="achDetailCard">
+    <div class="ach-detail-hero" id="achDetailHero">
+      <span class="ach-detail-icon" id="achDetailIcon">🏆</span>
+      <div id="achDetailRarityBadge" style="display:none;margin-bottom:8px"></div>
+      <div class="ach-detail-name" id="achDetailName">—</div>
+      <div class="ach-detail-cat" id="achDetailCat">—</div>
+    </div>
+    <div class="ach-detail-body">
+      <div class="ach-detail-row">
+        <span style="font-size:18px">📋</span>
+        <div>
+          <div class="ach-detail-lbl">Görev</div>
+          <div class="ach-detail-val" id="achDetailDesc">—</div>
+        </div>
+      </div>
+      <div class="ach-detail-row" id="achDetailStatusRow">
+        <span style="font-size:18px" id="achDetailStatusIcon">🔒</span>
+        <div>
+          <div class="ach-detail-lbl">Durum</div>
+          <div class="ach-detail-val" id="achDetailStatus">Henüz kazanılmadı</div>
+        </div>
+      </div>
+      <div class="ach-detail-row" id="achDetailDateRow" style="display:none">
+        <span style="font-size:18px">📅</span>
+        <div>
+          <div class="ach-detail-lbl">Kazanıldı</div>
+          <div class="ach-detail-val" id="achDetailDate">—</div>
+        </div>
+      </div>
+      <div class="ach-detail-row" id="achDetailRarityRow" style="display:none">
+        <span style="font-size:18px" id="achDetailRarityIcon">⭐</span>
+        <div>
+          <div class="ach-detail-lbl">Nadirlik</div>
+          <div class="ach-detail-val" id="achDetailRarity">—</div>
+        </div>
+      </div>
+    </div>
+    <button class="ach-detail-close" onclick="document.getElementById('achDetailModal').classList.remove('show')">Kapat</button>
   </div>
 </div>
 
