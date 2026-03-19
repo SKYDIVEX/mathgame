@@ -686,178 +686,176 @@ input, textarea, select {
   width: 100%;
   max-width: 480px;
   max-height: 92vh;
-  background: #0d1117;
+  background: #0c1018;
   border: 1px solid var(--border2);
-  border-radius: 24px 24px 0 0;
+  border-radius: 28px 28px 0 0;
   overflow-y: auto;
-  padding: 0 0 40px;
   animation: slideUp .35s cubic-bezier(.25,.9,.3,1);
-}
-.profile-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 16px 20px;
-  border-bottom: 1px solid var(--border);
-  position: sticky;
-  top: 0;
-  background: #0d1117;
-  z-index: 1;
-}
-.profile-header-title { font-family: var(--font-head); font-size: 16px; font-weight: 800; }
-.pm-avatar-wrap {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  padding: 24px 20px 16px;
 }
-.pm-avatar {
-  width: 72px;
-  height: 72px;
-  border-radius: 22px;
-  background: linear-gradient(135deg, var(--neon), #00cc66);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 32px;
-  font-weight: 800;
-  color: #030608;
-  overflow: hidden;
-  background-size: cover;
-  background-position: center;
-}
-.profile-section { padding: 0 20px 16px; border-bottom: 1px solid var(--border); margin-bottom: 16px; }
-.profile-section-title { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--muted2); margin-bottom: 10px; }
-.profile-input {
-  width: 100%;
-  padding: 12px 14px;
-  background: var(--glass2);
-  border: 1.5px solid var(--border);
-  border-radius: 10px;
-  color: var(--text);
-  font-size: 14px;
-  font-family: var(--font-body);
-  outline: none;
-  margin-bottom: 8px;
-}
-.profile-input:focus { border-color: var(--neon); }
-.profile-save-btn {
-  width: 100%;
-  padding: 12px;
-  background: linear-gradient(135deg, var(--neon), #00cc66);
-  color: #030608;
-  border: none;
-  border-radius: 12px;
-  font-size: 14px;
-  font-weight: 800;
-  font-family: var(--font-body);
-  cursor: pointer;
-  position: relative;
-  overflow: hidden;
-}
-.profile-save-btn::after { content: ''; position: absolute; inset: 0; background: rgba(0,0,0,0); transition: background 0.15s; }
-.profile-save-btn:active::after { background: rgba(0,0,0,0.2); }
 
-/* ── Profile Modal İç Elemanlar ─────────────────────── */
-.profile-avatar-big {
-  width: 44px;
-  height: 44px;
-  border-radius: 14px;
-  background: linear-gradient(135deg, var(--neon), #00cc66);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 20px;
-  font-weight: 800;
-  color: #030608;
-  flex-shrink: 0;
-  overflow: hidden;
-  background-size: cover;
-  background-position: center;
+/* ── Profil Hero ── */
+.pm-hero {
+  position: relative;
+  padding: 28px 20px 20px;
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(180deg, rgba(0,255,136,0.04) 0%, transparent 100%);
 }
-.profile-name-big {
-  font-family: var(--font-head);
-  font-size: 15px;
-  font-weight: 800;
-  color: var(--text);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: 180px;
-}
-.profile-email-small {
-  font-size: 11px;
+.pm-close-btn {
+  position: absolute;
+  top: 14px; right: 14px;
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  background: var(--glass2);
+  border: 1px solid var(--border);
   color: var(--muted);
-  margin-top: 2px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: 180px;
-}
-.profile-msg {
   font-size: 13px;
-  color: var(--warn);
-  padding: 8px 20px;
-  display: none;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
 }
-.profile-msg.show { display: block; }
-.profile-field {
-  padding: 0 20px 12px;
+.pm-avatar-wrap {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 12px;
 }
-.profile-field label {
-  display: block;
-  font-size: 10px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  color: var(--muted2);
-  margin-bottom: 6px;
+.pm-avatar-big {
+  width: 76px; height: 76px;
+  border-radius: 24px;
+  background: linear-gradient(135deg, var(--neon), #00cc66);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 34px; font-weight: 800; color: #030608;
+  overflow: hidden; background-size: cover; background-position: center;
+  border: 2px solid rgba(0,255,136,0.25);
+  cursor: pointer;
 }
-.profile-field input,
-.profile-field textarea {
-  width: 100%;
-  box-sizing: border-box;
-  padding: 11px 13px;
-  background: var(--glass2);
-  border: 1.5px solid var(--border);
-  border-radius: 10px;
-  color: var(--text);
-  font-size: 14px;
-  font-family: var(--font-body);
-  outline: none;
-  margin-bottom: 0;
-  resize: none;
+.pm-avatar-edit {
+  position: absolute;
+  bottom: -4px; right: -4px;
+  width: 22px; height: 22px;
+  background: var(--neon);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px;
+  cursor: pointer;
+  color: #030608;
 }
-.profile-field input:focus,
-.profile-field textarea:focus { border-color: var(--neon); }
-.profile-divider {
-  height: 1px;
+.pm-name { font-family: var(--font-head); font-size: 18px; font-weight: 800; color: var(--text); margin-bottom: 2px; }
+.pm-email { font-size: 11px; color: var(--muted); }
+.pm-role-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px; font-weight: 700;
+  margin-top: 6px;
+  background: rgba(245,158,11,0.12);
+  color: #f59e0b;
+  border: 1px solid rgba(245,158,11,0.25);
+}
+
+/* ── Profil Stats ── */
+.pm-stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
   background: var(--border);
-  margin: 12px 20px 8px;
+  border-bottom: 1px solid var(--border);
 }
-.profile-action-btn {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  width: calc(100% - 40px);
-  margin: 0 20px 8px;
+.pm-stat {
+  background: #0c1018;
+  padding: 12px 8px;
+  text-align: center;
+}
+.pm-stat-val { font-family: var(--font-head); font-size: 16px; font-weight: 800; color: var(--neon); line-height: 1; }
+.pm-stat-lbl { font-size: 9px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 3px; }
+
+/* ── Profil Form ── */
+.pm-section { padding: 16px 20px 0; }
+.pm-section-title {
+  font-size: 10px; font-weight: 800;
+  text-transform: uppercase; letter-spacing: 1.2px;
+  color: var(--muted2); margin-bottom: 10px;
+}
+.pm-field { margin-bottom: 12px; }
+.pm-field label {
+  display: block;
+  font-size: 11px; font-weight: 700;
+  color: var(--muted); margin-bottom: 5px;
+  text-transform: uppercase; letter-spacing: 0.5px;
+}
+.pm-field input,
+.pm-field textarea {
+  width: 100%; box-sizing: border-box;
   padding: 11px 14px;
-  background: var(--glass2);
-  border: 1px solid var(--border2);
+  background: rgba(255,255,255,0.05);
+  border: 1.5px solid var(--border);
   border-radius: 12px;
   color: var(--text);
-  font-size: 13px;
-  font-weight: 700;
+  font-size: 14px; font-family: var(--font-body);
+  outline: none; resize: none;
+  transition: border-color 0.15s;
+}
+.pm-field input:focus,
+.pm-field textarea:focus { border-color: var(--neon); background: rgba(0,255,136,0.03); }
+.pm-save-btn {
+  width: 100%;
+  padding: 13px;
+  background: linear-gradient(135deg, var(--neon), #00cc66);
+  color: #030608;
+  border: none; border-radius: 14px;
+  font-size: 14px; font-weight: 800;
   font-family: var(--font-body);
   cursor: pointer;
-  text-align: left;
-  position: relative;
-  overflow: hidden;
+  position: relative; overflow: hidden;
+  margin-top: 4px;
 }
-.profile-action-btn::after { content: ''; position: absolute; inset: 0; background: rgba(255,255,255,0); transition: background 0.15s; }
-.profile-action-btn:active::after { background: rgba(255,255,255,0.08); }
-.profile-action-btn.admin-btn { color: var(--neon); border-color: rgba(0,255,136,0.2); background: var(--neon-dim); }
-.profile-action-btn.danger { color: var(--warn); border-color: rgba(255,107,107,0.2); background: rgba(255,107,107,0.06); }
+.pm-save-btn::after { content: ''; position: absolute; inset: 0; background: rgba(0,0,0,0); transition: background 0.15s; }
+.pm-save-btn:active::after { background: rgba(0,0,0,0.15); }
+.pm-divider { height: 1px; background: var(--border); margin: 16px 0 12px; }
+.pm-action-btn {
+  display: flex; align-items: center; gap: 10px;
+  width: 100%;
+  padding: 13px 16px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  color: var(--text);
+  font-size: 13px; font-weight: 700;
+  font-family: var(--font-body);
+  cursor: pointer; text-align: left;
+  position: relative; overflow: hidden;
+  margin-bottom: 8px;
+  transition: background 0.15s, border-color 0.15s;
+}
+.pm-action-btn:active { background: rgba(255,255,255,0.08); }
+.pm-action-btn .pm-btn-icon { font-size: 16px; flex-shrink: 0; }
+.pm-action-btn.superadmin { color: #f59e0b; border-color: rgba(245,158,11,0.25); background: rgba(245,158,11,0.06); }
+.pm-action-btn.admin-green { color: var(--neon); border-color: rgba(0,255,136,0.2); background: var(--neon-dim); }
+.pm-action-btn.danger { color: var(--warn); border-color: rgba(255,107,107,0.2); background: rgba(255,107,107,0.05); }
+
+/* Eski class uyumluluk */
+.profile-header { display: none; } /* eski header gizle */
+.profile-avatar-big { width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,var(--neon),#00cc66);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:#030608;flex-shrink:0;overflow:hidden;background-size:cover;background-position:center; }
+.profile-name-big { font-family:var(--font-head);font-size:15px;font-weight:800;color:var(--text); }
+.profile-email-small { font-size:11px;color:var(--muted);margin-top:2px; }
+.profile-msg { font-size:13px;color:var(--warn);padding:0 20px 8px;display:none; }
+.profile-msg.show { display:block; }
+.profile-section-title { font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--muted2);margin-bottom:10px;padding:16px 20px 0; }
+.profile-field { padding:0 20px 12px; }
+.profile-field label { display:block;font-size:11px;font-weight:700;color:var(--muted);margin-bottom:5px; }
+.profile-field input,.profile-field textarea { width:100%;box-sizing:border-box;padding:11px 13px;background:rgba(255,255,255,0.05);border:1.5px solid var(--border);border-radius:12px;color:var(--text);font-size:14px;font-family:var(--font-body);outline:none;margin-bottom:0;resize:none; }
+.profile-field input:focus,.profile-field textarea:focus { border-color:var(--neon); }
+.profile-input { width:100%;padding:12px 14px;background:rgba(255,255,255,0.05);border:1.5px solid var(--border);border-radius:12px;color:var(--text);font-size:14px;font-family:var(--font-body);outline:none;margin-bottom:8px; }
+.profile-input:focus { border-color:var(--neon); }
+.profile-divider { height:1px;background:var(--border);margin:12px 20px 8px; }
+.profile-save-btn { width:calc(100% - 40px);margin:0 20px 8px;display:block;padding:13px;background:linear-gradient(135deg,var(--neon),#00cc66);color:#030608;border:none;border-radius:14px;font-size:14px;font-weight:800;font-family:var(--font-body);cursor:pointer;position:relative;overflow:hidden; }
+.profile-save-btn::after { content:'';position:absolute;inset:0;background:rgba(0,0,0,0);transition:background 0.15s; }
+.profile-save-btn:active::after { background:rgba(0,0,0,0.2); }
+.profile-action-btn { display:flex;align-items:center;gap:8px;width:calc(100% - 40px);margin:0 20px 8px;padding:13px 16px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:14px;color:var(--text);font-size:13px;font-weight:700;font-family:var(--font-body);cursor:pointer;text-align:left;position:relative;overflow:hidden; }
+.profile-action-btn:active { background:rgba(255,255,255,0.08); }
+.profile-action-btn.admin-btn { color:var(--neon);border-color:rgba(0,255,136,0.2);background:var(--neon-dim); }
+.profile-action-btn.danger { color:var(--warn);border-color:rgba(255,107,107,0.2);background:rgba(255,107,107,0.05); }
 
 /* ── Confirm Modal ───────────────────────────────────── */
 #confirmModal {
@@ -983,8 +981,10 @@ input, textarea, select {
   border-radius: 24px 24px 0 0;
   overflow-y: auto;
   animation: slideUp .35s ease;
+  display: flex;
+  flex-direction: column;
 }
-.admin-header {
+.admin-hero {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -993,48 +993,78 @@ input, textarea, select {
   position: sticky;
   top: 0;
   background: #080b12;
-  z-index: 1;
+  z-index: 10;
+  flex-shrink: 0;
 }
+.admin-title { font-family: var(--font-head); font-size: 17px; font-weight: 800; color: var(--text); }
+.admin-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.admin-body { flex: 1; overflow-y: auto; }
 .admin-tabs {
   display: flex;
   gap: 4px;
-  padding: 12px 16px;
+  padding: 10px 16px;
   overflow-x: auto;
   border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  scrollbar-width: none;
 }
+.admin-tabs::-webkit-scrollbar { display: none; }
 .admin-tab-btn {
-  padding: 6px 12px;
+  padding: 7px 14px;
   border-radius: 8px;
   border: 1px solid var(--border);
   background: var(--glass);
   color: var(--muted);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   font-family: var(--font-body);
   cursor: pointer;
   white-space: nowrap;
   position: relative;
+  flex-shrink: 0;
 }
 .admin-tab-btn::after { content: ''; position: absolute; inset: 0; background: rgba(255,255,255,0); transition: background 0.15s; border-radius: 7px; }
 .admin-tab-btn:active::after { background: rgba(255,255,255,0.1); }
 .admin-tab-btn.active { background: var(--neon-dim); color: var(--neon); border-color: rgba(0,255,136,0.3); }
-.admin-section { padding: 16px; border-bottom: 1px solid var(--border); }
-.admin-section-title { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 10px; }
+.admin-tab-panel { display: none; padding: 16px; }
+.admin-tab-panel.active { display: block; }
+.admin-section-title {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: var(--muted2);
+  margin-bottom: 8px;
+  margin-top: 4px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+.admin-row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+.admin-row .admin-input { flex: 1; min-width: 0; margin-bottom: 0; }
 .admin-input {
   width: 100%;
   padding: 10px 12px;
   background: var(--glass2);
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
   color: var(--text);
   font-size: 13px;
   font-family: var(--font-body);
   outline: none;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
+  transition: border-color 0.15s;
+  box-sizing: border-box;
 }
+.admin-input:focus { border-color: var(--neon); }
 .admin-btn {
-  padding: 8px 14px;
-  border-radius: 8px;
+  padding: 9px 14px;
+  border-radius: 10px;
   border: none;
   font-size: 12px;
   font-weight: 700;
@@ -1042,22 +1072,41 @@ input, textarea, select {
   cursor: pointer;
   position: relative;
   overflow: hidden;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 .admin-btn::after { content: ''; position: absolute; inset: 0; background: rgba(0,0,0,0); transition: background 0.15s; }
 .admin-btn:active::after { background: rgba(0,0,0,0.2); }
-.admin-btn-green { background: rgba(0,255,136,0.12); color: var(--neon); border: 1px solid rgba(0,255,136,0.25); }
-.admin-btn-red { background: rgba(255,107,107,0.12); color: var(--warn); border: 1px solid rgba(255,107,107,0.25); }
-.admin-btn-blue { background: rgba(56,189,248,0.12); color: #38bdf8; border: 1px solid rgba(56,189,248,0.25); }
-.admin-btn-gray { background: var(--glass2); color: var(--muted); border: 1px solid var(--border); }
+.admin-btn-green  { background: rgba(0,255,136,0.12); color: var(--neon); border: 1px solid rgba(0,255,136,0.3); }
+.admin-btn-red    { background: rgba(255,107,107,0.12); color: var(--warn); border: 1px solid rgba(255,107,107,0.3); }
+.admin-btn-blue   { background: rgba(56,189,248,0.12); color: #38bdf8; border: 1px solid rgba(56,189,248,0.3); }
+.admin-btn-gray   { background: var(--glass2); color: var(--muted); border: 1px solid var(--border2); }
+.admin-btn-orange { background: rgba(245,158,11,0.12); color: #f59e0b; border: 1px solid rgba(245,158,11,0.3); }
+.admin-stat-grid  { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+.admin-stat-card  { background: var(--glass); border: 1px solid var(--border); border-radius: 12px; padding: 12px; text-align: center; }
+.admin-stat-num   { font-family: var(--font-head); font-size: 22px; font-weight: 900; line-height: 1; }
+.admin-stat-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
 .admin-log {
   font-family: var(--font-mono);
   font-size: 11px;
-  background: rgba(0,0,0,0.3);
-  border-radius: 8px;
-  padding: 10px;
-  max-height: 200px;
+  background: rgba(0,0,0,0.4);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  max-height: 160px;
   overflow-y: auto;
-  line-height: 1.6;
+  line-height: 1.7;
+  margin: 12px 16px 16px;
+}
+.admin-player-card {
+  background: var(--glass);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px;
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.8;
+  margin-bottom: 10px;
 }
 
 /* ── Başarım Modal ───────────────────────────────────── */
@@ -1524,80 +1573,91 @@ input, textarea, select {
 <!-- Profil Modalı -->
 <div id="profileModal" style="display:none">
   <div id="profileCard">
-    <!-- Başlık -->
-    <div class="profile-header">
-      <div class="profile-avatar-big" id="pmAvatar">?</div>
-      <div>
-        <div class="profile-name-big" id="pmName">—</div>
-        <div class="profile-email-small" id="pmEmail">—</div>
+
+    <!-- Hero — Avatar + İsim + Stats -->
+    <div class="pm-hero">
+      <button class="pm-close-btn" id="pmCloseBtn">✕</button>
+      <div class="pm-avatar-wrap">
+        <div class="pm-avatar-big" id="pmAvatar" onclick="toggleAvatarPicker()" title="Avatar değiştir">?</div>
+        <div class="pm-avatar-edit" onclick="toggleAvatarPicker()">✏️</div>
       </div>
-      <button class="profile-close-btn" id="pmCloseBtn" style="width:32px;height:32px;border-radius:50%;background:var(--glass2);border:1px solid var(--border);color:var(--muted);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">✕</button>
+      <div class="pm-name" id="pmName">—</div>
+      <div class="pm-email" id="pmEmail">—</div>
+      <div id="pmRoleBadge" style="display:none" class="pm-role-badge">👑 Süper Admin</div>
+      <div id="avatarPickerRow" style="display:none;flex-wrap:wrap;gap:6px;margin-top:12px;padding:10px;background:rgba(0,0,0,0.3);border-radius:12px;border:1px solid var(--border);justify-content:center"></div>
     </div>
 
-    <div class="profile-msg" id="pmMsg"></div>
-
-    <!-- Takma ad değiştir -->
-    <div class="profile-section-title" style="padding:16px 20px 0">Profil Bilgileri</div>
-
-    <!-- Avatar seçici -->
-    <div class="profile-field">
-      <label>Avatar</label>
-      <div style="display:flex;align-items:center;gap:10px">
-        <div id="pmAvatarPreview" style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#00ff66,#00cc55);display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;border:2px solid rgba(0,255,102,0.3)" onclick="toggleAvatarPicker()" title="Avatar değiştir">😀</div>
-        <span style="font-size:11px;color:var(--muted)">Avatarına tıkla</span>
+    <!-- İstatistik çubuğu -->
+    <div class="pm-stats-row">
+      <div class="pm-stat">
+        <div class="pm-stat-val" id="pmStatScore">—</div>
+        <div class="pm-stat-lbl">Puan</div>
       </div>
-      <div id="avatarPickerRow" style="display:none;flex-wrap:wrap;gap:6px;margin-top:8px;padding:8px;background:#060c18;border-radius:10px;border:1px solid #1a2f28">
+      <div class="pm-stat">
+        <div class="pm-stat-val" id="pmStatLevel">—</div>
+        <div class="pm-stat-lbl">Seviye</div>
+      </div>
+      <div class="pm-stat">
+        <div class="pm-stat-val" id="pmStatStreak">—</div>
+        <div class="pm-stat-lbl">En Seri</div>
       </div>
     </div>
 
-    <!-- Bio -->
-    <div class="profile-field">
-      <label>Hakkımda <span id="pmBioCount" style="color:var(--muted);font-weight:400">(120)</span></label>
-      <textarea id="pmBio" placeholder="Kendini kısaca tanıt..." maxlength="120"
-        style="width:100%;box-sizing:border-box;background:transparent;border:none;color:#e6f7ea;font-size:13px;padding:0;font-family:inherit;resize:none;outline:none;min-height:50px"
-        oninput="document.getElementById('pmBioCount').textContent='('+(120-this.value.length)+')'"></textarea>
+    <div style="padding:16px 20px 0">
+      <div id="pmMsg" class="profile-msg"></div>
+
+      <!-- Profil Bilgileri -->
+      <div class="pm-section-title" style="margin-top:4px">Profil Bilgileri</div>
+
+      <div class="pm-field">
+        <label>Hakkımda <span id="pmBioCount" style="color:var(--muted);font-weight:400;text-transform:none">(120)</span></label>
+        <textarea id="pmBio" placeholder="Kendini kısaca tanıt..." maxlength="120" rows="2"
+          oninput="document.getElementById('pmBioCount').textContent='('+(120-this.value.length)+')'"></textarea>
+      </div>
+
+      <div class="pm-field">
+        <label>Takma Ad</label>
+        <input id="pmDisplayName" type="text" placeholder="Takma adın" maxlength="20" autocomplete="off">
+      </div>
+
+      <div class="pm-field" id="pmEmailField">
+        <label>E-posta</label>
+        <input id="pmEmailInput" type="email" placeholder="E-posta adresin" autocomplete="off">
+      </div>
+
+      <div class="pm-field" id="pmPasswordField">
+        <label>Yeni Şifre <span style="color:var(--muted);text-transform:none;font-weight:400">(boş bırakırsan değişmez)</span></label>
+        <input id="pmPassword" type="password" placeholder="••••••••" autocomplete="new-password">
+      </div>
+
+      <button class="pm-save-btn" id="pmSaveBtn">💾 Kaydet</button>
+
+      <div class="pm-divider"></div>
+
+      <!-- Eylemler -->
+      <button class="pm-action-btn superadmin" id="pmAdminBtn" style="display:none">
+        <span class="pm-btn-icon">⚡</span>
+        <span>Admin Paneli</span>
+        <span style="margin-left:auto;font-size:10px;opacity:0.6">→</span>
+      </button>
+
+      <button class="pm-action-btn" id="pmPinBtn" style="display:none">
+        <span class="pm-btn-icon">🔐</span>
+        <span>PIN Belirle / Değiştir</span>
+        <span style="margin-left:auto;font-size:10px;opacity:0.6">→</span>
+      </button>
+
+      <button class="pm-action-btn" id="pmRequestBtn">
+        <span class="pm-btn-icon">📬</span>
+        <span>İstek / Şikayet Gönder</span>
+        <span style="margin-left:auto;font-size:10px;opacity:0.6">→</span>
+      </button>
+
+      <button class="pm-action-btn danger" id="pmLogoutBtn" style="margin-bottom:20px">
+        <span class="pm-btn-icon">🚪</span>
+        <span>Oturumu Kapat</span>
+      </button>
     </div>
-
-    <div class="profile-field">
-      <label>Takma Ad</label>
-      <input id="pmDisplayName" type="text" placeholder="Takma adın" maxlength="20" autocomplete="off">
-    </div>
-
-    <!-- E-posta değiştir (sadece email girişinde) -->
-    <div class="profile-field" id="pmEmailField">
-      <label>E-posta</label>
-      <input id="pmEmailInput" type="email" placeholder="E-posta adresin" autocomplete="off">
-    </div>
-
-    <!-- Şifre değiştir (sadece email girişinde) -->
-    <div class="profile-field" id="pmPasswordField">
-      <label>Yeni Şifre (boş bırakırsan değişmez)</label>
-      <input id="pmPassword" type="password" placeholder="Yeni şifre" autocomplete="new-password">
-    </div>
-
-    <button class="profile-save-btn" id="pmSaveBtn" style="width:calc(100% - 40px);margin:0 20px 8px;display:block">💾 Kaydet</button>
-
-    <div class="profile-divider"></div>
-
-    <!-- Admin paneli (sadece adminlere) -->
-    <button class="profile-action-btn admin-btn" id="pmAdminBtn" style="display:none">
-      ⚡ Admin Paneli
-    </button>
-
-    <!-- PIN Değiştir (Google kullanıcıları için) -->
-    <button class="profile-action-btn" id="pmPinBtn" style="display:none">
-      🔐 PIN Belirle / Değiştir
-    </button>
-
-    <!-- İstek / Şikayet -->
-    <button class="profile-action-btn" id="pmRequestBtn">
-      📬 İstek / Şikayet Gönder
-    </button>
-
-    <!-- Çıkış -->
-    <button class="profile-action-btn danger" id="pmLogoutBtn">
-      🚪 Oturumu Kapat
-    </button>
   </div>
 </div>
 
@@ -1924,7 +1984,7 @@ input, textarea, select {
         <span style="font-size:14px">🤖</span>
         <div>
           <div style="font-size:11px;font-weight:700;color:var(--text)">Esleew</div>
-          <div style="font-size:10px;color:var(--muted)">Geliştirmede ve proje sahibinin kafayı yemesini engellemede çok büyük yardımı olan kişi</div>
+          <div style="font-size:10px;color:var(--muted)">Geliştirmedemde kafayı yememi engellemede çok büyük yardımı olan ablam</div>
         </div>
       </div>
       <div style="display:flex;align-items:center;gap:6px;margin-top:4px">
@@ -2163,7 +2223,7 @@ input, textarea, select {
     <div class="about-footer">
       <div style="font-size:12px;color:var(--muted)">Yapımcı: <strong style="color:var(--neon)">SKYDIVEX</strong> • 2026</div>
       <div style="font-size:11px;color:var(--muted2);margin-top:4px">Proje Sahibi: <strong style="color:var(--text)">Enes ŞEKER</strong></div>
-      <div style="font-size:11px;color:var(--muted2);margin-top:2px">AI Asistan: <strong style="color:var(--text)">Esleew</strong></div>
+      <div style="font-size:11px;color:var(--muted2);margin-top:2px">Ablam: <strong style="color:var(--text)">Esleew</strong></div>
       <div style="font-size:11px;color:rgba(255,255,255,0.3)">Tüm hakları saklıdır</div>
     </div>
 
@@ -2315,7 +2375,7 @@ function safeCalc(a,op,b){
   switch(op){ case '+':return a+b; case '-':return a-b; case '*':return a*b; case '/':return b!==0?a/b:0; default:return 0; }
 }
 
-const OP_LABELS = { '+':'Toplama','- ':'Çıkarma','*':'Çarpma','/':'Bölme' };
+const OP_LABELS = { '+':'Toplama','-':'Çıkarma','*':'Çarpma','/':'Bölme' };
 const OP_SORT   = ['+','-','*','/'];
 function opsKey(ops){ return [...ops].sort((a,b)=>OP_SORT.indexOf(a)-OP_SORT.indexOf(b)).join(''); }
 function opsLabel(ops){
@@ -2324,8 +2384,9 @@ function opsLabel(ops){
   return sorted.map(o=>names[o]||o).join(' + ');
 }
 function currentOpsKey(){ return opsKey(state.ops); }
-function getCurrentBoard(){ return state.leaderboard[currentOpsKey()] || {}; }
-function setCurrentBoard(board){ state.leaderboard[currentOpsKey()] = board; }
+/* Tek tablo — hepsi 'all' key'inde, ops bilgisi entry içinde */
+function getCurrentBoard(){ return state.leaderboard['all'] || {}; }
+function setCurrentBoard(board){ state.leaderboard['all'] = board; }
 
 /* ── MINI INFO ─────────────────────────────────────── */
 function updateMiniInfo(){
@@ -2702,19 +2763,53 @@ document.getElementById('saveSettingsBtn').addEventListener('click', ()=>{
 });
 
 /* ── LEADERBOARD ───────────────────────────────────── */
+var _localLbOpsFilter = 'all'; /* 'all' | '+' | '-' | '*' | '/' | '+-*/' */
+
 function renderLeaderboard(){
-  const board = getCurrentBoard();
-  const label = opsLabel(state.ops);
-  const arr = Object.entries(board).sort((a,b)=>b[1]-a[1]);
+  const board = getCurrentBoard(); /* hep 'all' key'i */
+  var entries = Object.entries(board); /* [name, {score, ops}] veya [name, score] */
 
-  const header = `<div style="font-size:11px;font-weight:700;letter-spacing:.5px;color:#a855f7;margin-bottom:6px">📊 ${label}</div>`;
-
-  if(arr.length===0){
-    leaderboardEl.innerHTML = header + '<i style="color:var(--muted)">Henüz kimse yok</i>';
-    boardDiv.innerHTML=''; return;
+  /* ops filtresi uygula */
+  if (_localLbOpsFilter !== 'all') {
+    entries = entries.filter(function(e) {
+      var ops = (typeof e[1] === 'object' && e[1].ops) ? e[1].ops : 'all';
+      return ops === _localLbOpsFilter || ops === 'all';
+    });
   }
-  leaderboardEl.innerHTML = header + arr.map((e,i)=>`<div class="lbItem"><div>${i+1}. ${escapeHtml(e[0])}</div><div>${e[1]}p</div></div>`).join('');
-  boardDiv.innerHTML = arr.map((e,i)=>`<div style="display:flex;justify-content:space-between;padding:6px;border-radius:6px;background:rgba(255,255,255,0.02);margin-bottom:6px">${i+1}. ${escapeHtml(e[0])}<strong>${e[1]}p</strong></div>`).join('');
+
+  /* skora göre sırala */
+  entries.sort(function(a, b) {
+    var sa = typeof a[1] === 'object' ? (a[1].score || 0) : a[1];
+    var sb = typeof b[1] === 'object' ? (b[1].score || 0) : b[1];
+    return sb - sa;
+  });
+
+  var filterLabel = _localLbOpsFilter === 'all' ? 'Tüm Modlar' : opsLabel([..._localLbOpsFilter]);
+  var header = '<div style="font-size:11px;font-weight:700;letter-spacing:.5px;color:#a855f7;margin-bottom:6px">📊 ' + filterLabel + '</div>';
+
+  if (entries.length === 0) {
+    leaderboardEl.innerHTML = header + '<i style="color:var(--muted)">Henüz kimse yok</i>';
+    if (boardDiv) boardDiv.innerHTML = '';
+    return;
+  }
+
+  var medals = ['🥇','🥈','🥉'];
+  var html = header + entries.slice(0, 20).map(function(e, i) {
+    var score = typeof e[1] === 'object' ? (e[1].score || 0) : e[1];
+    var rank = i < 3 ? medals[i] : (i + 1) + '.';
+    var isMe = e[0] === (authUser ? authUser.name : state.player);
+    return '<div class="lbItem' + (isMe ? '" style="background:var(--neon-dim);border-color:rgba(0,255,136,0.25)' : '') + '">' +
+      '<div>' + rank + ' ' + escapeHtml(e[0]) + (isMe ? ' ✦' : '') + '</div>' +
+      '<div style="color:var(--neon);font-family:var(--font-mono)">' + score + 'p</div>' +
+      '</div>';
+  }).join('');
+
+  leaderboardEl.innerHTML = html;
+  if (boardDiv) boardDiv.innerHTML = entries.slice(0, 10).map(function(e, i) {
+    var score = typeof e[1] === 'object' ? (e[1].score || 0) : e[1];
+    return '<div style="display:flex;justify-content:space-between;padding:6px;border-radius:6px;background:rgba(255,255,255,0.02);margin-bottom:6px">' +
+      (i + 1) + '. ' + escapeHtml(e[0]) + '<strong>' + score + 'p</strong></div>';
+  }).join('');
 }
 
 /* ── INIT ──────────────────────────────────────────── */
@@ -3298,7 +3393,7 @@ async function fetchAbsurdBatch(){
   }
 
   try {
-    const resp = await fetch(WORKER_URL, {
+    const resp = await fetch(WORKER_URL + '/absurd', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ usedList })
@@ -4167,9 +4262,9 @@ function getTodaysTasks() {
     if (saved.key === dayKey && Array.isArray(saved.tasks)) {
       return saved.tasks;
     }
-    /* Yeni gün — rastgele 3 görev seç */
+    /* Yeni gün — tüm 10 görevi göster */
     var shuffled = [...DAILY_TASK_POOL].sort(function() { return Math.random() - 0.5; });
-    var chosen = shuffled.slice(0, 3);
+    var chosen = shuffled.slice(0, 10);
     var tasks = chosen.map(function(t) { return Object.assign({}, t, { progress: 0, completed: false, rewardGiven: false }); });
     localStorage.setItem(storageKey, JSON.stringify({ key: dayKey, tasks: tasks }));
     return tasks;
@@ -5038,20 +5133,21 @@ document.addEventListener('DOMContentLoaded', () => {
   /* LB sekme */
   const lbLocal  = document.getElementById('lbTabLocal');
   const lbOnline = document.getElementById('lbTabOnline');
-  if (lbLocal) lbLocal.addEventListener('click', () => {
+  if (lbLocal) lbLocal.addEventListener('click', function() {
     lbLocal.classList.add('active'); lbOnline.classList.remove('active');
     document.getElementById('leaderboard').style.display = '';
     document.getElementById('onlineLbEl').style.display = 'none';
     var opsRow = document.getElementById('lbOpsRow');
-    if (opsRow) { opsRow.style.display = 'none'; }
+    if (opsRow) opsRow.style.display = 'flex'; /* ops filtreleme lokal'de de aktif */
     stopLbAutoRefresh();
+    renderLeaderboard();
   });
-  if (lbOnline) lbOnline.addEventListener('click', () => {
+  if (lbOnline) lbOnline.addEventListener('click', function() {
     lbOnline.classList.add('active'); lbLocal.classList.remove('active');
     document.getElementById('leaderboard').style.display = 'none';
     document.getElementById('onlineLbEl').style.display = '';
     var opsRow = document.getElementById('lbOpsRow');
-    if (opsRow) { opsRow.style.display = 'flex'; }
+    if (opsRow) opsRow.style.display = 'flex';
     startLbAutoRefresh();
   });
 });
@@ -5169,49 +5265,87 @@ function openProfileModal() {
   const modal = document.getElementById('profileModal');
   if (!modal) return;
 
-  /* Alanları doldur */
+  /* Avatar */
   const av = document.getElementById('pmAvatar');
-  const nm = document.getElementById('pmName');
-  const em = document.getElementById('pmEmail');
-  const dn = document.getElementById('pmDisplayName');
-  const ei = document.getElementById('pmEmailInput');
-  const ef = document.getElementById('pmEmailField');
-  const pf = document.getElementById('pmPasswordField');
-  const ab = document.getElementById('pmAdminBtn');
-  const msg = document.getElementById('pmMsg');
+  if (av) {
+    if (authUser.avatar) { av.textContent = authUser.avatar; av.style.backgroundImage = ''; }
+    else if (authUser.photoURL) { av.style.backgroundImage = 'url(' + authUser.photoURL + ')'; av.textContent = ''; }
+    else { av.textContent = (authUser.name || '?')[0].toUpperCase(); av.style.backgroundImage = ''; }
+  }
 
-  if (av) av.textContent = (authUser.name || '?')[0].toUpperCase();
+  /* İsim / email */
+  var nm = document.getElementById('pmName');
+  var em = document.getElementById('pmEmail');
   if (nm) nm.textContent = authUser.name || '—';
   if (em) em.textContent = authUser.email || (authUser.provider === 'google' ? 'Google hesabı' : '—');
-  if (dn) dn.value = authUser.name || '';
-  if (ei) ei.value = authUser.email || '';
-  if (msg) msg.textContent = '';
 
-  /* Google girişinde e-posta/şifre alanlarını gizle */
-  const isGoogle = authUser.provider === 'google';
-  if (ef) ef.style.display = isGoogle ? 'none' : '';
-  if (pf) pf.style.display = isGoogle ? 'none' : '';
-
-  /* PIN butonu — Google kullanıcısına göster */
-  var pinBtn = document.getElementById('pmPinBtn');
-  if (pinBtn) {
-    if (authUser && authUser.provider === 'google') {
-      pinBtn.style.display = '';
+  /* Rol rozeti */
+  var roleBadge = document.getElementById('pmRoleBadge');
+  if (roleBadge) {
+    var role = authUser.role || (isSuperAdminUser() ? 'superadmin' : '');
+    if (role === 'superadmin') {
+      roleBadge.innerHTML = '👑 Süper Admin';
+      roleBadge.style.display = 'inline-flex';
+      roleBadge.style.background = 'rgba(245,158,11,0.12)';
+      roleBadge.style.color = '#f59e0b';
+      roleBadge.style.borderColor = 'rgba(245,158,11,0.3)';
+    } else if (role === 'admin') {
+      roleBadge.innerHTML = '⚡ Admin';
+      roleBadge.style.display = 'inline-flex';
+      roleBadge.style.background = 'var(--neon-dim)';
+      roleBadge.style.color = 'var(--neon)';
+      roleBadge.style.borderColor = 'rgba(0,255,136,0.3)';
+    } else if (role === 'moderator') {
+      roleBadge.innerHTML = '🛡 Yetkili';
+      roleBadge.style.display = 'inline-flex';
+      roleBadge.style.background = 'rgba(56,189,248,0.1)';
+      roleBadge.style.color = '#38bdf8';
+      roleBadge.style.borderColor = 'rgba(56,189,248,0.3)';
     } else {
-      pinBtn.style.display = 'none';
+      roleBadge.style.display = 'none';
     }
   }
 
+  /* İstatistikler */
+  var sc = document.getElementById('pmStatScore');
+  var lv = document.getElementById('pmStatLevel');
+  var st = document.getElementById('pmStatStreak');
+  if (sc) sc.textContent = (state.score || 0) + 'p';
+  if (lv) lv.textContent = state.level || 1;
+  if (st) st.textContent = (state.stats && state.stats.bestStreak) ? state.stats.bestStreak : 0;
+
+  /* Form alanları */
+  var dn = document.getElementById('pmDisplayName');
+  var ei = document.getElementById('pmEmailInput');
+  var ef = document.getElementById('pmEmailField');
+  var pf = document.getElementById('pmPasswordField');
+  var bioEl = document.getElementById('pmBio');
+  var msg = document.getElementById('pmMsg');
+  if (dn) dn.value = authUser.name || '';
+  if (ei) ei.value = authUser.email || '';
+  if (msg) { msg.textContent = ''; msg.classList.remove('show'); }
+  if (bioEl) bioEl.value = authUser.bio || '';
+
+  /* Google girişinde e-posta/şifre gizle */
+  var isGoogle = authUser.provider === 'google' || authUser.isGoogle;
+  if (ef) ef.style.display = isGoogle ? 'none' : '';
+  if (pf) pf.style.display = isGoogle ? 'none' : '';
+
+  /* PIN butonu */
+  var pinBtn = document.getElementById('pmPinBtn');
+  if (pinBtn) pinBtn.style.display = (authUser.provider === 'google' || authUser.isGoogle) ? '' : 'none';
+
   /* Admin butonu */
+  var ab = document.getElementById('pmAdminBtn');
   if (ab) {
     ab.style.display = 'none';
-    checkAdminStatus().then(isAdmin => {
-      if (isAdmin && ab) ab.style.display = '';
-    }).catch(() => {});
+    checkAdminStatus().then(function(isAdm) {
+      if (isAdm && ab) ab.style.display = '';
+    }).catch(function() {});
   }
 
   modal.classList.add('show');
-  populateProfileSocial();
+  try { populateProfileSocial(); } catch(e) {}
 }
 
 function closeProfileModal() {
@@ -5376,18 +5510,21 @@ var _currentLbOps = 'all'; /* Seçili ops filtresi */
 
 function switchOnlineLbOps(ops) {
   _currentLbOps = ops;
-  /* Aktif sekmeyi güncelle */
+  _localLbOpsFilter = ops; /* lokal tablo için de filtre */
   var ids = { 'all':'lbOpsAll', '+':'lbOpsPlus', '-':'lbOpsMinus', '*':'lbOpsMul', '/':'lbOpsDiv', '+-*/':'lbOpsMixed' };
   Object.values(ids).forEach(function(id) {
-    var btn = document.getElementById(id);
-    if (btn) { btn.classList.remove('active'); }
+    var btn = document.getElementById(id); if (btn) btn.classList.remove('active');
   });
-  var activeId = ids[ops];
-  if (activeId) {
-    var activeBtn = document.getElementById(activeId);
-    if (activeBtn) { activeBtn.classList.add('active'); }
+  var activeBtn = document.getElementById(ids[ops]);
+  if (activeBtn) activeBtn.classList.add('active');
+
+  /* Hangi sekme aktifse onu güncelle */
+  var lbOnline = document.getElementById('lbTabOnline');
+  if (lbOnline && lbOnline.classList.contains('active')) {
+    fetchOnlineLeaderboard();
+  } else {
+    renderLeaderboard();
   }
-  fetchOnlineLeaderboard();
 }
 
 async function fetchOnlineLeaderboard() {
@@ -7101,13 +7238,11 @@ async function openPublicProfile(data) {
       else if (r.rank === 2) { badges.push('<span class="pub-badge-tag pub-badge-top">🥈 #2</span>'); }
       else if (r.rank === 3) { badges.push('<span class="pub-badge-tag pub-badge-top">🥉 #3</span>'); }
 
-      /* Admin rozeti — public-profile'dan gelen isAdmin bayrağını kullan */
-      if (r.isAdmin) {
-        if (ADMIN_UIDS_CLIENT.includes(r.uid)) {
-          badges.push('<span class="pub-badge-tag pub-badge-admin">⚡ Süper Admin</span>');
-        } else {
-          badges.push('<span class="pub-badge-tag pub-badge-admin">⚡ Admin</span>');
-        }
+      /* Rol rozeti — worker'dan gelen role alanını kullan */
+      if (r.role === 'superadmin') {
+        badges.push('<span class="pub-badge-tag pub-badge-admin" style="background:rgba(245,158,11,0.15);border-color:rgba(245,158,11,0.4);color:#f59e0b">👑 Süper Admin</span>');
+      } else if (r.role === 'admin' || r.isAdmin) {
+        badges.push('<span class="pub-badge-tag pub-badge-admin">⚡ Admin</span>');
       } else if (r.role === 'moderator') {
         badges.push('<span class="pub-badge-tag" style="background:rgba(56,189,248,0.12);border:1px solid rgba(56,189,248,0.25);color:#38bdf8">🛡 Yetkili</span>');
       }
@@ -7300,15 +7435,17 @@ async function adminCreateEvent() {
   var desc  = (document.getElementById('eventDesc').value || '').trim();
   var start = document.getElementById('eventStart').value;
   var end   = document.getElementById('eventEnd').value;
+  var startTime = document.getElementById('eventStartTime').value || '00:00';
+  var endTime   = document.getElementById('eventEndTime').value   || '23:59';
   var mult  = Number(document.getElementById('eventMult').value) || 2;
   if (!title) { adminLog('❌ Event adı gerekli'); return; }
   if (!start || !end) { adminLog('❌ Başlangıç ve bitiş tarihi gerekli'); return; }
-  var startTs = new Date(start).getTime();
-  var endTs   = new Date(end + 'T23:59:59').getTime();
+  var startTs = new Date(start + 'T' + startTime + ':00').getTime();
+  var endTs   = new Date(end   + 'T' + endTime   + ':59').getTime();
   if (endTs <= startTs) { adminLog('❌ Bitiş tarihi başlangıçtan sonra olmalı'); return; }
   var r = await adminCall('admin/create-event', { title, desc, startAt: startTs, endAt: endTs, multiplier: mult });
   if (r && r.ok) {
-    adminLog('✅ Event oluşturuldu: ' + title);
+    adminLog('✅ Event oluşturuldu: ' + title + ' (' + start + ' ' + startTime + ' → ' + end + ' ' + endTime + ')');
     document.getElementById('eventTitle').value = '';
     document.getElementById('eventDesc').value  = '';
     adminLoadEvents();
@@ -7416,7 +7553,7 @@ function uploadAvatarPhoto(input) {
   reader.onload = function(e) {
     var dataUrl = e.target.result;
     /* Avatar preview'ı fotoğraf olarak göster */
-    var preview = document.getElementById('pmAvatarPreview');
+    var preview = document.getElementById('pmAvatar');
     if (preview) {
       preview.style.backgroundImage = 'url(' + dataUrl + ')';
       preview.style.backgroundSize = 'cover';
@@ -7442,7 +7579,7 @@ function uploadAvatarPhoto(input) {
 }
 
 function selectAvatar(emoji) {
-  var preview = document.getElementById('pmAvatarPreview');
+  var preview = document.getElementById('pmAvatar');
   if (preview) { preview.textContent = emoji; }
   /* Yuvarlak avatar'ı da güncelle */
   var bigAvatar = document.getElementById('pmAvatar');
@@ -7468,7 +7605,7 @@ function applyAvatar(val) {
     }
   }
   setEl(document.getElementById('pmAvatar'), val);
-  setEl(document.getElementById('pmAvatarPreview'), val);
+  setEl(document.getElementById('pmAvatar'), val);
   setEl(document.getElementById('pbAvatar'), val);
   if (!state.profile) { state.profile = {}; }
   state.profile.avatar = val;
@@ -8011,9 +8148,15 @@ document.addEventListener('pointerdown', e => {
         <div style="display:flex;flex-direction:column;gap:6px">
           <input class="admin-input" id="eventTitle" placeholder="Event adı (ör: 2x Puan Haftası)">
           <input class="admin-input" id="eventDesc" placeholder="Açıklama (isteğe bağlı)">
+          <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:2px">Başlangıç</div>
           <div style="display:flex;gap:6px">
-            <input class="admin-input" id="eventStart" type="date" style="flex:1">
-            <input class="admin-input" id="eventEnd"   type="date" style="flex:1">
+            <input class="admin-input" id="eventStart" type="date" style="flex:2">
+            <input class="admin-input" id="eventStartTime" type="time" value="00:00" style="flex:1">
+          </div>
+          <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Bitiş</div>
+          <div style="display:flex;gap:6px">
+            <input class="admin-input" id="eventEnd" type="date" style="flex:2">
+            <input class="admin-input" id="eventEndTime" type="time" value="23:59" style="flex:1">
           </div>
           <div style="display:flex;gap:6px;align-items:center">
             <label style="font-size:12px;color:var(--muted)">Çarpan:</label>
