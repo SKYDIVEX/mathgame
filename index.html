@@ -1141,11 +1141,9 @@ input, textarea, select {
   justify-content: space-between;
   padding: 16px 20px;
   border-bottom: 1px solid var(--border);
-  position: sticky;
-  top: 0;
+  flex-shrink: 0; /* sticky yerine flex-shrink:0 — card scroll olunca üstte sabit kalır */
   background: #080b12;
   z-index: 10;
-  flex-shrink: 0;
 }
 .admin-title { font-family: var(--font-head); font-size: 17px; font-weight: 800; color: var(--text); }
 .admin-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
@@ -1302,10 +1300,7 @@ input, textarea, select {
 .sa-hero {
   padding: 18px 20px 14px;
   border-bottom: 1px solid rgba(245,158,11,0.15);
-  position: sticky;
-  top: 0;
-  background: #080b12;
-  z-index: 2;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -2122,7 +2117,7 @@ input, textarea, select {
 <!-- Level-up tam ekran -->
 <div id="levelUpScreen" style="display:none">
   <div style="font-size:36px;margin-bottom:8px">🎉</div>
-  <div class="lu-label">Seviye Atladın!</div>
+  <div class="lu-label" data-i18n="level_up">Seviye Atladın!</div>
   <div class="lu-level" id="luLevelNum">2</div>
   <div class="lu-sub" id="luSubText"></div>
   <div style="margin-top:28px;color:var(--muted);font-size:12px">Devam etmek için dokun</div>
@@ -2150,15 +2145,15 @@ input, textarea, select {
     <div class="pm-stats-row">
       <div class="pm-stat">
         <div class="pm-stat-val" id="pmStatScore">—</div>
-        <div class="pm-stat-lbl">Puan</div>
+        <div class="pm-stat-lbl" data-i18n="stat_score">Puan</div>
       </div>
       <div class="pm-stat">
         <div class="pm-stat-val" id="pmStatLevel">—</div>
-        <div class="pm-stat-lbl">Seviye</div>
+        <div class="pm-stat-lbl" data-i18n="stat_level">Seviye</div>
       </div>
       <div class="pm-stat">
         <div class="pm-stat-val" id="pmStatStreak">—</div>
-        <div class="pm-stat-lbl">En Seri</div>
+        <div class="pm-stat-lbl" data-i18n="stat_streak">En Seri</div>
       </div>
     </div>
 
@@ -2189,7 +2184,7 @@ input, textarea, select {
         <input id="pmPassword" type="password" placeholder="••••••••" autocomplete="new-password">
       </div>
 
-      <button class="pm-save-btn" id="pmSaveBtn">💾 Kaydet</button>
+      <button class="pm-save-btn" id="pmSaveBtn" data-i18n="save_profile">💾 Kaydet</button>
 
       <div class="pm-divider"></div>
 
@@ -2263,8 +2258,7 @@ input, textarea, select {
 
     <!-- Google -->
     <div style="padding:24px 24px 0">
-      <button class="auth-google-btn" id="authGoogleBtn">
-        <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+      <button class="auth-google-btn" id="authGoogleBtn" data-i18n-after="google_login"><svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
         Google ile Devam Et
       </button>
     </div>
@@ -2280,8 +2274,8 @@ input, textarea, select {
       <div style="padding:0 24px">
         <!-- Sekme -->
         <div class="auth-tabs" style="margin-bottom:14px">
-          <button class="auth-tab active" id="authTabLogin">Giriş Yap</button>
-          <button class="auth-tab" id="authTabRegister">Kayıt Ol</button>
+          <button class="auth-tab active" id="authTabLogin" data-i18n="login">Giriş Yap</button>
+          <button class="auth-tab" id="authTabRegister" data-i18n="register">Kayıt Ol</button>
           <button class="auth-tab" id="authTabPin">PIN</button>
         </div>
 
@@ -2336,6 +2330,14 @@ input, textarea, select {
   <div class="header" id="stickyHeader">
     <div class="header-logo">🧮 <span>Math</span>Game</div>
     <div class="header-right">
+      <!-- Dil seçici -->
+      <div style="position:relative">
+        <button id="langBtn" onclick="toggleLangMenu()"
+          style="background:var(--glass2);border:1px solid var(--border);border-radius:10px;color:var(--muted);padding:6px 10px;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:4px">
+          🌐
+        </button>
+        <div id="langMenu" style="display:none;position:absolute;top:38px;right:0;background:#0d1117;border:1px solid var(--border2);border-radius:14px;padding:6px;z-index:9999;min-width:160px;box-shadow:0 8px 32px rgba(0,0,0,0.6);max-height:320px;overflow-y:auto"></div>
+      </div>
       <div id="quickActions" style="display:none;align-items:center;gap:6px">
         <button onclick="window.scrollTo({top:0,behavior:'smooth'})" style="background:var(--glass2);border:1px solid var(--border);border-radius:10px;color:var(--muted);padding:6px 10px;font-size:13px;cursor:pointer">🏠</button>
         <button onclick="scrollToLeaderboard()" style="background:var(--glass2);border:1px solid var(--border);border-radius:10px;color:var(--muted);padding:6px 10px;font-size:13px;cursor:pointer">🏆</button>
@@ -2381,7 +2383,7 @@ input, textarea, select {
         <div id="playerLabel" style="font-family:'Syne',sans-serif;font-size:17px;font-weight:800;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">—</div>
         <div style="font-size:12px;color:var(--muted);margin-top:2px">Seviye <span id="levelDisplay" style="color:var(--neon);font-weight:700">1</span> &nbsp;·&nbsp; <span id="scoreDisplay" style="color:var(--neon);font-weight:700">0</span>p</div>
       </div>
-      <button id="logoutBtn" class="btn ghost sm">Çıkış</button>
+      <button id="logoutBtn" class="btn ghost sm" data-i18n="logout">Çıkış</button>
     </div>
 
     <!-- Event banner -->
@@ -2395,16 +2397,16 @@ input, textarea, select {
       <div class="play-card play-card-math" id="startGameBtn">
         <div class="play-card-icon">➕</div>
         <div>
-          <div class="play-card-title">Matematik</div>
-          <div class="play-card-sub">Klasik mod</div>
+          <div class="play-card-title" data-i18n="math_mode">Matematik</div>
+          <div class="play-card-sub" data-i18n="math_sub">Klasik mod</div>
         </div>
         <div class="play-card-badge">OYNA</div>
       </div>
       <div class="play-card play-card-absurd" id="startAbsurdBtn">
         <div class="play-card-icon">🤪</div>
         <div>
-          <div class="play-card-title">Absürt</div>
-          <div class="play-card-sub">AI sorular</div>
+          <div class="play-card-title" data-i18n="absurd_mode">Absürt</div>
+          <div class="play-card-sub" data-i18n="absurd_sub">AI sorular</div>
         </div>
         <div class="play-card-badge">AI</div>
       </div>
@@ -2420,15 +2422,11 @@ input, textarea, select {
         </div>
       </div>
       <div class="lb-tabs">
-        <button class="lb-tab" id="lbTabLocal">📱 Lokal</button>
-        <button class="lb-tab active" id="lbTabOnline">🌐 Online</button>
+        <button class="lb-tab" id="lbTabLocal" data-i18n="local">📱 Lokal</button>
+        <button class="lb-tab active" id="lbTabOnline" data-i18n="online_tab">🌐 Online</button>
       </div>
       <div id="lbOpsRow" style="display:flex;gap:4px;margin-bottom:8px" class="lb-ops-row">
         <button class="lb-ops-btn active" id="lbOpsAll"   onclick="switchOnlineLbOps('all')">🌍 Tümü</button>
-        <button class="lb-ops-btn"        id="lbOpsPlus"  onclick="switchOnlineLbOps('+')">➕</button>
-        <button class="lb-ops-btn"        id="lbOpsMinus" onclick="switchOnlineLbOps('-')">➖</button>
-        <button class="lb-ops-btn"        id="lbOpsMul"   onclick="switchOnlineLbOps('*')">✖️</button>
-        <button class="lb-ops-btn"        id="lbOpsDiv"   onclick="switchOnlineLbOps('/')">➗</button>
         <button class="lb-ops-btn"        id="lbOpsMixed" onclick="switchOnlineLbOps('+-*/')">🌀 Karma</button>
       </div>
       <div id="leaderboard" class="lb" style="display:none">Henüz kimse yok</div>
@@ -2522,12 +2520,12 @@ input, textarea, select {
     <div id="resultMsg" style="min-height:26px;margin-top:10px;font-weight:700;transition:opacity .44s ease"></div>
 
     <div style="margin-top:10px;display:flex;gap:8px;align-items:center">
-      <button id="pauseBtn" class="btn ghost">Duraklat</button>
+      <button id="pauseBtn" class="btn ghost" data-i18n="pause">Duraklat</button>
       <div style="margin-left:auto" class="small muted">Ödül: <strong id="rewardUI">10</strong>p</div>
     </div>
 
     <hr style="margin-top:12px;border:none;border-top:1px solid rgba(255,255,255,0.03)" />
-    <h3 style="margin:8px 0">Puan Tablosu</h3>
+    <h3 style="margin:8px 0" data-i18n="score_board">Puan Tablosu</h3>
     <div id="board" class="lb"></div>
   </div>
 
@@ -2569,15 +2567,15 @@ input, textarea, select {
         <div style="color:var(--muted);font-size:13px;margin-top:6px">Skydivex</div>
       </div>
       <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end">
-        <button id="resumeBtn" class="btn">Devam Et</button>
-        <button id="pauseSettingsBtn" class="btn ghost">Ayarlar</button>
-        <button id="pauseMenuBtn" class="btn ghost">Ana Menü</button>
+        <button id="resumeBtn" class="btn" data-i18n="resume">Devam Et</button>
+        <button id="pauseSettingsBtn" class="btn ghost" data-i18n="settings">Ayarlar</button>
+        <button id="pauseMenuBtn" class="btn ghost" data-i18n="menu">Ana Menü</button>
       </div>
     </div>
 
     <div id="settingsPanel" style="margin-top:14px;display:none">
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-        <label style="color:var(--muted)"><input type="checkbox" id="settingSound"> Ses açık</label>
+        <label style="color:var(--muted)"><input type="checkbox" id="settingSound"><span data-i18n="sound">Ses açık</span></label>
         <label style="color:var(--muted)">Buton renk <input type="color" id="settingBtnColor" value="#00ff66"></label>
         <label style="color:var(--muted)">Arka plan <input type="color" id="settingBgColor" value="#08121a"></label>
       </div>
@@ -2663,7 +2661,7 @@ input, textarea, select {
 
     <!-- Save -->
     <div style="margin-top:20px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.04);display:flex;justify-content:flex-end;gap:10px">
-      <button id="closeSettingsModal" class="btn ghost">Kapat</button>
+      <button id="closeSettingsModal" class="btn ghost" data-i18n="close">Kapat</button>
       <button id="saveSettingsBtn" class="btn" style="padding:10px 24px">💾 Kaydet</button>
     </div>
   </div>
@@ -2701,7 +2699,7 @@ input, textarea, select {
 
       <!-- Nasıl Oynanır -->
       <div class="about-section">
-        <div class="about-section-title">🎮 Nasıl Oynanır</div>
+        <div class="about-section-title">🎮 <span data-i18n="how_to_play">Nasıl Oynanır</span></div>
         <div class="about-how-grid">
           <div class="about-how-item">
             <div class="how-icon">🧮</div>
@@ -2748,7 +2746,7 @@ input, textarea, select {
 
       <!-- Versiyon geçmişi -->
       <div class="about-section">
-        <div class="about-section-title">📋 Versiyon Geçmişi</div>
+        <div class="about-section-title">📋 <span data-i18n="version_history">Versiyon Geçmişi</span></div>
         <div class="about-changelog">
           <div class="about-changelog-item">
             <span class="cl-ver">v1.0</span>
@@ -2797,6 +2795,266 @@ input, textarea, select {
 /* --------------------------
    MathGame v2.5 - Logic JS
    -------------------------- */
+
+/* ══════════════════════════════════════════════
+   i18n — Çok Dilli Destek Sistemi
+   ══════════════════════════════════════════════ */
+
+/* Tüm UI string'leri — kaynak dil: Türkçe */
+var I18N_STRINGS = {
+  /* Genel */
+  'close':           'Kapat',
+  'save':            'Kaydet',
+  'cancel':          'İptal',
+  'confirm':         'Onayla',
+  'yes':             'Evet',
+  'no':              'Hayır',
+  'ok':              'Tamam',
+  'loading':         'Yükleniyor...',
+  'error':           'Hata',
+  'success':         'Başarılı',
+  'retry':           'Tekrar Dene',
+  'back':            'Geri',
+  'send':            'Gönder',
+  'delete':          'Sil',
+  'edit':            'Düzenle',
+  'copy':            'Kopyala',
+  'share':           'Paylaş',
+  /* Auth */
+  'login':           'Giriş Yap',
+  'register':        'Kayıt Ol',
+  'logout':          'Çıkış',
+  'google_login':    'Google ile Devam Et',
+  'email':           'E-posta',
+  'password':        'Şifre',
+  'display_name':    'Kullanıcı adı',
+  'login_subtitle':  'Skorlarını kaydet, dünyayla yarış',
+  'pin_set':         'PIN Belirle',
+  'pin_login':       'PIN ile Giriş',
+  'pin_sub':         'Google hesabına erişim olmadığında bu PIN ile girebilirsin.',
+  'pin_enter':       'PIN gir',
+  'pin_repeat':      'PIN tekrar',
+  'pin_skip':        'Atla',
+  /* Menü */
+  'math_mode':       'Matematik',
+  'math_sub':        'Klasik mod',
+  'absurd_mode':     'Absürt',
+  'absurd_sub':      'AI sorular',
+  'play_btn':        'OYNA',
+  'leaderboard':     'Liderlik',
+  'local':           'Lokal',
+  'online':          'Online',
+  'all_ops':         '🌍 Tümü',
+  'mixed':           '🌀 Karma',
+  'daily_tasks':     'Günlük Görevler',
+  'stats':           'İstatistikler',
+  'refresh':         'Yenile',
+  'next_reset':      'Yenileme',
+  'all_done':        '🌟 Tüm günlük görevleri tamamladın!',
+  /* Oyun */
+  'level':           'Seviye',
+  'score':           'Puan',
+  'correct':         'Doğru',
+  'wrong':           'Yanlış',
+  'streak':          'Seri',
+  'pause':           'Duraklat',
+  'resume':          'Devam Et',
+  'menu':            'Ana Menü',
+  'settings':        'Ayarlar',
+  'score_board':     'Puan Tablosu',
+  'level_up':        'Seviye Atladın!',
+  'touch_continue':  'Devam etmek için dokun',
+  'no_score':        'Puan yok, sadece eğlence 🎉',
+  'score_mult':      'Puan Çarpanı',
+  'paused':          'Oyun Duraklatıldı',
+  'correct_msg':     'Doğru!',
+  'wrong_msg':       'Yanlış!',
+  'answer_input':    'Cevabın?',
+  /* Profil */
+  'profile':         'Profil',
+  'about_me':        'Hakkımda',
+  'username':        'Takma Ad',
+  'new_password':    'Yeni Şifre',
+  'pw_hint':         '(boş bırakırsan değişmez)',
+  'save_profile':    '💾 Kaydet',
+  'admin_panel':     'Admin Paneli',
+  'set_pin':         'PIN Belirle / Değiştir',
+  'request':         'İstek / Şikayet Gönder',
+  'stat_score':      'Puan',
+  'stat_level':      'Seviye',
+  'stat_streak':     'En Seri',
+  /* Başarımlar */
+  'achievements':    'Başarımlar',
+  'unlocked':        'kazanıldı',
+  'locked':          'Henüz kazanılmadı',
+  'ach_unlocked':    '🎉 Başarım Açıldı!',
+  'rarity_legend':   'Efsane',
+  'rarity_rare':     'Nadir',
+  'rarity_valuable': 'Değerli',
+  /* Ayarlar */
+  'settings_title':  'Ayarlar',
+  'sound':           'Ses açık',
+  'ops_title':       'İşlem Türleri',
+  'ops_hint':        'En az bir işlem türü seçili olmalı.',
+  'level_speed':     'Seviye Atlama Hızı',
+  'level_speed_desc':'Her {n} doğru cevaptan sonra seviye atla.',
+  'theme':           'Tema',
+  'bg_image':        'Arka Plan Resmi',
+  'bg_clear':        '🗑 Temizle',
+  'reset_score':     '🔁 Skoru Sıfırla',
+  /* Public profil */
+  'rank':            'Sıra',
+  'joined':          'Kayıt',
+  'online':          '🟢 Online',
+  'offline':         'Çevrimdışı',
+  /* Hakkında */
+  'about':           'Hakkında',
+  'how_to_play':     'Nasıl Oynanır',
+  'version_history': 'Versiyon Geçmişi',
+  'developer':       'Yapımcı',
+  /* Toast mesajları */
+  'toast_save_ok':   '✅ Profil kaydedildi',
+  'toast_name_ok':   '✅ İsim güncellendi',
+  'toast_pin_set':   '✅ PIN ayarlandı',
+  'toast_logout':    '👋 Çıkış yapıldı',
+  'toast_cloud':     '☁️ Skor buluttan yüklendi',
+  'toast_copy':      '📋 Kopyalandı',
+  /* Admin */
+  'ban':             '🚫 Ban',
+  'unban':           '✅ Banı Kaldır',
+  'set_score':       '🏆 Skor Ayarla',
+  'give_admin':      '👑 Admin Ver',
+  'take_admin':      '❌ Admin Al',
+  /* Hata mesajları */
+  'err_answer':      'Cevap gir!',
+  'err_number':      'Sayı gir!',
+  'err_network':     'İnternet bağlantısı yok.',
+  'err_login':       'Giriş başarısız',
+  'err_session':     'Oturum geçersiz',
+};
+
+/* Aktif dil ve çeviri tablosu */
+var _i18nLang = 'tr';
+var _i18nTable = {}; /* { key: translatedText } */
+var _i18nLoading = false;
+
+var LANG_NAMES = {
+  'tr': '🇹🇷 Türkçe', 'en': '🇬🇧 English', 'de': '🇩🇪 Deutsch',
+  'fr': '🇫🇷 Français', 'es': '🇪🇸 Español', 'ar': '🇸🇦 العربية',
+  'ru': '🇷🇺 Русский', 'zh': '🇨🇳 中文', 'ja': '🇯🇵 日本語',
+  'ko': '🇰🇷 한국어', 'pt': '🇧🇷 Português', 'it': '🇮🇹 Italiano',
+  'nl': '🇳🇱 Nederlands', 'pl': '🇵🇱 Polski', 'uk': '🇺🇦 Українська',
+  'hi': '🇮🇳 हिन्दी', 'fa': '🇮🇷 فارسی', 'sv': '🇸🇪 Svenska',
+  'no': '🇳🇴 Norsk', 'da': '🇩🇰 Dansk',
+};
+
+/* Çeviri fonksiyonu — key bulunamazsa Türkçe döndür */
+function t(key, vars) {
+  var text = (_i18nLang !== 'tr' && _i18nTable[key]) ? _i18nTable[key] : (I18N_STRINGS[key] || key);
+  if (vars) {
+    Object.keys(vars).forEach(function(k) {
+      text = text.replace('{' + k + '}', vars[k]);
+    });
+  }
+  return text;
+}
+
+/* Dili algıla ve yükle */
+async function initI18n() {
+  var savedLang = localStorage.getItem('mathgame_lang');
+  var browserLang = (navigator.language || navigator.userLanguage || 'tr').toLowerCase().slice(0, 2);
+  _i18nLang = savedLang || (LANG_NAMES[browserLang] ? browserLang : 'tr');
+
+  if (_i18nLang === 'tr') {
+    applyI18n();
+    return;
+  }
+
+  /* Cache'den yükle */
+  var cacheKey = 'i18n_cache_' + _i18nLang;
+  var cached = null;
+  try { cached = JSON.parse(localStorage.getItem(cacheKey) || 'null'); } catch(e) {}
+
+  if (cached && typeof cached === 'object' && Object.keys(cached).length > 10) {
+    _i18nTable = cached;
+    applyI18n();
+    return;
+  }
+
+  /* Worker'dan çevir */
+  await loadTranslations(_i18nLang);
+}
+
+async function loadTranslations(lang) {
+  if (_i18nLoading) return;
+  _i18nLoading = true;
+  try {
+    showToast('🌐 ' + (LANG_NAMES[lang] || lang) + ' diline çevriliyor...', '#38bdf8');
+    var resp = await fetch(WORKER_URL + '/translate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ strings: I18N_STRINGS, lang: lang }),
+    });
+    var data = await resp.json();
+    if (data && data.ok && data.translations) {
+      _i18nTable = data.translations;
+      _i18nLang = lang;
+      /* Cache'e kaydet */
+      try { localStorage.setItem('i18n_cache_' + lang, JSON.stringify(_i18nTable)); } catch(e) {}
+      localStorage.setItem('mathgame_lang', lang);
+      applyI18n();
+      showToast('✅ Dil değiştirildi: ' + (LANG_NAMES[lang] || lang), '#00ff88');
+    }
+  } catch(e) {
+    console.warn('i18n yükleme hatası:', e);
+  }
+  _i18nLoading = false;
+}
+
+/* Dili değiştir */
+async function switchLang(lang) {
+  if (lang === _i18nLang) return;
+  if (lang === 'tr') {
+    _i18nLang = 'tr';
+    _i18nTable = {};
+    localStorage.setItem('mathgame_lang', 'tr');
+    applyI18n();
+    showToast('✅ Dil değiştirildi: 🇹🇷 Türkçe', '#00ff88');
+    return;
+  }
+  /* Cache var mı? */
+  var cacheKey = 'i18n_cache_' + lang;
+  var cached = null;
+  try { cached = JSON.parse(localStorage.getItem(cacheKey) || 'null'); } catch(e) {}
+  if (cached && Object.keys(cached).length > 10) {
+    _i18nLang = lang;
+    _i18nTable = cached;
+    localStorage.setItem('mathgame_lang', lang);
+    applyI18n();
+    showToast('✅ ' + (LANG_NAMES[lang] || lang), '#00ff88');
+    return;
+  }
+  await loadTranslations(lang);
+}
+
+/* DOM'daki data-i18n elementlerini güncelle */
+function applyI18n() {
+  document.querySelectorAll('[data-i18n]').forEach(function(el) {
+    var key = el.getAttribute('data-i18n');
+    var translated = t(key);
+    if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+      el.placeholder = translated;
+    } else {
+      el.textContent = translated;
+    }
+  });
+  /* RTL diller */
+  var rtlLangs = ['ar', 'fa', 'he', 'ur'];
+  document.documentElement.dir = rtlLangs.includes(_i18nLang) ? 'rtl' : 'ltr';
+  /* Dil seçici varsa güncelle */
+  var sel = document.getElementById('langSelector');
+  if (sel) sel.value = _i18nLang;
+}
 
 /* State */
 var LS_KEY = 'mathgame_v2_0';
@@ -3260,6 +3518,34 @@ function analyzeImageAndAdapt(dataUrl){
 /* ── TOAST ─────────────────────────────────────────── */
 const toastEl = document.getElementById('toast');
 let toastTimer = null;
+/* ── Dil Menüsü ── */
+function toggleLangMenu() {
+  var menu = document.getElementById('langMenu');
+  if (!menu) return;
+  if (menu.style.display !== 'none') { menu.style.display = 'none'; return; }
+  /* Menüyü doldur */
+  menu.innerHTML = Object.entries(LANG_NAMES).map(function(entry) {
+    var code = entry[0];
+    var name = entry[1];
+    var isActive = code === _i18nLang;
+    return '<div onclick="switchLang(\'' + code + '\');document.getElementById(\'langMenu\').style.display=\'none\'" ' +
+      'style="padding:8px 12px;border-radius:8px;cursor:pointer;font-size:13px;' +
+      (isActive ? 'background:var(--neon-dim);color:var(--neon);font-weight:700' : 'color:var(--text)') +
+      ';white-space:nowrap">' + name + '</div>';
+  }).join('');
+  menu.style.display = 'block';
+  /* Dışarı tıklanınca kapat */
+  setTimeout(function() {
+    document.addEventListener('click', function closeLang(e) {
+      if (!document.getElementById('langMenu')?.contains(e.target) &&
+          e.target.id !== 'langBtn') {
+        document.getElementById('langMenu').style.display = 'none';
+        document.removeEventListener('click', closeLang);
+      }
+    });
+  }, 10);
+}
+
 function showToast(msg, color='#00ff66'){
   const bar = document.getElementById('toast-bar');
   document.getElementById('toast-msg').textContent = msg;
@@ -3386,6 +3672,9 @@ document.documentElement.style.setProperty('--accent', state.btnColor||'#00ff66'
 document.documentElement.style.setProperty('--neon',   state.btnColor||'#00ff66');
 document.documentElement.style.setProperty('--bg-mid', state.bgColor||'#0b1220');
 applyBgImage();
+
+/* i18n — dil algıla ve uygula (async, arka planda) */
+setTimeout(function() { try { initI18n(); } catch(e) {} }, 100);
 
 if (quickSoundToggle) quickSoundToggle.checked = !!state.soundOn;
 if (btnColorInput) btnColorInput.value = state.btnColor||'#00ff66';
@@ -5867,14 +6156,14 @@ async function handleEmailAuth() {
     var user = cred.user;
     var workerToken = null;
     try {
-      var fbRes = await workerPost('firebase-login', { uid: user.uid, name: name, email: email });
+      var fbRes = await workerPost('firebase-login', { uid: user.uid, name: name, email: email, provider: 'email' });
       if (fbRes && fbRes.ok) {
         workerToken = fbRes.token;
       } else if (fbRes && fbRes.error && fbRes.error.indexOf('takma ad') !== -1) {
         var suggestion = fbRes.suggestion || (name + '_' + user.uid.slice(0,4));
         showToast('⚠️ "' + name + '" takma adı alınmış. Yeni adın: ' + suggestion, '#f59e0b');
         name = suggestion;
-        var retry = await workerPost('firebase-login', { uid: user.uid, name: suggestion, email: email });
+        var retry = await workerPost('firebase-login', { uid: user.uid, name: suggestion, email: email, provider: 'email' });
         if (retry && retry.ok) { workerToken = retry.token; }
       }
     } catch(e) { console.warn('Worker hata:', e); }
@@ -7110,7 +7399,9 @@ async function adminDeepInfo() {
       '📧 E-posta: <b style="color:#e6f7ea">' + escapeHtml(r.email || '—') + '</b><br>' +
       '🌐 Provider: ' + escapeHtml(r.provider || '?') + '<br>' +
       '🔑 PIN: ' + (r.hasPin ? '✅ Ayarlı' : '❌ PIN ayarlanmadı') + '<br>' +
-      '🔐 Şifre: ' + (r.hasPw ? ('✅ Var' + (r.pwHash ? ' <span style="font-size:9px;color:var(--muted);font-family:monospace">[' + r.pwHash.slice(0,16) + '...</span>' : '')) : (r.provider === 'google' ? '— Google OAuth' : '❌ Yok')) + '<br>' +
+      '🔐 Şifre: ' + (r.hasPw
+        ? ('✅ Var <span style="font-size:9px;color:var(--muted);font-family:monospace">[' + (r.pwHash ? r.pwHash.slice(0,16) + '...' : '?') + ']</span>')
+        : (r.provider === 'email' ? '❌ Şifre hash yok (Firebase email auth)' : '— Google OAuth (e-posta şifresi yok)')) + '<br>' +
       '🎭 Rol: <b style="color:#f59e0b">' + escapeHtml(r.role || '?') + '</b><br>' +
       '🚫 Ban: ' + (r.banned ? '<b style="color:#ef4444">' + escapeHtml(r.banned.reason || 'Banlı') + '</b>' : '✅ Temiz') + '<br>' +
       '📡 Durum: ' + onlineStr + '<br>' +
@@ -8383,7 +8674,9 @@ var _currentAnnouncement = null;
 async function loadAnnouncement() {
   try {
     var ann = await workerGet('announcement', {});
-    if (!ann || !ann.active) { return; }
+    if (!ann || !ann.active) return;
+    if (!ann.title && !ann.text) return; /* boş duyuru gösterme */
+    if (ann.id && localStorage.getItem('ann_closed_' + ann.id)) return; /* kapatılmış */
     _currentAnnouncement = ann;
     showAnnouncement(ann);
   } catch(e) {}
@@ -8391,10 +8684,20 @@ async function loadAnnouncement() {
 
 function showAnnouncement(ann) {
   var banner = document.getElementById('announcementBanner');
-  if (!banner) { return; }
+  if (!banner) return;
+
+  /* Boş duyuruyu gösterme */
+  if (!ann.title && !ann.text) { banner.style.display = 'none'; return; }
+
+  /* Kapatılmış mı? */
+  if (ann.id && localStorage.getItem('ann_closed_' + ann.id)) { return; }
+
   document.getElementById('annBannerIcon').textContent  = ann.icon || '📢';
   document.getElementById('annBannerTitle').textContent = ann.title || '';
   document.getElementById('annBannerText').textContent  = ann.text || '';
+
+  /* Otomatik çeviri — tarayıcı diline göre */
+  translateAnnouncement(ann);
 
   var pollEl = document.getElementById('annBannerPoll');
   pollEl.innerHTML = '';
@@ -8412,6 +8715,39 @@ function showAnnouncement(ann) {
     });
   }
   banner.style.display = '';
+}
+
+/* Duyuruyu tarayıcı diline göre çevir */
+async function translateAnnouncement(ann) {
+  try {
+    /* Tarayıcı dili TR ise çevirme */
+    var lang = (navigator.language || navigator.userLanguage || 'tr').toLowerCase().slice(0, 2);
+    if (lang === 'tr') return;
+
+    var textToTranslate = (ann.title ? ann.title + '\n' : '') + (ann.text || '');
+    if (!textToTranslate.trim()) return;
+
+    /* Google Translate API'siz — MyMemory ücretsiz API */
+    var url = 'https://api.mymemory.translated.net/get?q=' +
+      encodeURIComponent(textToTranslate) + '&langpair=tr|' + lang;
+    var resp = await fetch(url);
+    var data = await resp.json();
+    var translated = data?.responseData?.translatedText;
+    if (!translated || translated === textToTranslate) return;
+
+    /* Başlık ve metin ayrı satırlarda geldiyse böl */
+    if (ann.title && ann.text) {
+      var parts = translated.split('\n');
+      if (parts.length >= 2) {
+        document.getElementById('annBannerTitle').textContent = parts[0];
+        document.getElementById('annBannerText').textContent  = parts.slice(1).join(' ');
+      } else {
+        document.getElementById('annBannerText').textContent = translated;
+      }
+    } else {
+      document.getElementById('annBannerText').textContent = translated;
+    }
+  } catch(e) { /* sessizce geç — çeviri olmasa da duyuru gösterilir */ }
 }
 
 function closeAnnouncement() {
@@ -8508,7 +8844,7 @@ document.addEventListener('pointerdown', e => {
     <div class="ach-popup-shine"></div>
     <div class="ach-popup-icon" id="achPopupIcon">🏆</div>
     <div class="ach-popup-body">
-      <div class="ach-popup-label">🎉 Başarım Açıldı!</div>
+      <div class="ach-popup-label" data-i18n="ach_unlocked">🎉 Başarım Açıldı!</div>
       <div class="ach-popup-name" id="achPopupName">—</div>
       <div class="ach-popup-desc" id="achPopupDesc">—</div>
     </div>
@@ -8616,7 +8952,7 @@ document.addEventListener('pointerdown', e => {
 
       <!-- Başarımlar -->
       <div id="pubAchSection" style="display:none;margin-bottom:10px">
-        <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--muted2);margin-bottom:8px">🏆 Başarımlar</div>
+        <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--muted2);margin-bottom:8px" data-i18n="achievements">🏆 Başarımlar</div>
         <div id="pubAchGrid" style="display:flex;flex-wrap:wrap;gap:5px"></div>
         <div id="pubAchEmpty" style="font-size:12px;color:var(--muted);text-align:center;display:none">Henüz başarım yok</div>
       </div>
@@ -8750,7 +9086,7 @@ document.addEventListener('pointerdown', e => {
     <div class="sa-hero">
       <div>
         <div class="sa-title">👑 Süper Admin Paneli</div>
-        <div class="sa-sub">Sadece sen görebilirsin — SKYDIVEX</div>
+        <div class="sa-sub">Benimle Eslem ablama özeldir 🤫</div>
       </div>
       <button onclick="document.getElementById('superAdminModal').classList.remove('show')"
         style="width:30px;height:30px;border-radius:50%;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);color:#f59e0b;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
@@ -8793,17 +9129,18 @@ document.addEventListener('pointerdown', e => {
       </div>
       <button id="closeAdminModal" class="btn ghost" style="padding:6px 12px;font-size:12px">✕</button>
     </div>
-    <div class="admin-body">
 
-      <!-- Sekmeler -->
-      <div class="admin-tabs">
-        <button class="admin-tab-btn active" onclick="adminSwitchTab('stats')">📊</button>
-        <button class="admin-tab-btn" onclick="adminSwitchTab('players')">👥</button>
-        <button class="admin-tab-btn" onclick="adminSwitchTab('bans')">🚫</button>
-        <button class="admin-tab-btn" onclick="adminSwitchTab('requests')">📬</button>
-        <button class="admin-tab-btn" onclick="adminSwitchTab('logs')">📜</button>
-        <button class="admin-tab-btn" id="adminTabSystem" onclick="adminSwitchTab('system')">⚙️</button>
-      </div>
+    <!-- Sekmeler — body dışında, sabit kalır -->
+    <div class="admin-tabs">
+      <button class="admin-tab-btn active" onclick="adminSwitchTab('stats')">📊</button>
+      <button class="admin-tab-btn" onclick="adminSwitchTab('players')">👥</button>
+      <button class="admin-tab-btn" onclick="adminSwitchTab('bans')">🚫</button>
+      <button class="admin-tab-btn" onclick="adminSwitchTab('requests')">📬</button>
+      <button class="admin-tab-btn" onclick="adminSwitchTab('logs')">📜</button>
+      <button class="admin-tab-btn" id="adminTabSystem" onclick="adminSwitchTab('system')">⚙️</button>
+    </div>
+
+    <div class="admin-body">
 
       <!-- GENEL BAKIŞ -->
       <div class="admin-tab-panel active" id="adminTab-stats">
