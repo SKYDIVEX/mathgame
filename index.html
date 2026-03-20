@@ -7055,12 +7055,16 @@ async function adminLoadBadgeLibrary() {
     return;
   }
   el.innerHTML = _badgeLibrary.map(function(b) {
-    var bg = 'rgba(' + (b.color || '99,179,237') + ',0.15)';
+    var bg  = 'rgba(' + (b.color || '99,179,237') + ',0.15)';
     var col = '#' + (b.textColor || '63b3ed');
+    var icon = b.icon || '🏅';
+    var iconHtml = (icon.startsWith('data:') || icon.startsWith('http'))
+      ? '<img src="' + escapeHtml(icon) + '" style="width:16px;height:16px;border-radius:3px;object-fit:cover;vertical-align:middle">'
+      : icon;
     return '<div onclick="adminGiveBadgeFromLib(\`' + b.id + '\`)" ' +
       'style="padding:5px 10px;border-radius:8px;background:' + bg + ';border:1px solid rgba(' + (b.color || '99,179,237') + ',0.3);color:' + col + ';font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:4px" ' +
-      'title="' + b.label + ' — tıkla ve ver">' +
-      (b.icon || '🏅') + ' ' + b.label +
+      'title="' + escapeHtml(b.label) + ' — tıkla ve ver">' +
+      iconHtml + ' ' + escapeHtml(b.label) +
     '</div>';
   }).join('');
   adminLog('✅ ' + _badgeLibrary.length + ' badge yüklendi');
@@ -7072,9 +7076,10 @@ async function adminGiveBadgeFromLib(badgeId) {
   var badge = _badgeLibrary.find(function(b) { return b.id === badgeId; });
   if (!badge) { adminLog('Badge bulunamadi'); return; }
   /* showConfirm yerine direkt ver — z-index sorunu var */
-  adminLog('Veriliyor: ' + badge.icon + ' ' + badge.label + ' → ' + name);
+  var logIcon = (badge.icon && (badge.icon.startsWith('data:') || badge.icon.startsWith('http'))) ? '🖼️' : (badge.icon || '🏅');
+  adminLog('Veriliyor: ' + logIcon + ' ' + badge.label + ' → ' + name);
   var r = await adminCall('admin/badge-library-give', { targetName: name, badgeId: badgeId });
-  if (r && r.ok) { adminLog('✅ ' + badge.icon + ' ' + badge.label + ' → ' + name); }
+  if (r && r.ok) { adminLog('✅ ' + logIcon + ' ' + badge.label + ' → ' + name); }
   else adminLog('❌ ' + (r ? r.error : 'Hata'));
 }
 
@@ -7114,7 +7119,10 @@ function updateLibPreview() {
   preview.style.background  = 'rgba(' + color + ',0.15)';
   preview.style.borderColor = 'rgba(' + color + ',0.3)';
   preview.style.color       = '#' + textColor;
-  preview.textContent       = icon + ' ' + (label || 'Önizleme');
+  var iconHtml = (icon.startsWith('data:') || icon.startsWith('http'))
+    ? '<img src="' + escapeHtml(icon) + '" style="width:16px;height:16px;border-radius:3px;object-fit:cover;vertical-align:middle">'
+    : icon;
+  preview.innerHTML = iconHtml + ' ' + (label || 'Önizleme');
 }
 
 async function adminAddBadgeToLibrary() {
