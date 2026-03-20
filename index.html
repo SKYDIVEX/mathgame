@@ -1137,9 +1137,6 @@ input, textarea, select {
   justify-content: space-between;
   padding: 16px 20px;
   border-bottom: 1px solid var(--border);
-  position: sticky;
-  top: 0;
-  z-index: 10;
   background: #080b12;
 }
 .admin-title { font-family: var(--font-head); font-size: 17px; font-weight: 800; color: var(--text); }
@@ -1152,9 +1149,6 @@ input, textarea, select {
   overflow-x: auto;
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
-  position: sticky;
-  top: 70px; /* admin-hero yüksekliği kadar */
-  z-index: 9;
   background: #080b12;
   scrollbar-width: none;
 }
@@ -1299,10 +1293,6 @@ input, textarea, select {
 .sa-hero {
   padding: 18px 20px 14px;
   border-bottom: 1px solid rgba(245,158,11,0.15);
-  flex-shrink: 0;
-  position: sticky;
-  top: 0;
-  z-index: 5;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1366,9 +1356,6 @@ input, textarea, select {
   padding: 18px 20px 14px;
   border-bottom: 1px solid var(--border);
   background: #0b0f18;
-  position: sticky;
-  top: 0;
-  z-index: 2;
 }
 .ach-modal-title {
   font-family: var(--font-head);
@@ -3545,6 +3532,83 @@ function toggleLangMenu() {
   }, 10);
 }
 
+/* ── Modal Fixed Header Sistemi ──────────────────────────
+   position:sticky mobil WebKit'te güvenilmez.
+   Bu sistem header'ı position:fixed yaparak %100 sabit tutar.
+   ─────────────────────────────────────────────────────── */
+function setupModalFixedHeader(cardId, headerSel, tabsSel) {
+  var card   = document.getElementById(cardId);
+  if (!card) return;
+  var header = card.querySelector(headerSel);
+  var tabs   = tabsSel ? card.querySelector(tabsSel) : null;
+  if (!header) return;
+
+  /* Eski handler varsa temizle */
+  if (card._mfhHandler) {
+    card.removeEventListener('scroll', card._mfhHandler);
+    card._mfhHandler = null;
+  }
+
+  function applyFixed() {
+    var cr = card.getBoundingClientRect();
+    var hh = header.offsetHeight;
+    var th = tabs ? tabs.offsetHeight : 0;
+
+    /* Header fixed */
+    header.style.cssText +=
+      ';position:fixed!important' +
+      ';top:' + Math.round(cr.top) + 'px' +
+      ';left:' + Math.round(cr.left) + 'px' +
+      ';width:' + Math.round(cr.width) + 'px' +
+      ';z-index:99999' +
+      ';box-sizing:border-box';
+
+    /* Tabs fixed */
+    if (tabs) {
+      tabs.style.cssText +=
+        ';position:fixed!important' +
+        ';top:' + Math.round(cr.top + hh) + 'px' +
+        ';left:' + Math.round(cr.left) + 'px' +
+        ';width:' + Math.round(cr.width) + 'px' +
+        ';z-index:99998' +
+        ';box-sizing:border-box';
+    }
+
+    /* Card'a padding ekle ki içerik header altında kalmaya devam etsin */
+    card.style.boxSizing = 'border-box';
+    card.style.paddingTop = (hh + th) + 'px';
+  }
+
+  /* İlk uygulama */
+  requestAnimationFrame(applyFixed);
+
+  /* Scroll'da güncelle — sadece top değişir */
+  card._mfhHandler = function() {
+    var cr = card.getBoundingClientRect();
+    var hh = header.offsetHeight;
+    var th = tabs ? tabs.offsetHeight : 0;
+    header.style.top  = Math.round(cr.top) + 'px';
+    header.style.left = Math.round(cr.left) + 'px';
+    if (tabs) {
+      tabs.style.top  = Math.round(cr.top + hh) + 'px';
+      tabs.style.left = Math.round(cr.left) + 'px';
+    }
+  };
+  card.addEventListener('scroll', card._mfhHandler, { passive: true });
+}
+
+function teardownModalFixedHeader(cardId) {
+  var card = document.getElementById(cardId);
+  if (!card) return;
+  if (card._mfhHandler) {
+    card.removeEventListener('scroll', card._mfhHandler);
+    card._mfhHandler = null;
+  }
+  var header = card.querySelector('[style*="position:fixed"]');
+  if (header) { header.style.position = ''; header.style.top = ''; header.style.left = ''; header.style.width = ''; header.style.zIndex = ''; }
+  card.style.paddingTop = '';
+}
+
 function showToast(msg, color='#00ff66'){
   const bar = document.getElementById('toast-bar');
   document.getElementById('toast-msg').textContent = msg;
@@ -4819,6 +4883,7 @@ function openAchModal() {
     renderAchModal();
     document.getElementById('achModal').classList.add('show');
     clickSound();
+    setTimeout(function() { setupModalFixedHeader('achModalCard', '.ach-modal-hero', null); }, 50);
   } catch(e) {}
 }
 
@@ -5642,6 +5707,12 @@ document.addEventListener('click', (e) => {
 function closeModal(el, cb) {
   try {
     if (!el || !el.classList.contains('show')) return;
+    /* Fixed header teardown */
+    var cardIds = ['achModalCard','adminCard','superAdminCard','profileCard'];
+    cardIds.forEach(function(id) {
+      var card = document.getElementById(id);
+      if (card && el.contains(card)) { try { teardownModalFixedHeader(id); } catch(e) {} }
+    });
     el.classList.add('modal-closing');
     setTimeout(() => {
       try {
@@ -6290,10 +6361,12 @@ function openProfileModal() {
   }
 
   modal.classList.add('show');
+  setTimeout(function() { setupModalFixedHeader('profileCard', '.pm-hero', null); }, 50);
   try { populateProfileSocial(); } catch(e) {}
 }
 
 function closeProfileModal() {
+  teardownModalFixedHeader('profileCard');
   const modal = document.getElementById('profileModal');
   if (modal) modal.classList.remove('show');
 }
@@ -6601,13 +6674,12 @@ async function openAdminPanel() {
   adminLog('Admin paneli açıldı. Hoş geldin ' + authUser.name + '!');
   adminLoadStats();
   try { updateAdminRoleBadge(); } catch(e) {}
-  /* Süper admin butonunu göster/gizle */
   var isSA = isSuperAdminUser();
   var saSection = document.getElementById('superAdminSection');
   var saEntry = document.getElementById('superAdminEntrySection');
   if (saSection) saSection.style.display = isSA ? 'block' : 'none';
   if (saEntry) saEntry.style.display = isSA ? 'block' : 'none';
-  /* Panel açılışını da logla */
+  setTimeout(function() { setupModalFixedHeader('adminCard', '.admin-hero', '.admin-tabs'); }, 50);
   try { await workerPost('admin/write-log', { token: authUser.token, action: 'panel-open', detail: authUser.name + ' paneli açtı' }); } catch(e) {}
 }
 
@@ -7349,6 +7421,7 @@ function openSuperAdminModal() {
   if (!isSuperAdminUser()) { showToast('⛔ Sadece süper adminler', '#ef4444'); return; }
   document.getElementById('superAdminModal').classList.add('show');
   clickSound();
+  setTimeout(function() { setupModalFixedHeader('superAdminCard', '.sa-hero', null); }, 50);
 }
 
 async function saLoadSuspiciousLogs() {
@@ -9087,7 +9160,7 @@ document.addEventListener('pointerdown', e => {
         <div class="sa-title">👑 Süper Admin Paneli</div>
         <div class="sa-sub">Benimle Eslem ablama özeldir canum ablacum</div>
       </div>
-      <button onclick="document.getElementById('superAdminModal').classList.remove('show')"
+      <button onclick="teardownModalFixedHeader('superAdminCard');document.getElementById('superAdminModal').classList.remove('show')"
         style="width:30px;height:30px;border-radius:50%;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);color:#f59e0b;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
     </div>
     <div class="sa-body">
