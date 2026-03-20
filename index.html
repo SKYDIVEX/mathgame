@@ -1365,7 +1365,7 @@ input, textarea, select {
   background: #0b0f18;
   border: 1px solid var(--border2);
   border-radius: 28px 28px 0 0;
-  overflow-y: auto;
+  overflow: hidden; /* hero sticky çalışsın */
   animation: slideUp .35s ease;
   display: flex;
   flex-direction: column;
@@ -1374,11 +1374,9 @@ input, textarea, select {
 .ach-modal-hero {
   padding: 18px 20px 14px;
   border-bottom: 1px solid var(--border);
-  position: sticky;
-  top: 0;
   background: #0b0f18;
   z-index: 2;
-  flex-shrink: 0;
+  flex-shrink: 0; /* overflow:hidden ile sticky gerekmez — body scroll eder */
 }
 .ach-modal-title {
   font-family: var(--font-head);
@@ -2166,7 +2164,7 @@ input, textarea, select {
       </div>
     </div>
 
-    <div style="padding:16px 20px 0">
+    <div style="padding:16px 20px 0;flex:1;overflow-y:auto;min-height:0;padding-bottom:20px">
       <div id="pmMsg" class="profile-msg"></div>
 
       <!-- Profil Bilgileri -->
@@ -9039,7 +9037,7 @@ document.addEventListener('pointerdown', e => {
         <button id="closeAchModal" class="btn ghost sm" style="flex-shrink:0;margin-left:12px">✕</button>
       </div>
     </div>
-    <div class="ach-modal-body" id="achModalBody" style="flex:1;overflow-y:auto"></div>
+    <div class="ach-modal-body" id="achModalBody" style="flex:1;overflow-y:auto;min-height:0"></div>
     <div class="ach-modal-footer">
       <div style="font-size:11px;color:var(--muted);text-align:center">Rozete tıkla → detay ve nadirlik gör</div>
     </div>
