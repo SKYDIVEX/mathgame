@@ -27,17 +27,8 @@ document.addEventListener('gesturestart', function(e) {
   e.preventDefault();
 }, { passive: false });
 
-/* 🐛 HATA GÖSTERGE — beta için */
+/* Hata tracking — GA4'e gönder */
 window.onerror = function(msg, src, line, col, err) {
-  var d = document.getElementById('_dbg');
-  if (!d) {
-    d = document.createElement('div');
-    d.id = '_dbg';
-    d.style.cssText = 'position:fixed;bottom:0;left:0;right:0;z-index:99999;background:#1a0000;color:#ff6666;font-size:11px;padding:8px 10px;font-family:monospace;max-height:120px;overflow-y:auto;border-top:2px solid #ff0000';
-    document.body ? document.body.appendChild(d) : document.addEventListener('DOMContentLoaded', function(){ document.body.appendChild(d); });
-  }
-  d.innerHTML += '<div>❌ ' + msg + ' (satır ' + line + ')</div>';
-  /* GA4 hata tracking */
   try {
     if (typeof gtag === 'function') {
       gtag('event', 'exception', {
@@ -2116,7 +2107,7 @@ input, textarea, select {
   <div class="lu-sub" id="luSubText"></div>
   <div style="margin-top:28px;color:var(--muted);font-size:12px">Devam etmek için dokun</div>
 </div>
-<div id="streakBadge" style="display:none;position:fixed;top:80px;left:50%;transform:translateX(-50%);background:rgba(255,140,0,0.15);border:1px solid rgba(255,140,0,0.4);color:#ff8c00;padding:5px 14px;border-radius:20px;font-size:13px;font-weight:800;z-index:800;backdrop-filter:blur(8px);white-space:nowrap">🔥 <span id="streakCount">0</span> seri</div>
+<div id="streakBadge" style="display:none;position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:rgba(255,140,0,0.15);border:1px solid rgba(255,140,0,0.4);color:#ff8c00;padding:5px 16px;border-radius:20px;font-size:13px;font-weight:800;z-index:800;backdrop-filter:blur(8px);white-space:nowrap;pointer-events:none">🔥 <span id="streakCount">0</span> seri</div>
 
 <!-- Profil Modalı -->
 <div id="profileModal" style="display:none">
@@ -3232,6 +3223,9 @@ function showScreen(name){
   }
   menuCard.style.display   = name==='menu'  ? 'block' : 'none';
   gameArea.style.display   = name==='game'  ? 'block' : 'none';
+  /* Oyun dışında streak badge'i gizle */
+  var sb = document.getElementById('streakBadge');
+  if (sb && name !== 'game') sb.style.display = 'none';
   if (name === 'menu') {
     menuCard.classList.remove('show');
     requestAnimationFrame(function() {
@@ -5032,10 +5026,12 @@ function updateStreakBadge(streak) {
     var badge = document.getElementById('streakBadge');
     var count = document.getElementById('streakCount');
     if (!badge || !count) return;
-    if (streak >= 3) {
+    /* Sadece oyun ekranında göster */
+    var gameScreen = document.getElementById('gameScreen');
+    var gameVisible = gameScreen && gameScreen.style.display !== 'none';
+    if (streak >= 3 && gameVisible) {
       count.textContent = streak;
       badge.style.display = 'block';
-      /* Rengi seriye göre değiştir */
       if (streak >= 20) {
         badge.style.background = 'rgba(168,85,247,0.2)';
         badge.style.borderColor = 'rgba(168,85,247,0.5)';
