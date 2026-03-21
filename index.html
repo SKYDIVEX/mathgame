@@ -3947,7 +3947,7 @@ function nextQuestion(reset=false){
       a = randInt(mulMin, mulMax);
       b = randInt(mulMin, mulMax);
     } else {
-      /* Bölme — her zaman tam bölünen: a = b * k */
+      /* Bölme — her zaman tam bölünen: a = b * k → sonuç tam sayı */
       const divMax = Math.min(Math.floor(max * 0.5), 500);
       b = randInt(2, Math.max(2, Math.floor(divMax * 0.3)));
       const maxMultiplier = Math.max(2, Math.floor(divMax / b));
@@ -3961,22 +3961,16 @@ function nextQuestion(reset=false){
   askedQuestions.add(key);
   var rawResult = safeCalc(a, op, b);
 
-  /* Virgül kontrolü — tüm işlemler için max 2 ondalık, yoksa tam sayıya zorla */
-  rawResult = Math.round(rawResult * 100) / 100;
-  var rawStr = String(rawResult);
-  var decLen = rawStr.includes('.') ? rawStr.split('.')[1].length : 0;
-  if (decLen > 2) {
-    /* Tam sayıya zorla — b'yi yeniden seç */
-    if (op === '/') {
-      a = b * Math.round(rawResult); rawResult = a / b;
-    } else {
-      rawResult = Math.round(rawResult);
-      if (op === '+') { b = rawResult - a; }
-      else if (op === '-') { b = a - rawResult; }
-    }
-    rawResult = Math.round(rawResult);
-  }
-  const result = Math.round(rawResult * 100) / 100;
+  /* TAM SAYI GARANTİSİ — virgüllü cevap kesinlikle çıkmasın */
+  rawResult = Math.floor(rawResult); /* her zaman tam sayıya yuvarla */
+  /* Bölmede a'yı düzelt — a = b * rawResult olsun */
+  if (op === '/') { a = b * rawResult; }
+  /* Çıkarmada b'yi düzelt — a - b = rawResult */
+  if (op === '-') { b = a - rawResult; if (b < 1) { b = 1; rawResult = a - b; } }
+  /* Toplamada b'yi düzelt */
+  if (op === '+') { rawResult = a + b; } /* toplama zaten tam sayı */
+  /* Çarpmada sonuç zaten tam sayı */
+  const result = Math.floor(rawResult); /* kesinlikle tam sayı */
   const opDisp = {'+':'+', '-':'−', '*':'×', '/':'÷'}[op]||op;
 
   /* Soru tipini belirle */
@@ -6308,9 +6302,10 @@ async function pushScoreToWorker() {
     authUser.token = 'fb2_' + authUser.uid;
     saveAuth(authUser);
   }
-  /* Throttle: aynı skor tekrar gönderme, en az 60sn bekle */
+  /* Sadece skor artmışsa gönder — 30sn throttle */
   var now = Date.now();
-  if (state.score <= _lastPushScore && (now - _lastPushTime) < 60000) { return; }
+  if (state.score <= _lastPushScore) { return; } /* skor artmadıysa gönderme */
+  if ((now - _lastPushTime) < 30000 && state.score < _lastPushScore + 50) { return; } /* 30sn içinde 50'den az artış varsa bekle */
   _lastPushScore = state.score;
   _lastPushTime  = now;
   try {
@@ -6325,6 +6320,8 @@ async function pushScoreToWorker() {
       var board = getCurrentBoard();
       board[state.player] = state.score;
       setCurrentBoard(board);
+      /* Lokal liderliği güncelle */
+      renderLeaderboard();
       trackEvent('score_submit', {
         score: state.score,
         level: state.level || 1,
@@ -7350,6 +7347,113 @@ function openSuperAdminModal() {
   if (!isSuperAdminUser()) { showToast('⛔ Sadece süper adminler', '#ef4444'); return; }
   document.getElementById('superAdminModal').classList.add('show');
   clickSound();
+}
+
+async function loadGA4Stats() {
+  var dash    = document.getElementById('ga4Dashboard');
+  var errEl   = document.getElementById('ga4Error');
+  var btn     = document.querySelector('[onclick="loadGA4Stats()"]');
+  if (btn) { btn.textContent = '⏳ Yükleniyor...'; btn.disabled = true; }
+  if (errEl) errEl.style.display = 'none';
+
+  try {
+    var r = await adminCall('ga4-stats', {});
+    if (!r || !r.ok) {
+      if (errEl) { errEl.textContent = '❌ ' + (r?.error || 'Hata'); errEl.style.display = 'block'; }
+      return;
+    }
+
+    dash.style.display = 'block';
+
+    /* Özet kartlar — report rows */
+    var rows = r.report?.rows || [];
+    var totals = { users: 0, sessions: 0, events: 0, newUsers: 0 };
+    rows.forEach(function(row) {
+      totals.users    += parseInt(row.metricValues[0].value || 0);
+      totals.sessions += parseInt(row.metricValues[1].value || 0);
+      totals.events   += parseInt(row.metricValues[2].value || 0);
+      totals.newUsers += parseInt(row.metricValues[3].value || 0);
+    });
+
+    var cards = document.getElementById('ga4Cards');
+    if (cards) {
+      var cardStyle = 'background:#060a10;border:1px solid rgba(245,158,11,0.15);border-radius:10px;padding:10px;text-align:center';
+      cards.innerHTML = [
+        { val: totals.users,    lbl: 'Aktif Kullanıcı',  icon: '👥' },
+        { val: totals.newUsers, lbl: 'Yeni Kullanıcı',   icon: '✨' },
+        { val: totals.sessions, lbl: 'Oturum',           icon: '🎮' },
+        { val: totals.events,   lbl: 'Event',            icon: '⚡' },
+      ].map(function(c) {
+        return '<div style="' + cardStyle + '">' +
+          '<div style="font-size:18px">' + c.icon + '</div>' +
+          '<div style="font-family:var(--font-head);font-size:20px;font-weight:900;color:#f59e0b">' + c.val.toLocaleString() + '</div>' +
+          '<div style="font-size:10px;color:rgba(245,158,11,0.5);text-transform:uppercase;letter-spacing:0.5px">' + c.lbl + '</div>' +
+          '</div>';
+      }).join('');
+    }
+
+    /* Günlük bar chart — son 7 gün */
+    var chart     = document.getElementById('ga4Chart');
+    var labels    = document.getElementById('ga4ChartLabels');
+    var last7rows = rows.slice(-7);
+    if (chart && last7rows.length > 0) {
+      var maxVal = Math.max.apply(null, last7rows.map(function(r) { return parseInt(r.metricValues[0].value || 0); }));
+      chart.innerHTML = last7rows.map(function(row) {
+        var val = parseInt(row.metricValues[0].value || 0);
+        var pct = maxVal > 0 ? Math.round((val / maxVal) * 100) : 0;
+        var date = row.dimensionValues[0].value; /* YYYYMMDD */
+        var day  = date.slice(6, 8) + '.' + date.slice(4, 6);
+        return '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px">' +
+          '<div style="font-size:9px;color:#f59e0b;font-weight:700">' + (val || '') + '</div>' +
+          '<div style="width:100%;background:rgba(245,158,11,0.8);border-radius:3px 3px 0 0;height:' + pct + '%;min-height:' + (val > 0 ? '3' : '0') + 'px"></div>' +
+          '</div>';
+      }).join('');
+      labels.innerHTML = last7rows.map(function(row) {
+        var date = row.dimensionValues[0].value;
+        var day  = date.slice(6, 8) + '.' + date.slice(4, 6);
+        return '<div style="flex:1;font-size:8px;color:rgba(245,158,11,0.4);text-align:center">' + day + '</div>';
+      }).join('');
+    }
+
+    /* Top events */
+    var evEl = document.getElementById('ga4Events');
+    var evRows = r.events?.rows || [];
+    if (evEl) {
+      evEl.innerHTML = evRows.map(function(row) {
+        var name  = row.dimensionValues[0].value;
+        var count = parseInt(row.metricValues[0].value || 0);
+        return '<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:12px">' +
+          '<span style="color:#c8dcd8">' + escapeHtml(name) + '</span>' +
+          '<span style="color:#f59e0b;font-weight:700">' + count.toLocaleString() + '</span>' +
+          '</div>';
+      }).join('') || '<div style="color:var(--muted);font-size:12px">Veri yok</div>';
+    }
+
+    /* Ülkeler */
+    var ctEl  = document.getElementById('ga4Countries');
+    var ctRows = r.countries?.rows || [];
+    var ctMax  = ctRows.length > 0 ? parseInt(ctRows[0].metricValues[0].value || 1) : 1;
+    if (ctEl) {
+      ctEl.innerHTML = ctRows.map(function(row) {
+        var country = row.dimensionValues[0].value;
+        var users   = parseInt(row.metricValues[0].value || 0);
+        var pct     = Math.round((users / ctMax) * 100);
+        return '<div style="margin-bottom:6px">' +
+          '<div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:2px">' +
+            '<span style="color:#c8dcd8">' + escapeHtml(country) + '</span>' +
+            '<span style="color:#f59e0b;font-weight:700">' + users + '</span>' +
+          '</div>' +
+          '<div style="height:3px;background:rgba(255,255,255,0.05);border-radius:2px">' +
+            '<div style="height:100%;width:' + pct + '%;background:rgba(245,158,11,0.6);border-radius:2px"></div>' +
+          '</div></div>';
+      }).join('') || '<div style="color:var(--muted);font-size:12px">Veri yok</div>';
+    }
+
+  } catch(e) {
+    if (errEl) { errEl.textContent = '❌ ' + e.message; errEl.style.display = 'block'; }
+  } finally {
+    if (btn) { btn.textContent = '📈 Analytics Verilerini Getir'; btn.disabled = false; }
+  }
 }
 
 async function saLoadSuspiciousLogs() {
@@ -9092,6 +9196,33 @@ document.addEventListener('pointerdown', e => {
         style="width:30px;height:30px;border-radius:50%;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);color:#f59e0b;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
     </div>
     <div class="sa-body">
+
+      <!-- GA4 Analytics Dashboard -->
+      <div class="sa-section-title">📊 Google Analytics (Son 7 Gün)</div>
+      <button class="admin-btn" onclick="loadGA4Stats()" style="width:100%;background:rgba(245,158,11,0.12);color:#f59e0b;border:1px solid rgba(245,158,11,0.3);margin-bottom:8px">
+        📈 Analytics Verilerini Getir
+      </button>
+      <div id="ga4Dashboard" style="display:none">
+        <!-- Özet kartlar -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px" id="ga4Cards"></div>
+        <!-- Günlük grafik -->
+        <div style="background:#060a10;border:1px solid rgba(245,158,11,0.15);border-radius:10px;padding:10px;margin-bottom:8px">
+          <div style="font-size:10px;font-weight:800;color:rgba(245,158,11,0.6);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Günlük Aktif Kullanıcı (7 gün)</div>
+          <div id="ga4Chart" style="display:flex;align-items:flex-end;gap:4px;height:60px"></div>
+          <div id="ga4ChartLabels" style="display:flex;gap:4px;margin-top:4px"></div>
+        </div>
+        <!-- Top events -->
+        <div style="background:#060a10;border:1px solid rgba(245,158,11,0.15);border-radius:10px;padding:10px;margin-bottom:8px">
+          <div style="font-size:10px;font-weight:800;color:rgba(245,158,11,0.6);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">🎯 Top Event'ler (7 gün)</div>
+          <div id="ga4Events"></div>
+        </div>
+        <!-- Ülkeler -->
+        <div style="background:#060a10;border:1px solid rgba(245,158,11,0.15);border-radius:10px;padding:10px;margin-bottom:10px">
+          <div style="font-size:10px;font-weight:800;color:rgba(245,158,11,0.6);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">🌍 Ülke Dağılımı (30 gün)</div>
+          <div id="ga4Countries"></div>
+        </div>
+      </div>
+      <div id="ga4Error" style="display:none;font-size:12px;color:#ef4444;padding:8px;background:rgba(239,68,68,0.08);border-radius:8px;margin-bottom:8px"></div>
 
       <!-- Derin Bilgi -->
       <div class="sa-section-title">🔍 Derin Kullanıcı Bilgisi</div>
