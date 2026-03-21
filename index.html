@@ -655,14 +655,15 @@ input, textarea, select {
 #authModal, #profileModal, #pinModal, #adminModal, #achModal,
 #bgLibModal, #aboutModal, #publicProfileModal, #settingsModal,
 #confirmModal, #achPopup, #requestModal, #chatModal,
-#reqPanelNew, #reqPanelMy, #settingsPanel {
+#reqPanelNew, #reqPanelMy, #settingsPanel,
+#shopModal, #questModal, #clanModal {
   display: none;
 }
 #authModal.show, #profileModal.show, #pinModal.show,
 #adminModal.show, #achModal.show, #bgLibModal.show,
 #aboutModal.show, #publicProfileModal.show, #settingsModal.show,
 #confirmModal.show, #achPopup.show, #requestModal.show,
-#chatModal.show {
+#chatModal.show, #shopModal.show, #questModal.show, #clanModal.show {
   display: flex !important;
 }
 #settingsPanel.show, #reqPanelNew.show, #reqPanelMy.show {
@@ -2441,31 +2442,29 @@ input, textarea, select {
 <div class="app">
   <!-- Header -->
   <div class="header" id="stickyHeader">
-    <div class="header-logo">🧮 <span>Math</span>Game</div>
-    <div class="header-right">
-      <!-- Ekonomi göstergesi -->
-      <div id="walletDisplay" style="display:none;align-items:center;gap:6px;cursor:pointer" onclick="openShop()">
-        <div style="display:flex;align-items:center;gap:3px;background:rgba(255,215,0,0.12);border:1px solid rgba(255,215,0,0.25);border-radius:10px;padding:4px 8px">
-          <span style="font-size:13px">💰</span>
-          <span id="coinDisplay" style="font-size:12px;font-weight:800;color:#ffd700">0</span>
+    <div style="display:flex;align-items:center;gap:8px;min-width:0">
+      <div class="header-logo">🧮 <span>Math</span>Game</div>
+      <!-- Cüzdan — logo yanında, küçük -->
+      <div id="walletDisplay" style="display:none;align-items:center;gap:4px">
+        <div style="display:flex;align-items:center;gap:2px;background:rgba(255,215,0,0.1);border:1px solid rgba(255,215,0,0.2);border-radius:8px;padding:3px 7px;cursor:pointer" onclick="openShop()">
+          <span style="font-size:11px">💰</span>
+          <span id="coinDisplay" style="font-size:11px;font-weight:800;color:#ffd700">0</span>
         </div>
-        <div style="display:flex;align-items:center;gap:3px;background:rgba(99,179,237,0.12);border:1px solid rgba(99,179,237,0.25);border-radius:10px;padding:4px 8px">
-          <span style="font-size:13px">💎</span>
-          <span id="diamondDisplay" style="font-size:12px;font-weight:800;color:#63b3ed">0</span>
+        <div style="display:flex;align-items:center;gap:2px;background:rgba(99,179,237,0.1);border:1px solid rgba(99,179,237,0.2);border-radius:8px;padding:3px 7px;cursor:pointer" onclick="openShop()">
+          <span style="font-size:11px">💎</span>
+          <span id="diamondDisplay" style="font-size:11px;font-weight:800;color:#63b3ed">0</span>
         </div>
       </div>
-      <!-- Dil seçici -->
+    </div>
+    <div class="header-right">
       <div style="position:relative">
         <button id="langBtn" onclick="toggleLangMenu()"
-          style="background:var(--glass2);border:1px solid var(--border);border-radius:10px;color:var(--muted);padding:6px 10px;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:4px">
+          style="background:var(--glass2);border:1px solid var(--border);border-radius:10px;color:var(--muted);padding:6px 9px;font-size:13px;cursor:pointer">
           🌐
         </button>
         <div id="langMenu" style="display:none;position:absolute;top:38px;right:0;background:#0d1117;border:1px solid var(--border2);border-radius:14px;padding:6px;z-index:9999;min-width:160px;box-shadow:0 8px 32px rgba(0,0,0,0.6);max-height:320px;overflow-y:auto"></div>
       </div>
-      <div id="quickActions" style="display:none;align-items:center;gap:6px">
-        <button onclick="window.scrollTo({top:0,behavior:'smooth'})" style="background:var(--glass2);border:1px solid var(--border);border-radius:10px;color:var(--muted);padding:6px 10px;font-size:13px;cursor:pointer">🏠</button>
-        <button onclick="scrollToLeaderboard()" style="background:var(--glass2);border:1px solid var(--border);border-radius:10px;color:var(--muted);padding:6px 10px;font-size:13px;cursor:pointer">🏆</button>
-      </div>
+      <div id="quickActions" style="display:none"></div>
       <div id="miniInfo" style="display:none"></div>
       <div id="profileBtnWrap">
         <button class="profile-btn" id="profileBtn" onclick="openProfileModal()" style="display:none">
@@ -7283,10 +7282,11 @@ try {
       try { await syncOnlineScore(); } catch(e) { console.warn('syncOnlineScore hata:', e); }
       try { await loadProfileFromCloud(); } catch(e) { console.warn('loadProfileFromCloud hata:', e); }
       try { updateWallet(); } catch(e) {}
-      try { setTimeout(checkDailyLogin, 1500); } catch(e) {}
       try { loadGroqDailyTasks().then(function() { updateDailyTasks(); }); } catch(e) {}
       try { loadGroqWeeklyTasks(); } catch(e) {}
       try { scheduleDailyReset(); } catch(e) {}
+      /* checkDailyLogin profil yüklendikten sonra — erken tetiklenmeyi önler */
+      setTimeout(function() { try { checkDailyLogin(); } catch(e) {} }, 2500);
     }
 
     /* Okunmamış mesaj listener'ı başlat */
@@ -7725,10 +7725,10 @@ async function handleEmailAuth() {
     try { await syncOnlineScore(); } catch(e) {}
     try { await loadProfileFromCloud(); } catch(e) {}
     try { updateWallet(); } catch(e) {}
-    try { setTimeout(checkDailyLogin, 1500); } catch(e) {}
     try { loadGroqDailyTasks().then(function() { updateDailyTasks(); }); } catch(e) {}
     try { loadGroqWeeklyTasks(); } catch(e) {}
     try { scheduleDailyReset(); } catch(e) {}
+    setTimeout(function() { try { checkDailyLogin(); } catch(e) {} }, 2500);
     try { startUnreadListener(); } catch(e) {}
     try { startOnlinePing(); } catch(e) {}
 
