@@ -655,8 +655,7 @@ input, textarea, select {
 #authModal, #profileModal, #pinModal, #adminModal, #achModal,
 #bgLibModal, #aboutModal, #publicProfileModal, #settingsModal,
 #confirmModal, #achPopup, #requestModal, #chatModal,
-#reqPanelNew, #reqPanelMy, #settingsPanel,
-#shopModal, #questModal, #clanModal {
+#reqPanelNew, #reqPanelMy, #settingsPanel {
   display: none;
 }
 #authModal.show, #profileModal.show, #pinModal.show,
@@ -668,6 +667,17 @@ input, textarea, select {
 }
 #settingsPanel.show, #reqPanelNew.show, #reqPanelMy.show {
   display: block !important;
+}
+
+/* ── Yeni Modallar (Mağaza / Görevler / Klan) ── */
+#shopModal, #questModal, #clanModal {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  background: rgba(8,11,18,0.96);
+  backdrop-filter: blur(20px);
+  align-items: flex-end;
+  justify-content: center;
 }
 
 /* ── Auth Modal ──────────────────────────────────────── */
@@ -3321,6 +3331,7 @@ function defaultState() {
     loginStreak: 0,   /* günlük giriş serisi */
     lastLoginDate: null,
     clanId: null,     /* üye olduğu klan */
+    _economyV26: true,
   };
 }
 let state = defaultState();
@@ -3404,12 +3415,27 @@ function loadState(uid) {
     if (stored) {
       var raw = JSON.parse(stored);
       state = Object.assign(defaultState(), raw);
+      /* v2.6 ekonomi sistemi yeni — eski kayıtta yoksa sıfırdan başlat */
+      if (!raw._economyV26) {
+        state.coins    = 0;
+        state.diamonds = 0;
+        state.jokers   = { skip:0, hint:0, freeze:0, double:0 };
+        state.inventory = [];
+        state._shopBuys = 0;
+        state._jokersUsed = 0;
+        state._economyV26 = true;
+        /* Kalıcı/başarım görevlerini de sıfırla */
+        state.permTasks    = null;
+        state.achieveTasks = null;
+      }
     } else {
       state = defaultState();
+      state._economyV26 = true;
     }
   } catch(e) {
     console.warn('[loadState] HATA:', e);
     state = defaultState();
+    state._economyV26 = true;
   }
 }
 function saveState() {
