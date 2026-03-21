@@ -4078,6 +4078,7 @@ function useJoker(key) {
   if (!gameScreen || gameScreen.style.display === 'none') return;
 
   state.jokers[key]--;
+  state._jokersUsed = (state._jokersUsed || 0) + 1;
   saveState();
   updateJokerUI();
 
@@ -6128,93 +6129,200 @@ function showLevelUpScreen(newLevel, callback) {
 
 /* ── GÜNLÜK GÖREV SİSTEMİ ────────────────────────────────── */
 const DAILY_TASK_POOL = [
-  { id:'d_correct_5',    icon:'🎯', title:'İlk Adım',          desc:'5 doğru cevap ver',                 target:5,   key:'totalCorrect',   type:'stat',  reward:{coins:50} },
-  { id:'d_correct_10',   icon:'🎯', title:'Keskin Nişancı',    desc:'10 doğru cevap ver',                target:10,  key:'totalCorrect',   type:'stat',  reward:{coins:100} },
-  { id:'d_correct_20',   icon:'⚡', title:'Hız Treni',         desc:'20 doğru cevap ver',                target:20,  key:'totalCorrect',   type:'stat',  reward:{coins:200} },
-  { id:'d_correct_30',   icon:'💥', title:'Çarpıcı',           desc:'30 doğru cevap ver',                target:30,  key:'totalCorrect',   type:'stat',  reward:{coins:300} },
-  { id:'d_streak_3',     icon:'🔥', title:'Seri Başlangıç',    desc:'3 doğru arka arkaya yap',           target:3,   key:'bestStreak',     type:'stat',  reward:{coins:80} },
-  { id:'d_streak_5',     icon:'🔥', title:'Seriye Gir',        desc:'5 doğru arka arkaya yap',           target:5,   key:'bestStreak',     type:'stat',  reward:{coins:150} },
-  { id:'d_streak_10',    icon:'🌪️', title:'Durdurulamaz',      desc:'10 doğru arka arkaya yap',          target:10,  key:'bestStreak',     type:'stat',  reward:{coins:300} },
-  { id:'d_streak_15',    icon:'💫', title:'Efsane Seri',       desc:'15 doğru arka arkaya yap',          target:15,  key:'bestStreak',     type:'stat',  reward:{coins:500, diamonds:3} },
-  { id:'d_score_200',    icon:'💰', title:'İlk Kazanım',       desc:'200 puana ulaş',                    target:200, key:'score',          type:'score', reward:{coins:80} },
-  { id:'d_score_500',    icon:'💰', title:'Beş Yüz',           desc:'500 puana ulaş',                    target:500, key:'score',          type:'score', reward:{coins:150} },
-  { id:'d_score_1000',   icon:'💎', title:'Bin Puan',          desc:'1000 puana ulaş',                   target:1000,key:'score',          type:'score', reward:{coins:300} },
-  { id:'d_answered_10',  icon:'📚', title:'Meraklı',           desc:'10 soru cevapla',                   target:10,  key:'totalAnswered',  type:'stat',  reward:{coins:70} },
-  { id:'d_answered_20',  icon:'📚', title:'Çalışkan',          desc:'20 soru cevapla',                   target:20,  key:'totalAnswered',  type:'stat',  reward:{coins:120} },
-  { id:'d_answered_50',  icon:'📗', title:'Kitaplık',          desc:'50 soru cevapla',                   target:50,  key:'totalAnswered',  type:'stat',  reward:{coins:250} },
-  { id:'d_level_1',      icon:'🚀', title:'Tırmanış',          desc:'1 seviye atla',                     target:1,   key:'dailyLevelUps',  type:'daily', reward:{coins:200} },
-  { id:'d_level_3',      icon:'📈', title:'Sürekli Yüksel',    desc:'3 seviye atla',                     target:3,   key:'dailyLevelUps',  type:'daily', reward:{coins:400, diamonds:2} },
-  { id:'d_absurd_3',     icon:'🤔', title:'Absürt Başlangıç',  desc:'Absürt modda 3 soru cevapla',       target:3,   key:'absurdPlayed',   type:'stat',  reward:{coins:80} },
-  { id:'d_absurd_5',     icon:'🤪', title:'Absürt Mod',        desc:'Absürt modda 5 soru cevapla',       target:5,   key:'absurdPlayed',   type:'stat',  reward:{coins:120} },
-  { id:'d_absurd_10',    icon:'🌀', title:'Absürt Uzmanı',     desc:'Absürt modda 10 soru cevapla',      target:10,  key:'absurdPlayed',   type:'stat',  reward:{coins:200} },
-  { id:'d_no_wrong_3',   icon:'✨', title:'Temiz Sayfa',       desc:'Hiç yanlış yapmadan 3 soru',        target:3,   key:'currentNoWrong', type:'stat',  reward:{coins:100} },
-  { id:'d_no_wrong_5',   icon:'✨', title:'Hatasız',           desc:'Hiç yanlış yapmadan 5 soru',        target:5,   key:'currentNoWrong', type:'stat',  reward:{coins:200} },
-  { id:'d_no_wrong_10',  icon:'💎', title:'Kusursuz',          desc:'Hiç yanlış yapmadan 10 soru',       target:10,  key:'currentNoWrong', type:'stat',  reward:{coins:400, diamonds:3} },
-  { id:'d_time_2min',    icon:'⏱️', title:'Isındım',           desc:'2 dakika oyna',                     target:120, key:'totalTimeSec',   type:'stat',  reward:{coins:70} },
-  { id:'d_time_5min',    icon:'⏱️', title:'Adanmış',           desc:'5 dakika oyna',                     target:300, key:'totalTimeSec',   type:'stat',  reward:{coins:150} },
-  { id:'d_time_10min',   icon:'⌛', title:'Maraton',           desc:'10 dakika oyna',                    target:600, key:'totalTimeSec',   type:'stat',  reward:{coins:300, diamonds:2} },
-  { id:'d_wrong_0',      icon:'🛡️', title:'Dokunulmaz',        desc:'Hiç yanlış yapmadan oyna (5 soru)', target:5,   key:'currentNoWrong', type:'stat',  reward:{coins:350, diamonds:2} },
+  { id:'d_correct_5',   icon:'🎯', title:'İlk Adım',         desc:'5 doğru cevap ver',               target:5,   key:'totalCorrect',   type:'stat',  reward:{coins:60} },
+  { id:'d_correct_10',  icon:'🎯', title:'Keskin Nişancı',   desc:'10 doğru cevap ver',              target:10,  key:'totalCorrect',   type:'stat',  reward:{coins:120} },
+  { id:'d_correct_20',  icon:'⚡', title:'Hız Treni',        desc:'20 doğru cevap ver',              target:20,  key:'totalCorrect',   type:'stat',  reward:{coins:220} },
+  { id:'d_correct_30',  icon:'💥', title:'Çarpıcı',          desc:'30 doğru cevap ver',              target:30,  key:'totalCorrect',   type:'stat',  reward:{coins:320} },
+  { id:'d_correct_50',  icon:'🌟', title:'Yarım Yüz',        desc:'50 doğru cevap ver',              target:50,  key:'totalCorrect',   type:'stat',  reward:{coins:450, diamonds:2} },
+  { id:'d_streak_3',    icon:'🔥', title:'Seri Başlangıç',   desc:'3 doğru arka arkaya yap',         target:3,   key:'bestStreak',     type:'stat',  reward:{coins:80} },
+  { id:'d_streak_5',    icon:'🔥', title:'Seriye Gir',       desc:'5 doğru arka arkaya yap',         target:5,   key:'bestStreak',     type:'stat',  reward:{coins:160} },
+  { id:'d_streak_10',   icon:'🌪️', title:'Durdurulamaz',     desc:'10 doğru arka arkaya yap',        target:10,  key:'bestStreak',     type:'stat',  reward:{coins:320} },
+  { id:'d_streak_15',   icon:'💫', title:'Efsane Seri',      desc:'15 doğru arka arkaya yap',        target:15,  key:'bestStreak',     type:'stat',  reward:{coins:500, diamonds:3} },
+  { id:'d_score_200',   icon:'💰', title:'İlk Kazanım',      desc:'200 puana ulaş',                  target:200, key:'score',          type:'score', reward:{coins:90} },
+  { id:'d_score_500',   icon:'💰', title:'Beş Yüz',          desc:'500 puana ulaş',                  target:500, key:'score',          type:'score', reward:{coins:160} },
+  { id:'d_score_1000',  icon:'💎', title:'Bin Puan',         desc:'1000 puana ulaş',                 target:1000,key:'score',          type:'score', reward:{coins:320} },
+  { id:'d_score_2000',  icon:'💎', title:'İki Bin',          desc:'2000 puana ulaş',                 target:2000,key:'score',          type:'score', reward:{coins:500, diamonds:2} },
+  { id:'d_answered_10', icon:'📚', title:'Meraklı',          desc:'10 soru cevapla',                 target:10,  key:'totalAnswered',  type:'stat',  reward:{coins:70} },
+  { id:'d_answered_20', icon:'📚', title:'Çalışkan',         desc:'20 soru cevapla',                 target:20,  key:'totalAnswered',  type:'stat',  reward:{coins:130} },
+  { id:'d_answered_50', icon:'📗', title:'Kitaplık',         desc:'50 soru cevapla',                 target:50,  key:'totalAnswered',  type:'stat',  reward:{coins:280} },
+  { id:'d_level_1',     icon:'🚀', title:'Tırmanış',         desc:'1 seviye atla',                   target:1,   key:'dailyLevelUps',  type:'daily', reward:{coins:200} },
+  { id:'d_level_3',     icon:'📈', title:'Sürekli Yüksel',   desc:'3 seviye atla',                   target:3,   key:'dailyLevelUps',  type:'daily', reward:{coins:400, diamonds:2} },
+  { id:'d_absurd_3',    icon:'🤔', title:'Absürt Başlangıç', desc:'Absürt modda 3 soru cevapla',     target:3,   key:'absurdPlayed',   type:'stat',  reward:{coins:90} },
+  { id:'d_absurd_5',    icon:'🤪', title:'Absürt Mod',       desc:'Absürt modda 5 soru cevapla',     target:5,   key:'absurdPlayed',   type:'stat',  reward:{coins:140} },
+  { id:'d_absurd_10',   icon:'🌀', title:'Absürt Uzmanı',    desc:'Absürt modda 10 soru cevapla',    target:10,  key:'absurdPlayed',   type:'stat',  reward:{coins:220} },
+  { id:'d_no_wrong_3',  icon:'✨', title:'Temiz Sayfa',      desc:'Hiç yanlış yapmadan 3 soru',      target:3,   key:'currentNoWrong', type:'stat',  reward:{coins:110} },
+  { id:'d_no_wrong_5',  icon:'✨', title:'Hatasız',          desc:'Hiç yanlış yapmadan 5 soru',      target:5,   key:'currentNoWrong', type:'stat',  reward:{coins:210} },
+  { id:'d_no_wrong_10', icon:'💎', title:'Kusursuz',         desc:'Hiç yanlış yapmadan 10 soru',     target:10,  key:'currentNoWrong', type:'stat',  reward:{coins:400, diamonds:3} },
+  { id:'d_time_2min',   icon:'⏱️', title:'Isındım',          desc:'2 dakika oyna',                   target:120, key:'totalTimeSec',   type:'stat',  reward:{coins:70} },
+  { id:'d_time_5min',   icon:'⏱️', title:'Adanmış',          desc:'5 dakika oyna',                   target:300, key:'totalTimeSec',   type:'stat',  reward:{coins:160} },
+  { id:'d_time_10min',  icon:'⌛', title:'Maraton',          desc:'10 dakika oyna',                  target:600, key:'totalTimeSec',   type:'stat',  reward:{coins:300, diamonds:2} },
 ];
+/* Havuz ek olarak Groq'tan gelen görevlerle birleşir — bkz. loadGroqDailyTasks() */
 
 /* Haftalık görevler */
 var WEEKLY_TASK_POOL = [
-  { id:'w_correct_50',   icon:'🎯', title:'Elli Atış',         desc:'Bu hafta 50 doğru cevap ver',       target:50,  key:'totalCorrect',   type:'stat',  reward:{coins:300, diamonds:3} },
-  { id:'w_correct_100',  icon:'🎯', title:'Yüz Atış',          desc:'Bu hafta 100 doğru cevap ver',      target:100, key:'totalCorrect',   type:'stat',  reward:{coins:500, diamonds:5} },
-  { id:'w_correct_200',  icon:'⚡', title:'İki Yüz Atış',      desc:'Bu hafta 200 doğru cevap ver',      target:200, key:'totalCorrect',   type:'stat',  reward:{coins:1000,diamonds:10} },
-  { id:'w_score_1000',   icon:'💰', title:'Bin Puan Haftası',  desc:'Bu hafta 1000 puana ulaş',          target:1000,key:'score',          type:'score', reward:{coins:400, diamonds:5} },
-  { id:'w_score_3000',   icon:'💎', title:'Büyük Skor',        desc:'Bu hafta 3000 puana ulaş',          target:3000,key:'score',          type:'score', reward:{coins:800, diamonds:12} },
-  { id:'w_score_5000',   icon:'🏆', title:'Skor Canavarı',     desc:'Bu hafta 5000 puana ulaş',          target:5000,key:'score',          type:'score', reward:{coins:1500,diamonds:20} },
-  { id:'w_streak_10',    icon:'🔥', title:'Haftalık Seri',     desc:'10 doğru arka arkaya yap',          target:10,  key:'bestStreak',     type:'stat',  reward:{coins:400, diamonds:5} },
-  { id:'w_streak_20',    icon:'🌊', title:'Dalga',             desc:'20 doğru arka arkaya yap',          target:20,  key:'bestStreak',     type:'stat',  reward:{coins:800, diamonds:10} },
-  { id:'w_level_3',      icon:'📈', title:'Sürekli Yüksel',    desc:'Bu hafta 3 seviye atla',            target:3,   key:'dailyLevelUps',  type:'daily', reward:{coins:400, diamonds:5} },
-  { id:'w_level_7',      icon:'🚀', title:'Roket',             desc:'Bu hafta 7 seviye atla',            target:7,   key:'dailyLevelUps',  type:'daily', reward:{coins:800, diamonds:10} },
-  { id:'w_absurd_15',    icon:'🤪', title:'Absürt Haftası',    desc:'Absürt modda 15 soru cevapla',      target:15,  key:'absurdPlayed',   type:'stat',  reward:{coins:350, diamonds:5} },
-  { id:'w_absurd_30',    icon:'🌀', title:'Absürt Ustası',     desc:'Absürt modda 30 soru cevapla',      target:30,  key:'absurdPlayed',   type:'stat',  reward:{coins:700, diamonds:10} },
-  { id:'w_answered_100', icon:'📚', title:'Yüz Soru',         desc:'Bu hafta 100 soru cevapla',         target:100, key:'totalAnswered',  type:'stat',  reward:{coins:600, diamonds:8} },
-  { id:'w_time_30min',   icon:'⌛', title:'Haftalık Maraton',  desc:'Toplam 30 dakika oyna',             target:1800,key:'totalTimeSec',   type:'stat',  reward:{coins:500, diamonds:6} },
-  { id:'w_no_wrong_10',  icon:'💎', title:'Haftalık Kusursuz', desc:'Hiç yanlış yapmadan 10 soru',       target:10,  key:'currentNoWrong', type:'stat',  reward:{coins:500, diamonds:8} },
+  { id:'w_correct_50',   icon:'🎯', title:'Elli Atış',          desc:'Bu hafta 50 doğru cevap ver',     target:50,   key:'totalCorrect',  type:'stat',  reward:{coins:300,  diamonds:3} },
+  { id:'w_correct_100',  icon:'🎯', title:'Yüz Atış',           desc:'Bu hafta 100 doğru cevap ver',    target:100,  key:'totalCorrect',  type:'stat',  reward:{coins:500,  diamonds:5} },
+  { id:'w_correct_200',  icon:'⚡', title:'İki Yüz Atış',       desc:'Bu hafta 200 doğru cevap ver',    target:200,  key:'totalCorrect',  type:'stat',  reward:{coins:1000, diamonds:10} },
+  { id:'w_correct_500',  icon:'👑', title:'Beş Yüz Atış',       desc:'Bu hafta 500 doğru cevap ver',    target:500,  key:'totalCorrect',  type:'stat',  reward:{coins:2500, diamonds:25} },
+  { id:'w_score_1000',   icon:'💰', title:'Bin Puan Haftası',   desc:'Bu hafta 1000 puana ulaş',        target:1000, key:'score',         type:'score', reward:{coins:400,  diamonds:5} },
+  { id:'w_score_3000',   icon:'💎', title:'Büyük Skor',         desc:'Bu hafta 3000 puana ulaş',        target:3000, key:'score',         type:'score', reward:{coins:800,  diamonds:12} },
+  { id:'w_score_5000',   icon:'🏆', title:'Skor Canavarı',      desc:'Bu hafta 5000 puana ulaş',        target:5000, key:'score',         type:'score', reward:{coins:1500, diamonds:20} },
+  { id:'w_score_10000',  icon:'💫', title:'On Bin Haftası',     desc:'Bu hafta 10000 puana ulaş',       target:10000,key:'score',         type:'score', reward:{coins:3000, diamonds:40} },
+  { id:'w_streak_10',    icon:'🔥', title:'Haftalık Seri',      desc:'10 doğru arka arkaya yap',        target:10,   key:'bestStreak',    type:'stat',  reward:{coins:400,  diamonds:5} },
+  { id:'w_streak_20',    icon:'🌊', title:'Dalga',              desc:'20 doğru arka arkaya yap',        target:20,   key:'bestStreak',    type:'stat',  reward:{coins:800,  diamonds:10} },
+  { id:'w_streak_30',    icon:'☄️', title:'Meteor',             desc:'30 doğru arka arkaya yap',        target:30,   key:'bestStreak',    type:'stat',  reward:{coins:1500, diamonds:20} },
+  { id:'w_level_3',      icon:'📈', title:'Sürekli Yüksel',     desc:'Bu hafta 3 seviye atla',          target:3,    key:'dailyLevelUps', type:'daily', reward:{coins:400,  diamonds:5} },
+  { id:'w_level_7',      icon:'🚀', title:'Roket',              desc:'Bu hafta 7 seviye atla',          target:7,    key:'dailyLevelUps', type:'daily', reward:{coins:800,  diamonds:10} },
+  { id:'w_level_10',     icon:'🚀', title:'Haftalık 10 Seviye', desc:'Bu hafta 10 seviye atla',         target:10,   key:'dailyLevelUps', type:'daily', reward:{coins:1200, diamonds:15} },
+  { id:'w_absurd_15',    icon:'🤪', title:'Absürt Haftası',     desc:'Absürt modda 15 soru cevapla',    target:15,   key:'absurdPlayed',  type:'stat',  reward:{coins:350,  diamonds:5} },
+  { id:'w_absurd_30',    icon:'🌀', title:'Absürt Ustası',      desc:'Absürt modda 30 soru cevapla',    target:30,   key:'absurdPlayed',  type:'stat',  reward:{coins:700,  diamonds:10} },
+  { id:'w_absurd_50',    icon:'🧿', title:'Absürt Efsanesi',    desc:'Absürt modda 50 soru cevapla',    target:50,   key:'absurdPlayed',  type:'stat',  reward:{coins:1200, diamonds:18} },
+  { id:'w_answered_100', icon:'📚', title:'Yüz Soru',           desc:'Bu hafta 100 soru cevapla',       target:100,  key:'totalAnswered', type:'stat',  reward:{coins:600,  diamonds:8} },
+  { id:'w_answered_200', icon:'📗', title:'İki Yüz Soru',       desc:'Bu hafta 200 soru cevapla',       target:200,  key:'totalAnswered', type:'stat',  reward:{coins:1200, diamonds:15} },
+  { id:'w_time_30min',   icon:'⌛', title:'Haftalık Maraton',   desc:'Toplam 30 dakika oyna',           target:1800, key:'totalTimeSec',  type:'stat',  reward:{coins:500,  diamonds:6} },
+  { id:'w_time_60min',   icon:'⏰', title:'Bir Saat',           desc:'Toplam 60 dakika oyna',           target:3600, key:'totalTimeSec',  type:'stat',  reward:{coins:1000, diamonds:12} },
+  { id:'w_no_wrong_10',  icon:'💎', title:'Haftalık Kusursuz',  desc:'Hiç yanlış yapmadan 10 soru',     target:10,   key:'currentNoWrong',type:'stat',  reward:{coins:500,  diamonds:8} },
+  { id:'w_no_wrong_20',  icon:'👑', title:'Haftalık Efsane',    desc:'Hiç yanlış yapmadan 20 soru',     target:20,   key:'currentNoWrong',type:'stat',  reward:{coins:1000, diamonds:15} },
 ];
 
-/* Kalıcı görevler */
+/* Kalıcı görevler — 100 görev, oyun başından sonuna */
 var PERM_TASK_POOL = [
-  { id:'p_first_q',      icon:'🎮', title:'İlk Adım',          desc:'İlk soruyu cevapla',                target:1,    key:'totalAnswered',  type:'stat',  reward:{coins:200,  diamonds:5} },
-  { id:'p_correct_10',   icon:'✅', title:'On Doğru',          desc:'Toplam 10 doğru cevap ver',         target:10,   key:'totalCorrect',   type:'stat',  reward:{coins:200,  diamonds:3} },
-  { id:'p_correct_50',   icon:'🎯', title:'Elli Atış',         desc:'Toplam 50 doğru cevap ver',         target:50,   key:'totalCorrect',   type:'stat',  reward:{coins:400,  diamonds:5} },
-  { id:'p_correct_100',  icon:'💯', title:'Yüz Doğru',         desc:'Toplam 100 doğru cevap ver',        target:100,  key:'totalCorrect',   type:'stat',  reward:{coins:600,  diamonds:8} },
-  { id:'p_correct_500',  icon:'⚡', title:'Beş Yüz Atış',     desc:'Toplam 500 doğru cevap ver',        target:500,  key:'totalCorrect',   type:'stat',  reward:{coins:2000, diamonds:30} },
-  { id:'p_correct_1000', icon:'👑', title:'Bin Atış',          desc:'Toplam 1000 doğru cevap ver',       target:1000, key:'totalCorrect',   type:'stat',  reward:{coins:5000, diamonds:100} },
-  { id:'p_score_1000',   icon:'💰', title:'Bin Puan',          desc:'1000 puana ulaş',                   target:1000, key:'score',          type:'score', reward:{coins:300,  diamonds:5} },
-  { id:'p_score_5000',   icon:'💎', title:'Beş Bin',           desc:'5000 puana ulaş',                   target:5000, key:'score',          type:'score', reward:{coins:1000, diamonds:20} },
-  { id:'p_score_10000',  icon:'🏆', title:'On Bin',            desc:'10000 puana ulaş',                  target:10000,key:'score',          type:'score', reward:{coins:2000, diamonds:40} },
-  { id:'p_score_50000',  icon:'🌟', title:'Elli Bin',          desc:'50000 puana ulaş',                  target:50000,key:'score',          type:'score', reward:{coins:8000, diamonds:150} },
-  { id:'p_streak_5',     icon:'🔥', title:'İlk Seri',          desc:'5 doğru arka arkaya yap',           target:5,    key:'bestStreak',     type:'stat',  reward:{coins:300,  diamonds:5} },
-  { id:'p_streak_10',    icon:'💥', title:'Seri Uzmanı',       desc:'10 doğru arka arkaya yap',          target:10,   key:'bestStreak',     type:'stat',  reward:{coins:500,  diamonds:10} },
-  { id:'p_streak_20',    icon:'🌪️', title:'Efsane Seri',       desc:'20 doğru arka arkaya yap',          target:20,   key:'bestStreak',     type:'stat',  reward:{coins:800,  diamonds:15} },
-  { id:'p_streak_50',    icon:'☄️', title:'Meteor',            desc:'50 doğru arka arkaya yap',          target:50,   key:'bestStreak',     type:'stat',  reward:{coins:3000, diamonds:60} },
-  { id:'p_level_5',      icon:'🌱', title:'Yükselen',          desc:'5. seviyeye ulaş',                  target:5,    key:'highestLevel',   type:'stat',  reward:{coins:300,  diamonds:5} },
-  { id:'p_level_10',     icon:'🚀', title:'Seviye 10',         desc:'10. seviyeye ulaş',                 target:10,   key:'highestLevel',   type:'stat',  reward:{coins:600,  diamonds:10} },
-  { id:'p_level_25',     icon:'⭐', title:'Seviye 25',         desc:'25. seviyeye ulaş',                 target:25,   key:'highestLevel',   type:'stat',  reward:{coins:1500, diamonds:30} },
-  { id:'p_level_50',     icon:'🌟', title:'Seviye 50',         desc:'50. seviyeye ulaş',                 target:50,   key:'highestLevel',   type:'stat',  reward:{coins:3000, diamonds:60} },
-  { id:'p_level_100',    icon:'👑', title:'Seviye 100',        desc:'100. seviyeye ulaş',                target:100,  key:'highestLevel',   type:'stat',  reward:{coins:8000, diamonds:200} },
-  { id:'p_absurd_10',    icon:'🤪', title:'Absürt Başlangıç', desc:'Absürt modda 10 soru cevapla',      target:10,   key:'absurdPlayed',   type:'stat',  reward:{coins:300,  diamonds:5} },
-  { id:'p_absurd_50',    icon:'🌀', title:'Absürt Uzmanı',    desc:'Absürt modda 50 soru cevapla',      target:50,   key:'absurdPlayed',   type:'stat',  reward:{coins:1000, diamonds:20} },
-  { id:'p_absurd_100',   icon:'🧿', title:'Absürt Efsanesi',  desc:'Absürt modda 100 soru cevapla',     target:100,  key:'absurdPlayed',   type:'stat',  reward:{coins:2000, diamonds:40} },
-  { id:'p_shop_buy',     icon:'🏪', title:'İlk Alışveriş',   desc:'Mağazadan bir şey satın al',        target:1,    key:'shopBuys',       type:'stat',  reward:{coins:200,  diamonds:5} },
-  { id:'p_login_3',      icon:'📅', title:'3 Gün Giriş',     desc:'3 gün üst üste giriş yap',          target:3,    key:'loginStreak',    type:'stat',  reward:{coins:300,  diamonds:5} },
-  { id:'p_login_7',      icon:'🗓️', title:'Haftalık Giriş',  desc:'7 gün üst üste giriş yap',          target:7,    key:'loginStreak',    type:'stat',  reward:{coins:700,  diamonds:15} },
-  { id:'p_login_30',     icon:'🏅', title:'Aylık Giriş',     desc:'30 gün üst üste giriş yap',         target:30,   key:'loginStreak',    type:'stat',  reward:{coins:3000, diamonds:60} },
-  { id:'p_clan_join',    icon:'👥', title:'Sosyal',           desc:'Bir klana katıl veya klan kur',      target:1,    key:'clanJoined',     type:'stat',  reward:{coins:500,  diamonds:10} },
+  /* ── DOĞRU CEVAP (11 aşama) ── */
+  { id:'p_c1',    icon:'✅', title:'İlk Doğru',            desc:'İlk doğru cevabını ver',           target:1,      key:'totalCorrect',   type:'stat',  reward:{coins:100,   diamonds:2} },
+  { id:'p_c5',    icon:'🎯', title:'Beş Doğru',            desc:'Toplam 5 doğru cevap ver',         target:5,      key:'totalCorrect',   type:'stat',  reward:{coins:150,   diamonds:2} },
+  { id:'p_c10',   icon:'🎯', title:'On Doğru',             desc:'Toplam 10 doğru cevap ver',        target:10,     key:'totalCorrect',   type:'stat',  reward:{coins:200,   diamonds:3} },
+  { id:'p_c25',   icon:'🎯', title:'Yirmi Beş Doğru',      desc:'Toplam 25 doğru cevap ver',        target:25,     key:'totalCorrect',   type:'stat',  reward:{coins:300,   diamonds:4} },
+  { id:'p_c50',   icon:'🎯', title:'Elli Doğru',           desc:'Toplam 50 doğru cevap ver',        target:50,     key:'totalCorrect',   type:'stat',  reward:{coins:400,   diamonds:5} },
+  { id:'p_c100',  icon:'💯', title:'Yüz Doğru',            desc:'Toplam 100 doğru cevap ver',       target:100,    key:'totalCorrect',   type:'stat',  reward:{coins:600,   diamonds:8} },
+  { id:'p_c250',  icon:'⚡', title:'İki Yüz Elli',         desc:'Toplam 250 doğru cevap ver',       target:250,    key:'totalCorrect',   type:'stat',  reward:{coins:1000,  diamonds:15} },
+  { id:'p_c500',  icon:'⚡', title:'Beş Yüz Doğru',        desc:'Toplam 500 doğru cevap ver',       target:500,    key:'totalCorrect',   type:'stat',  reward:{coins:2000,  diamonds:30} },
+  { id:'p_c1000', icon:'🌟', title:'Bin Doğru',            desc:'Toplam 1000 doğru cevap ver',      target:1000,   key:'totalCorrect',   type:'stat',  reward:{coins:5000,  diamonds:80} },
+  { id:'p_c2500', icon:'👑', title:'İki Bin Beş Yüz',      desc:'Toplam 2500 doğru cevap ver',      target:2500,   key:'totalCorrect',   type:'stat',  reward:{coins:10000, diamonds:150} },
+  { id:'p_c5000', icon:'💎', title:'Beş Bin Doğru',        desc:'Toplam 5000 doğru cevap ver',      target:5000,   key:'totalCorrect',   type:'stat',  reward:{coins:20000, diamonds:300} },
+  /* ── PUAN (10 aşama) ── */
+  { id:'p_s100',  icon:'💰', title:'Yüz Puan',             desc:'100 puana ulaş',                   target:100,    key:'score',          type:'score', reward:{coins:100,   diamonds:2} },
+  { id:'p_s500',  icon:'💰', title:'Beş Yüz Puan',         desc:'500 puana ulaş',                   target:500,    key:'score',          type:'score', reward:{coins:200,   diamonds:3} },
+  { id:'p_s1k',   icon:'💰', title:'Bin Puan',             desc:'1000 puana ulaş',                  target:1000,   key:'score',          type:'score', reward:{coins:300,   diamonds:5} },
+  { id:'p_s2k5',  icon:'💎', title:'İki Bin Beş',          desc:'2500 puana ulaş',                  target:2500,   key:'score',          type:'score', reward:{coins:600,   diamonds:10} },
+  { id:'p_s5k',   icon:'💎', title:'Beş Bin',              desc:'5000 puana ulaş',                  target:5000,   key:'score',          type:'score', reward:{coins:1000,  diamonds:20} },
+  { id:'p_s10k',  icon:'🏆', title:'On Bin',               desc:'10000 puana ulaş',                 target:10000,  key:'score',          type:'score', reward:{coins:2000,  diamonds:40} },
+  { id:'p_s25k',  icon:'🌟', title:'Yirmi Beş Bin',        desc:'25000 puana ulaş',                 target:25000,  key:'score',          type:'score', reward:{coins:5000,  diamonds:80} },
+  { id:'p_s50k',  icon:'👑', title:'Elli Bin',             desc:'50000 puana ulaş',                 target:50000,  key:'score',          type:'score', reward:{coins:8000,  diamonds:150} },
+  { id:'p_s100k', icon:'💫', title:'Yüz Bin',              desc:'100000 puana ulaş',                target:100000, key:'score',          type:'score', reward:{coins:20000, diamonds:350} },
+  { id:'p_s500k', icon:'🌌', title:'Beş Yüz Bin',          desc:'500000 puana ulaş',                target:500000, key:'score',          type:'score', reward:{coins:80000, diamonds:1000} },
+  /* ── SERİ (9 aşama) ── */
+  { id:'p_st3',   icon:'🔥', title:'İlk Seri',             desc:'3 doğru arka arkaya yap',          target:3,      key:'bestStreak',     type:'stat',  reward:{coins:150,   diamonds:2} },
+  { id:'p_st5',   icon:'🔥', title:'Beşli Seri',           desc:'5 doğru arka arkaya yap',          target:5,      key:'bestStreak',     type:'stat',  reward:{coins:300,   diamonds:5} },
+  { id:'p_st10',  icon:'💥', title:'Onlu Seri',            desc:'10 doğru arka arkaya yap',         target:10,     key:'bestStreak',     type:'stat',  reward:{coins:500,   diamonds:10} },
+  { id:'p_st15',  icon:'🌪️', title:'Kasırga',              desc:'15 doğru arka arkaya yap',         target:15,     key:'bestStreak',     type:'stat',  reward:{coins:800,   diamonds:15} },
+  { id:'p_st20',  icon:'🌪️', title:'Efsane Seri',          desc:'20 doğru arka arkaya yap',         target:20,     key:'bestStreak',     type:'stat',  reward:{coins:1200,  diamonds:20} },
+  { id:'p_st30',  icon:'☄️', title:'Meteor',               desc:'30 doğru arka arkaya yap',         target:30,     key:'bestStreak',     type:'stat',  reward:{coins:2000,  diamonds:35} },
+  { id:'p_st50',  icon:'💎', title:'Elmas Seri',           desc:'50 doğru arka arkaya yap',         target:50,     key:'bestStreak',     type:'stat',  reward:{coins:3500,  diamonds:60} },
+  { id:'p_st75',  icon:'🌟', title:'Yıldız Seri',          desc:'75 doğru arka arkaya yap',         target:75,     key:'bestStreak',     type:'stat',  reward:{coins:6000,  diamonds:100} },
+  { id:'p_st100', icon:'👑', title:'Efsane 100',           desc:'100 doğru arka arkaya yap',        target:100,    key:'bestStreak',     type:'stat',  reward:{coins:10000, diamonds:200} },
+  /* ── SEVİYE (14 aşama) ── */
+  { id:'p_lv2',   icon:'🌱', title:'İlk Seviye',           desc:'2. seviyeye ulaş',                 target:2,      key:'highestLevel',   type:'stat',  reward:{coins:100,   diamonds:2} },
+  { id:'p_lv5',   icon:'🌱', title:'Seviye 5',             desc:'5. seviyeye ulaş',                 target:5,      key:'highestLevel',   type:'stat',  reward:{coins:300,   diamonds:5} },
+  { id:'p_lv10',  icon:'🚀', title:'Seviye 10',            desc:'10. seviyeye ulaş',                target:10,     key:'highestLevel',   type:'stat',  reward:{coins:600,   diamonds:10} },
+  { id:'p_lv15',  icon:'🚀', title:'Seviye 15',            desc:'15. seviyeye ulaş',                target:15,     key:'highestLevel',   type:'stat',  reward:{coins:900,   diamonds:15} },
+  { id:'p_lv20',  icon:'⭐', title:'Seviye 20',            desc:'20. seviyeye ulaş',                target:20,     key:'highestLevel',   type:'stat',  reward:{coins:1200,  diamonds:20} },
+  { id:'p_lv25',  icon:'⭐', title:'Seviye 25',            desc:'25. seviyeye ulaş',                target:25,     key:'highestLevel',   type:'stat',  reward:{coins:1500,  diamonds:25} },
+  { id:'p_lv30',  icon:'💫', title:'Seviye 30',            desc:'30. seviyeye ulaş',                target:30,     key:'highestLevel',   type:'stat',  reward:{coins:2000,  diamonds:35} },
+  { id:'p_lv40',  icon:'🌟', title:'Seviye 40',            desc:'40. seviyeye ulaş',                target:40,     key:'highestLevel',   type:'stat',  reward:{coins:3000,  diamonds:50} },
+  { id:'p_lv50',  icon:'🌟', title:'Seviye 50',            desc:'50. seviyeye ulaş',                target:50,     key:'highestLevel',   type:'stat',  reward:{coins:4000,  diamonds:70} },
+  { id:'p_lv60',  icon:'👑', title:'Seviye 60',            desc:'60. seviyeye ulaş',                target:60,     key:'highestLevel',   type:'stat',  reward:{coins:5000,  diamonds:90} },
+  { id:'p_lv75',  icon:'👑', title:'Seviye 75',            desc:'75. seviyeye ulaş',                target:75,     key:'highestLevel',   type:'stat',  reward:{coins:7000,  diamonds:120} },
+  { id:'p_lv100', icon:'💎', title:'Seviye 100',           desc:'100. seviyeye ulaş',               target:100,    key:'highestLevel',   type:'stat',  reward:{coins:10000, diamonds:200} },
+  { id:'p_lv150', icon:'💎', title:'Seviye 150',           desc:'150. seviyeye ulaş',               target:150,    key:'highestLevel',   type:'stat',  reward:{coins:15000, diamonds:300} },
+  { id:'p_lv200', icon:'🌌', title:'Seviye 200',           desc:'200. seviyeye ulaş',               target:200,    key:'highestLevel',   type:'stat',  reward:{coins:25000, diamonds:500} },
+  /* ── ABSÜRT (7 aşama) ── */
+  { id:'p_ab1',   icon:'🤔', title:'Absürt Deneme',        desc:'İlk absürt soruyu cevapla',        target:1,      key:'absurdPlayed',   type:'stat',  reward:{coins:100,   diamonds:2} },
+  { id:'p_ab5',   icon:'🤪', title:'Absürt Meraklı',       desc:'Absürt modda 5 soru cevapla',      target:5,      key:'absurdPlayed',   type:'stat',  reward:{coins:200,   diamonds:3} },
+  { id:'p_ab10',  icon:'🤪', title:'Absürt Başlangıç',     desc:'Absürt modda 10 soru cevapla',     target:10,     key:'absurdPlayed',   type:'stat',  reward:{coins:300,   diamonds:5} },
+  { id:'p_ab25',  icon:'🌀', title:'Absürt Tutkunu',       desc:'Absürt modda 25 soru cevapla',     target:25,     key:'absurdPlayed',   type:'stat',  reward:{coins:500,   diamonds:8} },
+  { id:'p_ab50',  icon:'🌀', title:'Absürt Uzmanı',        desc:'Absürt modda 50 soru cevapla',     target:50,     key:'absurdPlayed',   type:'stat',  reward:{coins:1000,  diamonds:15} },
+  { id:'p_ab100', icon:'🧿', title:'Absürt Efsanesi',      desc:'Absürt modda 100 soru cevapla',    target:100,    key:'absurdPlayed',   type:'stat',  reward:{coins:2000,  diamonds:30} },
+  { id:'p_ab250', icon:'🌌', title:'Absürt Tanrısı',       desc:'Absürt modda 250 soru cevapla',    target:250,    key:'absurdPlayed',   type:'stat',  reward:{coins:5000,  diamonds:80} },
+  /* ── ZAMAN (6 aşama) ── */
+  { id:'p_t5m',   icon:'⏱️', title:'5 Dakika',             desc:'Toplam 5 dakika oyna',             target:300,    key:'totalTimeSec',   type:'stat',  reward:{coins:100,   diamonds:2} },
+  { id:'p_t15m',  icon:'⏱️', title:'15 Dakika',            desc:'Toplam 15 dakika oyna',            target:900,    key:'totalTimeSec',   type:'stat',  reward:{coins:250,   diamonds:4} },
+  { id:'p_t30m',  icon:'⌛', title:'Yarım Saat',           desc:'Toplam 30 dakika oyna',            target:1800,   key:'totalTimeSec',   type:'stat',  reward:{coins:500,   diamonds:8} },
+  { id:'p_t1h',   icon:'⌛', title:'Bir Saat',             desc:'Toplam 1 saat oyna',               target:3600,   key:'totalTimeSec',   type:'stat',  reward:{coins:800,   diamonds:12} },
+  { id:'p_t3h',   icon:'⏰', title:'Üç Saat',              desc:'Toplam 3 saat oyna',               target:10800,  key:'totalTimeSec',   type:'stat',  reward:{coins:2000,  diamonds:30} },
+  { id:'p_t10h',  icon:'⏰', title:'On Saat',              desc:'Toplam 10 saat oyna',              target:36000,  key:'totalTimeSec',   type:'stat',  reward:{coins:5000,  diamonds:80} },
+  /* ── HATASIZ (4 aşama) ── */
+  { id:'p_nw5',   icon:'✨', title:'Temiz 5',              desc:'Hiç yanlış yapmadan 5 soru',       target:5,      key:'currentNoWrong', type:'stat',  reward:{coins:200,   diamonds:3} },
+  { id:'p_nw10',  icon:'✨', title:'Temiz 10',             desc:'Hiç yanlış yapmadan 10 soru',      target:10,     key:'currentNoWrong', type:'stat',  reward:{coins:400,   diamonds:6} },
+  { id:'p_nw20',  icon:'💎', title:'Temiz 20',             desc:'Hiç yanlış yapmadan 20 soru',      target:20,     key:'currentNoWrong', type:'stat',  reward:{coins:800,   diamonds:12} },
+  { id:'p_nw30',  icon:'👑', title:'Temiz 30',             desc:'Hiç yanlış yapmadan 30 soru',      target:30,     key:'currentNoWrong', type:'stat',  reward:{coins:1500,  diamonds:25} },
+  /* ── TOPLAM SORU (5 aşama) ── */
+  { id:'p_a1',    icon:'🎮', title:'İlk Oyun',             desc:'İlk soruyu cevapla',               target:1,      key:'totalAnswered',  type:'stat',  reward:{coins:200,   diamonds:5} },
+  { id:'p_a100',  icon:'📚', title:'Yüz Soru',             desc:'Toplam 100 soru cevapla',          target:100,    key:'totalAnswered',  type:'stat',  reward:{coins:400,   diamonds:6} },
+  { id:'p_a500',  icon:'📗', title:'Beş Yüz Soru',         desc:'Toplam 500 soru cevapla',          target:500,    key:'totalAnswered',  type:'stat',  reward:{coins:1500,  diamonds:20} },
+  { id:'p_a1000', icon:'📘', title:'Bin Soru',             desc:'Toplam 1000 soru cevapla',         target:1000,   key:'totalAnswered',  type:'stat',  reward:{coins:3000,  diamonds:50} },
+  { id:'p_a5000', icon:'📙', title:'Beş Bin Soru',         desc:'Toplam 5000 soru cevapla',         target:5000,   key:'totalAnswered',  type:'stat',  reward:{coins:10000, diamonds:150} },
+  /* ── GİRİŞ SERİSİ (7 aşama) ── */
+  { id:'p_lg1',   icon:'📅', title:'İlk Giriş',            desc:'Oyuna giriş yap',                  target:1,      key:'loginStreak',    type:'stat',  reward:{coins:100,   diamonds:2} },
+  { id:'p_lg3',   icon:'📅', title:'3 Gün Giriş',          desc:'3 gün üst üste giriş yap',         target:3,      key:'loginStreak',    type:'stat',  reward:{coins:300,   diamonds:5} },
+  { id:'p_lg7',   icon:'🗓️', title:'Haftalık Giriş',       desc:'7 gün üst üste giriş yap',         target:7,      key:'loginStreak',    type:'stat',  reward:{coins:700,   diamonds:15} },
+  { id:'p_lg14',  icon:'🗓️', title:'İki Haftalık',         desc:'14 gün üst üste giriş yap',        target:14,     key:'loginStreak',    type:'stat',  reward:{coins:1500,  diamonds:30} },
+  { id:'p_lg30',  icon:'🏅', title:'Aylık Giriş',          desc:'30 gün üst üste giriş yap',        target:30,     key:'loginStreak',    type:'stat',  reward:{coins:3000,  diamonds:60} },
+  { id:'p_lg60',  icon:'🥈', title:'İki Aylık',            desc:'60 gün üst üste giriş yap',        target:60,     key:'loginStreak',    type:'stat',  reward:{coins:6000,  diamonds:120} },
+  { id:'p_lg100', icon:'🥇', title:'100 Gün',              desc:'100 gün üst üste giriş yap',       target:100,    key:'loginStreak',    type:'stat',  reward:{coins:10000, diamonds:200} },
+  /* ── SOSYAL & DİĞER (11 aşama) ── */
+  { id:'p_shop1', icon:'🏪', title:'İlk Alışveriş',        desc:'Mağazadan bir şey satın al',       target:1,      key:'shopBuys',       type:'stat',  reward:{coins:200,   diamonds:5} },
+  { id:'p_shop5', icon:'🏪', title:'Alışveriş Tutkunu',    desc:'5 kez satın al',                   target:5,      key:'shopBuys',       type:'stat',  reward:{coins:500,   diamonds:10} },
+  { id:'p_shop10',icon:'🏪', title:'VIP Müşteri',          desc:'10 kez satın al',                  target:10,     key:'shopBuys',       type:'stat',  reward:{coins:1200,  diamonds:25} },
+  { id:'p_clan',  icon:'👥', title:'Sosyal Oyuncu',        desc:'Bir klana katıl veya kur',         target:1,      key:'clanJoined',     type:'stat',  reward:{coins:500,   diamonds:10} },
+  { id:'p_jok1',  icon:'🃏', title:'İlk Joker',            desc:'İlk jokerini kullan',              target:1,      key:'jokersUsed',     type:'stat',  reward:{coins:200,   diamonds:3} },
+  { id:'p_jok10', icon:'🃏', title:'Joker Ustası',         desc:'10 joker kullan',                  target:10,     key:'jokersUsed',     type:'stat',  reward:{coins:500,   diamonds:10} },
+  { id:'p_jok50', icon:'🃏', title:'Joker Efsanesi',       desc:'50 joker kullan',                  target:50,     key:'jokersUsed',     type:'stat',  reward:{coins:2000,  diamonds:40} },
+  { id:'p_wrong0',icon:'🛡️', title:'Dokunulmaz',           desc:'Hiç yanlış yapmadan 5 soru',       target:5,      key:'currentNoWrong', type:'stat',  reward:{coins:350,   diamonds:2} },
+  { id:'p_wt10',  icon:'❌', title:'Hata Kabul',           desc:'Toplam 10 yanlış yap (olur)',      target:10,     key:'totalWrong',     type:'stat',  reward:{coins:50,    diamonds:1} },
+  { id:'p_wt100', icon:'😅', title:'Hata Ustası',          desc:'Toplam 100 yanlış yap',            target:100,    key:'totalWrong',     type:'stat',  reward:{coins:200,   diamonds:3} },
+  { id:'p_wt500', icon:'😂', title:'Hata Koleksiyoneri',   desc:'Toplam 500 yanlış yap',            target:500,    key:'totalWrong',     type:'stat',  reward:{coins:800,   diamonds:10} },
+  /* ── ÖZEL (16 görev = toplam 100) ── */
+  { id:'p_sp1',   icon:'💡', title:'Joker Harcayıcı',     desc:'Toplam 25 joker kullan',           target:25,     key:'jokersUsed',     type:'stat',  reward:{coins:800,   diamonds:15} },
+  { id:'p_sp2',   icon:'🌙', title:'Gece Kuşu',           desc:'Toplam 2 saat oyna',               target:7200,   key:'totalTimeSec',   type:'stat',  reward:{coins:1200,  diamonds:18} },
+  { id:'p_sp3',   icon:'🔮', title:'Kahin',               desc:'Seviye 20 ye ulaş',                target:20,     key:'highestLevel',   type:'stat',  reward:{coins:1200,  diamonds:20} },
+  { id:'p_sp4',   icon:'🧠', title:'Matematik Dehası',    desc:'Toplam 200 doğru cevap ver',       target:200,    key:'totalCorrect',   type:'stat',  reward:{coins:800,   diamonds:12} },
+  { id:'p_sp5',   icon:'⚗️', title:'Kimyager',             desc:'2500 puana ulaş',                  target:2500,   key:'score',          type:'score', reward:{coins:700,   diamonds:12} },
+  { id:'p_sp6',   icon:'🎸', title:'Rock Yıldızı',        desc:'15 doğru arka arkaya yap',         target:15,     key:'bestStreak',     type:'stat',  reward:{coins:900,   diamonds:15} },
+  { id:'p_sp7',   icon:'🦁', title:'Aslan Yürekli',       desc:'100 soru cevapla',                 target:100,    key:'totalAnswered',  type:'stat',  reward:{coins:500,   diamonds:8} },
+  { id:'p_sp8',   icon:'🦅', title:'Kartal Göz',          desc:'50 doğru cevap ver',               target:50,     key:'totalCorrect',   type:'stat',  reward:{coins:500,   diamonds:8} },
+  { id:'p_sp9',   icon:'🌊', title:'Okyanus',             desc:'Absürt modda 75 soru cevapla',     target:75,     key:'absurdPlayed',   type:'stat',  reward:{coins:1500,  diamonds:25} },
+  { id:'p_sp10',  icon:'🧊', title:'Buz Gibi',            desc:'Hiç yanlış yapmadan 15 soru',      target:15,     key:'currentNoWrong', type:'stat',  reward:{coins:700,   diamonds:12} },
+  { id:'p_sp11',  icon:'🎯', title:'Tam İsabet',          desc:'Toplam 750 doğru cevap ver',       target:750,    key:'totalCorrect',   type:'stat',  reward:{coins:3000,  diamonds:50} },
+  { id:'p_sp12',  icon:'🌠', title:'Yıldız Toplayıcı',   desc:'15 gün üst üste giriş yap',        target:15,     key:'loginStreak',    type:'stat',  reward:{coins:2000,  diamonds:40} },
+  { id:'p_sp13',  icon:'🎭', title:'Çok Yönlü',           desc:'1000 puana ulaş',                  target:1000,   key:'score',          type:'score', reward:{coins:400,   diamonds:7} },
+  { id:'p_sp14',  icon:'🏆', title:'Skor Canavarı',       desc:'7500 puana ulaş',                  target:7500,   key:'score',          type:'score', reward:{coins:2500,  diamonds:45} },
+  { id:'p_sp15',  icon:'🌈', title:'Gökkuşağı',           desc:'50 haftalık görevi tamamla',       target:50,     key:'totalAnswered',  type:'stat',  reward:{coins:600,   diamonds:10} },
+  { id:'p_sp16',  icon:'💫', title:'Süpernova',           desc:'Toplam 3000 doğru cevap ver',      target:3000,   key:'totalCorrect',   type:'stat',  reward:{coins:12000, diamonds:200} },
 ];
 
-/* Başarım görevleri */
+/* Başarım görevleri — 20 aşama */
 var ACHIEVE_TASKS = [
-  { id:'a_first_ach',    icon:'🏅', title:'İlk Başarım',      desc:'İlk başarımını kazan',              target:1,    key:'achCount',       type:'stat',  reward:{coins:300,  diamonds:5} },
-  { id:'a_ach_5',        icon:'🥉', title:'5 Başarım',        desc:'5 başarım kazan',                   target:5,    key:'achCount',       type:'stat',  reward:{coins:500,  diamonds:10} },
-  { id:'a_ach_10',       icon:'🥈', title:'10 Başarım',       desc:'10 başarım kazan',                  target:10,   key:'achCount',       type:'stat',  reward:{coins:1000, diamonds:20} },
-  { id:'a_ach_20',       icon:'🥇', title:'20 Başarım',       desc:'20 başarım kazan',                  target:20,   key:'achCount',       type:'stat',  reward:{coins:2000, diamonds:40} },
-  { id:'a_ach_all',      icon:'💎', title:'Tam Koleksiyon',   desc:'Tüm başarımları kazan',              target:34,   key:'achCount',       type:'stat',  reward:{coins:10000,diamonds:200} },
-  { id:'a_rare',         icon:'💜', title:'Nadir Avcı',       desc:'Nadir başarım kazan',               target:1,    key:'rareAchCount',   type:'stat',  reward:{coins:800,  diamonds:15} },
-  { id:'a_legend',       icon:'👑', title:'Efsane',           desc:'Efsane başarım kazan',              target:1,    key:'legendAchCount', type:'stat',  reward:{coins:2000, diamonds:50} },
+  { id:'a_a1',    icon:'🏅', title:'İlk Başarım',          desc:'İlk başarımını kazan',             target:1,      key:'achCount',         type:'stat', reward:{coins:300,   diamonds:5} },
+  { id:'a_a3',    icon:'🥉', title:'3 Başarım',            desc:'3 başarım kazan',                  target:3,      key:'achCount',         type:'stat', reward:{coins:400,   diamonds:6} },
+  { id:'a_a5',    icon:'🥉', title:'5 Başarım',            desc:'5 başarım kazan',                  target:5,      key:'achCount',         type:'stat', reward:{coins:500,   diamonds:8} },
+  { id:'a_a8',    icon:'🥈', title:'8 Başarım',            desc:'8 başarım kazan',                  target:8,      key:'achCount',         type:'stat', reward:{coins:700,   diamonds:12} },
+  { id:'a_a10',   icon:'🥈', title:'10 Başarım',           desc:'10 başarım kazan',                 target:10,     key:'achCount',         type:'stat', reward:{coins:1000,  diamonds:15} },
+  { id:'a_a15',   icon:'🥈', title:'15 Başarım',           desc:'15 başarım kazan',                 target:15,     key:'achCount',         type:'stat', reward:{coins:1500,  diamonds:25} },
+  { id:'a_a20',   icon:'🥇', title:'20 Başarım',           desc:'20 başarım kazan',                 target:20,     key:'achCount',         type:'stat', reward:{coins:2000,  diamonds:35} },
+  { id:'a_a25',   icon:'🥇', title:'25 Başarım',           desc:'25 başarım kazan',                 target:25,     key:'achCount',         type:'stat', reward:{coins:3000,  diamonds:50} },
+  { id:'a_a30',   icon:'💎', title:'30 Başarım',           desc:'30 başarım kazan',                 target:30,     key:'achCount',         type:'stat', reward:{coins:5000,  diamonds:80} },
+  { id:'a_all',   icon:'👑', title:'Tam Koleksiyon',       desc:'Tüm başarımları kazan',             target:34,     key:'achCount',         type:'stat', reward:{coins:10000, diamonds:200} },
+  { id:'a_val',   icon:'⭐', title:'Değerli Avcı',         desc:'Değerli başarım kazan',            target:1,      key:'valuableAchCount', type:'stat', reward:{coins:500,   diamonds:8} },
+  { id:'a_val3',  icon:'⭐', title:'3 Değerli',            desc:'3 değerli başarım kazan',          target:3,      key:'valuableAchCount', type:'stat', reward:{coins:1200,  diamonds:20} },
+  { id:'a_rare',  icon:'💜', title:'Nadir Avcı',           desc:'Nadir başarım kazan',              target:1,      key:'rareAchCount',     type:'stat', reward:{coins:800,   diamonds:15} },
+  { id:'a_rare3', icon:'💜', title:'Nadir Koleksiyoner',   desc:'3 nadir başarım kazan',            target:3,      key:'rareAchCount',     type:'stat', reward:{coins:2000,  diamonds:40} },
+  { id:'a_leg',   icon:'👑', title:'Efsane',               desc:'Efsane başarım kazan',             target:1,      key:'legendAchCount',   type:'stat', reward:{coins:2000,  diamonds:50} },
+  { id:'a_leg3',  icon:'💎', title:'Efsane Koleksiyoner',  desc:'3 efsane başarım kazan',           target:3,      key:'legendAchCount',   type:'stat', reward:{coins:5000,  diamonds:100} },
+  { id:'a_stach', icon:'🔥', title:'Seri Başarımcı',       desc:'Seri kategorisinde başarım kazan', target:1,      key:'streakAchCount',   type:'stat', reward:{coins:600,   diamonds:10} },
+  { id:'a_scach', icon:'💰', title:'Puan Başarımcı',       desc:'Puan kategorisinde başarım kazan', target:1,      key:'scoreAchCount',    type:'stat', reward:{coins:600,   diamonds:10} },
+  { id:'a_abach', icon:'🤪', title:'Absürt Başarımcı',     desc:'Absürt kategorisinde başarım kazan',target:1,     key:'absurdAchCount',   type:'stat', reward:{coins:600,   diamonds:10} },
+  { id:'a_compl', icon:'🌟', title:'Görev Tamamlayıcı',    desc:'50 kalıcı görevi tamamla',         target:50,     key:'permDone',         type:'stat', reward:{coins:8000,  diamonds:150} },
 ];
 
 /* Aktif sekme */
@@ -6239,22 +6347,53 @@ function renderQuestTab(tab) {
 }
 
 /* Haftalık görevleri localStorage'dan yükle */
+var _groqWeeklyTasksCache = null;
+
+async function loadGroqWeeklyTasks() {
+  var weekKey = getWeekKey();
+  var cacheKey = 'mathgame_groq_weekly_' + weekKey;
+  try {
+    var cached = JSON.parse(localStorage.getItem(cacheKey) || 'null');
+    if (cached && Array.isArray(cached) && cached.length >= 3) {
+      _groqWeeklyTasksCache = cached;
+      return cached;
+    }
+  } catch(e) {}
+  try {
+    var r = await workerPost('groq-weekly-quests', { weekKey: weekKey });
+    if (r && r.ok && Array.isArray(r.tasks) && r.tasks.length >= 3) {
+      _groqWeeklyTasksCache = r.tasks;
+      try { localStorage.setItem(cacheKey, JSON.stringify(r.tasks)); } catch(e) {}
+      return r.tasks;
+    }
+  } catch(e) { console.warn('Groq haftalık görev hatası:', e); }
+  return [];
+}
+
 function getWeeklyTasks() {
   var weekKey = getWeekKey();
   var storageKey = 'mathgame_weekly_' + (authUser ? authUser.uid : 'guest');
   var saved = null;
   try { saved = JSON.parse(localStorage.getItem(storageKey) || 'null'); } catch(e) {}
-  if (saved && saved.key === weekKey && Array.isArray(saved.tasks)) {
+  if (saved && saved.key === weekKey && Array.isArray(saved.tasks) && saved.tasks.length > 0) {
     return saved.tasks.map(function(t) {
-      var progress = getQuestProgress(t);
-      t.progress = Math.min(progress, t.target);
-      t.completed = t.progress >= t.target;
+      if (!t.rewardGiven) {
+        t.progress  = Math.min(getQuestProgress(t), t.target);
+        t.completed = t.progress >= t.target;
+      }
       return t;
     });
   }
+  /* Yeni hafta — statik havuzdan + Groq */
   var tasks = WEEKLY_TASK_POOL.map(function(t) {
-    return Object.assign({}, t, { progress: 0, completed: false, rewardGiven: false });
+    return Object.assign({}, t, { progress: 0, completed: false, rewardGiven: false, source: 'static' });
   });
+  if (_groqWeeklyTasksCache && _groqWeeklyTasksCache.length > 0) {
+    var groqTasks = _groqWeeklyTasksCache.slice(0, 5).map(function(t) {
+      return Object.assign({}, t, { progress: 0, completed: false, rewardGiven: false, source: 'groq' });
+    });
+    tasks = tasks.concat(groqTasks);
+  }
   try { localStorage.setItem(storageKey, JSON.stringify({ key: weekKey, tasks: tasks })); } catch(e) {}
   return tasks;
 }
@@ -6309,12 +6448,30 @@ function getQuestProgress(task) {
   }
   if (task.key === 'rareAchCount') {
     return Object.keys(state.achievements || {}).filter(function(k) {
-      return ACH_RARITY && (ACH_RARITY[k] === 'Nadir' || ACH_RARITY[k] === 'Efsane');
+      return ACH_RARITY && (ACH_RARITY[k] === 'Nadir' || ACH_RARITY[k] === 'Değerli');
     }).length;
   }
+  if (task.key === 'valuableAchCount') {
+    return Object.keys(state.achievements || {}).filter(function(k) {
+      return ACH_RARITY && ACH_RARITY[k] === 'Değerli';
+    }).length;
+  }
+  if (task.key === 'streakAchCount') {
+    return Object.keys(state.achievements || {}).filter(function(k) { return k.startsWith('streak_'); }).length;
+  }
+  if (task.key === 'scoreAchCount') {
+    return Object.keys(state.achievements || {}).filter(function(k) { return k.startsWith('score_'); }).length;
+  }
+  if (task.key === 'absurdAchCount') {
+    return Object.keys(state.achievements || {}).filter(function(k) { return k.startsWith('absurd_'); }).length;
+  }
   if (task.key === 'shopBuys') return state._shopBuys || 0;
-  if (task.key === 'highestLevel') return state.stats.highestLevel || 0;
+  if (task.key === 'jokersUsed') return state._jokersUsed || 0;
+  if (task.key === 'highestLevel') return state.stats.highestLevel || state.level || 0;
   if (task.key === 'clanJoined') return state.clanId ? 1 : 0;
+  if (task.key === 'permDone') {
+    return (state.permTasks || []).filter(function(t) { return t.rewardGiven; }).length;
+  }
   return state.stats[task.key] || 0;
 }
 
@@ -6398,7 +6555,7 @@ function renderTaskList(tasks, listEl, tabType) {
     return '<div style="display:flex;align-items:center;gap:12px;padding:14px;border-radius:16px;border:1px solid;margin-bottom:8px;' + cardBg + '">' +
       '<div style="width:46px;height:46px;border-radius:14px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">' + task.icon + '</div>' +
       '<div style="flex:1;min-width:0">' +
-        '<div style="font-size:13px;font-weight:800;color:' + (isGiven?'var(--muted)':'var(--text)') + '">' + escapeHtml(task.title) + '</div>' +
+        '<div style="font-size:13px;font-weight:800;color:' + (isGiven?'var(--muted)':'var(--text)') + '">' + escapeHtml(task.title) + (task.source === 'groq' ? ' <span style="font-size:9px;background:rgba(168,85,247,0.2);color:#a855f7;border-radius:6px;padding:1px 5px;font-weight:800">AI</span>' : '') + '</div>' +
         '<div style="font-size:11px;color:var(--muted);margin-top:2px">' + escapeHtml(task.desc) + '</div>' +
         (!isGiven
           ? '<div style="display:flex;justify-content:space-between;margin-top:6px">' +
@@ -6420,19 +6577,15 @@ function renderTaskList(tasks, listEl, tabType) {
 
 function getDailyKey() {
   try {
-    const d = new Date();
+    var d = new Date();
     return 'daily_' + d.getFullYear() + '_' + d.getMonth() + '_' + d.getDate();
   } catch(e) { return 'daily_fallback'; }
 }
 
 function getDailyStorageKey() {
-  if (authUser && authUser.uid) {
-    return 'mathgame_daily_' + authUser.uid;
-  }
+  if (authUser && authUser.uid) return 'mathgame_daily_' + authUser.uid;
   var storedUid = localStorage.getItem(CURRENT_UID_KEY);
-  if (storedUid) {
-    return 'mathgame_daily_' + storedUid;
-  }
+  if (storedUid) return 'mathgame_daily_' + storedUid;
   return 'mathgame_daily_guest';
 }
 
@@ -6440,9 +6593,72 @@ function forceResetDailyTasks() {
   try {
     var storageKey = getDailyStorageKey();
     localStorage.removeItem(storageKey);
+    /* Groq görev cache'ini de sil */
+    localStorage.removeItem('mathgame_groq_daily_' + getDailyKey());
     updateDailyTasks();
     showToast('📅 Günlük görevler yenilendi', '#38bdf8');
   } catch(e) {}
+}
+
+/* ── Groq ile günlük görev üretimi ── */
+/* Her gün 23:59'da (veya ilk açılışta yeni gün algılanınca) Groq'tan üretilir */
+var _groqDailyTasksCache = null;
+
+async function loadGroqDailyTasks() {
+  var dayKey = getDailyKey();
+  var cacheKey = 'mathgame_groq_daily_' + dayKey;
+
+  /* Local cache var mı? */
+  try {
+    var cached = JSON.parse(localStorage.getItem(cacheKey) || 'null');
+    if (cached && Array.isArray(cached) && cached.length >= 5) {
+      _groqDailyTasksCache = cached;
+      return cached;
+    }
+  } catch(e) {}
+
+  /* Worker'dan iste */
+  try {
+    var r = await workerPost('groq-daily-quests', { dayKey: dayKey });
+    if (r && r.ok && Array.isArray(r.tasks) && r.tasks.length >= 3) {
+      _groqDailyTasksCache = r.tasks;
+      try { localStorage.setItem(cacheKey, JSON.stringify(r.tasks)); } catch(e) {}
+      return r.tasks;
+    }
+  } catch(e) { console.warn('Groq günlük görev hatası:', e); }
+
+  return [];
+}
+
+function getMidnightCountdown() {
+  var now  = new Date();
+  var midnight = new Date(now);
+  midnight.setHours(23, 59, 0, 0);
+  if (now >= midnight) {
+    midnight.setDate(midnight.getDate() + 1);
+    midnight.setHours(23, 59, 0, 0);
+  }
+  return Math.max(0, midnight - now);
+}
+
+/* Gece yarısı sıfırlama zamanlayıcısı */
+function scheduleDailyReset() {
+  var ms = getMidnightCountdown();
+  setTimeout(function() {
+    var storageKey = getDailyStorageKey();
+    var dayKey     = getDailyKey();
+    var saved      = null;
+    try { saved = JSON.parse(localStorage.getItem(storageKey) || 'null'); } catch(e) {}
+    if (!saved || saved.key !== dayKey) {
+      /* Gün değişti — sıfırla */
+      localStorage.removeItem(storageKey);
+      localStorage.removeItem('mathgame_groq_daily_' + saved?.key);
+      _groqDailyTasksCache = null;
+      updateDailyTasks();
+      showToast('🌅 Günlük görevler yenilendi!', '#38bdf8');
+    }
+    scheduleDailyReset(); /* Tekrar planla */
+  }, ms);
 }
 
 function getTodaysTasks() {
@@ -6450,13 +6666,21 @@ function getTodaysTasks() {
     var dayKey = getDailyKey();
     var storageKey = getDailyStorageKey();
     var saved = JSON.parse(localStorage.getItem(storageKey) || '{}');
-    if (saved.key === dayKey && Array.isArray(saved.tasks)) {
+    if (saved.key === dayKey && Array.isArray(saved.tasks) && saved.tasks.length > 0) {
       return saved.tasks;
     }
-    /* Yeni gün — tüm 10 görevi göster */
+    /* Yeni gün — statik havuzdan 8 tane seç */
     var shuffled = [...DAILY_TASK_POOL].sort(function() { return Math.random() - 0.5; });
-    var chosen = shuffled.slice(0, 10);
-    var tasks = chosen.map(function(t) { return Object.assign({}, t, { progress: 0, completed: false, rewardGiven: false }); });
+    var tasks = shuffled.slice(0, 8).map(function(t) {
+      return Object.assign({}, t, { progress: 0, completed: false, rewardGiven: false, source: 'static' });
+    });
+    /* Groq görevleri varsa ekle (max 4) */
+    if (_groqDailyTasksCache && _groqDailyTasksCache.length > 0) {
+      var groqTasks = _groqDailyTasksCache.slice(0, 4).map(function(t) {
+        return Object.assign({}, t, { progress: 0, completed: false, rewardGiven: false, source: 'groq' });
+      });
+      tasks = tasks.concat(groqTasks);
+    }
     localStorage.setItem(storageKey, JSON.stringify({ key: dayKey, tasks: tasks }));
     return tasks;
   } catch(e) {
@@ -6602,7 +6826,7 @@ function renderDailyTasks(tasks) {
         /* İçerik */
         '<div style="flex:1;min-width:0">' +
           '<div style="font-size:13px;font-weight:800;color:' + (isGiven ? 'var(--muted)' : 'var(--text)') + '">' +
-            escapeHtml(task.title) +
+            escapeHtml(task.title) + (task.source === 'groq' ? ' <span style="font-size:9px;background:rgba(168,85,247,0.2);color:#a855f7;border-radius:6px;padding:1px 5px;font-weight:800">AI</span>' : '') +
           '</div>' +
           '<div style="font-size:11px;color:var(--muted);margin-top:2px">' +
             escapeHtml(task.desc) +
@@ -7060,6 +7284,9 @@ try {
       try { await loadProfileFromCloud(); } catch(e) { console.warn('loadProfileFromCloud hata:', e); }
       try { updateWallet(); } catch(e) {}
       try { setTimeout(checkDailyLogin, 1500); } catch(e) {}
+      try { loadGroqDailyTasks().then(function() { updateDailyTasks(); }); } catch(e) {}
+      try { loadGroqWeeklyTasks(); } catch(e) {}
+      try { scheduleDailyReset(); } catch(e) {}
     }
 
     /* Okunmamış mesaj listener'ı başlat */
@@ -7499,6 +7726,9 @@ async function handleEmailAuth() {
     try { await loadProfileFromCloud(); } catch(e) {}
     try { updateWallet(); } catch(e) {}
     try { setTimeout(checkDailyLogin, 1500); } catch(e) {}
+    try { loadGroqDailyTasks().then(function() { updateDailyTasks(); }); } catch(e) {}
+    try { loadGroqWeeklyTasks(); } catch(e) {}
+    try { scheduleDailyReset(); } catch(e) {}
     try { startUnreadListener(); } catch(e) {}
     try { startOnlinePing(); } catch(e) {}
 
