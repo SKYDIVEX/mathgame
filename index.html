@@ -3669,6 +3669,9 @@ applyBgImage();
 /* i18n — dil algıla ve uygula (async, arka planda) */
 setTimeout(function() { try { initI18n(); } catch(e) {} }, 100);
 
+/* Eski confetti kalıntılarını temizle */
+try { document.querySelectorAll('.confetti-piece').forEach(function(el){ el.remove(); }); } catch(e) {}
+
 if (quickSoundToggle) quickSoundToggle.checked = !!state.soundOn;
 if (btnColorInput) btnColorInput.value = state.btnColor||'#00ff66';
 if (bgColorInput) bgColorInput.value  = state.bgColor||'#0b1220';
@@ -4985,9 +4988,11 @@ function spawnConfetti(count = 60) {
         'animation-delay:' + delay + 's;';
 
       document.body.appendChild(el);
-      el.addEventListener('animationend', () => {
-        try { el.remove(); } catch(e) {}
-      }, { once: true });
+      /* animationend + timeout ile ikili güvence */
+      var maxDur = (parseFloat(dur) + parseFloat(delay) + 0.2) * 1000;
+      var cleanup = function() { try { el.remove(); } catch(e) {} };
+      el.addEventListener('animationend', cleanup, { once: true });
+      setTimeout(cleanup, maxDur);
     }
   } catch(e) {
     console.warn('spawnConfetti hata:', e);
