@@ -2116,7 +2116,7 @@ input, textarea, select {
   <div class="lu-sub" id="luSubText"></div>
   <div style="margin-top:28px;color:var(--muted);font-size:12px">Devam etmek için dokun</div>
 </div>
-<div id="streakBadge">🔥 <span id="streakCount">0</span> seri</div>
+<div id="streakBadge" style="display:none;position:fixed;top:80px;left:50%;transform:translateX(-50%);background:rgba(255,140,0,0.15);border:1px solid rgba(255,140,0,0.4);color:#ff8c00;padding:5px 14px;border-radius:20px;font-size:13px;font-weight:800;z-index:800;backdrop-filter:blur(8px);white-space:nowrap">🔥 <span id="streakCount">0</span> seri</div>
 
 <!-- Profil Modalı -->
 <div id="profileModal" style="display:none">
@@ -4157,6 +4157,7 @@ function checkAnswer(){
 
       /* Streak sıfırla */
       state.correctStreak = 0;
+      updateStreakBadge(0);
       if (state.stats) {
         state.stats.totalWrong      = (state.stats.totalWrong      || 0) + 1;
       try { sessionWrong++; updateSessionStats(); } catch(e) {}
@@ -5028,13 +5029,26 @@ function showCombo(streak) {
 /* ── STREAK BADGE (sağ üst) ─────────────────────────────── */
 function updateStreakBadge(streak) {
   try {
-    const badge = document.getElementById('streakBadge');
-    const count = document.getElementById('streakCount');
+    var badge = document.getElementById('streakBadge');
+    var count = document.getElementById('streakCount');
     if (!badge || !count) return;
-
     if (streak >= 3) {
       count.textContent = streak;
       badge.style.display = 'block';
+      /* Rengi seriye göre değiştir */
+      if (streak >= 20) {
+        badge.style.background = 'rgba(168,85,247,0.2)';
+        badge.style.borderColor = 'rgba(168,85,247,0.5)';
+        badge.style.color = '#c084fc';
+      } else if (streak >= 10) {
+        badge.style.background = 'rgba(239,68,68,0.15)';
+        badge.style.borderColor = 'rgba(239,68,68,0.4)';
+        badge.style.color = '#ef4444';
+      } else {
+        badge.style.background = 'rgba(255,140,0,0.15)';
+        badge.style.borderColor = 'rgba(255,140,0,0.4)';
+        badge.style.color = '#ff8c00';
+      }
     } else {
       badge.style.display = 'none';
     }
@@ -7370,15 +7384,23 @@ async function loadGA4Stats() {
 
     dash.style.display = 'block';
 
-    /* Özet kartlar — report rows */
-    var rows = r.report?.rows || [];
+    /* Özet kartlar — 30 günlük summary'den al */
+    var sumRows = r.summary?.totals || r.summary?.rows || [];
     var totals = { users: 0, sessions: 0, events: 0, newUsers: 0 };
-    rows.forEach(function(row) {
-      totals.users    += parseInt(row.metricValues[0].value || 0);
-      totals.sessions += parseInt(row.metricValues[1].value || 0);
-      totals.events   += parseInt(row.metricValues[2].value || 0);
-      totals.newUsers += parseInt(row.metricValues[3].value || 0);
-    });
+    if (r.summary?.totals && r.summary.totals.length > 0) {
+      var t = r.summary.totals[0];
+      totals.users    = parseInt(t.metricValues[0].value || 0);
+      totals.sessions = parseInt(t.metricValues[1].value || 0);
+      totals.events   = parseInt(t.metricValues[2].value || 0);
+      totals.newUsers = parseInt(t.metricValues[3].value || 0);
+    } else if (r.summary?.rows) {
+      r.summary.rows.forEach(function(row) {
+        totals.users    += parseInt(row.metricValues[0].value || 0);
+        totals.sessions += parseInt(row.metricValues[1].value || 0);
+        totals.events   += parseInt(row.metricValues[2].value || 0);
+        totals.newUsers += parseInt(row.metricValues[3].value || 0);
+      });
+    }
 
     var cards = document.getElementById('ga4Cards');
     if (cards) {
@@ -7397,10 +7419,10 @@ async function loadGA4Stats() {
       }).join('');
     }
 
-    /* Günlük bar chart — son 7 gün */
+    /* Günlük bar chart — 7 günlük report'tan */
     var chart     = document.getElementById('ga4Chart');
     var labels    = document.getElementById('ga4ChartLabels');
-    var last7rows = rows.slice(-7);
+    var last7rows = (r.report?.rows || []).slice(-7);
     if (chart && last7rows.length > 0) {
       var maxVal = Math.max.apply(null, last7rows.map(function(r) { return parseInt(r.metricValues[0].value || 0); }));
       chart.innerHTML = last7rows.map(function(row) {
