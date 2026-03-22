@@ -29,6 +29,8 @@ document.addEventListener('gesturestart', function(e) {
 
 /* Hata tracking — GA4'e gönder */
 window.onerror = function(msg, src, line, col, err) {
+  /* Geliştirici debug — satır + kaynak göster */
+  console.error('[MathGame Error]', msg, 'satır:', line, 'kaynak:', src);
   try {
     if (typeof gtag === 'function') {
       gtag('event', 'exception', {
@@ -3522,7 +3524,7 @@ function showConfirm(title, msg){
     confirmModal.classList.add('show');
   });
 }
-confirmOkBtn.addEventListener('click', ()=>{ closeModal(confirmModal, ()=>{ if(_confirmResolve){_confirmResolve(true);_confirmResolve=null;} }); clickSound(); });
+if(confirmOkBtn) confirmOkBtn.addEventListener('click', ()=>{ closeModal(confirmModal, ()=>{ if(_confirmResolve){_confirmResolve(true);_confirmResolve=null;} }); clickSound(); });
 confirmCancel.addEventListener('click', ()=>{ closeModal(confirmModal, ()=>{ if(_confirmResolve){_confirmResolve(false);_confirmResolve=null;} }); clickSound(); });
 
 /* ── SETTINGS MODAL ────────────────────────────────── */
@@ -3609,7 +3611,7 @@ function _closeSettingsForReal() {
   clickSound();
 }
 
-closeSettingsBtn.addEventListener('click', tryCloseSettings);
+if(closeSettingsBtn) closeSettingsBtn.addEventListener('click', tryCloseSettings);
 
 /* Op toggle butonları — SADECE draft'ı değiştirir */
 opBtns.forEach(b => {
@@ -3633,36 +3635,36 @@ opBtns.forEach(b => {
 });
 
 /* Seviye hızı — sadece draft */
-levelUpSlider.addEventListener('input', ()=>{
+if(levelUpSlider) levelUpSlider.addEventListener('input', ()=>{
   settingsDraft.levelUpEvery = parseInt(levelUpSlider.value);
   levelUpVal.innerText = levelUpSlider.value;
   markSettingsChanged();
 });
 
 /* Ses toggle — sadece draft */
-settingSoundToggle.addEventListener('change', ()=>{
+if(settingSoundToggle) settingSoundToggle.addEventListener('change', ()=>{
   settingsDraft.soundOn = settingSoundToggle.checked;
   markSettingsChanged();
   clickSound();
 });
 
 /* Buton rengi — canlı önizleme ama SADECE draft'a kayıt */
-settingBtnColorNew.addEventListener('input', ()=>{
+if(settingBtnColorNew) settingBtnColorNew.addEventListener('input', ()=>{
   settingsDraft.btnColor = settingBtnColorNew.value;
   document.documentElement.style.setProperty('--neon', settingBtnColorNew.value);
   markSettingsChanged();
 });
 
 /* Arka plan rengi — canlı önizleme ama SADECE draft'a kayıt */
-settingBgColorNew.addEventListener('input', ()=>{
+if(settingBgColorNew) settingBgColorNew.addEventListener('input', ()=>{
   settingsDraft.bgColor = settingBgColorNew.value;
   document.documentElement.style.setProperty('--bg-mid', settingBgColorNew.value);
   markSettingsChanged();
 });
 
 // Bg image
-settingBgImageBtn.addEventListener('click', ()=> settingBgImageInput.click());
-settingBgImageInput.addEventListener('change', (ev)=>{
+if(settingBgImageBtn) settingBgImageBtn.addEventListener('click', ()=> settingBgImageInput && settingBgImageInput.click());
+if(settingBgImageInput) settingBgImageInput.addEventListener('change', (ev)=>{
   const f = ev.target.files[0];
   if(!f) return;
   if(f.size > 15 * 1024 * 1024){ showToast('⚠️ Fotoğraf çok büyük (max 15MB)', '#f59e0b'); return; }
@@ -3678,7 +3680,7 @@ settingBgImageInput.addEventListener('change', (ev)=>{
   });
   ev.target.value = '';
 });
-settingClearBgBtn.addEventListener('click', function() {
+if(settingClearBgBtn) settingClearBgBtn.addEventListener('click', function() {
   state.bgImage = null;
   applyBgImage();
   try { saveState(); } catch(e) {}
@@ -4439,9 +4441,15 @@ async function renderClanTab(tab) {
 }
 
 function renderClanInfo(el, clan) {
-  var isLeader = clan.leaderId === (authUser && authUser.uid);
-  var myScore = clan.memberScores && authUser ? (clan.memberScores[authUser.uid] || 0) : 0;
+  var isLeader  = clan.leaderId === (authUser && authUser.uid);
+  var myMember  = clan.members.find(function(m) { return m.uid === (authUser && authUser.uid); });
+  var myRole    = myMember ? (myMember.role || 'member') : 'member';
+  var isOfficer = myRole === 'leader' || myRole === 'coleader' || myRole === 'officer';
+  var myScore   = clan.memberScores && authUser ? (clan.memberScores[authUser.uid] || 0) : 0;
   var isContrib = clan.leaderId === (authUser && authUser.uid) || (clan.contributors||[]).includes(authUser && authUser.uid);
+
+  var ROLE_LABELS = { leader: '👑 Kurucu', coleader: '⭐ Lider Yardımcısı', officer: '⚡ Yetkili', member: '👤 Üye' };
+  var ROLE_ORDER  = { leader: 0, coleader: 1, officer: 2, member: 3 };
 
   el.innerHTML =
     '<div style="text-align:center;padding:16px 0 10px">' +
@@ -4449,6 +4457,7 @@ function renderClanInfo(el, clan) {
       '<div style="font-family:var(--font-head);font-size:20px;font-weight:900">' + escapeHtml(clan.name) + '</div>' +
       '<div style="font-size:12px;color:var(--neon);font-weight:700;margin-top:4px">[' + clan.tag + ']' + (clan.isPublic ? ' 🔓' : ' 🔒') + '</div>' +
       (clan.description ? '<div style="font-size:12px;color:var(--muted);margin-top:6px">' + escapeHtml(clan.description) + '</div>' : '') +
+      '<div style="margin-top:8px;display:inline-block;background:rgba(255,215,0,0.1);border:1px solid rgba(255,215,0,0.25);border-radius:20px;padding:4px 12px;font-size:12px;color:#ffd700;font-weight:700">' + (ROLE_LABELS[myRole] || '👤 Üye') + '</div>' +
     '</div>' +
     /* Klan stats */
     '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px">' +
@@ -4475,29 +4484,70 @@ function renderClanInfo(el, clan) {
     '</div>' +
     /* Üye listesi */
     '<div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--muted2);margin-bottom:8px">Üyeler</div>' +
-    clan.members.sort(function(a,b) {
-      if (a.role === 'leader') return -1;
-      if (b.role === 'leader') return 1;
-      return ((clan.memberScores&&clan.memberScores[b.uid])||0) - ((clan.memberScores&&clan.memberScores[a.uid])||0);
+    clan.members.slice().sort(function(a,b) {
+      return (ROLE_ORDER[a.role]||3) - (ROLE_ORDER[b.role]||3) ||
+             ((clan.memberScores&&clan.memberScores[b.uid])||0) - ((clan.memberScores&&clan.memberScores[a.uid])||0);
     }).map(function(m) {
-      var roleIcon = m.role === 'leader' ? '👑' : '👤';
-      var isC = (clan.contributors||[]).includes(m.uid) || m.role === 'leader';
+      var roleIcon  = { leader:'👑', coleader:'⭐', officer:'⚡', member:'👤' }[m.role] || '👤';
+      var roleLabel = ROLE_LABELS[m.role] || '👤 Üye';
+      var isC   = (clan.contributors||[]).includes(m.uid) || m.role === 'leader';
       var mScore = (clan.memberScores && clan.memberScores[m.uid]) || 0;
-      return '<div style="display:flex;align-items:center;gap:8px;padding:10px;border-radius:12px;background:' + (isC ? 'rgba(0,255,136,0.03)' : 'rgba(255,255,255,0.02)') + ';border:1px solid ' + (isC ? 'rgba(0,255,136,0.12)' : 'var(--border)') + ';margin-bottom:5px">' +
-        '<div style="font-size:18px">' + roleIcon + (isC && m.role !== 'leader' ? '⚽' : '') + '</div>' +
-        '<div style="flex:1">' +
-          '<div style="font-size:13px;font-weight:700;color:var(--text)">' + escapeHtml(m.name) + '</div>' +
-          '<div style="font-size:10px;color:var(--muted)">' + (m.role === 'leader' ? 'Lider' : (isC ? 'Katkıcı' : 'Üye')) + '</div>' +
+      var isMe  = authUser && m.uid === authUser.uid;
+      /* Rütbe değiştirme — sadece lider veya yardımcı */
+      var manageBtns = '';
+      if (isLeader && m.role !== 'leader') {
+        manageBtns = '<div style="display:flex;gap:4px;margin-top:6px">' +
+          '<select onchange="setClanRole(\'' + m.uid + '\',this.value)" style="flex:1;background:var(--glass2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:11px;padding:4px;font-family:inherit">' +
+            '<option value="coleader"' + (m.role==='coleader'?' selected':'') + '>⭐ Lider Yard.</option>' +
+            '<option value="officer"' + (m.role==='officer'?' selected':'') + '>⚡ Yetkili</option>' +
+            '<option value="member"' + (m.role==='member'||!m.role?' selected':'') + '>👤 Üye</option>' +
+          '</select>' +
+          '<button onclick="kickMember(\'' + m.uid + '\',\'' + escapeHtml(m.name) + '\')" style="padding:4px 8px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:8px;color:#ef4444;font-size:11px;cursor:pointer">✕ Çıkar</button>' +
+        '</div>';
+      }
+      return '<div style="padding:10px;border-radius:12px;background:' + (isMe ? 'rgba(0,255,136,0.04)' : 'rgba(255,255,255,0.02)') + ';border:1px solid ' + (isMe ? 'rgba(0,255,136,0.15)' : 'var(--border)') + ';margin-bottom:6px">' +
+        '<div style="display:flex;align-items:center;gap:8px">' +
+          '<div style="font-size:18px">' + roleIcon + (isC && m.role !== 'leader' ? '⚽' : '') + '</div>' +
+          '<div style="flex:1">' +
+            '<div style="font-size:13px;font-weight:700;color:var(--text)">' + escapeHtml(m.name) + (isMe ? ' <span style="font-size:10px;color:var(--neon)">(sen)</span>' : '') + '</div>' +
+            '<div style="font-size:10px;color:var(--muted)">' + roleLabel.replace(/^[^\s]+ /,'') + (isC ? ' · ⚽ Katkıcı' : '') + '</div>' +
+          '</div>' +
+          '<div style="font-size:12px;font-weight:800;color:#ffd700">' + (mScore > 0 ? mScore.toLocaleString() + 'p' : '—') + '</div>' +
         '</div>' +
-        '<div style="font-size:12px;font-weight:800;color:#ffd700">' + (mScore > 0 ? mScore.toLocaleString() + 'p' : '—') + '</div>' +
+        manageBtns +
       '</div>';
     }).join('') +
     /* Butonlar */
-    '<div style="margin-top:14px;display:flex;gap:8px">' +
-      (isLeader ? '<button onclick="switchClanTab(\'settings\')" class="btn" style="flex:1">⚙️ Klan Ayarları</button>' : '') +
-      '<button onclick="leaveClan()" class="btn ghost" style="' + (isLeader ? '' : 'flex:1;') + 'color:#ef4444;border-color:rgba(239,68,68,0.3)">🚪 Terk Et</button>' +
+    '<div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">' +
+      (isLeader
+        ? '<button onclick="switchClanTab(\'settings\')" class="btn" style="flex:1">⚙️ Klan Ayarları</button>'
+        : '') +
+      '<button onclick="leaveClan()" class="btn ghost" style="flex:1;color:#ef4444;border-color:rgba(239,68,68,0.3)">🚪 Terk Et</button>' +
     '</div>';
 }
+
+  el.innerHTML =
+    '<div style="text-align:center;padding:16px 0 10px">' +
+      '<div style="font-size:40px;margin-bottom:8px">🏰</div>' +
+      '<div style="font-family:var(--font-head);font-size:20px;font-weight:900">' + escapeHtml(clan.name) + '</div>' +
+      '<div style="font-size:12px;color:var(--neon);font-weight:700;margin-top:4px">[' + clan.tag + ']' + (clan.isPublic ? ' 🔓' : ' 🔒') + '</div>' +
+      (clan.description ? '<div style="font-size:12px;color:var(--muted);margin-top:6px">' + escapeHtml(clan.description) + '</div>' : '') +
+    '</div>' +
+    /* Klan stats */
+    '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px">' +
+      '<div style="text-align:center;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:12px;padding:10px">' +
+        '<div style="font-size:18px;font-weight:900;color:var(--neon)">' + clan.members.length + '</div>' +
+        '<div style="font-size:10px;color:var(--muted)">Üye</div>' +
+      '</div>' +
+      '<div style="text-align:center;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:12px;padding:10px">' +
+        '<div style="font-size:16px;font-weight:900;color:#ffd700">' + (clan.totalScore||0).toLocaleString() + '</div>' +
+        '<div style="font-size:10px;color:var(--muted)">Klan Puanı</div>' +
+      '</div>' +
+      '<div style="text-align:center;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:12px;padding:10px">' +
+        '<div style="font-size:16px;font-weight:900;color:#a855f7">' + (clan.contributors||[]).length + '/' + Math.max(2,Math.min(10,Math.floor(clan.members.length/2))) + '</div>' +
+        '<div style="font-size:10px;color:var(--muted)">Katkıcı</div>' +
+      '</div>' +
+    '</div>' +
 
 function renderTournamentTab(el, tournament) {
   if (!tournament) {
@@ -4640,6 +4690,28 @@ async function joinByInvite() {
   } catch(e) { showToast('❌ Bağlantı hatası', '#ef4444'); }
 }
 
+async function setClanRole(targetUid, role) {
+  if (!authUser) return;
+  try {
+    var r = await workerPost('clan/set-role', { token: authUser.token, targetUid, role });
+    if (!r || !r.ok) { showToast('❌ ' + (r?.error || 'Hata'), '#ef4444'); return; }
+    showToast('✅ Rütbe güncellendi', '#00ff88');
+    switchClanTab('my');
+  } catch(e) { showToast('❌ Bağlantı hatası', '#ef4444'); }
+}
+
+async function kickMember(targetUid, name) {
+  if (!authUser) return;
+  var ok = await showConfirm('Üyeyi Çıkar', '"' + name + '" klandan çıkarılacak. Emin misin?');
+  if (!ok) return;
+  try {
+    var r = await workerPost('clan/kick', { token: authUser.token, targetUid });
+    if (!r || !r.ok) { showToast('❌ ' + (r?.error || 'Hata'), '#ef4444'); return; }
+    showToast('✅ ' + name + ' klandan çıkarıldı', '#f59e0b');
+    switchClanTab('my');
+  } catch(e) { showToast('❌ Bağlantı hatası', '#ef4444'); }
+}
+
 async function leaveClan() {
   if (!authUser) return;
   var ok = await showConfirm('Klanı Terk Et', 'Klanı terk etmek istediğine emin misin?');
@@ -4747,8 +4819,10 @@ function renderClanShop(el) {
 }
 
 function showToast(msg, color='#00ff66'){
+  if (!toastEl) { console.warn('toast:', msg); return; }
   const bar = document.getElementById('toast-bar');
-  document.getElementById('toast-msg').textContent = msg;
+  var msgEl = document.getElementById('toast-msg');
+  if (msgEl) msgEl.textContent = msg;
   toastEl.style.background = color === '#00ff66' ? 'linear-gradient(135deg,#071022,#0a1e14)' : 'linear-gradient(135deg,#1a0f00,#1a1200)';
   toastEl.style.borderColor = color;
   toastEl.style.color = color;
@@ -4893,19 +4967,16 @@ if (settingSound) settingSound.checked  = !!state.soundOn;
 if (authUser && authUser.uid) {
   /* Auth var — state zaten uid key'den yüklendi */
   state.player = authUser.name;
-  playerLabel.innerText = state.player;
-  scoreDisplay.innerText = state.score;
-  levelDisplay.innerText = state.level;
+  updateAllScoreDisplays();
   updateProfileBtn();
+  updateWallet();
   showScreen('menu');
   refreshMenuPanels();
   updateMiniInfo();
 } else if (state.player) {
   /* Misafir — eski global state'ten */
   showScreen('menu');
-  playerLabel.innerText = state.player;
-  scoreDisplay.innerText = state.score;
-  levelDisplay.innerText = state.level;
+  updateAllScoreDisplays();
   updateMiniInfo();
 } else {
   /* Giriş yapılmamış — beta şifresi geçtiyse aç */
@@ -4946,7 +5017,7 @@ let gameMode = 'math'; // 'math' | 'absurd'
 
 /* ── MENU BUTTONS ──────────────────────────────────── */
 try {
-startGameBtn.addEventListener('click', ()=>{
+if(startGameBtn) startGameBtn.addEventListener('click', ()=>{
   clickSound();
   gameMode = 'math';
   try { resetSessionCounters(); } catch(e) {}
@@ -4960,7 +5031,7 @@ startGameBtn.addEventListener('click', ()=>{
   trackEvent('game_start', { mode: 'math', level: state.level || 1 });
 });
 
-startAbsurdBtn.addEventListener('click', async ()=>{
+if(startAbsurdBtn) startAbsurdBtn.addEventListener('click', async ()=>{
   clickSound();
   gameMode = 'absurd';
   try { resetSessionCounters(); } catch(e) {}
@@ -5005,13 +5076,13 @@ if(resetScores) resetScores.addEventListener('click', async ()=>{
 });
 
 /* Quick sound toggle */
-quickSoundToggle.addEventListener('change', e=>{ state.soundOn=e.target.checked; saveState(); clickSound(); });
+if(quickSoundToggle) quickSoundToggle.addEventListener('change', e=>{ state.soundOn=e.target.checked; saveState(); clickSound(); });
 
 /* Old bg/color inputs still work (menu sidebar) */
-btnColorInput.addEventListener('input', e=>{
+if(btnColorInput) btnColorInput.addEventListener('input', e=>{
   state.btnColor=e.target.value; document.documentElement.style.setProperty('--neon',state.btnColor); saveState(); clickSound();
 });
-bgColorInput.addEventListener('input', e=>{
+if(bgColorInput) bgColorInput.addEventListener('input', e=>{
   state.bgColor=e.target.value; document.documentElement.style.setProperty('--bg-mid',state.bgColor); saveState(); clickSound();
 });
 bgImageBtn.addEventListener('click', ()=> bgImageInput.click());
@@ -8231,6 +8302,9 @@ async function syncOnlineScore() {
 function updateAllScoreDisplays() {
   var s = state.score || 0;
   var l = state.level || 1;
+  /* Player label */
+  var pl = document.getElementById('playerLabel');
+  if (pl && (authUser || state.player)) pl.textContent = (authUser ? authUser.name : state.player) || '—';
   /* Oyun içi */
   try { if (scoreDisplay) scoreDisplay.innerText = s; } catch(e) {}
   try { if (levelDisplay) levelDisplay.innerText = l; } catch(e) {}
@@ -8394,28 +8468,32 @@ async function fetchOnlineLeaderboard() {
     if (statusEl) statusEl.textContent = '🟢 online';
 
     if (!Array.isArray(board) || board.length === 0) {
-      el.innerHTML = '<div style="color:var(--muted);font-size:12px;padding:8px">' + opsLabel + ': Henüz kayıt yok — ilk sen ol!</div>';
+      el.innerHTML = '<div style="color:var(--muted);font-size:12px;padding:8px">' + (opsLabels[_currentLbOps] || 'Tüm Kategoriler') + ': Henüz kayıt yok — ilk sen ol!</div>';
       return;
     }
-    el.innerHTML = '<div style="font-size:11px;color:var(--neon);font-weight:700;margin-bottom:6px;opacity:0.7">' + opsLabel + '</div>';
+    el.innerHTML = '<div style="font-size:11px;color:var(--neon);font-weight:700;margin-bottom:6px;opacity:0.7">' + opsLabels[_currentLbOps] + '</div>';
 
     /* Board verisini global'e kaydet — onclick index ile erişir */
     window._lbBoardCache = board;
-    el.innerHTML += board.map((e, i) => {
-      const isMe  = authUser && e.uid === authUser.uid;
-      const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i+1) + '.';
-      const nameHtml = isMe
-        ? '<span class="lb-name">' + escapeHtml(e.name) + ' 👈</span>'
-        : '<span class="lb-name" style="cursor:pointer;text-decoration:underline;text-underline-offset:2px;text-decoration-color:rgba(255,255,255,0.2)" onclick="openPublicProfileByIndex(' + i + ')">' + escapeHtml(e.name) + '</span>';
-      return '<div class="lb-online-item' + (isMe ? ' lb-me' : '') + '">' +
+    var boardHtml = board.map(function(entry, i) {
+      var isMe  = authUser && entry.uid === authUser.uid;
+      var medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i+1) + '.';
+      var nameHtml = isMe
+        ? '<span class="lb-name" style="color:var(--neon);font-weight:800">' + escapeHtml(entry.name) + ' 👈🏿</span>'
+        : '<span class="lb-name" style="cursor:pointer;text-decoration:underline;text-underline-offset:2px;text-decoration-color:rgba(255,255,255,0.2)" onclick="openPublicProfileByIndex(' + i + ')">' + escapeHtml(entry.name) + '</span>';
+      return '<div class="lb-online-item' + (isMe ? ' lb-me' : '') + '" style="' + (isMe ? 'background:rgba(0,255,136,0.08);border:1px solid rgba(0,255,136,0.2);border-radius:10px;padding:4px 8px;' : '') + '">' +
         '<span class="lb-rank">' + medal + '</span>' +
         nameHtml +
-        '<span class="lb-score">' + e.score + 'p</span>' +
+        '<span class="lb-score">' + entry.score + 'p</span>' +
         '</div>';
     }).join('');
-  } catch(e) {
-    el.innerHTML = '<div style="color:var(--muted);font-size:12px;padding:8px">🔴 Bağlantı hatası</div>';
-    if (statusEl) statusEl.textContent = '🔴 hata';
+    el.innerHTML += boardHtml;
+  } catch(fetchErr) {
+    var lbEl = document.getElementById('onlineLbEl');
+    if (lbEl) lbEl.innerHTML = '<div style="color:var(--muted);font-size:12px;padding:8px">🔴 Bağlantı hatası</div>';
+    var stEl = document.getElementById('onlineLbStatus');
+    if (stEl) stEl.textContent = '🔴 hata';
+    console.warn('fetchOnlineLeaderboard hata:', fetchErr);
   }
 }
 
