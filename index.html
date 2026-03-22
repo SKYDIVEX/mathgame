@@ -5026,16 +5026,19 @@ if(startAbsurdBtn) startAbsurdBtn.addEventListener('click', async ()=>{
 
 if(logoutBtn) logoutBtn.addEventListener('click', async ()=>{
   try { if(fbAuth && fbAuth.currentUser) await fbAuth.signOut(); } catch(e){}
+  /* Çıkış öncesi cloud'a kaydet */
+  try { await saveProfileToCloud(); } catch(e){}
   clearAuth();
   authUser = null;
-  state.player = null;
-  state.score  = 0;
-  saveState();
   _adminChecked  = false;
   _adminVerified = false;
+  /* State'i sıfırlama — sadece player alanını temizle */
+  state.player = null;
+  saveState();
   showToast('👋 Çıkış yapıldı');
   const pb = document.getElementById('profileBtn');
   if(pb) pb.style.display = 'none';
+  updateProfileBtn();
   showLoginChoice();
 });
 
@@ -6466,7 +6469,7 @@ function showLevelUpScreen(newLevel, callback) {
 }
 
 /* ── GÜNLÜK GÖREV SİSTEMİ ────────────────────────────────── */
-const DAILY_TASK_POOL = [
+var DAILY_TASK_POOL = [
   { id:'d_correct_5',   icon:'🎯', title:'İlk Adım',         desc:'5 doğru cevap ver',               target:5,   key:'totalCorrect',   type:'stat',  reward:{coins:60} },
   { id:'d_correct_10',  icon:'🎯', title:'Keskin Nişancı',   desc:'10 doğru cevap ver',              target:10,  key:'totalCorrect',   type:'stat',  reward:{coins:120} },
   { id:'d_correct_20',  icon:'⚡', title:'Hız Treni',        desc:'20 doğru cevap ver',              target:20,  key:'totalCorrect',   type:'stat',  reward:{coins:220} },
@@ -8863,6 +8866,136 @@ async function adminResetPass() {
   const r = await adminCall('admin/reset-password', { targetName: name, newPassword: pass });
   if (r?.ok) { adminLog('✅ ' + r.message); document.getElementById('adminNewPass').value = ''; }
   else adminLog('❌ ' + (r?.error || 'Hata'));
+}
+
+async function adminSearchClan() {
+  var q = (document.getElementById('adminClanSearch')?.value || '').trim();
+  if (!q) { adminLog('Klan adı veya etiket gir'); return; }
+  adminLog('⏳ Aranıyor: ' + q);
+  var r = await adminCall('clan/search', { query: q });
+  var el = document.getElementById('adminClanResults');
+  if (!r || !r.clans || r.clans.length === 0) {
+    adminLog('❌ Klan bulunamadı');
+    if (el) el.innerHTML = '';
+    return;
+  }
+  adminLog('✅ ' + r.clans.length + ' klan bulundu');
+  if (el) {
+    el.innerHTML = r.clans.map(function(c) {
+      return '<div onclick="document.getElementById(\'adminClanId\').value=\'' + c.id + '\'" style="padding:8px;border:1px solid var(--border);border-radius:8px;cursor:pointer;margin-bottom:4px;background:rgba(255,255,255,0.02)">' +
+        '<strong>[' + c.tag + '] ' + escapeHtml(c.name) + '</strong> · ' + c.members + ' üye' +
+        '<div style="font-size:10px;color:var(--muted);font-family:monospace">' + c.id + '</div>' +
+      '</div>';
+    }).join('');
+  }
+}
+
+async function adminViewClan() {
+  var id = (document.getElementById('adminClanId')?.value || '').trim();
+  if (!id) { adminLog('Klan ID gir'); return; }
+  var r = await adminCall('clan/info', { clanId: id });
+  if (!r || !r.ok) { adminLog('❌ ' + (r?.error || 'Hata')); return; }
+  var c = r.clan;
+  adminLog('🏰 [' + c.tag + '] ' + c.name + '\n' +
+    'ID: ' + c.id + '\n' +
+    'Üye: ' + c.members.length + ' · Puan: ' + (c.totalScore||0) + '\n' +
+    'Lider: ' + (c.leaderName||c.leaderId) + '\n' +
+    'Public: ' + (c.isPublic ? 'Evet' : 'Hayır'));
+}
+
+async function adminViewClanMembers() {
+  var id = (document.getElementById('adminClanId')?.value || '').trim();
+  if (!id) { adminLog('Klan ID gir'); return; }
+  var r = await adminCall('clan/info', { clanId: id });
+  if (!r || !r.ok) { adminLog('❌ ' + (r?.error || 'Hata')); return; }
+  var c = r.clan;
+  var ROLES = { leader:'👑', coleader:'⭐', officer:'⚡', member:'👤' };
+  adminLog('👥 ' + c.name + ' üyeleri:\n' +
+    c.members.map(function(m, i) {
+      var score = (c.memberScores && c.memberScores[m.uid]) || 0;
+      return (i+1) + '. ' + (ROLES[m.role]||'👤') + ' ' + m.name + ' — ' + score + 'p';
+    }).join('\n'));
+}
+
+async function adminDeleteClan() {
+  var id = (document.getElementById('adminClanId')?.value || '').trim();
+  if (!id) { adminLog('Klan ID gir'); return; }
+  var ok = await showConfirm('Klanı Sil', 'Klan kalıcı olarak silinecek!');
+  if (!ok) return;
+  var r = await adminCall('admin/clan-delete', { clanId: id });
+  if (r?.ok) adminLog('✅ Klan silindi');
+  else adminLog('❌ ' + (r?.error || 'Hata'));
+}
+
+async function adminResetClanScore() {
+  var id = (document.getElementById('adminClanId')?.value || '').trim();
+  if (!id) { adminLog('Klan ID gir'); return; }
+  var ok = await showConfirm('Klan Puanını Sıfırla', 'Klan puanı ve üye katkıları sıfırlanacak!');
+  if (!ok) return;
+  var r = await adminCall('admin/clan-reset-score', { clanId: id });
+  if (r?.ok) adminLog('✅ Klan puanı sıfırlandı');
+  else adminLog('❌ ' + (r?.error || 'Hata'));
+}
+
+async function adminGiveClanReward() {
+  var clanId = (document.getElementById('adminClanBadgeId')?.value || '').trim();
+  var label  = (document.getElementById('adminClanBadgeLabel')?.value || '').trim();
+  var icon   = (document.getElementById('adminClanBadgeIcon')?.value || '🏆').trim();
+  var coins  = parseInt(document.getElementById('adminClanBadgeCoins')?.value || '0') || 0;
+  var diamonds = parseInt(document.getElementById('adminClanBadgeDiamonds')?.value || '0') || 0;
+  if (!clanId || !label) { adminLog('Klan ID ve rozet adı zorunlu'); return; }
+  var ok = await showConfirm('Klan Ödülü', '[' + icon + ' ' + label + '] rozeti ve ' + coins + '💰 ' + diamonds + '💎 tüm üyelere verilecek');
+  if (!ok) return;
+  adminLog('⏳ Ödüller veriliyor...');
+  var r = await adminCall('admin/clan-reward', { clanId, badge: { icon, label }, coins, diamonds });
+  if (r?.ok) adminLog('✅ ' + r.count + ' üyeye ödül verildi');
+  else adminLog('❌ ' + (r?.error || 'Hata'));
+}
+
+async function adminCreateTournament() {
+  var name = (document.getElementById('adminTournName')?.value || '').trim() || 'Klan Turnuvası';
+  var ok = await showConfirm('Turnuva Oluştur', '"' + name + '" adlı turnuva oluşturulacak');
+  if (!ok) return;
+  adminLog('⏳ Turnuva oluşturuluyor...');
+  var r = await adminCall('clan/tournament/create', { name });
+  if (r?.ok) adminLog('✅ Turnuva oluşturuldu: ' + r.tournament.id);
+  else adminLog('❌ ' + (r?.error || 'Hata'));
+}
+
+async function adminStartTournament() {
+  var ok = await showConfirm('Turnuvayı Başlat', 'Kayıt kapanır, gruplar oluşturulur');
+  if (!ok) return;
+  adminLog('⏳ Turnuva başlatılıyor...');
+  var r = await adminCall('clan/tournament/start', {});
+  if (r?.ok) adminLog('✅ Turnuva başladı · ' + (r.tournament?.registeredClans?.length||0) + ' klan');
+  else adminLog('❌ ' + (r?.error || 'Hata'));
+}
+
+async function adminFinishTournament() {
+  var ok = await showConfirm('Turnuvayı Bitir', 'Turnuva sonuçlandırılır ve ödüller verilir');
+  if (!ok) return;
+  adminLog('⏳ Turnuva sonuçlandırılıyor...');
+  var r = await adminCall('clan/tournament/finish', {});
+  if (r?.ok) adminLog('✅ Turnuva bitti! Kazanan: ' + (r.winner?.name || '?'));
+  else adminLog('❌ ' + (r?.error || 'Hata'));
+}
+
+async function adminCancelTournament() {
+  var ok = await showConfirm('Turnuvayı İptal Et', 'Aktif turnuva silinecek!');
+  if (!ok) return;
+  var r = await adminCall('admin/tournament-cancel', {});
+  if (r?.ok) adminLog('✅ Turnuva iptal edildi');
+  else adminLog('❌ ' + (r?.error || 'Hata'));
+}
+
+async function adminTournamentInfo() {
+  var r = await adminCall('clan/tournament/info', {});
+  if (!r || !r.ok || !r.tournament) { adminLog('Aktif turnuva yok'); return; }
+  var t = r.tournament;
+  adminLog('⚔️ ' + t.name + '\n' +
+    'Durum: ' + t.status + '\n' +
+    'Kayıtlı: ' + (t.registeredClans||[]).length + ' klan\n' +
+    'ID: ' + t.id);
 }
 
 async function adminClearLb() {
@@ -11262,6 +11395,7 @@ document.addEventListener('pointerdown', e => {
       <button class="admin-tab-btn" onclick="adminSwitchTab('requests')">📬</button>
       <button class="admin-tab-btn" onclick="adminSwitchTab('logs')">📜</button>
       <button class="admin-tab-btn" id="adminTabSystem" onclick="adminSwitchTab('system')">⚙️</button>
+      <button class="admin-tab-btn" onclick="adminSwitchTab('clans')">🏰</button>
     </div>
 
     <div class="admin-body">
@@ -11494,8 +11628,64 @@ document.addEventListener('pointerdown', e => {
         <button class="admin-btn admin-btn-green" onclick="adminMakeFirst()" style="width:100%">🥇 Beni Birinci Yap (Test)</button>
       </div>
 
-      <!-- Log — Terminal görünümü -->
+      <!-- LOG -->
       <div class="admin-log" id="adminLog">Hazır.</div>
+
+      <!-- KLAN YÖNETİMİ -->
+      <div class="admin-tab-panel" id="adminTab-clans">
+        <div class="admin-section-title">🏰 Klan Yönetimi</div>
+
+        <!-- Klan Ara -->
+        <div class="admin-row" style="margin-bottom:6px">
+          <input class="admin-input" id="adminClanSearch" placeholder="Klan tag veya adı ara...">
+          <button class="admin-btn admin-btn-green" onclick="adminSearchClan()">🔍 Ara</button>
+        </div>
+        <div id="adminClanResults" style="margin-bottom:12px;font-size:12px;color:var(--muted)"></div>
+
+        <!-- Seçili klan işlemleri -->
+        <div style="background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:10px">
+          <div class="admin-section-title" style="margin-top:0">Seçili Klan İşlemleri</div>
+          <div class="admin-row" style="margin-bottom:6px">
+            <input class="admin-input" id="adminClanId" placeholder="Klan ID gir">
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+            <button class="admin-btn admin-btn-green" onclick="adminViewClan()">👁 Klan Bilgisi</button>
+            <button class="admin-btn admin-btn-red" onclick="adminDeleteClan()">🗑 Klana Sil</button>
+            <button class="admin-btn" onclick="adminResetClanScore()">🔄 Puanı Sıfırla</button>
+            <button class="admin-btn" onclick="adminViewClanMembers()">👥 Üyeler</button>
+          </div>
+        </div>
+
+        <!-- Klan Ödülü Ver -->
+        <div style="background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:10px">
+          <div class="admin-section-title" style="margin-top:0">🏆 Klan Ödülü Ver</div>
+          <div class="admin-row"><input class="admin-input" id="adminClanBadgeId" placeholder="Klan ID"></div>
+          <div class="admin-row">
+            <input class="admin-input" id="adminClanBadgeLabel" placeholder="Rozet adı (örn: Şampiyon)">
+            <input class="admin-input" id="adminClanBadgeIcon" placeholder="İkon (emoji)">
+          </div>
+          <div class="admin-row">
+            <input type="number" class="admin-input" id="adminClanBadgeCoins" placeholder="Coin ödülü" min="0">
+            <input type="number" class="admin-input" id="adminClanBadgeDiamonds" placeholder="Elmas ödülü" min="0">
+          </div>
+          <button class="admin-btn admin-btn-green" onclick="adminGiveClanReward()" style="width:100%">🎁 Ödül Ver (Tüm Üyelere)</button>
+        </div>
+
+        <!-- Turnuva Yönetimi -->
+        <div style="background:rgba(255,215,0,0.04);border:1px solid rgba(255,215,0,0.2);border-radius:12px;padding:12px">
+          <div class="admin-section-title" style="margin-top:0;color:#ffd700">⚔️ Turnuva Yönetimi</div>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <input class="admin-input" id="adminTournName" placeholder="Turnuva adı">
+            <button class="admin-btn admin-btn-green" onclick="adminCreateTournament()" style="width:100%">➕ Turnuva Oluştur</button>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+              <button class="admin-btn" onclick="adminStartTournament()">▶ Başlat</button>
+              <button class="admin-btn admin-btn-red" onclick="adminFinishTournament()">✅ Bitir</button>
+              <button class="admin-btn" onclick="adminTournamentInfo()">📋 Turnuva Durumu</button>
+              <button class="admin-btn admin-btn-red" onclick="adminCancelTournament()">🗑 İptal Et</button>
+            </div>
+          </div>
+        </div>
+      </div>
 
     </div>
   </div>
