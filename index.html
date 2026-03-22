@@ -2606,7 +2606,10 @@ input, textarea, select {
 
     <!-- Ayarlar -->
     <div style="background:var(--glass);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:10px">
-      <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:800;color:var(--text);margin-bottom:12px">⚙️ Ayarlar</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:800;color:var(--text)">⚙️ Ayarlar</div>
+        <button id="openSettings" onclick="openSettingsModal()" class="btn ghost sm">Tümünü Gör</button>
+      </div>
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
         <label style="font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;cursor:pointer">
           <input type="checkbox" id="soundToggle" checked style="width:16px;height:16px;accent-color:var(--neon)"> Ses
@@ -2623,7 +2626,6 @@ input, textarea, select {
         <button id="bgLibBtn" class="btn ghost sm" style="flex:none">🖼 Arka Plan</button>
         <button id="bgImageBtn" class="btn ghost sm" style="flex:none">📁 Yükle</button>
         <button id="openAbout" class="btn ghost sm" style="flex:none">ℹ️ Hakkında</button>
-        <button id="resetScores" class="btn ghost sm" style="flex:none">🗑 Sıfırla</button>
         <button id="clearBgBtn" class="btn ghost sm" style="flex:none">✕ BG</button>
       </div>
       <input id="bgImageInput2" type="file" accept="image/*" style="display:none">
@@ -2805,12 +2807,6 @@ input, textarea, select {
           </div>
         </div>
       </div>
-    </div>
-
-    <!-- Tehlikeli Bölge -->
-    <div style="padding:16px 20px;border-bottom:1px solid var(--border)">
-      <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted2);margin-bottom:12px">⚠️ Diğer</div>
-      <button id="settingResetScores" style="width:100%;padding:11px;border-radius:12px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.25);color:#ef4444;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">🗑 Tüm Skorları Sıfırla</button>
     </div>
 
     <!-- Kaydet -->
@@ -3694,7 +3690,7 @@ settingClearBgBtn.addEventListener('click', function() {
 });
 
 // Reset scores (with confirm)
-settingResetScores.addEventListener('click', async ()=>{
+if (settingResetScores) settingResetScores.addEventListener('click', async ()=>{
   const ok = await showConfirm('Skorları Sıfırla', 'Tüm modlardaki tüm skorlar silinecek.');
   if(!ok) return;
   state.leaderboard={}; saveState(); renderLeaderboard();
