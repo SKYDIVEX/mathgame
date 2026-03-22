@@ -4818,7 +4818,7 @@ function renderClanShop(el) {
     }).join('');
 }
 
-function showToast(msg, color='#00ff66'){
+function showToast(msg, color){if(!color)color='#00ff66';
   if (!toastEl) { console.warn('toast:', msg); return; }
   const bar = document.getElementById('toast-bar');
   var msgEl = document.getElementById('toast-msg');
@@ -4973,27 +4973,12 @@ if (authUser && authUser.uid) {
   showScreen('menu');
   refreshMenuPanels();
   updateMiniInfo();
-  /* Cloud'dan skor ve profil yükle — async, UI sonra güncellenir */
-  setTimeout(async function() {
-    try {
-      await syncOnlineScore();
-    } catch(e) {}
-    try {
-      await loadProfileFromCloud();
-    } catch(e) {}
-    updateAllScoreDisplays();
-    updateWallet();
-  }, 800);
 } else if (state.player) {
-  /* Misafir — eski global state'ten */
   showScreen('menu');
   updateAllScoreDisplays();
   updateMiniInfo();
 } else {
-  /* Giriş yapılmamış */
-  setTimeout(function() {
-    try { openAuthModal(); } catch(e) {}
-  }, 300);
+  setTimeout(function() { try { openAuthModal(); } catch(e) {} }, 300);
 }
 renderLeaderboard();
 
@@ -7648,7 +7633,7 @@ try {
     var finalToken = workerToken || (existingAuth ? existingAuth.token : null);
     saveAuth({ uid: user.uid, name, email: user.email || '', provider: 'google', token: finalToken });
 
-    /* Aynı kullanıcı zaten yüklüyse — sadece token güncelle, state'e dokunma */
+    /* Aynı kullanıcı zaten yüklüyse — sadece token güncelle */
     if (existingAuth && existingAuth.uid === user.uid && state.player) {
       updateProfileBtn();
     } else {
@@ -8128,15 +8113,17 @@ async function handleEmailAuth() {
 /* ── Profil butonu güncelle ──────────────────────────── */
 function updateProfileBtn() {
   var btn    = document.getElementById('profileBtn');
+  var loginH = document.getElementById('loginBtnHeader');
   var avatar = document.getElementById('pbAvatar');
   var nameEl = document.getElementById('pbName');
-  if (!btn) { return; }
   if (authUser) {
-    btn.style.display = 'flex';
-    if (avatar) { avatar.textContent = authUser.name[0].toUpperCase(); }
-    if (nameEl) { nameEl.textContent = authUser.name.slice(0, 12); }
+    if (btn)    { btn.style.display = 'flex'; }
+    if (loginH) { loginH.style.display = 'none'; }
+    if (avatar) { avatar.textContent = (authUser.name || '?')[0].toUpperCase(); }
+    if (nameEl) { nameEl.textContent = (authUser.name || '').slice(0, 12); }
   } else {
-    btn.style.display = 'none';
+    if (btn)    { btn.style.display = 'none'; }
+    if (loginH) { loginH.style.display = 'block'; }
   }
 }
 
@@ -9566,16 +9553,14 @@ async function loadOnlineStatusForProfile(targetUid) {
    BETA ŞİFRE KONTROLÜ
    ══════════════════════════════════════════════════════ */
 window.addEventListener('load', function() {
-  /* Kayıtlı oturum varsa direkt menüye — showLoginChoice'u atlat */
   try {
     const raw = localStorage.getItem('mathgame_auth_v1');
     if (raw) {
       const saved = JSON.parse(raw);
       if (saved && saved.uid && saved.name) {
-        /* Auth var, Firebase onAuthStateChanged halledecek — bekliyoruz */
-        /* Ama Firebase yavaşsa 1.5sn sonra direkt menü aç */
-        setTimeout(() => {
-          if (authUser) return; /* Firebase zaten halletti */
+        /* Firebase onAuthStateChanged zaten halledecek — 2sn fallback */
+        setTimeout(function() {
+          if (authUser) return;
           authUser = saved;
           loadState(saved.uid);
           state.player = saved.name;
@@ -9585,12 +9570,13 @@ window.addEventListener('load', function() {
           showScreen('menu');
           refreshMenuPanels();
           saveState();
-        }, 1500);
+        }, 2000);
         return;
       }
     }
   } catch(e) {}
-  showLoginChoice();
+  /* Auth yok — login ekranı */
+  setTimeout(function() { try { openAuthModal(); } catch(e) {} }, 300);
 });
 
 /* ══════════════════════════════════════════════════════
