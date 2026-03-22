@@ -2255,7 +2255,7 @@ input, textarea, select {
   <div id="profileCard">
 
     <!-- Hero — Avatar + İsim + Stats -->
-    <div class="pm-hero">
+    <div class="pm-hero" style="position:sticky;top:0;z-index:10">
       <button class="pm-close-btn" id="pmCloseBtn">✕</button>
       <div class="pm-avatar-wrap">
         <div class="pm-avatar-big" id="pmAvatar" onclick="toggleAvatarPicker()" title="Avatar değiştir">?</div>
@@ -2741,7 +2741,7 @@ input, textarea, select {
   <div id="settingsCard">
 
     <!-- Header -->
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:20px 20px 16px;border-bottom:1px solid var(--border)">
+    <div style="position:sticky;top:0;z-index:10;background:#0a0e16;display:flex;justify-content:space-between;align-items:center;padding:20px 20px 16px;border-bottom:1px solid var(--border)">
       <div>
         <div style="font-family:var(--font-head);font-size:20px;font-weight:900;color:var(--text)">⚙️ Ayarlar</div>
         <div style="font-size:11px;color:var(--muted);margin-top:2px">MathGame v2.6 — SKYDIVEX</div>
@@ -2819,7 +2819,7 @@ input, textarea, select {
 <!-- Görevler Modalı -->
 <div id="questModal" style="display:none">
   <div id="questCard" style="width:100%;max-width:480px;max-height:92vh;background:#0a0e16;border:1px solid var(--border2);border-radius:28px 28px 0 0;overflow-y:auto;animation:slideUp .35s ease;padding-bottom:40px">
-    <div style="padding:18px 20px 14px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+    <div style="position:sticky;top:0;z-index:10;background:#0a0e16;padding:18px 20px 14px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
       <div>
         <div style="font-family:var(--font-head);font-size:20px;font-weight:900">📋 Görevler</div>
         <div style="display:flex;align-items:center;gap:8px;margin-top:4px">
@@ -2830,7 +2830,7 @@ input, textarea, select {
       <button onclick="closeModal(document.getElementById('questModal'))" style="width:32px;height:32px;border-radius:50%;background:var(--glass2);border:1px solid var(--border);color:var(--muted);font-size:14px;cursor:pointer">✕</button>
     </div>
     <!-- Sekmeler -->
-    <div style="display:flex;gap:4px;padding:12px 16px;border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none">
+    <div style="position:sticky;top:64px;z-index:9;background:#0a0e16;display:flex;gap:4px;padding:12px 16px;border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none">
       <button class="quest-tab active" id="qtabDaily"   onclick="switchQuestTab('daily')">📅 Günlük</button>
       <button class="quest-tab"        id="qtabWeekly"  onclick="switchQuestTab('weekly')">📆 Haftalık</button>
       <button class="quest-tab"        id="qtabPerm"    onclick="switchQuestTab('perm')">⭐ Kalıcı</button>
@@ -2861,7 +2861,7 @@ input, textarea, select {
     </div>
 
     <!-- Sekme -->
-    <div style="display:flex;gap:4px;padding:12px 16px;border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none">
+    <div style="position:sticky;top:64px;z-index:9;background:#0a0e16;display:flex;gap:4px;padding:12px 16px;border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none">
       <button class="shop-tab active" onclick="switchShopTab('jokers')" id="shopTabJokers">🃏 Jokerler</button>
       <button class="shop-tab" onclick="switchShopTab('avatars')" id="shopTabAvatars">🖼️ Avatarlar</button>
       <button class="shop-tab" onclick="switchShopTab('badges')" id="shopTabBadges">🏅 Rozetler</button>
@@ -2876,11 +2876,11 @@ input, textarea, select {
 <!-- Klan Modalı -->
 <div id="clanModal" style="display:none">
   <div id="clanCard" style="width:100%;max-width:480px;max-height:92vh;background:#0a0e16;border:1px solid var(--border2);border-radius:28px 28px 0 0;overflow-y:auto;animation:slideUp .35s ease;padding-bottom:40px">
-    <div style="padding:18px 20px 14px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+    <div style="position:sticky;top:0;z-index:10;background:#0a0e16;padding:18px 20px 14px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
       <div style="font-family:var(--font-head);font-size:20px;font-weight:900">👥 Klanlar</div>
       <button onclick="closeModal(document.getElementById('clanModal'))" style="width:32px;height:32px;border-radius:50%;background:var(--glass2);border:1px solid var(--border);color:var(--muted);font-size:14px;cursor:pointer">✕</button>
     </div>
-    <div style="display:flex;gap:4px;padding:12px 16px;border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none">
+    <div style="position:sticky;top:64px;z-index:9;background:#0a0e16;display:flex;gap:4px;padding:12px 16px;border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none">
       <button class="shop-tab active" onclick="switchClanTab('my')"         id="clanTabMy">👤 Klanım</button>
       <button class="shop-tab"        onclick="switchClanTab('search')"      id="clanTabSearch">🔍 Ara</button>
       <button class="shop-tab"        onclick="switchClanTab('create')"      id="clanTabCreate">➕ Kur</button>
@@ -2909,7 +2909,7 @@ input, textarea, select {
   <div id="aboutCard">
 
     <!-- Hero başlık -->
-    <div class="about-hero">
+    <div class="about-hero" style="position:sticky;top:0;z-index:10">
       <div style="display:flex;justify-content:space-between;align-items:flex-start">
         <div>
           <div class="about-hero-title">MathGame</div>
@@ -4457,6 +4457,7 @@ function renderClanInfo(el, clan) {
       '<div style="font-family:var(--font-head);font-size:20px;font-weight:900">' + escapeHtml(clan.name) + '</div>' +
       '<div style="font-size:12px;color:var(--neon);font-weight:700;margin-top:4px">[' + clan.tag + ']' + (clan.isPublic ? ' 🔓' : ' 🔒') + '</div>' +
       (clan.description ? '<div style="font-size:12px;color:var(--muted);margin-top:6px">' + escapeHtml(clan.description) + '</div>' : '') +
+      '<div style="font-size:10px;color:var(--muted2);margin-top:6px;font-family:monospace">ID: ' + clan.id + ' <button onclick="navigator.clipboard&&navigator.clipboard.writeText(\'' + clan.id + '\').then(function(){showToast(\'📋 Klan ID kopyalandı\',\'#38bdf8\')})" style="background:none;border:1px solid var(--border);border-radius:5px;color:var(--muted);font-size:9px;cursor:pointer;padding:1px 5px;font-family:inherit">Kopyala</button></div>' +
       '<div style="margin-top:8px;display:inline-block;background:rgba(255,215,0,0.1);border:1px solid rgba(255,215,0,0.25);border-radius:20px;padding:4px 12px;font-size:12px;color:#ffd700;font-weight:700">' + (ROLE_LABELS[myRole] || '👤 Üye') + '</div>' +
     '</div>' +
     /* Klan stats */
@@ -6813,6 +6814,26 @@ function getQuestProgress(task) {
 }
 
 /* Claim için haftalık ve kalıcı görevler */
+function claimAllQuests(tabType) {
+  /* Tüm alınabilir görevleri tek seferde ver */
+  var tasks;
+  if (tabType === 'daily') {
+    tasks = getTodaysTasks();
+  } else if (tabType === 'weekly') {
+    tasks = getThisWeeksTasks();
+  } else if (tabType === 'perm') {
+    tasks = state.permTasks || [];
+  } else if (tabType === 'achieve') {
+    tasks = state.achieveTasks || [];
+  } else {
+    return;
+  }
+  var claimable = tasks.filter(function(t) { return t.completed && !t.rewardGiven; });
+  if (claimable.length === 0) { showToast('Alınacak görev yok', '#f59e0b'); return; }
+  claimable.forEach(function(t) { claimQuestReward(t.id, tabType); });
+  showToast('🎁 ' + claimable.length + ' görev ödülü alındı!', '#ffd700');
+}
+
 function claimQuestReward(taskId, tabType) {
   var tasks;
   var storageKey;
@@ -6873,6 +6894,9 @@ function renderTaskList(tasks, listEl, tabType) {
         '<span style="color:var(--neon);font-weight:800">' + done + '</span>/' + tasks.length + ' tamamlandı' +
         (claimable > 0 ? ' · <span style="color:#ffd700;font-weight:800">' + claimable + ' alınabilir</span>' : '') +
       '</div>' +
+      (claimable > 1
+        ? '<button onclick="claimAllQuests(\'' + tabType + '\')" style="padding:6px 14px;border-radius:12px;background:linear-gradient(135deg,#ffd700,#f59e0b);border:none;color:#000;font-size:11px;font-weight:800;cursor:pointer;font-family:inherit">🎁 Tümünü Al (' + claimable + ')</button>'
+        : '') +
     '</div>' +
     '<div style="height:4px;background:rgba(255,255,255,0.06);border-radius:4px;margin-bottom:14px">' +
       '<div style="height:100%;width:' + Math.round((done/Math.max(tasks.length,1))*100) + '%;background:linear-gradient(90deg,var(--neon),#00cc66);border-radius:4px"></div>' +
@@ -11089,7 +11113,7 @@ document.addEventListener('pointerdown', e => {
 
 <div id="achModal" style="display:none">
   <div id="achModalCard">
-    <div class="ach-modal-hero">
+    <div class="ach-modal-hero" style="position:sticky;top:0;z-index:10">
       <div style="display:flex;justify-content:space-between;align-items:flex-start">
         <div style="flex:1">
           <div class="ach-modal-title">🏆 Başarımlar</div>
