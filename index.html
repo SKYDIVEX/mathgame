@@ -8200,7 +8200,7 @@ function adminLog(msg) {
   var isSuccess = msg.indexOf('✅') !== -1;
   var isWait    = msg.indexOf('⏳') !== -1;
   var color = isError ? '#ef4444' : isSuccess ? '#00ff66' : isWait ? '#f59e0b' : '#86efac';
-  var line = '<span style="color:' + color + '">[' + time + '] ' + msg + '</span>\n';
+  var line = '<div style="padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.05);margin-bottom:4px"><span style="color:' + color + '">[' + time + '] ' + msg + '</span></div>';
   el.innerHTML = line + el.innerHTML;
 }
 
@@ -9898,39 +9898,45 @@ async function openPublicProfile(data) {
       /* Admin verdiği badge'leri _pubProfileData'ya kaydet */
       _pubProfileData.badges = r.badges || [];
 
-      /* Profil verisini çek — başarımlar için */
+      /* Profil verisini çek — başarımlar için (sadece admin veya kendi profili) */
       try {
-        var profileRes = await workerPost('load-profile', { token: authUser ? authUser.token : '' });
-        /* Kendi profilimiz değil, başkasının — admin olarak çekebiliriz */
-        /* Şimdilik UID'e göre profile key kullanacağız */
         if (r.uid) {
-          var pubProfileRes = await workerPost('admin/player-profile', { token: authUser ? authUser.token : '', uid: r.uid });
+          var pubProfileRes = null;
+          if (isViewerAdmin) {
+            pubProfileRes = await workerPost('admin/player-profile', { token: authUser ? authUser.token : '', uid: r.uid });
+          } else if (authUser && data.name === authUser.name) {
+            /* Kendi profili — state'den oku */
+            pubProfileRes = { ok: true, achievements: state.achievements || {} };
+          }
           var achSection = document.getElementById('pubAchSection');
           var achGrid    = document.getElementById('pubAchGrid');
           var achEmpty   = document.getElementById('pubAchEmpty');
           if (pubProfileRes && pubProfileRes.ok && pubProfileRes.achievements) {
             var unlockedIds = Object.keys(pubProfileRes.achievements);
             if (unlockedIds.length > 0) {
-              achSection.style.display = '';
-              achEmpty.style.display   = 'none';
-              /* ACHIEVEMENTS listesinden ikonları bul */
+              if (achSection) achSection.style.display = '';
+              if (achEmpty)   achEmpty.style.display   = 'none';
               var achHtml = '';
               ACHIEVEMENTS.forEach(function(ach) {
                 if (pubProfileRes.achievements[ach.id]) {
                   achHtml += '<div title="' + ach.name + ': ' + ach.desc + '" style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;font-size:18px;cursor:default">' + ach.icon + '</div>';
                 }
               });
-              achGrid.innerHTML = achHtml;
+              if (achGrid) achGrid.innerHTML = achHtml;
             } else {
-              achSection.style.display = '';
-              achEmpty.style.display   = '';
-              achGrid.innerHTML        = '';
+              if (achSection) achSection.style.display = '';
+              if (achEmpty)   achEmpty.style.display   = '';
+              if (achGrid)    achGrid.innerHTML         = '';
             }
           } else {
-            achSection.style.display = 'none';
+            if (achSection) achSection.style.display = 'none';
           }
         }
-      } catch(e) { document.getElementById('pubAchSection').style.display = 'none'; }
+      } catch(e) {
+        var achSec = document.getElementById('pubAchSection');
+        if (achSec) achSec.style.display = 'none';
+        console.warn('Başarım yükleme hatası:', e);
+      }
 
       /* Badge'ler — herkes görür */
       var badges = [];
@@ -9988,10 +9994,12 @@ async function openPublicProfile(data) {
   } catch(e) {
     document.getElementById('pubRank').textContent   = '?';
     document.getElementById('pubJoined').textContent = '?';
+    console.warn('openPublicProfile hata:', e);
+    showToast('❌ Profil yüklenemedi: ' + (e.message || 'Bağlantı hatası'), '#ef4444');
   }
 
   if (adminActions && isViewerAdmin) { 
-    adminActions.style.display = 'flex';
+    adminActions.style.display = 'block';
     /* Mevcut badge'leri göster */
     var pubBadgeList = document.getElementById('pubCurrentBadges');
     if (pubBadgeList && _pubProfileData.badges && _pubProfileData.badges.length > 0) {
