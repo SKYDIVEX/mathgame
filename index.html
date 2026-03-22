@@ -4973,13 +4973,24 @@ if (authUser && authUser.uid) {
   showScreen('menu');
   refreshMenuPanels();
   updateMiniInfo();
+  /* Cloud'dan skor ve profil yükle — async, UI sonra güncellenir */
+  setTimeout(async function() {
+    try {
+      await syncOnlineScore();
+    } catch(e) {}
+    try {
+      await loadProfileFromCloud();
+    } catch(e) {}
+    updateAllScoreDisplays();
+    updateWallet();
+  }, 800);
 } else if (state.player) {
   /* Misafir — eski global state'ten */
   showScreen('menu');
   updateAllScoreDisplays();
   updateMiniInfo();
 } else {
-  /* Giriş yapılmamış — beta şifresi geçtiyse aç */
+  /* Giriş yapılmamış */
   setTimeout(function() {
     try { openAuthModal(); } catch(e) {}
   }, 300);
@@ -7653,12 +7664,13 @@ try {
       trackEvent('login', { method: 'google' });
       try { await syncOnlineScore(); } catch(e) { console.warn('syncOnlineScore hata:', e); }
       try { await loadProfileFromCloud(); } catch(e) { console.warn('loadProfileFromCloud hata:', e); }
+      /* Cloud yüklendi — UI güncelle */
+      updateAllScoreDisplays();
       try { updateWallet(); } catch(e) {}
       try { loadGroqDailyTasks().then(function() { updateDailyTasks(); }); } catch(e) {}
       try { loadGroqWeeklyTasks(); } catch(e) {}
       try { scheduleDailyReset(); } catch(e) {}
       try { setTimeout(checkTournamentPrizes, 3000); } catch(e) {}
-      /* checkDailyLogin profil yüklendikten sonra — erken tetiklenmeyi önler */
       setTimeout(function() { try { checkDailyLogin(); } catch(e) {} }, 2500);
     }
 
@@ -8097,6 +8109,8 @@ async function handleEmailAuth() {
     try { stopSessionTimer(); startSessionTimer(); } catch(e) {}
     try { await syncOnlineScore(); } catch(e) {}
     try { await loadProfileFromCloud(); } catch(e) {}
+    /* Cloud yüklendi — UI güncelle */
+    updateAllScoreDisplays();
     try { updateWallet(); } catch(e) {}
     try { loadGroqDailyTasks().then(function() { updateDailyTasks(); }); } catch(e) {}
     try { loadGroqWeeklyTasks(); } catch(e) {}
@@ -9563,9 +9577,11 @@ window.addEventListener('load', function() {
         setTimeout(() => {
           if (authUser) return; /* Firebase zaten halletti */
           authUser = saved;
-          loadState(saved.uid); /* uid'e özel localStorage'ı yükle */
+          loadState(saved.uid);
           state.player = saved.name;
           updateProfileBtn();
+          updateAllScoreDisplays();
+          updateWallet();
           showScreen('menu');
           refreshMenuPanels();
           saveState();
