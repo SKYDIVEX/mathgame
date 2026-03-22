@@ -5034,7 +5034,9 @@ if (settingSound) settingSound.checked  = !!state.soundOn;
 
 // Show correct initial screen
 if (authUser && authUser.uid) {
-  /* Auth var — state zaten uid key'den yüklendi */
+  /* Auth var — loginBtnHeader gizle, profil göster */
+  var _lbh = document.getElementById('loginBtnHeader');
+  if (_lbh) _lbh.style.display = 'none';
   state.player = authUser.name;
   updateAllScoreDisplays();
   updateProfileBtn();
@@ -5042,12 +5044,20 @@ if (authUser && authUser.uid) {
   showScreen('menu');
   refreshMenuPanels();
   updateMiniInfo();
+  /* onAuthStateChanged'ı beklemeden hızlı cloud sync yap */
+  setTimeout(async function() {
+    if (!authUser || !authUser.token) return;
+    try { await syncOnlineScore(); } catch(e) {}
+    try { await loadProfileFromCloud(); } catch(e) {}
+    updateAllScoreDisplays();
+    updateWallet();
+  }, 100);
 } else if (state.player) {
   showScreen('menu');
   updateAllScoreDisplays();
   updateMiniInfo();
 }
-/* Auth yoksa window.load halleder — buradan openAuthModal çağırma */
+/* Auth yoksa window.load halleder */
 renderLeaderboard();
 
 /* ── ENTRY ─────────────────────────────────────────── */
@@ -7727,6 +7737,10 @@ try {
     var finalToken = workerToken || (existingAuth ? existingAuth.token : null);
     saveAuth({ uid: user.uid, name, email: user.email || '', provider: 'google', token: finalToken });
 
+    /* loginBtnHeader'ı kesin gizle — her zaman */
+    var _lbhEl = document.getElementById('loginBtnHeader');
+    if (_lbhEl) _lbhEl.style.display = 'none';
+
     /* Aynı kullanıcı zaten yüklüyse */
     if (existingAuth && existingAuth.uid === user.uid && state.player) {
       updateProfileBtn();
@@ -8588,7 +8602,7 @@ async function fetchOnlineLeaderboard() {
       el.innerHTML = '<div style="color:var(--muted);font-size:12px;padding:8px">' + (opsLabels[_currentLbOps] || 'Tüm Kategoriler') + ': Henüz kayıt yok — ilk sen ol!</div>';
       return;
     }
-    el.innerHTML = '<div style="font-size:11px;color:var(--neon);font-weight:700;margin-bottom:6px;opacity:0.7">' + opsLabels[_currentLbOps] + '</div>';
+    el.innerHTML = '<div style="font-size:11px;color:var(--neon);font-weight:700;margin-bottom:6px;opacity:0.7">' + (opsLabels[_currentLbOps] || 'Tüm Kategoriler') + '</div>';
 
     /* Board verisini global'e kaydet — onclick index ile erişir */
     window._lbBoardCache = board;
