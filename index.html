@@ -4526,29 +4526,6 @@ function renderClanInfo(el, clan) {
     '</div>';
 }
 
-  el.innerHTML =
-    '<div style="text-align:center;padding:16px 0 10px">' +
-      '<div style="font-size:40px;margin-bottom:8px">🏰</div>' +
-      '<div style="font-family:var(--font-head);font-size:20px;font-weight:900">' + escapeHtml(clan.name) + '</div>' +
-      '<div style="font-size:12px;color:var(--neon);font-weight:700;margin-top:4px">[' + clan.tag + ']' + (clan.isPublic ? ' 🔓' : ' 🔒') + '</div>' +
-      (clan.description ? '<div style="font-size:12px;color:var(--muted);margin-top:6px">' + escapeHtml(clan.description) + '</div>' : '') +
-    '</div>' +
-    /* Klan stats */
-    '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px">' +
-      '<div style="text-align:center;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:12px;padding:10px">' +
-        '<div style="font-size:18px;font-weight:900;color:var(--neon)">' + clan.members.length + '</div>' +
-        '<div style="font-size:10px;color:var(--muted)">Üye</div>' +
-      '</div>' +
-      '<div style="text-align:center;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:12px;padding:10px">' +
-        '<div style="font-size:16px;font-weight:900;color:#ffd700">' + (clan.totalScore||0).toLocaleString() + '</div>' +
-        '<div style="font-size:10px;color:var(--muted)">Klan Puanı</div>' +
-      '</div>' +
-      '<div style="text-align:center;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:12px;padding:10px">' +
-        '<div style="font-size:16px;font-weight:900;color:#a855f7">' + (clan.contributors||[]).length + '/' + Math.max(2,Math.min(10,Math.floor(clan.members.length/2))) + '</div>' +
-        '<div style="font-size:10px;color:var(--muted)">Katkıcı</div>' +
-      '</div>' +
-    '</div>' +
-
 function renderTournamentTab(el, tournament) {
   if (!tournament) {
     var canRegister = !!state.clanId;
