@@ -7712,11 +7712,14 @@ try {
 
   fbAuth.onAuthStateChanged(async (user) => {
     if (!user) {
-      /* Firebase oturumu kapandı — bizim state'i de temizle */
+      /* Firebase oturumu kapandı */
       if (authUser) {
+        /* Gerçekten çıkış yapıldıysa temizle */
         authUser = null;
         localStorage.removeItem('mathgame_auth_v1');
+        updateProfileBtn(); /* loginBtnHeader'ı güncelle */
       }
+      /* authUser zaten null ise — init sırasındaki ilk null callback, yoksay */
       return;
     }
     const name = sanitizeUsername(user.displayName || user.email.split('@')[0]);
@@ -7874,9 +7877,22 @@ function openAuthModal() {
   clearAuthError();
 }
 
+/* ── Profil butonu durumunu garantile ──────────────────── */
+/* Sayfa yüklendikten sonra 3sn boyunca her 300ms kontrol et */
+var _pbGuardCount = 0;
+var _pbGuardTimer = setInterval(function() {
+  _pbGuardCount++;
+  if (_pbGuardCount > 10) { clearInterval(_pbGuardTimer); return; }
+  var loginH = document.getElementById('loginBtnHeader');
+  var profBtn = document.getElementById('profileBtn');
+  if (authUser) {
+    if (loginH && loginH.style.display !== 'none') loginH.style.display = 'none';
+    if (profBtn && profBtn.style.display === 'none') profBtn.style.display = 'flex';
+  }
+}, 300);
+
 /* Sekme & submit event'leri */
 document.addEventListener('DOMContentLoaded', () => {
-  /* loadAuth() ve updateProfileBtn() init bloğunda zaten çalışıyor — tekrar çağırma */
 
   /* ── Profil Modal Eventleri ── */
   document.getElementById('pmCloseBtn')?.addEventListener('click', closeProfileModal);
@@ -10536,7 +10552,7 @@ async function openPublicProfile(data) {
 
   try {
     var token = authUser ? authUser.token : '';
-    var r = await workerPost('public-profile', { targetName: data.name });
+    var r = await workerPost('public-profile', { targetName: data.name, targetUid: data.uid || '' });
     if (r && r.ok) {
       _pubProfileData.uid = r.uid;
       document.getElementById('pubRank').textContent   = r.rank ? '#' + r.rank : '—';
@@ -10662,6 +10678,8 @@ async function openPublicProfile(data) {
   } catch(e) {
     document.getElementById('pubRank').textContent   = '?';
     document.getElementById('pubJoined').textContent = '?';
+    var osEl = document.getElementById('pubOnlineStatus');
+    if (osEl) osEl.innerHTML = '<span style="font-size:11px;color:var(--muted)">⚫ Bilgi alınamadı</span>';
     console.warn('openPublicProfile hata:', e);
     showToast('❌ Profil yüklenemedi: ' + (e.message || 'Bağlantı hatası'), '#ef4444');
   }
