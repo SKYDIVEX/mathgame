@@ -5046,9 +5046,8 @@ if (authUser && authUser.uid) {
   showScreen('menu');
   updateAllScoreDisplays();
   updateMiniInfo();
-} else {
-  setTimeout(function() { try { openAuthModal(); } catch(e) {} }, 300);
 }
+/* Auth yoksa window.load halleder — buradan openAuthModal çağırma */
 renderLeaderboard();
 
 /* ── ENTRY ─────────────────────────────────────────── */
@@ -7728,9 +7727,16 @@ try {
     var finalToken = workerToken || (existingAuth ? existingAuth.token : null);
     saveAuth({ uid: user.uid, name, email: user.email || '', provider: 'google', token: finalToken });
 
-    /* Aynı kullanıcı zaten yüklüyse — sadece token güncelle */
+    /* Aynı kullanıcı zaten yüklüyse */
     if (existingAuth && existingAuth.uid === user.uid && state.player) {
       updateProfileBtn();
+      /* Sayfa yenilenmiş olabilir — cloud'dan ekonomi/profil yükle */
+      try { await syncOnlineScore(); } catch(e) {}
+      try { await loadProfileFromCloud(); } catch(e) {}
+      updateAllScoreDisplays();
+      try { updateWallet(); } catch(e) {}
+      try { scheduleDailyReset(); } catch(e) {}
+      setTimeout(function() { try { checkDailyLogin(); } catch(e) {} }, 2500);
     } else {
       /* Farklı kullanıcı veya ilk giriş — state'i uid key'den yükle */
       loadState(user.uid);
@@ -9820,7 +9826,7 @@ window.addEventListener('load', function() {
       if (saved && saved.uid && saved.name) {
         /* Firebase onAuthStateChanged zaten halledecek — 2sn fallback */
         setTimeout(function() {
-          if (authUser) return;
+          if (authUser) return; /* Firebase halletti */
           authUser = saved;
           loadState(saved.uid);
           state.player = saved.name;
@@ -9831,12 +9837,15 @@ window.addEventListener('load', function() {
           refreshMenuPanels();
           saveState();
         }, 2000);
-        return;
+        return; /* Auth kaydı var — openAuthModal çağırma */
       }
     }
   } catch(e) {}
-  /* Auth yok — login ekranı */
-  setTimeout(function() { try { openAuthModal(); } catch(e) {} }, 300);
+  /* Auth kaydı yok — 500ms bekle, hala auth yoksa giriş ekranı */
+  setTimeout(function() {
+    if (authUser) return; /* onAuthStateChanged halletti */
+    try { openAuthModal(); } catch(e) {}
+  }, 500);
 });
 
 /* ══════════════════════════════════════════════════════
