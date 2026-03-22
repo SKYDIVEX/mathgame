@@ -7856,8 +7856,7 @@ function openAuthModal() {
 
 /* Sekme & submit event'leri */
 document.addEventListener('DOMContentLoaded', () => {
-  loadAuth();
-  if (authUser) updateProfileBtn();
+  /* loadAuth() ve updateProfileBtn() init bloğunda zaten çalışıyor — tekrar çağırma */
 
   /* ── Profil Modal Eventleri ── */
   document.getElementById('pmCloseBtn')?.addEventListener('click', closeProfileModal);
@@ -8431,6 +8430,8 @@ async function saveProfileToCloud() {
       correctStreak: state.correctStreak || 0,
       bio: state.profile.bio || '',
       avatar: state.profile.avatar || '',
+      theme: state.theme || 'green',
+      bg: state.bgImage || '',
       /* Ekonomi verileri */
       coins: state.coins || 0,
       diamonds: state.diamonds || 0,
@@ -8442,6 +8443,9 @@ async function saveProfileToCloud() {
       _shopBuys: state._shopBuys || 0,
       _jokersUsed: state._jokersUsed || 0,
       _economyV26: true,
+      /* Görev verileri */
+      permTasks: state.permTasks || null,
+      achieveTasks: state.achieveTasks || null,
     });
   } catch(e) {
     console.warn('saveProfileToCloud hata:', e);
@@ -8471,24 +8475,35 @@ async function loadProfileFromCloud() {
     if (result.score && result.score > (state.score || 0)) {
       state.score = result.score;
     }
-    /* Ekonomi — sadece _economyV26 bayrağı yoksa yükle (sıfırlanmış hesap için) */
-    if (result.coins !== undefined && result._economyV26) {
+    /* Ekonomi — her zaman cloud'dan yükle (cloud kaynak of truth) */
+    if (result.coins !== undefined) {
       state.coins    = result.coins    || 0;
       state.diamonds = result.diamonds || 0;
       state.jokers   = result.jokers   || { skip:0, hint:0, freeze:0, double:0 };
       state.inventory = result.inventory || [];
-      state.loginStreak  = result.loginStreak  || state.loginStreak  || 0;
-      state.lastLoginDate = result.lastLoginDate || state.lastLoginDate || null;
-      state.clanId   = result.clanId   || state.clanId   || null;
-      state._shopBuys  = result._shopBuys  || state._shopBuys  || 0;
-      state._jokersUsed = result._jokersUsed || state._jokersUsed || 0;
-      state._economyV26 = true;
+      state.loginStreak   = result.loginStreak   || 0;
+      state.lastLoginDate = result.lastLoginDate || null;
+      state.clanId        = result.clanId        || state.clanId || null;
+      state._shopBuys     = result._shopBuys     || 0;
+      state._jokersUsed   = result._jokersUsed   || 0;
+      state._economyV26   = true;
     }
+    /* Görevler */
+    if (result.permTasks)    state.permTasks    = result.permTasks;
+    if (result.achieveTasks) state.achieveTasks = result.achieveTasks;
     if (!state.profile) { state.profile = {}; }
     if (result.bio !== undefined) { state.profile.bio = result.bio; }
     if (result.avatar) { state.profile.avatar = result.avatar; applyAvatar(result.avatar); }
-    if (result.theme) { localStorage.setItem('mathgame_theme', result.theme); try { applyTheme(result.theme); } catch(e) {} }
-    if (result.bg !== undefined) { localStorage.setItem('mathgame_bg', result.bg); try { if (result.bg) applyBg(result.bg); } catch(e) {} }
+    if (result.theme) {
+      state.theme = result.theme;
+      localStorage.setItem('mathgame_theme', result.theme);
+      try { applyTheme(result.theme); } catch(e) {}
+    }
+    if (result.bg !== undefined && result.bg) {
+      state.bgImage = result.bg;
+      localStorage.setItem('mathgame_bg', result.bg);
+      try { applyBg(result.bg); } catch(e) {}
+    }
     saveState();
     updateAllScoreDisplays();
     updateWallet();
