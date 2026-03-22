@@ -8646,13 +8646,17 @@ async function adminLoadBadgeLibrary() {
     var bg  = 'rgba(' + (b.color || '99,179,237') + ',0.15)';
     var col = '#' + (b.textColor || '63b3ed');
     var icon = b.icon || '🏅';
-    var iconHtml = (icon.startsWith('data:') || icon.startsWith('http'))
-      ? '<img src="' + escapeHtml(icon) + '" style="width:16px;height:16px;border-radius:3px;object-fit:cover;vertical-align:middle">'
-      : icon;
+    var iconHtml;
+    if (icon.startsWith('data:') || icon.startsWith('http')) {
+      /* base64 veya URL — escapeHtml KULLANMA, src bozulur */
+      iconHtml = '<img src="' + icon + '" style="width:20px;height:20px;border-radius:4px;object-fit:cover;vertical-align:middle;flex-shrink:0">';
+    } else {
+      iconHtml = '<span style="font-size:16px">' + icon + '</span>';
+    }
     return '<div onclick="adminGiveBadgeFromLib(\`' + b.id + '\`)" ' +
-      'style="padding:5px 10px;border-radius:8px;background:' + bg + ';border:1px solid rgba(' + (b.color || '99,179,237') + ',0.3);color:' + col + ';font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:4px" ' +
+      'style="padding:6px 10px;border-radius:10px;background:' + bg + ';border:1px solid rgba(' + (b.color || '99,179,237') + ',0.3);color:' + col + ';font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px" ' +
       'title="' + escapeHtml(b.label) + ' — tıkla ve ver">' +
-      iconHtml + ' ' + escapeHtml(b.label) +
+      iconHtml + '<span>' + escapeHtml(b.label) + '</span>' +
     '</div>';
   }).join('');
   adminLog('✅ ' + _badgeLibrary.length + ' badge yüklendi');
@@ -8708,7 +8712,7 @@ function updateLibPreview() {
   preview.style.borderColor = 'rgba(' + color + ',0.3)';
   preview.style.color       = '#' + textColor;
   var iconHtml = (icon.startsWith('data:') || icon.startsWith('http'))
-    ? '<img src="' + escapeHtml(icon) + '" style="width:16px;height:16px;border-radius:3px;object-fit:cover;vertical-align:middle">'
+    ? '<img src="' + icon + '" style="width:20px;height:20px;border-radius:4px;object-fit:cover;vertical-align:middle">'
     : icon;
   preview.innerHTML = iconHtml + ' ' + (label || 'Önizleme');
 }
@@ -9984,7 +9988,7 @@ async function openPublicProfile(data) {
         r.badges.forEach(function(b) {
           var icon = b.icon || '🏅';
           var iconHtml = (icon.startsWith('data:') || icon.startsWith('http'))
-            ? '<img src="' + escapeHtml(icon) + '" style="width:14px;height:14px;border-radius:3px;object-fit:cover;vertical-align:middle;margin-right:3px">'
+            ? '<img src="' + icon + '" style="width:16px;height:16px;border-radius:4px;object-fit:cover;vertical-align:middle;margin-right:3px">'
             : icon + ' ';
           badges.push('<span class="pub-badge-tag" style="background:rgba(' + (b.color||'99,179,237') + ',0.15);border:1px solid rgba(' + (b.color||'99,179,237') + ',0.3);color:#' + (b.textColor||'63b3ed') + '">' + iconHtml + escapeHtml(b.label || '') + '</span>');
         });
