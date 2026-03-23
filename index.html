@@ -3889,7 +3889,15 @@ function addCoins(amount, reason) {
   saveState();
   updateWallet();
   if (reason) showFloatingReward('+' + amount + ' 💰', '#ffd700');
+  /* Her para değişiminde buluta kaydet */
+  if (authUser && authUser.token) {
+    clearTimeout(addCoins._saveTimer);
+    addCoins._saveTimer = setTimeout(function() {
+      try { saveProfileToCloud(); } catch(e) {}
+    }, 2000); /* 2sn debounce — çok sık çağrıyı önle */
+  }
 }
+addCoins._saveTimer = null;
 
 /* Elmas ekle */
 function addDiamonds(amount, reason) {
@@ -3897,7 +3905,14 @@ function addDiamonds(amount, reason) {
   saveState();
   updateWallet();
   if (reason) showFloatingReward('+' + amount + ' 💎', '#63b3ed');
+  if (authUser && authUser.token) {
+    clearTimeout(addDiamonds._saveTimer);
+    addDiamonds._saveTimer = setTimeout(function() {
+      try { saveProfileToCloud(); } catch(e) {}
+    }, 2000);
+  }
 }
+addDiamonds._saveTimer = null;
 
 /* Yüzen ödül animasyonu */
 function showFloatingReward(text, color) {
@@ -4157,6 +4172,10 @@ function checkDailyLogin() {
 
   state.lastLoginDate = today;
   saveState();
+  /* Cloud'a kaydet — lastLoginDate ve loginStreak korunun */
+  if (authUser && authUser.token) {
+    setTimeout(function() { try { saveProfileToCloud(); } catch(e) {} }, 500);
+  }
 
   /* Ödülü göster */
   setTimeout(function() { showDailyLoginModal(); }, 1000);
@@ -4221,6 +4240,11 @@ function claimDailyLogin() {
 
   var modal = document.getElementById('loginRewardModal');
   if (modal) modal.remove();
+
+  /* Cloud'a kaydet */
+  if (authUser && authUser.token) {
+    setTimeout(function() { try { saveProfileToCloud(); } catch(e) {} }, 500);
+  }
 }
 
 /* claimDailyReward — görev listesinden ödül al */
@@ -5412,12 +5436,17 @@ function checkAnswer(){
     if (!state.stats.highestLevel) state.stats.highestLevel = 1;
 
     /* ── DOĞRU ── */
-    /* Tolerans: max(0.01, correctAnswer'ın 0.5%) — devirli sayılar için */
-    var tolerance = Math.max(0.01, Math.abs(correctAnswer) * 0.005);
-    /* Kullanıcının cevabını 2 ondalığa yuvarla ve karşılaştır */
+    /* Tolerans: bölme işlemlerinde daha geniş tut */
+    var tolerance = Math.max(0.05, Math.abs(correctAnswer) * 0.01);
+    /* Her ikisini de 2 ondalığa yuvarla */
     var userRounded    = Math.round(user * 100) / 100;
     var correctRounded = Math.round(correctAnswer * 100) / 100;
-    if (Math.abs(userRounded - correctRounded) < tolerance) {
+    /* Ayrıca tam sayıya da yuvarlanmış değerle karşılaştır */
+    var userInt    = Math.round(user);
+    var correctInt = Math.round(correctAnswer);
+    var isCorrect  = (Math.abs(userRounded - correctRounded) < tolerance) ||
+                     (Number.isInteger(correctAnswer) && userInt === correctInt);
+    if (isCorrect) {
       successSound();
 
       /* Puan hesapla */
@@ -8484,6 +8513,11 @@ async function saveProfileToCloud() {
       /* Görev verileri */
       permTasks: state.permTasks || null,
       achieveTasks: state.achieveTasks || null,
+      /* Günlük görev durumu */
+      lastLoginDate: state.lastLoginDate || null,
+      loginStreak: state.loginStreak || 0,
+      dailyTasksKey: getDailyKey(),
+      dailyTasksData: (function() { try { var s=getDailyStorageKey(); var v=localStorage.getItem(s); return v?JSON.parse(v):null; } catch(e){return null;} })(),
     });
   } catch(e) {
     console.warn('saveProfileToCloud hata:', e);
@@ -8529,6 +8563,23 @@ async function loadProfileFromCloud() {
     /* Görevler */
     if (result.permTasks)    state.permTasks    = result.permTasks;
     if (result.achieveTasks) state.achieveTasks = result.achieveTasks;
+    /* Günlük login tarihi ve serisi — cloud kazanır */
+    if (result.lastLoginDate) state.lastLoginDate = result.lastLoginDate;
+    if (result.loginStreak)   state.loginStreak   = result.loginStreak;
+    /* Günlük görev verisi — aynı gün ise yükle */
+    if (result.dailyTasksData && result.dailyTasksKey === getDailyKey()) {
+      try {
+        var storageKey = getDailyStorageKey();
+        var localRaw = localStorage.getItem(storageKey);
+        var localData = localRaw ? JSON.parse(localRaw) : null;
+        /* Local'de daha çok tamamlanmış görev varsa local'i koru */
+        var cloudDone  = (result.dailyTasksData.tasks || []).filter(function(t){return t.rewardGiven;}).length;
+        var localDone  = localData ? (localData.tasks || []).filter(function(t){return t.rewardGiven;}).length : 0;
+        if (cloudDone >= localDone) {
+          localStorage.setItem(storageKey, JSON.stringify(result.dailyTasksData));
+        }
+      } catch(e) {}
+    }
     if (!state.profile) { state.profile = {}; }
     if (result.bio !== undefined) { state.profile.bio = result.bio; }
     if (result.avatar) { state.profile.avatar = result.avatar; applyAvatar(result.avatar); }
