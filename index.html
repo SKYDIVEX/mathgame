@@ -4366,7 +4366,7 @@ async function renderClanTab(tab) {
             '<label for="clanPublicInput" style="font-size:13px;color:var(--text)">Public klan</label>' +
           '</div>' +
         '</div>' +
-        '<button onclick="createClan()" class="btn" style="width:100%;padding:13px;margin-top:4px"' + (!hasCoins ? ' disabled style="opacity:0.5"' : '') + '>🏰 Klan Kur (1000 💰)</button>' +
+        '<button onclick="createClan()" class="btn" style="width:100%;padding:13px;margin-top:4px;' + (!hasCoins ? 'opacity:0.5' : '') + '"' + (!hasCoins ? ' disabled' : '') + '>🏰 Klan Kur (1000 💰)</button>' +
       '</div>';
   }
 
@@ -9063,6 +9063,18 @@ async function adminResetPass() {
   else adminLog('❌ ' + (r?.error || 'Hata'));
 }
 
+async function adminGiftCurrency() {
+  var name     = (document.getElementById('adminGiftTarget')?.value || '').trim();
+  var coins    = parseInt(document.getElementById('adminGiftCoins')?.value    || '0') || 0;
+  var diamonds = parseInt(document.getElementById('adminGiftDiamonds')?.value || '0') || 0;
+  if (!name) { adminLog('Oyuncu adı gir'); return; }
+  if (coins === 0 && diamonds === 0) { adminLog('Miktar gir'); return; }
+  adminLog('⏳ Gönderiliyor: ' + name + ' → ' + coins + '💰 ' + diamonds + '💎');
+  var r = await adminCall('admin/gift-currency', { targetName: name, coins, diamonds });
+  if (r?.ok) adminLog('✅ Gönderildi! ' + name + ' yeni bakiye: ' + r.coins + '💰 ' + r.diamonds + '💎');
+  else adminLog('❌ ' + (r?.error || 'Hata'));
+}
+
 async function adminSearchClan() {
   var q = (document.getElementById('adminClanSearch')?.value || '').trim();
   if (!q) { adminLog('Klan adı veya etiket gir'); return; }
@@ -11866,6 +11878,17 @@ document.addEventListener('pointerdown', e => {
 
         <!-- Klan Modalını Aç -->
         <button class="admin-btn admin-btn-green" onclick="closeModal(document.getElementById('adminModal'));openClanModal()" style="width:100%;margin-bottom:12px">👥 Klan Sayfasını Aç</button>
+
+        <!-- Para/Elmas Ver -->
+        <div style="background:rgba(255,215,0,0.04);border:1px solid rgba(255,215,0,0.2);border-radius:12px;padding:12px;margin-bottom:10px">
+          <div class="admin-section-title" style="margin-top:0;color:#ffd700">💰 Oyuncuya Para/Elmas Ver</div>
+          <div class="admin-row"><input class="admin-input" id="adminGiftTarget" placeholder="Oyuncu adı"></div>
+          <div class="admin-row">
+            <input type="number" class="admin-input" id="adminGiftCoins" placeholder="Coin miktarı" min="0">
+            <input type="number" class="admin-input" id="adminGiftDiamonds" placeholder="Elmas miktarı" min="0">
+          </div>
+          <button class="admin-btn admin-btn-green" onclick="adminGiftCurrency()" style="width:100%">🎁 Gönder</button>
+        </div>
 
         <!-- Klan Ara -->
         <div class="admin-row" style="margin-bottom:6px">
