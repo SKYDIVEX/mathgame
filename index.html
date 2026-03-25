@@ -3,10 +3,79 @@
 <head>
 <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+
+<!-- PWA -->
+<link id="pwa-manifest" rel="manifest">
+<meta name="theme-color" content="#00ff88">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MathGame">
 <title>MathGame — v2.6 — SKYDIVEX</title>
 <script>
 /* Kritik global değişkenler — en başta tanımla */
 var WORKER_URL = 'https://mathgame.enesseker2113.workers.dev';
+
+
+/* PWA Manifest — dinamik oluştur */
+(function() {
+  try {
+    var manifest = {
+      name: 'MathGame — SKYDIVEX',
+      short_name: 'MathGame',
+      description: 'Matematiksel ve absürt sorularla becerinizi test edin!',
+      start_url: '/mathgame/',
+      scope: '/mathgame/',
+      display: 'standalone',
+      background_color: '#080b12',
+      theme_color: '#00ff88',
+      orientation: 'portrait-primary',
+      categories: ['games', 'education'],
+      icons: [
+        {
+          src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='40' fill='%23080b12'/%3E%3Crect x='8' y='8' width='176' height='176' rx='34' fill='none' stroke='%2300ff88' stroke-width='4'/%3E%3Ctext x='96' y='128' font-size='100' text-anchor='middle' font-family='Arial'%3E%F0%9F%A7%AE%3C/text%3E%3C/svg%3E",
+          sizes: '192x192',
+          type: 'image/svg+xml',
+          purpose: 'any maskable'
+        }
+      ]
+    };
+    var blob = new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' });
+    var url = URL.createObjectURL(blob);
+    var linkEl = document.getElementById('pwa-manifest');
+    if (linkEl) { linkEl.href = url; }
+  } catch(e) {}
+
+  /* Service Worker kaydı */
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+      navigator.serviceWorker.register('/mathgame/sw.js', { scope: '/mathgame/' })
+        .then(function(reg) { console.log('[MathGame SW] Kayıtlı:', reg.scope); })
+        .catch(function(err) { console.warn('[MathGame SW] Kayıt başarısız:', err); });
+    });
+  }
+
+  /* iOS için ana ekrana ekle ipucu (bir kez göster) */
+  var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  var isStandalone = window.navigator.standalone === true;
+  var shownInstall = localStorage.getItem('mg_install_shown');
+  if (isIOS && !isStandalone && !shownInstall) {
+    localStorage.setItem('mg_install_shown', '1');
+    setTimeout(function() {
+      var tip = document.createElement('div');
+      tip.id = 'ios-install-tip';
+      tip.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);' +
+        'background:rgba(0,255,136,0.12);border:1px solid rgba(0,255,136,0.3);border-radius:16px;' +
+        'padding:14px 20px;color:#00ff88;font-size:13px;font-weight:700;z-index:99999;' +
+        'max-width:320px;text-align:center;backdrop-filter:blur(12px);box-shadow:0 4px 24px rgba(0,0,0,0.5)';
+      tip.innerHTML = '📲 Ana ekrana eklemek için <strong>Paylaş → Ana Ekrana Ekle</strong> seç!<br>' +
+        '<span style="font-size:11px;opacity:0.7;font-weight:400">Uygulama gibi çalışır ✨</span>';
+      tip.onclick = function() { tip.remove(); };
+      document.body.appendChild(tip);
+      setTimeout(function() { if (tip.parentNode) { tip.style.opacity='0'; tip.style.transition='opacity 0.5s'; setTimeout(function(){tip.remove();},500); } }, 8000);
+    }, 3000);
+  }
+})();
 
 /* Zoom ve double-tap engelleyici */
 document.addEventListener('touchstart', function(e) {
