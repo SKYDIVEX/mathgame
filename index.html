@@ -4407,11 +4407,11 @@ async function renderClanTab(tab) {
   }
 
   else if (tab === 'create') {
-    var hasCoins = (state.coins || 0) >= 1000;
+    /* Önce formu yükle — coin kontrolü createClan() içinde yapılıyor zaten */
     el.innerHTML =
-      '<div style="background:rgba(255,215,0,0.06);border:1px solid rgba(255,215,0,0.2);border-radius:14px;padding:12px;margin-bottom:14px;text-align:center">' +
+      '<div id="clanCreateCoinInfo" style="background:rgba(255,215,0,0.06);border:1px solid rgba(255,215,0,0.2);border-radius:14px;padding:12px;margin-bottom:14px;text-align:center">' +
         '<div style="font-size:13px;color:#ffd700;font-weight:700">💰 Klan kurmak 1000 coin gerektirir</div>' +
-        '<div style="font-size:11px;color:var(--muted);margin-top:3px">Bakiyen: ' + (state.coins||0) + ' coin</div>' +
+        '<div id="clanCreateCoinBal" style="font-size:11px;color:var(--muted);margin-top:3px">Bakiyen: yükleniyor...</div>' +
       '</div>' +
       '<div style="display:flex;flex-direction:column;gap:10px">' +
         '<div><label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px">Klan Adı (2-24 karakter)</label>' +
@@ -4435,8 +4435,34 @@ async function renderClanTab(tab) {
             '<label for="clanPublicInput" style="font-size:13px;color:var(--text)">Public klan</label>' +
           '</div>' +
         '</div>' +
-        '<button onclick="createClan()" class="btn" style="width:100%;padding:13px;margin-top:4px;' + (!hasCoins ? 'opacity:0.5' : '') + '"' + (!hasCoins ? ' disabled' : '') + '>🏰 Klan Kur (1000 💰)</button>' +
+        '<button id="clanCreateBtn" onclick="createClan()" class="btn" style="width:100%;padding:13px;margin-top:4px">🏰 Klan Kur (1000 💰)</button>' +
       '</div>';
+    /* Cloud'dan güncel coin bilgisini çek, sonra butonu güncelle */
+    (async function() {
+      try {
+        if (authUser && authUser.token) {
+          var pr = await workerPost('load-profile', { token: authUser.token });
+          if (pr && pr.ok && pr.coins !== undefined) {
+            state.coins    = pr.coins    || 0;
+            state.diamonds = pr.diamonds || 0;
+            updateWallet();
+          }
+        }
+      } catch(e) {}
+      var bal = document.getElementById('clanCreateCoinBal');
+      var btn = document.getElementById('clanCreateBtn');
+      var currentCoins = state.coins || 0;
+      if (bal) bal.textContent = 'Bakiyen: ' + currentCoins + ' coin';
+      if (btn) {
+        if (currentCoins < 1000) {
+          btn.disabled = true;
+          btn.style.opacity = '0.5';
+        } else {
+          btn.disabled = false;
+          btn.style.opacity = '1';
+        }
+      }
+    })();
   }
 
   else if (tab === 'settings') {
