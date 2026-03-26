@@ -391,6 +391,67 @@ input, textarea, select {
   background: linear-gradient(135deg, rgba(124,111,255,0.2), rgba(168,85,247,0.05));
   border-color: rgba(124,111,255,0.2);
 }
+.play-card-challenge {
+  background: linear-gradient(135deg, rgba(239,68,68,0.18), rgba(249,115,22,0.06));
+  border-color: rgba(239,68,68,0.25);
+}
+/* ── Soru Sayacı ── */
+#questionTimerWrap {
+  margin: 6px 0 10px;
+  height: 5px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 99px;
+  overflow: hidden;
+  display: none;
+}
+#questionTimerBar {
+  height: 100%;
+  border-radius: 99px;
+  background: linear-gradient(90deg, var(--neon), #00cc66);
+  transition: width 0.1s linear, background 0.3s;
+  width: 100%;
+}
+#questionTimerText {
+  font-size: 11px;
+  color: var(--muted);
+  text-align: right;
+  margin-bottom: 2px;
+  display: none;
+}
+.feedback-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--muted);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 4px 10px;
+  cursor: pointer;
+  margin-top: 6px;
+  font-family: var(--font-body);
+}
+.feedback-btn:active { background: var(--glass2); }
+#challengeModal { display: none; }
+#challengeModal.show { display: flex !important; }
+.challenge-diff-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid var(--border2);
+  background: var(--glass);
+  cursor: pointer;
+  font-family: var(--font-body);
+  width: 100%;
+  text-align: left;
+  color: var(--text);
+  position: relative;
+  overflow: hidden;
+}
+.challenge-diff-btn:active { opacity: 0.8; }
 .play-card-icon {
   font-size: 32px;
   margin-bottom: 12px;
@@ -2614,6 +2675,14 @@ input, textarea, select {
         </div>
         <div class="play-card-badge">AI</div>
       </div>
+      <div class="play-card play-card-challenge" id="startChallengeBtn" onclick="openChallengeModal()">
+        <div class="play-card-icon">⚔️</div>
+        <div>
+          <div class="play-card-title">Meydan Okuma</div>
+          <div class="play-card-sub">Süreye karşı yaris</div>
+        </div>
+        <div class="play-card-badge" style="background:rgba(239,68,68,0.2);color:#ef4444;border-color:rgba(239,68,68,0.3)">YENİ</div>
+      </div>
     </div>
 
     <!-- Görevler & Mağaza & Klan hızlı erişim -->
@@ -2731,6 +2800,11 @@ input, textarea, select {
       </div>
       <!-- Absurd choices (shown in absurd mode) -->
       <div id="absurdChoices" style="display:none;margin-top:8px"></div>
+      <!-- Soru Sayacı -->
+      <div id="questionTimerText">⏱ <span id="questionTimerCount">-</span>s</div>
+      <div id="questionTimerWrap"><div id="questionTimerBar"></div></div>
+      <!-- Geri Bildirim -->
+      <button class="feedback-btn" onclick="openFeedbackModal()" id="feedbackBtn" style="display:none">💬 Geri bildirim</button>
     </div>
 
     <div id="resultMsg" style="min-height:26px;margin-top:10px;font-weight:700;transition:opacity .44s ease"></div>
@@ -7267,7 +7341,8 @@ function getTodaysTasks() {
       return saved.tasks;
     }
     /* Yeni gün — statik havuzdan 8 tane seç */
-    var shuffled = [...DAILY_TASK_POOL].sort(function() { return Math.random() - 0.5; });
+    if (!Array.isArray(DAILY_TASK_POOL) || DAILY_TASK_POOL.length === 0) { return []; }
+    var shuffled = DAILY_TASK_POOL.slice().sort(function() { return Math.random() - 0.5; });
     var tasks = shuffled.slice(0, 8).map(function(t) {
       return Object.assign({}, t, { progress: 0, completed: false, rewardGiven: false, source: 'static' });
     });
@@ -9168,6 +9243,19 @@ async function adminGiftCurrency() {
   var r = await adminCall('admin/gift-currency', { targetName: name, coins, diamonds });
   if (r?.ok) adminLog('✅ Gönderildi! ' + name + ' yeni bakiye: ' + r.coins + '💰 ' + r.diamonds + '💎');
   else adminLog('❌ ' + (r?.error || 'Hata'));
+}
+
+async function adminForceResetMyClan() {
+  if (!authUser) { adminLog('Giriş yapılmamış'); return; }
+  if (!confirm('Kendi klan verini tamamen sıfırlamak istediğine emin misin? Bu işlem geri alınamaz.')) { return; }
+  try {
+    var r = await workerPost('clan/force-reset', { token: authUser.token });
+    if (!r || !r.ok) { adminLog('❌ Hata: ' + (r?.error || 'Bilinmeyen')); return; }
+    state.clanId = null;
+    saveState();
+    adminLog('✅ Klan verisi sıfırlandı: ' + (r.log || []).join(' | '));
+    showToast('✅ Klan verisi temizlendi', '#00ff88');
+  } catch(e) { adminLog('❌ Bağlantı hatası: ' + e.message); }
 }
 
 async function adminSearchClan() {
@@ -11384,6 +11472,510 @@ document.addEventListener('DOMContentLoaded', function() {
 
 window._mathgame={ state, nextQuestion, checkAnswer };
 
+/* ════════════════════════════════════════════════════════════
+   SORU SAYACI SİSTEMİ
+   ════════════════════════════════════════════════════════════ */
+var _questionTimerInterval = null;
+var _questionTimerLeft = 0;
+var _questionTimerTotal = 0;
+var _questionTimerPaused = false;
+
+function startQuestionTimer(seconds) {
+  clearQuestionTimer();
+  if (!seconds || seconds <= 0) return;
+  _questionTimerTotal = seconds;
+  _questionTimerLeft  = seconds;
+  var wrap    = document.getElementById('questionTimerWrap');
+  var bar     = document.getElementById('questionTimerBar');
+  var txt     = document.getElementById('questionTimerText');
+  var counter = document.getElementById('questionTimerCount');
+  if (wrap) wrap.style.display = 'block';
+  if (txt)  txt.style.display  = 'block';
+  var fbBtn = document.getElementById('feedbackBtn');
+  if (fbBtn) fbBtn.style.display = 'inline-flex';
+  function tick() {
+    if (_questionTimerPaused) return;
+    _questionTimerLeft -= 0.1;
+    var pct = Math.max(0, (_questionTimerLeft / _questionTimerTotal) * 100);
+    if (bar) {
+      bar.style.width = pct + '%';
+      if (pct < 33)      bar.style.background = 'linear-gradient(90deg,#ef4444,#f97316)';
+      else if (pct < 66) bar.style.background = 'linear-gradient(90deg,#f59e0b,#eab308)';
+      else               bar.style.background = 'linear-gradient(90deg,var(--neon),#00cc66)';
+    }
+    if (counter) counter.textContent = Math.ceil(_questionTimerLeft);
+    if (_questionTimerLeft <= 0) {
+      clearQuestionTimer();
+      /* Süre doldu — yanlış say */
+      if (typeof gameMode !== 'undefined') {
+        if (gameMode === 'math') {
+          failSound();
+          resultMsg.style.color = '#ff6b6b';
+          resultMsg.innerText   = '⏰ Süre doldu!';
+          resultMsg.style.opacity = 1;
+          if (!state.stats) state.stats = {};
+          state.stats.totalAnswered = (state.stats.totalAnswered || 0) + 1;
+          state.stats.totalWrong    = (state.stats.totalWrong    || 0) + 1;
+          saveState();
+          setTimeout(function() { try { nextQuestion(false); } catch(e) {} }, 1200);
+        } else if (gameMode === 'absurd') {
+          failSound();
+          resultMsg.style.color   = '#ff6b6b';
+          resultMsg.innerText     = '⏰ Süre doldu!';
+          resultMsg.style.opacity = 1;
+          setTimeout(function() { try { nextAbsurdQuestion(); } catch(e) {} }, 1200);
+        }
+      }
+    }
+  }
+  _questionTimerInterval = setInterval(tick, 100);
+}
+
+function clearQuestionTimer() {
+  if (_questionTimerInterval) { clearInterval(_questionTimerInterval); _questionTimerInterval = null; }
+  var wrap = document.getElementById('questionTimerWrap');
+  var txt  = document.getElementById('questionTimerText');
+  if (wrap) wrap.style.display = 'none';
+  if (txt)  txt.style.display  = 'none';
+}
+
+function pauseQuestionTimer()  { _questionTimerPaused = true; }
+function resumeQuestionTimer() { _questionTimerPaused = false; }
+
+/* Pause butonu timer'ı duraklatmalı */
+(function patchPauseForTimer() {
+  var origPauseBtn = document.getElementById('pauseBtn');
+  var origResumeBtn = document.getElementById('resumeBtn');
+  if (origPauseBtn)  origPauseBtn.addEventListener('click',  function() { pauseQuestionTimer(); });
+  if (origResumeBtn) origResumeBtn.addEventListener('click', function() { resumeQuestionTimer(); });
+})();
+
+/* ════════════════════════════════════════════════════════════
+   DURAKLATMA FİX — Aynı soru geri gelsin
+   ════════════════════════════════════════════════════════════ */
+var _savedMathQuestion  = null; /* { questionStr, correctAnswer, questionTypeUsed, a, b, op } */
+var _savedAbsurdQuestion = null; /* currentAbsurd objesi */
+
+/* pauseMenuBtn'e ek listener — soruyu kaydet */
+(function patchPauseMenu() {
+  var btn = document.getElementById('pauseMenuBtn');
+  if (!btn) return;
+  btn.addEventListener('click', function() {
+    /* Mevcut soruyu kaydet */
+    if (typeof gameMode !== 'undefined') {
+      if (gameMode === 'math' && typeof correctAnswer !== 'undefined') {
+        _savedMathQuestion = {
+          questionStr:      (typeof questionText !== 'undefined' ? questionText.innerText : ''),
+          correctAnswer:    correctAnswer,
+          questionTypeUsed: (typeof questionTypeUsed !== 'undefined' ? questionTypeUsed : 'normal'),
+        };
+      } else if (gameMode === 'absurd' && currentAbsurd) {
+        _savedAbsurdQuestion = currentAbsurd;
+      }
+    }
+    clearQuestionTimer();
+  }, true); /* capture=true → önce çalışsın */
+})();
+
+/* nextQuestion override — saved soruyu restore et */
+var _origNextQuestion = nextQuestion;
+nextQuestion = function(reset) {
+  if (!reset && _savedMathQuestion) {
+    var saved = _savedMathQuestion;
+    _savedMathQuestion = null;
+    /* Restore */
+    questionText.innerText = saved.questionStr;
+    correctAnswer          = saved.correctAnswer;
+    resultMsg.style.opacity = 0;
+    answerInput.value = '';
+    answerInput.focus();
+    /* Sayacı başlat */
+    var timerSec = 15 + Math.floor((state.level || 1) * 0.5);
+    if (timerSec > 40) timerSec = 40;
+    startQuestionTimer(timerSec);
+    return;
+  }
+  _savedMathQuestion = null;
+  _origNextQuestion.call(this, reset);
+  /* Normal soruda sayacı başlat */
+  var timerSec2 = 15 + Math.floor((state.level || 1) * 0.5);
+  if (timerSec2 > 40) timerSec2 = 40;
+  startQuestionTimer(timerSec2);
+};
+
+/* nextAbsurdQuestion restore */
+var _origNextAbsurd = window.nextAbsurdQuestion;
+window.nextAbsurdQuestion = async function() {
+  if (_savedAbsurdQuestion) {
+    var saved = _savedAbsurdQuestion;
+    _savedAbsurdQuestion = null;
+    currentAbsurd = saved;
+    questionText.innerText = saved.q;
+    resultMsg.style.opacity = 0;
+    resultMsg.innerText = '';
+    /* Şıkları yeniden göster */
+    var indices = [0,1,2,3];
+    for (var i=3;i>0;i--) { var j=randInt(0,i); var tmp=indices[i]; indices[i]=indices[j]; indices[j]=tmp; }
+    var container2 = document.getElementById('absurdChoices');
+    container2.innerHTML = '';
+    var grid2 = document.createElement('div');
+    grid2.className = 'absurd-grid';
+    indices.forEach(function(origIdx) {
+      var btn2 = document.createElement('button');
+      btn2.className = 'choice-btn';
+      btn2.dataset.orig = origIdx;
+      btn2.textContent = String(saved.choices[origIdx]).replace(/^[A-Da-d][\)\.\s]+/, '').trim();
+      btn2.addEventListener('click', function() { handleAbsurdAnswer(btn2, origIdx, grid2); });
+      grid2.appendChild(btn2);
+    });
+    container2.appendChild(grid2);
+    startQuestionTimer(20);
+    return;
+  }
+  _savedAbsurdQuestion = null;
+  await _origNextAbsurd.apply(this, arguments);
+  startQuestionTimer(20);
+};
+
+/* ════════════════════════════════════════════════════════════
+   GERİ BİLDİRİM SİSTEMİ
+   ════════════════════════════════════════════════════════════ */
+var _feedbackContext = null;
+
+function openFeedbackModal() {
+  if (!authUser) { showToast('Geri bildirim için giriş yap', '#f59e0b'); return; }
+  pauseQuestionTimer();
+  /* Mevcut soru bağlamını yakala */
+  _feedbackContext = {
+    mode:    gameMode || 'math',
+    question: (typeof questionText !== 'undefined' ? questionText.innerText : '—'),
+    userAnswer: (typeof answerInput !== 'undefined' ? answerInput.value : '—'),
+    correctAnswer: (typeof correctAnswer !== 'undefined' ? String(correctAnswer) : '—'),
+    score:   state.score || 0,
+    level:   state.level || 1,
+  };
+  var info = document.getElementById('feedbackQuestionInfo');
+  if (info) {
+    info.innerHTML =
+      '<div style="margin-bottom:4px"><strong>Soru:</strong> ' + _feedbackContext.question + '</div>' +
+      '<div><strong>Senin cevabın:</strong> ' + (_feedbackContext.userAnswer || '—') + ' &nbsp;|&nbsp; <strong>Doğru:</strong> ' + _feedbackContext.correctAnswer + '</div>';
+  }
+  var ta = document.getElementById('feedbackText');
+  if (ta) ta.value = '';
+  document.getElementById('feedbackModal').style.display = 'flex';
+}
+
+function closeFeedbackModal() {
+  document.getElementById('feedbackModal').style.display = 'none';
+  resumeQuestionTimer();
+}
+
+async function submitFeedback() {
+  var msg = (document.getElementById('feedbackText')?.value || '').trim();
+  if (!msg || msg.length < 3) { showToast('Lütfen bir şeyler yaz', '#f59e0b'); return; }
+  if (!authUser) { showToast('Giriş gerekli', '#ef4444'); return; }
+  try {
+    var payload = {
+      token:   authUser.token,
+      type:    'question_feedback',
+      message: msg,
+      context: _feedbackContext,
+    };
+    var r = await workerPost('feedback', payload);
+    if (!r || !r.ok) { showToast('Gönderilemedi: ' + (r?.error || 'hata'), '#ef4444'); return; }
+    showToast('✅ Geri bildirim gönderildi!', '#00ff88');
+    closeFeedbackModal();
+  } catch(e) {
+    showToast('Bağlantı hatası', '#ef4444');
+  }
+}
+
+/* ════════════════════════════════════════════════════════════
+   MEYDAN OKUMA MODU
+   ════════════════════════════════════════════════════════════ */
+var CHALLENGE_DIFFS = {
+  cadet:   { label:'Çırak 🌱',   color:'#22c55e', maxNum:50,   timePerQ:25, ops:['+','-'],           multiplier:1, questions:20 },
+  warrior: { label:'Savaşçı ⚔️', color:'#3b82f6', maxNum:300,  timePerQ:18, ops:['+','-','*'],       multiplier:2, questions:20 },
+  legend:  { label:'Efsane 🔥',  color:'#f59e0b', maxNum:1000, timePerQ:12, ops:['+','-','*','/'],   multiplier:3, questions:20 },
+  god:     { label:'Tanrı ⚡',   color:'#ef4444', maxNum:9999, timePerQ:8,  ops:['+','-','*','/'],   multiplier:5, questions:20 },
+};
+
+var _chlState = {
+  diff: null, qNum: 0, correct: 0, wrong: 0,
+  startTime: 0, totalTimeMs: 0,
+  timerInterval: null, qTimerInterval: null,
+  qLeft: 0, active: false,
+  currentAnswer: null,
+};
+
+function openChallengeModal() {
+  document.getElementById('challengeModal').classList.add('show');
+  switchChallengeTab('play');
+}
+
+function closeChallengeModal() {
+  document.getElementById('challengeModal').classList.remove('show');
+}
+
+function switchChallengeTab(tab) {
+  var playBtn = document.getElementById('chlTabPlay');
+  var lbBtn   = document.getElementById('chlTabLb');
+  if (tab === 'play') {
+    if (playBtn) { playBtn.className = 'btn'; playBtn.style.flex = '1'; playBtn.style.fontSize = '12px'; playBtn.style.padding = '8px'; }
+    if (lbBtn)   { lbBtn.className   = 'btn ghost'; lbBtn.style.flex = '1'; lbBtn.style.fontSize = '12px'; lbBtn.style.padding = '8px'; }
+    renderChallengePlay();
+  } else {
+    if (lbBtn)   { lbBtn.className   = 'btn'; lbBtn.style.flex = '1'; lbBtn.style.fontSize = '12px'; lbBtn.style.padding = '8px'; }
+    if (playBtn) { playBtn.className = 'btn ghost'; playBtn.style.flex = '1'; playBtn.style.fontSize = '12px'; playBtn.style.padding = '8px'; }
+    renderChallengeLb();
+  }
+}
+
+function renderChallengePlay() {
+  var el = document.getElementById('challengeContent');
+  if (!el) return;
+  var html = '<div style="display:flex;flex-direction:column;gap:8px">';
+  Object.entries(CHALLENGE_DIFFS).forEach(function(entry) {
+    var key = entry[0];
+    var d   = entry[1];
+    html += '<button class="challenge-diff-btn" onclick="startChallenge('' + key + '')" style="border-color:' + d.color + '20">' +
+      '<span style="font-size:28px">' + d.label.split(' ')[1] + '</span>' +
+      '<div style="flex:1">' +
+        '<div style="font-size:15px;font-weight:800;color:' + d.color + '">' + d.label + '</div>' +
+        '<div style="font-size:11px;color:var(--muted);margin-top:2px">20 soru · ' + d.timePerQ + 's/soru · ' + d.multiplier + 'x puan</div>' +
+      '</div>' +
+      '<span style="font-size:18px;color:var(--muted)">›</span>' +
+    '</button>';
+  });
+  html += '</div>';
+  el.innerHTML = html;
+}
+
+async function renderChallengeLb() {
+  var el = document.getElementById('challengeContent');
+  if (!el) return;
+  el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted)">⏳ Yükleniyor...</div>';
+
+  /* Diff seçici */
+  var selHtml = '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">';
+  Object.entries(CHALLENGE_DIFFS).forEach(function(entry) {
+    var k = entry[0]; var d = entry[1];
+    selHtml += '<button onclick="loadChallengeLb('' + k + '',this)" style="font-size:11px;padding:5px 10px;border-radius:20px;border:1px solid ' + d.color + '40;background:transparent;color:' + d.color + ';cursor:pointer;font-family:var(--font-body)">' + d.label + '</button>';
+  });
+  selHtml += '</div><div id="chlLbContent"></div>';
+  el.innerHTML = selHtml;
+  loadChallengeLb('cadet', null);
+}
+
+async function loadChallengeLb(diffKey, btnEl) {
+  var lbEl = document.getElementById('chlLbContent');
+  if (!lbEl) return;
+  lbEl.innerHTML = '<div style="text-align:center;padding:16px;color:var(--muted)">⏳</div>';
+  try {
+    var r = await workerPost('challenge/leaderboard', { diff: diffKey });
+    if (!r || !r.ok || !r.board || r.board.length === 0) {
+      lbEl.innerHTML = '<div style="text-align:center;padding:16px;color:var(--muted)">Henüz kayıt yok</div>';
+      return;
+    }
+    var d = CHALLENGE_DIFFS[diffKey];
+    var html2 = '<div style="display:flex;flex-direction:column;gap:6px">';
+    r.board.forEach(function(entry, i) {
+      var mins  = Math.floor(entry.time / 60000);
+      var secs  = Math.floor((entry.time % 60000) / 1000);
+      var timeStr = mins + ':' + String(secs).padStart(2, '0');
+      var medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i+1) + '.';
+      html2 += '<div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--glass);border:1px solid var(--border);border-radius:12px">' +
+        '<span style="font-size:14px;min-width:24px">' + medal + '</span>' +
+        '<span style="flex:1;font-weight:700;font-size:13px">' + entry.name + '</span>' +
+        '<span style="font-size:12px;color:var(--neon);font-weight:800">' + entry.score + 'p</span>' +
+        '<span style="font-size:11px;color:var(--muted);font-family:var(--font-mono);min-width:40px;text-align:right">' + timeStr + '</span>' +
+      '</div>';
+    });
+    html2 += '</div>';
+    lbEl.innerHTML = html2;
+  } catch(e) {
+    lbEl.innerHTML = '<div style="color:#ef4444;padding:12px">Hata: ' + e.message + '</div>';
+  }
+}
+
+function startChallenge(diffKey) {
+  if (!authUser) { showToast('Giriş yap!', '#ef4444'); return; }
+  var d = CHALLENGE_DIFFS[diffKey];
+  if (!d) return;
+  closeChallengeModal();
+  _chlState.diff       = diffKey;
+  _chlState.qNum       = 0;
+  _chlState.correct    = 0;
+  _chlState.wrong      = 0;
+  _chlState.startTime  = Date.now();
+  _chlState.active     = true;
+  document.getElementById('chlDiffLabel').textContent = d.label.toUpperCase();
+  document.getElementById('chlDiffLabel').style.color = d.color;
+  document.getElementById('chlCorrectCount').textContent = '0';
+  document.getElementById('challengeGameArea').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+  chlTotalTimeTick();
+  chlNextQuestion();
+}
+
+function chlTotalTimeTick() {
+  if (_chlState.timerInterval) clearInterval(_chlState.timerInterval);
+  _chlState.timerInterval = setInterval(function() {
+    if (!_chlState.active) { clearInterval(_chlState.timerInterval); return; }
+    var elapsed = Date.now() - _chlState.startTime;
+    var mins = Math.floor(elapsed / 60000);
+    var secs = Math.floor((elapsed % 60000) / 1000);
+    var el = document.getElementById('chlTotalTime');
+    if (el) el.textContent = String(mins).padStart(2,'0') + ':' + String(secs).padStart(2,'0');
+  }, 500);
+}
+
+function chlNextQuestion() {
+  var d = CHALLENGE_DIFFS[_chlState.diff];
+  if (!d) return;
+  _chlState.qNum++;
+  if (_chlState.qNum > d.questions) { chlFinish(); return; }
+
+  document.getElementById('chlQNum').textContent = _chlState.qNum;
+  document.getElementById('chlResultMsg').textContent = '';
+  document.getElementById('chlResultMsg').style.opacity = '0';
+
+  /* Matematik sorusu üret */
+  var ops = d.ops;
+  var maxN = d.maxNum;
+  var op  = ops[Math.floor(Math.random() * ops.length)];
+  var a, b, ans;
+  if (op === '+') { a = randInt(1, maxN); b = randInt(1, maxN); ans = a + b; }
+  else if (op === '-') { a = randInt(1, maxN); b = randInt(1, Math.max(1, a)); ans = a - b; }
+  else if (op === '*') { var sq = Math.max(2, Math.floor(Math.sqrt(maxN))); a = randInt(2,sq); b = randInt(2,sq); ans = a * b; }
+  else { b = randInt(2, Math.max(2, Math.floor(maxN/4))); a = b * randInt(2, Math.max(2, Math.floor(maxN/b))); ans = a / b; }
+  _chlState.currentAnswer = ans;
+
+  var opDisp = {'+':'+', '-':'−', '*':'×', '/':'÷'}[op] || op;
+  document.getElementById('chlQuestionText').textContent = a + ' ' + opDisp + ' ' + b + ' = ?';
+
+  /* Şıklar üret (3 yanlış + 1 doğru) */
+  var choices = [ans];
+  var attempts2 = 0;
+  while (choices.length < 4 && attempts2 < 50) {
+    attempts2++;
+    var fake = ans + randInt(-Math.max(5, Math.floor(ans*0.3)), Math.max(5, Math.floor(ans*0.3)));
+    if (fake !== ans && !choices.includes(fake)) choices.push(fake);
+  }
+  choices = choices.sort(function() { return Math.random() - 0.5; });
+
+  var container3 = document.getElementById('chlChoices');
+  container3.innerHTML = '';
+  choices.forEach(function(c) {
+    var btn3 = document.createElement('button');
+    btn3.className = 'choice-btn';
+    btn3.style.cssText = 'padding:12px;border-radius:12px;border:1px solid var(--border2);background:var(--glass);color:var(--text);font-size:16px;font-weight:700;cursor:pointer;font-family:var(--font-body);width:100%';
+    btn3.textContent = c;
+    btn3.addEventListener('click', function() { chlHandleAnswer(c, btn3, container3); });
+    container3.appendChild(btn3);
+  });
+
+  /* Soru sayacı */
+  chlStartQTimer(d.timePerQ);
+}
+
+function chlStartQTimer(seconds) {
+  if (_chlState.qTimerInterval) clearInterval(_chlState.qTimerInterval);
+  var left = seconds;
+  var bar  = document.getElementById('chlTimerBar');
+  var cnt  = document.getElementById('chlTimerCount');
+  if (bar) bar.style.width = '100%';
+  if (cnt) cnt.textContent = Math.ceil(left);
+  _chlState.qTimerInterval = setInterval(function() {
+    left -= 0.1;
+    var pct = Math.max(0, (left / seconds) * 100);
+    if (bar) bar.style.width = pct + '%';
+    if (cnt) cnt.textContent = Math.ceil(left);
+    if (left <= 0) {
+      clearInterval(_chlState.qTimerInterval);
+      /* Süre doldu */
+      var rm = document.getElementById('chlResultMsg');
+      if (rm) { rm.style.color='#ff6b6b'; rm.textContent='⏰ Süre doldu!'; rm.style.opacity='1'; }
+      _chlState.wrong++;
+      failSound();
+      setTimeout(chlNextQuestion, 1000);
+    }
+  }, 100);
+}
+
+function chlHandleAnswer(chosen, btnEl, container4) {
+  if (_chlState.qTimerInterval) clearInterval(_chlState.qTimerInterval);
+  var allBtns = container4.querySelectorAll('button');
+  allBtns.forEach(function(b) { b.disabled = true; });
+  var rm = document.getElementById('chlResultMsg');
+  if (chosen === _chlState.currentAnswer) {
+    btnEl.style.background    = 'rgba(0,255,136,0.12)';
+    btnEl.style.borderColor   = 'rgba(0,255,136,0.4)';
+    btnEl.style.color         = 'var(--neon)';
+    _chlState.correct++;
+    document.getElementById('chlCorrectCount').textContent = _chlState.correct;
+    if (rm) { rm.style.color='#00ff88'; rm.textContent='✅ Doğru!'; rm.style.opacity='1'; }
+    successSound();
+    setTimeout(chlNextQuestion, 800);
+  } else {
+    btnEl.style.background  = 'rgba(239,68,68,0.12)';
+    btnEl.style.borderColor = 'rgba(239,68,68,0.3)';
+    btnEl.style.color       = '#ef4444';
+    allBtns.forEach(function(b) { if (parseInt(b.textContent) === _chlState.currentAnswer) { b.style.background='rgba(0,255,136,0.12)'; b.style.borderColor='rgba(0,255,136,0.4)'; b.style.color='var(--neon)'; } });
+    _chlState.wrong++;
+    if (rm) { rm.style.color='#ff6b6b'; rm.textContent='❌ Yanlış!'; rm.style.opacity='1'; }
+    failSound();
+    setTimeout(chlNextQuestion, 1000);
+  }
+}
+
+async function chlFinish() {
+  _chlState.active = false;
+  if (_chlState.timerInterval)  clearInterval(_chlState.timerInterval);
+  if (_chlState.qTimerInterval) clearInterval(_chlState.qTimerInterval);
+  var elapsed = Date.now() - _chlState.startTime;
+  var d       = CHALLENGE_DIFFS[_chlState.diff];
+  var score   = _chlState.correct * 100 * (d ? d.multiplier : 1);
+  var mins    = Math.floor(elapsed / 60000);
+  var secs    = Math.floor((elapsed % 60000) / 1000);
+  var timeStr = mins + ':' + String(secs).padStart(2,'0');
+
+  document.getElementById('challengeGameArea').style.display = 'none';
+  document.body.style.overflow = '';
+
+  /* Sonuç toast */
+  showToast('⚔️ ' + _chlState.correct + '/20 doğru · ' + timeStr + ' · ' + score + 'p', '#00ff88');
+  spawnConfetti(20);
+
+  /* Worker'a kaydet */
+  if (authUser && authUser.token) {
+    try {
+      await workerPost('challenge/submit', {
+        token: authUser.token,
+        diff:  _chlState.diff,
+        score: score,
+        correct: _chlState.correct,
+        time: elapsed,
+      });
+    } catch(e) {}
+  }
+
+  /* Modalı aç, liderliği göster */
+  openChallengeModal();
+  switchChallengeTab('lb');
+  setTimeout(function() { loadChallengeLb(_chlState.diff, null); }, 400);
+}
+
+function exitChallenge() {
+  _chlState.active = false;
+  if (_chlState.timerInterval)  clearInterval(_chlState.timerInterval);
+  if (_chlState.qTimerInterval) clearInterval(_chlState.qTimerInterval);
+  document.getElementById('challengeGameArea').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+
+
 /* ── LIQUID RIPPLE ─────────────────────────────────── */
 function addRipple(e, el){
   const rect = el.getBoundingClientRect();
@@ -11972,7 +12564,10 @@ document.addEventListener('pointerdown', e => {
         <div class="admin-section-title">🏰 Klan Yönetimi</div>
 
         <!-- Klan Modalını Aç -->
-        <button class="admin-btn admin-btn-green" onclick="closeModal(document.getElementById('adminModal'));openClanModal()" style="width:100%;margin-bottom:12px">👥 Klan Sayfasını Aç</button>
+        <button class="admin-btn admin-btn-green" onclick="closeModal(document.getElementById('adminModal'));openClanModal()" style="width:100%;margin-bottom:8px">👥 Klan Sayfasını Aç</button>
+
+        <!-- Kendi klan verisini sıfırla -->
+        <button class="admin-btn admin-btn-red" onclick="adminForceResetMyClan()" style="width:100%;margin-bottom:12px">🔄 Kendi Klan Verimi Sıfırla</button>
 
         <!-- Para/Elmas Ver -->
         <div style="background:rgba(255,215,0,0.04);border:1px solid rgba(255,215,0,0.2);border-radius:12px;padding:12px;margin-bottom:10px">
@@ -12051,5 +12646,65 @@ document.addEventListener('pointerdown', e => {
     </div>
   </div>
 </div>
+<!-- ══ MEYDAN OKUMA MODALI ══ -->
+<div id="challengeModal" style="position:fixed;inset:0;z-index:9100;display:none;align-items:center;justify-content:center;padding:12px;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px)">
+  <div class="card" style="width:100%;max-width:420px;max-height:92vh;overflow-y:auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <div style="font-family:var(--font-head);font-size:18px;font-weight:800">⚔️ Meydan Okuma</div>
+      <button onclick="closeChallengeModal()" style="width:34px;height:34px;border-radius:50%;background:var(--glass2);border:1px solid var(--border);color:var(--muted);font-size:15px;cursor:pointer">✕</button>
+    </div>
+    <!-- Sekme -->
+    <div style="display:flex;gap:6px;margin-bottom:14px">
+      <button onclick="switchChallengeTab('play')" id="chlTabPlay" class="btn" style="flex:1;font-size:12px;padding:8px">🎮 Oyna</button>
+      <button onclick="switchChallengeTab('lb')" id="chlTabLb" class="btn ghost" style="flex:1;font-size:12px;padding:8px">🏆 Liderlik</button>
+    </div>
+    <div id="challengeContent"></div>
+  </div>
+</div>
+
+<!-- ══ MEYDAN OKUMA OYUN EKRANI ══ -->
+<div id="challengeGameArea" style="display:none;position:fixed;inset:0;z-index:9050;background:var(--bg);overflow-y:auto;padding:12px">
+  <div class="card" style="max-width:520px;margin:0 auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div>
+        <div id="chlDiffLabel" style="font-size:11px;font-weight:800;letter-spacing:1px;color:#ef4444">MEYDAN OKUMA</div>
+        <div style="font-size:13px;color:var(--muted)">Soru <span id="chlQNum">1</span>/20</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:20px;font-weight:800;color:var(--neon);font-family:var(--font-mono)" id="chlTotalTime">00:00</div>
+        <div style="font-size:11px;color:var(--muted)">Toplam süre</div>
+      </div>
+    </div>
+    <!-- Soru sayacı -->
+    <div id="chlTimerText" style="font-size:11px;color:var(--muted);text-align:right;margin-bottom:2px">⏱ <span id="chlTimerCount">-</span>s</div>
+    <div style="height:5px;background:rgba(255,255,255,0.06);border-radius:99px;overflow:hidden;margin-bottom:14px">
+      <div id="chlTimerBar" style="height:100%;border-radius:99px;background:linear-gradient(90deg,#ef4444,#f97316);width:100%;transition:width 0.1s linear"></div>
+    </div>
+    <div id="chlQuestionText" style="font-size:24px;font-weight:800;line-height:1.4;margin-bottom:16px;min-height:60px">—</div>
+    <div id="chlChoices" style="display:flex;flex-direction:column;gap:8px"></div>
+    <div id="chlResultMsg" style="min-height:24px;margin-top:10px;font-weight:700;text-align:center;font-size:14px"></div>
+    <div style="margin-top:12px;border-top:1px solid var(--border);padding-top:10px;display:flex;justify-content:space-between;align-items:center">
+      <div style="font-size:13px;color:var(--muted)">✅ Doğru: <strong id="chlCorrectCount" style="color:var(--neon)">0</strong></div>
+      <button onclick="exitChallenge()" class="btn ghost" style="font-size:12px;padding:6px 12px">✕ Çık</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ GERİ BİLDİRİM MODALI ══ -->
+<div id="feedbackModal" style="position:fixed;inset:0;z-index:9200;display:none;align-items:center;justify-content:center;padding:12px;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px)">
+  <div class="card" style="width:100%;max-width:400px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <div style="font-family:var(--font-head);font-size:16px;font-weight:800">💬 Geri Bildirim</div>
+      <button onclick="closeFeedbackModal()" style="width:34px;height:34px;border-radius:50%;background:var(--glass2);border:1px solid var(--border);color:var(--muted);font-size:15px;cursor:pointer">✕</button>
+    </div>
+    <div id="feedbackQuestionInfo" style="background:var(--glass);border:1px solid var(--border2);border-radius:10px;padding:10px;margin-bottom:12px;font-size:12px;color:var(--muted)"></div>
+    <div style="margin-bottom:8px">
+      <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px">Sorun / Şikayet / Öneri:</label>
+      <textarea id="feedbackText" rows="4" class="admin-input" style="width:100%;resize:vertical" placeholder="Soru hatalıysa, cevap yanlışsa veya başka bir şey varsa yaz..."></textarea>
+    </div>
+    <button onclick="submitFeedback()" class="btn" style="width:100%">📤 Gönder</button>
+  </div>
+</div>
+
 </body>
 </html>
