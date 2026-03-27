@@ -220,6 +220,14 @@ input, textarea, select {
   border-radius: 20px;
   padding: 5px 12px 5px 5px;
   cursor: pointer;
+  max-width: 140px;
+  overflow: hidden;
+}
+#pbName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 80px;
 }
 #pbAvatar {
   width: 28px;
@@ -594,7 +602,7 @@ input, textarea, select {
 .choice-btn.wrong::before { background: rgba(255,107,107,0.15); color: var(--warn); border-color: rgba(255,107,107,0.35); }
 .choice-btn:disabled { cursor: default; }
 
-/* ── Duraklat overlay ────────────────────────────────── */
+/* ── Pause overlay ────────────────────────────────── */
 #pauseOverlay {
   display: none;
   position: fixed;
@@ -2253,7 +2261,7 @@ input, textarea, select {
 <!-- Level-up tam ekran -->
 <div id="levelUpScreen" style="display:none">
   <div style="font-size:36px;margin-bottom:8px">🎉</div>
-  <div class="lu-label" data-i18n="level_up">Seviye Atladın!</div>
+  <div class="lu-label" data-i18n="level_up">Level Up!</div>
   <div class="lu-level" id="luLevelNum">2</div>
   <div class="lu-sub" id="luSubText"></div>
   <div style="margin-top:28px;color:var(--muted);font-size:12px">Devam etmek için dokun</div>
@@ -2322,7 +2330,7 @@ input, textarea, select {
         <input id="pmPassword" type="password" placeholder="••••••••" autocomplete="new-password">
       </div>
 
-      <button class="pm-save-btn" id="pmSaveBtn" data-i18n="save_profile">💾 Kaydet</button>
+      <button class="pm-save-btn" id="pmSaveBtn" data-i18n="save_profile">💾 Save</button>
 
       <div class="pm-divider"></div>
 
@@ -2397,7 +2405,7 @@ input, textarea, select {
     <!-- Google -->
     <div style="padding:24px 24px 0">
       <button class="auth-google-btn" id="authGoogleBtn" data-i18n-after="google_login"><svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
-        Google ile Devam Et
+        Google ile Resume
       </button>
     </div>
 
@@ -2412,7 +2420,7 @@ input, textarea, select {
       <div style="padding:0 24px">
         <!-- Sekme -->
         <div class="auth-tabs" style="margin-bottom:14px">
-          <button class="auth-tab active" id="authTabLogin" data-i18n="login">Giriş Yap</button>
+          <button class="auth-tab active" id="authTabLogin" data-i18n="login">Sign In</button>
           <button class="auth-tab" id="authTabRegister" data-i18n="register">Kayıt Ol</button>
           <button class="auth-tab" id="authTabPin">PIN</button>
         </div>
@@ -2432,7 +2440,7 @@ input, textarea, select {
         <input class="auth-input" id="authEmail" type="email" placeholder="E-posta adresi" autocomplete="email">
         <input class="auth-input" id="authDisplayName" type="text" placeholder="Kullanıcı adı" style="display:none" autocomplete="off" maxlength="20">
         <input class="auth-input" id="authPassword" type="password" placeholder="Şifre" autocomplete="current-password">
-        <button class="btn primary full" id="authSubmitBtn" style="margin-top:4px">Giriş Yap</button>
+        <button class="btn primary full" id="authSubmitBtn" style="margin-top:4px">Sign In</button>
       </div>
 
       <!-- Skip -->
@@ -2456,7 +2464,7 @@ input, textarea, select {
       <button id="lockEyeBtn" tabindex="-1">👁</button>
     </div>
     <div id="lockError"></div>
-    <button id="lockSubmitBtn">Giriş Yap →</button>
+    <button id="lockSubmitBtn">Sign In →</button>
     <div class="lock-footer">© SKYDIVEX — Yetkisiz erişim yasaktır</div>
   </div>
 </div>
@@ -2467,7 +2475,7 @@ input, textarea, select {
   <!-- Header -->
   <div class="header" id="stickyHeader">
     <div class="header-logo">🧮 <span>Math</span>Game</div>
-    <div class="header-right">
+    <div class="header-right" style="min-width:0;overflow:visible;flex-shrink:0">
       <!-- Cüzdan -->
       <div id="walletDisplay" style="display:none;align-items:center;gap:4px">
         <div style="display:flex;align-items:center;gap:2px;background:rgba(255,215,0,0.1);border:1px solid rgba(255,215,0,0.2);border-radius:8px;padding:3px 7px;cursor:pointer" onclick="openShop()">
@@ -2488,12 +2496,12 @@ input, textarea, select {
       </div>
       <div id="quickActions" style="display:none"></div>
       <div id="miniInfo" style="display:none"></div>
-      <div id="profileBtnWrap">
+      <div id="profileBtnWrap" style="flex-shrink:0;min-width:0">
         <button class="profile-btn" id="profileBtn" onclick="openProfileModal()" style="display:none">
           <div id="pbAvatar">E</div>
           <span id="pbName">—</span>
         </button>
-        <button class="btn primary sm" id="loginBtnHeader" onclick="openAuthModal()" style="display:none">Giriş Yap</button>
+        <button class="btn primary sm" id="loginBtnHeader" onclick="openAuthModal()" style="display:none">Sign In</button>
       </div>
     </div>
   </div>
@@ -2528,7 +2536,7 @@ input, textarea, select {
         <div id="playerLabel" style="font-family:'Syne',sans-serif;font-size:17px;font-weight:800;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">—</div>
         <div style="font-size:12px;color:var(--muted);margin-top:2px">Seviye <span id="levelDisplay" style="color:var(--neon);font-weight:700">1</span> &nbsp;·&nbsp; <span id="scoreDisplay" style="color:var(--neon);font-weight:700">0</span>p</div>
       </div>
-      <button id="logoutBtn" class="btn ghost sm" data-i18n="logout">Çıkış</button>
+      <button id="logoutBtn" class="btn ghost sm" data-i18n="logout">Sign Out</button>
     </div>
 
     <!-- Event banner -->
@@ -2634,10 +2642,10 @@ input, textarea, select {
       <div id="achievementsGrid" style="display:flex;flex-wrap:wrap;gap:5px"></div>
     </div>
 
-    <!-- Ayarlar -->
+    <!-- Settings -->
     <div style="background:var(--glass);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:10px">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-        <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:800;color:var(--text)">⚙️ Ayarlar</div>
+        <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:800;color:var(--text)">⚙️ Settings</div>
         <button id="openSettings" onclick="openSettingsModal()" class="btn ghost sm">Tümünü Gör</button>
       </div>
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
@@ -2668,7 +2676,7 @@ input, textarea, select {
   <div id="gameArea" class="card" style="margin-top:12px;display:none">
     <div class="topbar">
       <div>
-        <div class="stat">Oyuncu: <strong id="playerDisplay">—</strong></div>
+        <div class="stat">Player: <strong id="playerDisplay">—</strong></div>
         <div id="modeBadge" style="display:none;margin-top:6px;font-size:11px;font-weight:800;letter-spacing:1px;padding:4px 12px;border-radius:20px;background:rgba(168,85,247,0.18);color:#c084fc;border:1px solid rgba(168,85,247,0.3);display:inline-block">🤪 ABSÜRT MOD</div>
       </div>
       <div style="text-align:center">
@@ -2701,12 +2709,12 @@ input, textarea, select {
     <div id="jokerBar"></div>
 
     <div style="margin-top:10px;display:flex;gap:8px;align-items:center">
-      <button id="pauseBtn" class="btn ghost" data-i18n="pause">Duraklat</button>
+      <button id="pauseBtn" class="btn ghost" data-i18n="pause">Pause</button>
       <div style="margin-left:auto" class="small muted">Ödül: <strong id="rewardUI">10</strong>p</div>
     </div>
 
     <hr style="margin-top:12px;border:none;border-top:1px solid rgba(255,255,255,0.03)" />
-    <h3 style="margin:8px 0" data-i18n="score_board">Puan Tablosu</h3>
+    <h3 style="margin:8px 0" data-i18n="score_board">Leaderboard</h3>
     <div id="board" class="lb"></div>
   </div>
 
@@ -2749,13 +2757,13 @@ input, textarea, select {
   <div id="pauseCard" class="card" style="width:420px;max-width:94%">
     <div style="display:flex;justify-content:space-between;align-items:center">
       <div>
-        <div style="font-weight:800">Oyun Duraklatıldı</div>
-        <div style="color:var(--muted);font-size:13px;margin-top:6px">Skydivex</div>
+        <div style="font-weight:800">Game Paused</div>
+        <div style="color:var(--muted);font-size:13px;margin-top:6px">SKYDIVEX</div>
       </div>
       <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end">
-        <button id="resumeBtn" class="btn" data-i18n="resume">Devam Et</button>
-        <button id="pauseSettingsBtn" class="btn ghost" data-i18n="settings">Ayarlar</button>
-        <button id="pauseMenuBtn" class="btn ghost" data-i18n="menu">Ana Menü</button>
+        <button id="resumeBtn" class="btn" data-i18n="resume">Resume</button>
+        <button id="pauseSettingsBtn" class="btn ghost" data-i18n="settings">Settings</button>
+        <button id="pauseMenuBtn" class="btn ghost" data-i18n="menu">Main Menu</button>
       </div>
     </div>
 
@@ -2776,7 +2784,7 @@ input, textarea, select {
     <!-- Header -->
     <div style="position:sticky;top:0;z-index:10;background:#0a0e16;display:flex;justify-content:space-between;align-items:center;padding:20px 20px 16px;border-bottom:1px solid var(--border)">
       <div>
-        <div style="font-family:var(--font-head);font-size:20px;font-weight:900;color:var(--text)">⚙️ Ayarlar</div>
+        <div style="font-family:var(--font-head);font-size:20px;font-weight:900;color:var(--text)">⚙️ Settings</div>
         <div style="font-size:11px;color:var(--muted);margin-top:2px">MathGame v2.6 — SKYDIVEX</div>
       </div>
       <button id="closeSettingsModal" style="width:32px;height:32px;border-radius:50%;background:var(--glass2);border:1px solid var(--border);color:var(--muted);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
@@ -2844,7 +2852,7 @@ input, textarea, select {
 
     <!-- Kaydet -->
     <div style="padding:16px 20px;display:flex;gap:10px">
-      <button id="saveSettingsBtn" class="btn" style="flex:1;padding:13px">💾 Kaydet</button>
+      <button id="saveSettingsBtn" class="btn" style="flex:1;padding:13px">💾 Save</button>
     </div>
   </div>
 </div>
@@ -2914,12 +2922,12 @@ input, textarea, select {
       <button onclick="closeModal(document.getElementById('clanModal'))" style="width:36px;height:36px;border-radius:50%;background:var(--glass2);border:1px solid var(--border);color:var(--muted);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
     </div>
     <div style="position:sticky;top:64px;z-index:9;background:#0a0e16;display:flex;gap:4px;padding:12px 16px;border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none">
-      <button class="shop-tab active" onclick="switchClanTab('my')"         id="clanTabMy">👤 Klanım</button>
-      <button class="shop-tab"        onclick="switchClanTab('search')"      id="clanTabSearch">🔍 Ara</button>
-      <button class="shop-tab"        onclick="switchClanTab('create')"      id="clanTabCreate">➕ Kur</button>
-      <button class="shop-tab"        onclick="switchClanTab('ranking')"     id="clanTabRanking">🏆 Sıralama</button>
-      <button class="shop-tab"        onclick="switchClanTab('tournament')"  id="clanTabTournament">⚔️ Turnuva</button>
-      <button class="shop-tab"        onclick="switchClanTab('settings')"    id="clanTabSettings">⚙️ Ayarlar</button>
+      <button class="shop-tab active" onclick="switchClanTab('my')"         id="clanTabMy">👤 My Clan</button>
+      <button class="shop-tab"        onclick="switchClanTab('search')"      id="clanTabSearch">🔍 Search</button>
+      <button class="shop-tab"        onclick="switchClanTab('create')"      id="clanTabCreate">➕ Create</button>
+      <button class="shop-tab"        onclick="switchClanTab('ranking')"     id="clanTabRanking">🏆 Ranking</button>
+      <button class="shop-tab"        onclick="switchClanTab('tournament')"  id="clanTabTournament">⚔️ Tournament</button>
+      <button class="shop-tab"        onclick="switchClanTab('settings')"    id="clanTabSettings">⚙️ Settings</button>
     </div>
     <div id="clanContent" style="padding:16px"></div>
   </div>
@@ -2932,7 +2940,7 @@ input, textarea, select {
     <div class="confirm-msg" id="confirmMsg"></div>
     <div class="confirm-btns">
       <button id="confirmOk" class="btn">Evet</button>
-      <button id="confirmCancel" class="btn ghost">İptal</button>
+      <button id="confirmCancel" class="btn ghost">Cancel</button>
     </div>
   </div>
 </div>
@@ -2946,7 +2954,7 @@ input, textarea, select {
       <div style="display:flex;justify-content:space-between;align-items:flex-start">
         <div>
           <div class="about-hero-title">MathGame</div>
-          <div class="about-hero-sub">Skydivex Edition — v2.6</div>
+          <div class="about-hero-sub">SKYDIVEX Edition — v2.6</div>
           <div class="about-badge">⚡ v2.6</div>
         </div>
         <button id="closeAboutModal" class="btn ghost" style="padding:7px 14px;font-size:13px">✕</button>
@@ -3020,7 +3028,7 @@ input, textarea, select {
           </div>
           <div class="about-changelog-item">
             <span class="cl-ver">v1.3</span>
-            <span class="cl-text">Ayarlar paneli, confirm modal, navigasyon düzeltmeleri, güvenli eval.</span>
+            <span class="cl-text">Settings paneli, confirm modal, navigasyon düzeltmeleri, güvenli eval.</span>
           </div>
           <div class="about-changelog-item">
             <span class="cl-ver">v2.0</span>
@@ -3064,52 +3072,52 @@ input, textarea, select {
 
 /* Tüm UI string'leri — kaynak dil: Türkçe */
 var I18N_STRINGS = {
-  /* Genel */
-  'close':           'Kapat',
-  'save':            'Kaydet',
-  'cancel':          'İptal',
-  'confirm':         'Onayla',
-  'yes':             'Evet',
-  'no':              'Hayır',
-  'ok':              'Tamam',
-  'loading':         'Yükleniyor...',
-  'error':           'Hata',
-  'success':         'Başarılı',
-  'retry':           'Tekrar Dene',
-  'back':            'Geri',
-  'send':            'Gönder',
-  'delete':          'Sil',
-  'edit':            'Düzenle',
-  'copy':            'Kopyala',
-  'share':           'Paylaş',
+  /* General */
+  'close':           'Close',
+  'save':            'Save',
+  'cancel':          'Cancel',
+  'confirm':         'Confirm',
+  'yes':             'Yes',
+  'no':              'No',
+  'ok':              'OK',
+  'loading':         'Loading...',
+  'error':           'Error',
+  'success':         'Success',
+  'retry':           'Retry',
+  'back':            'Back',
+  'send':            'Send',
+  'delete':          'Delete',
+  'edit':            'Edit',
+  'copy':            'Copy',
+  'share':           'Share',
   /* Auth */
-  'login':           'Giriş Yap',
-  'register':        'Kayıt Ol',
-  'logout':          'Çıkış',
-  'google_login':    'Google ile Devam Et',
-  'email':           'E-posta',
-  'password':        'Şifre',
-  'display_name':    'Kullanıcı adı',
-  'login_subtitle':  'Skorlarını kaydet, dünyayla yarış',
-  'pin_set':         'PIN Belirle',
-  'pin_login':       'PIN ile Giriş',
-  'pin_sub':         'Google hesabına erişim olmadığında bu PIN ile girebilirsin.',
-  'pin_enter':       'PIN gir',
-  'pin_repeat':      'PIN tekrar',
-  'pin_skip':        'Atla',
-  /* Menü */
-  'math_mode':       'Matematik',
-  'math_sub':        'Klasik mod',
-  'absurd_mode':     'Absürt',
-  'absurd_sub':      'AI sorular',
-  'play_btn':        'OYNA',
-  'leaderboard':     'Liderlik',
-  'local':           'Lokal',
+  'login':           'Sign In',
+  'register':        'Register',
+  'logout':          'Sign Out',
+  'google_login':    'Continue with Google',
+  'email':           'Email',
+  'password':        'Password',
+  'display_name':    'Username',
+  'login_subtitle':  'Save your scores, compete worldwide',
+  'pin_set':         'Set PIN',
+  'pin_login':       'Sign In with PIN',
+  'pin_sub':         'Use this PIN when Google is unavailable.',
+  'pin_enter':       'Enter PIN',
+  'pin_repeat':      'Repeat PIN',
+  'pin_skip':        'Skip',
+  /* Menu */
+  'math_mode':       'Math',
+  'math_sub':        'Classic mode',
+  'absurd_mode':     'Absurd',
+  'absurd_sub':      'AI questions',
+  'play_btn':        'PLAY',
+  'leaderboard':     'Leaderboard',
+  'local':           'Local',
   'online_tab':      '🌐 Online',
   'online_status':   'Online',
   'online':          'Online',
-  'all_ops':         '🌍 Tümü',
-  'mixed':           '🌀 Karma',
+  'all_ops':         '🌍 All',
+  'mixed':           '🌀 Mixed',
   'daily_tasks':     'Günlük Görevler',
   'stats':           'İstatistikler',
   'refresh':         'Yenile',
@@ -3121,16 +3129,16 @@ var I18N_STRINGS = {
   'correct':         'Doğru',
   'wrong':           'Yanlış',
   'streak':          'Seri',
-  'pause':           'Duraklat',
-  'resume':          'Devam Et',
-  'menu':            'Ana Menü',
-  'settings':        'Ayarlar',
-  'score_board':     'Puan Tablosu',
-  'level_up':        'Seviye Atladın!',
+  'pause':           'Pause',
+  'resume':          'Resume',
+  'menu':            'Main Menu',
+  'settings':        'Settings',
+  'score_board':     'Leaderboard',
+  'level_up':        'Level Up!',
   'touch_continue':  'Devam etmek için dokun',
   'no_score':        'Puan yok, sadece eğlence 🎉',
   'score_mult':      'Puan Çarpanı',
-  'paused':          'Oyun Duraklatıldı',
+  'paused':          'Game Paused',
   'correct_msg':     'Doğru!',
   'wrong_msg':       'Yanlış!',
   'answer_input':    'Cevabın?',
@@ -3155,8 +3163,8 @@ var I18N_STRINGS = {
   'rarity_legend':   'Efsane',
   'rarity_rare':     'Nadir',
   'rarity_valuable': 'Değerli',
-  /* Ayarlar */
-  'settings_title':  'Ayarlar',
+  /* Settings */
+  'settings_title':  'Settings',
   'sound':           'Ses açık',
   'ops_title':       'İşlem Türleri',
   'ops_hint':        'En az bir işlem türü seçili olmalı.',
@@ -3180,7 +3188,7 @@ var I18N_STRINGS = {
   'toast_save_ok':   '✅ Profil kaydedildi',
   'toast_name_ok':   '✅ İsim güncellendi',
   'toast_pin_set':   '✅ PIN ayarlandı',
-  'toast_logout':    '👋 Çıkış yapıldı',
+  'toast_logout':    '👋 Sign Out yapıldı',
   'toast_cloud':     '☁️ Skor buluttan yüklendi',
   'toast_copy':      '📋 Kopyalandı',
   /* Admin */
@@ -3574,7 +3582,7 @@ const settingBgImageInput  = document.getElementById('settingBgImageInput');
 const settingClearBgBtn    = document.getElementById('settingClearBgBtn');
 const settingResetScores   = document.getElementById('settingResetScores');
 
-/* ── Ayarlar: Draft State sistemi ────────────────────────────
+/* ── Settings: Draft State sistemi ────────────────────────────
    Kullanıcı ayarları değiştirdiğinde state'e DOKUNMUYORUZ.
    Sadece draft objesi güncellenir. Kaydet tuşuna basınca
    draft → state'e yazılır. Kaydedilmeden çıkılırsa uyarı çıkar.
@@ -4333,7 +4341,7 @@ function switchClanTab(tab) {
 async function renderClanTab(tab) {
   var el = document.getElementById('clanContent');
   if (!el) return;
-  el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted)">⏳ Yükleniyor...</div>';
+  el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted)">⏳ Loading...</div>';
 
   if (tab === 'my') {
     if (!authUser || !state.clanId) {
@@ -4416,20 +4424,20 @@ async function renderClanTab(tab) {
     el.innerHTML =
       /* Davet Linki */
       '<div style="background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:10px">' +
-        '<div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--muted2);margin-bottom:10px">🔗 Davet Linki</div>' +
+        '<div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--muted2);margin-bottom:10px">🔗 Invite Link</div>' +
         (clan.inviteToken
           ? '<div style="background:rgba(0,255,136,0.06);border:1px solid rgba(0,255,136,0.2);border-radius:10px;padding:10px;font-family:monospace;font-size:12px;color:var(--neon);margin-bottom:8px;word-break:break-all">' + clan.inviteToken + '</div>' +
             '<div style="display:flex;gap:8px">' +
-              '<button onclick="copyInviteLink(\'' + clan.inviteToken + '\')" class="btn ghost" style="flex:1;font-size:12px">📋 Kopyala</button>' +
-              '<button onclick="generateInviteLink()" class="btn ghost" style="flex:1;font-size:12px">🔄 Yenile</button>' +
+              '<button onclick="copyInviteLink(\'' + clan.inviteToken + '\')" class="btn ghost" style="flex:1;font-size:12px">📋 Copy</button>' +
+              '' +
             '</div>'
-          : '<button onclick="generateInviteLink()" class="btn" style="width:100%">🔗 Davet Linki Oluştur</button>'
+          : '<button onclick="generateInviteLink()" class="btn" style="width:100%">🔗 Generate Invite Link</button>'
         ) +
       '</div>' +
       /* Katkıcı Seçimi */
       '<div style="background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:10px">' +
         '<div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--muted2);margin-bottom:6px">⚽ Katkıcı Oyuncular</div>' +
-        '<div style="font-size:12px;color:var(--muted);margin-bottom:10px">En fazla <strong style="color:var(--neon)">' + maxC + '</strong> oyuncu seçebilirsin. Sadece seçilen oyuncuların puanları klana katkı sağlar.</div>' +
+        '<div style="font-size:12px;color:var(--muted);margin-bottom:10px">Select up to <strong style="color:var(--neon)">' + maxC + '</strong> players to represent the clan in tournaments. All members contribute to clan score.</div>' +
         '<div id="contributorPicker">' +
           clan.members.filter(function(m) { return m.role !== 'leader'; }).map(function(m) {
             var isContrib = (clan.contributors || []).includes(m.uid);
@@ -4440,11 +4448,11 @@ async function renderClanTab(tab) {
             '</label>';
           }).join('') +
         '</div>' +
-        '<button onclick="saveContributors()" class="btn" style="width:100%;margin-top:8px">💾 Katkıcıları Kaydet</button>' +
+        '<button onclick="saveContributors()" class="btn" style="width:100%;margin-top:8px">💾 Save Tournament Team</button>' +
       '</div>' +
-      /* Klan Ayarları */
+      /* Klan Settingsı */
       '<div style="background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:14px;padding:14px">' +
-        '<div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--muted2);margin-bottom:10px">⚙️ Klan Ayarları</div>' +
+        '<div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--muted2);margin-bottom:10px">⚙️ Klan Settingsı</div>' +
         '<div style="display:flex;flex-direction:column;gap:10px">' +
           '<div><label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px">Açıklama</label>' +
             '<input id="settingClanDesc" class="admin-input" value="' + escapeHtml(clan.description||'') + '" maxlength="200"></div>' +
@@ -4460,7 +4468,8 @@ async function renderClanTab(tab) {
             '<input type="checkbox" id="settingIsPublic" ' + (clan.isPublic ? 'checked' : '') + ' style="width:16px;height:16px;accent-color:var(--neon)">' +
             '<label for="settingIsPublic" style="font-size:13px;color:var(--text)">Public klan (herkes katılabilir)</label>' +
           '</div>' +
-          '<button onclick="saveClanSettings()" class="btn" style="width:100%">💾 Ayarları Kaydet</button>' +
+          '<button onclick="saveClanSettings()" class="btn" style="width:100%">💾 Save Settings</button>' +
+          '<button onclick="deleteMyClan()" class="btn ghost" style="width:100%;margin-top:8px;color:#ef4444;border-color:rgba(239,68,68,0.3)">🗑 Delete Clan</button>' +
         '</div>' +
       '</div>';
   }
@@ -4473,7 +4482,7 @@ async function renderClanTab(tab) {
         return;
       }
       el.innerHTML =
-        '<div style="font-size:11px;color:var(--muted);margin-bottom:10px">Klan puanı sadece katkıcı oyunculardan gelir</div>' +
+        '<div style="font-size:11px;color:var(--muted);margin-bottom:10px">All members contribute to clan score. Tournament representatives selected by leader.</div>' +
         r2.clans.map(function(c, i) {
           var medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i+1) + '.';
           var isMy = state.clanId && c.id === state.clanId;
@@ -4505,7 +4514,7 @@ function renderClanInfo(el, clan) {
   var myScore   = clan.memberScores && authUser ? (clan.memberScores[authUser.uid] || 0) : 0;
   var isContrib = clan.leaderId === (authUser && authUser.uid) || (clan.contributors||[]).includes(authUser && authUser.uid);
 
-  var ROLE_LABELS = { leader: '👑 Kurucu', coleader: '⭐ Lider Yardımcısı', officer: '⚡ Yetkili', member: '👤 Üye' };
+  var ROLE_LABELS = { leader: '👑 Leader', coleader: '⭐ Co-Leader', officer: '⚡ Officer', member: '👤 Member' };
   var ROLE_ORDER  = { leader: 0, coleader: 1, officer: 2, member: 3 };
 
   el.innerHTML =
@@ -4522,24 +4531,24 @@ function renderClanInfo(el, clan) {
     '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px">' +
       '<div style="text-align:center;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:12px;padding:10px">' +
         '<div style="font-size:18px;font-weight:900;color:var(--neon)">' + clan.members.length + '</div>' +
-        '<div style="font-size:10px;color:var(--muted)">Üye</div>' +
+        '<div style="font-size:10px;color:var(--muted)">Members</div>' +
       '</div>' +
       '<div style="text-align:center;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:12px;padding:10px">' +
         '<div style="font-size:16px;font-weight:900;color:#ffd700">' + (clan.totalScore||0).toLocaleString() + '</div>' +
-        '<div style="font-size:10px;color:var(--muted)">Klan Puanı</div>' +
+        '<div style="font-size:10px;color:var(--muted)">Clan Score</div>' +
       '</div>' +
       '<div style="text-align:center;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:12px;padding:10px">' +
         '<div style="font-size:16px;font-weight:900;color:#a855f7">' + (clan.contributors||[]).length + '/' + Math.max(2,Math.min(10,Math.floor(clan.members.length/2))) + '</div>' +
-        '<div style="font-size:10px;color:var(--muted)">Katkıcı</div>' +
+        '<div style="font-size:10px;color:var(--muted)">Tournament</div>' +
       '</div>' +
     '</div>' +
-    /* Benim katkım */
-    '<div style="background:' + (isContrib ? 'rgba(0,255,136,0.05)' : 'rgba(255,165,0,0.05)') + ';border:1px solid ' + (isContrib ? 'rgba(0,255,136,0.2)' : 'rgba(255,165,0,0.2)') + ';border-radius:12px;padding:10px 12px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center">' +
+    /* Benim katkım - herkes katkı yapabilir */
+    '<div style="background:rgba(0,255,136,0.05);border:1px solid rgba(0,255,136,0.2);border-radius:12px;padding:10px 12px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center">' +
       '<div>' +
-        '<div style="font-size:12px;font-weight:700;color:' + (isContrib ? 'var(--neon)' : '#f59e0b') + '">' + (isContrib ? '✅ Katkıcısın' : '⏳ Katkıcı Değilsin') + '</div>' +
-        '<div style="font-size:11px;color:var(--muted)">' + (isContrib ? 'Oyunun klan puanına yansıyor' : 'Liderden katkıcı olmayı iste') + '</div>' +
+        '<div style="font-size:12px;font-weight:700;color:var(--neon)">✅ Contributing Member</div>' +
+        '<div style="font-size:11px;color:var(--muted)">Your score contributes to the clan</div>' +
       '</div>' +
-      '<div style="text-align:right"><div style="font-size:14px;font-weight:800;color:#ffd700">' + myScore.toLocaleString() + 'p</div><div style="font-size:10px;color:var(--muted)">Katkın</div></div>' +
+      '<div style="text-align:right"><div style="font-size:14px;font-weight:800;color:#ffd700">' + myScore.toLocaleString() + 'p</div><div style="font-size:10px;color:var(--muted)">Your contribution</div></div>' +
     '</div>' +
     /* Üye listesi */
     '<div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--muted2);margin-bottom:8px">Üyeler</div>' +
@@ -4549,7 +4558,7 @@ function renderClanInfo(el, clan) {
     }).map(function(m) {
       var roleIcon  = { leader:'👑', coleader:'⭐', officer:'⚡', member:'👤' }[m.role] || '👤';
       var roleLabel = ROLE_LABELS[m.role] || '👤 Üye';
-      var isC   = (clan.contributors||[]).includes(m.uid) || m.role === 'leader';
+      var isC   = (clan.contributors||[]).includes(m.uid) || m.role === 'leader' || m.role === 'coleader';
       var mScore = (clan.memberScores && clan.memberScores[m.uid]) || 0;
       var isMe  = authUser && m.uid === authUser.uid;
       /* Rütbe değiştirme — sadece lider veya yardımcı */
@@ -4579,7 +4588,7 @@ function renderClanInfo(el, clan) {
     /* Butonlar */
     '<div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">' +
       (isLeader
-        ? '<button onclick="switchClanTab(\'settings\')" class="btn" style="flex:1">⚙️ Klan Ayarları</button>'
+        ? '<button onclick="switchClanTab(\'settings\')" class="btn" style="flex:1">⚙️ Klan Settingsı</button>'
         : '') +
       '<button onclick="leaveClan()" class="btn ghost" style="flex:1;color:#ef4444;border-color:rgba(239,68,68,0.3)">🚪 Terk Et</button>' +
     '</div>';
@@ -4748,15 +4757,20 @@ async function searchClan() {
     if (!r || !r.clans || !r.clans.length) { res.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:8px">Klan bulunamadı</div>'; return; }
     res.innerHTML = r.clans.map(function(c) {
       var alreadyIn = state.clanId === c.id;
-      return '<div style="display:flex;align-items:center;gap:12px;padding:14px;border-radius:14px;background:rgba(255,255,255,0.02);border:1px solid var(--border);margin-bottom:8px">' +
+      var isPrivate = c.isPublic === false;
+      var inviteLink = isPrivate ? 'https://skydivex.github.io/mathgame/?invite=' + (c.inviteToken || '') : '';
+      return '<div style="display:flex;align-items:center;gap:12px;padding:14px;border-radius:14px;background:rgba(255,255,255,0.02);border:1px solid ' + (isPrivate ? 'rgba(239,68,68,0.2)' : 'var(--border)') + ';margin-bottom:8px">' +
         '<div style="flex:1">' +
-          '<div style="font-size:14px;font-weight:800">[' + c.tag + '] ' + escapeHtml(c.name) + '</div>' +
-          '<div style="font-size:11px;color:var(--muted);margin-top:2px">' + c.members + ' üye' + (c.description ? ' · ' + escapeHtml(c.description).slice(0,40) : '') + '</div>' +
-          (c.minScore ? '<div style="font-size:10px;color:#f59e0b;margin-top:2px">Min. ' + c.minScore + ' puan gerekli</div>' : '') +
+          '<div style="font-size:14px;font-weight:800">[' + c.tag + '] ' + escapeHtml(c.name) + ' ' + (isPrivate ? '🔒' : '🔓') + '</div>' +
+          '<div style="font-size:11px;color:var(--muted);margin-top:2px">' + c.members + ' members' + (c.description ? ' · ' + escapeHtml(c.description).slice(0,40) : '') + '</div>' +
+          (c.minScore ? '<div style="font-size:10px;color:#f59e0b;margin-top:2px">Min. ' + c.minScore + ' score required</div>' : '') +
+          (isPrivate ? '<div style="font-size:10px;color:#ef4444;margin-top:2px">Private — invite link required</div>' : '') +
         '</div>' +
         (alreadyIn
-          ? '<div style="font-size:12px;color:var(--neon)">✓ Üyesin</div>'
-          : '<button onclick="joinClan(\'' + c.id + '\')" class="btn" style="padding:8px 14px;font-size:12px">Katıl</button>'
+          ? '<div style="font-size:12px;color:var(--neon)">✓ Member</div>'
+          : isPrivate
+            ? '<button onclick="showToast(\'Ask the leader for an invite link\',\'#f59e0b\')" class="btn ghost" style="padding:8px 14px;font-size:12px;opacity:0.6">🔒 Private</button>'
+            : '<button onclick="joinClan(\'' + c.id + '\')" class="btn" style="padding:8px 14px;font-size:12px">Join</button>'
         ) +
       '</div>';
     }).join('');
@@ -5003,7 +5017,7 @@ document.getElementById('saveSettingsBtn').addEventListener('click', ()=>{
   settingsChanged = false;
 
   clickSound();
-  showToast('✅ Ayarlar kaydedildi!');
+  showToast('✅ Settings kaydedildi!');
 
   /* Modalı kapat */
   setTimeout(() => {
@@ -5184,7 +5198,7 @@ if(startAbsurdBtn) startAbsurdBtn.addEventListener('click', async ()=>{
 
 if(logoutBtn) logoutBtn.addEventListener('click', async ()=>{
   try { if(fbAuth && fbAuth.currentUser) await fbAuth.signOut(); } catch(e){}
-  /* Çıkış öncesi cloud'a kaydet */
+  /* Sign Out öncesi cloud'a kaydet */
   try { await saveProfileToCloud(); } catch(e){}
   clearAuth();
   authUser = null;
@@ -5193,7 +5207,7 @@ if(logoutBtn) logoutBtn.addEventListener('click', async ()=>{
   /* State'i sıfırlama — sadece player alanını temizle */
   state.player = null;
   saveState();
-  showToast('👋 Çıkış yapıldı');
+  showToast('👋 Sign Out yapıldı');
   const pb = document.getElementById('profileBtn');
   if(pb) pb.style.display = 'none';
   updateProfileBtn();
@@ -5442,6 +5456,10 @@ answerInput.addEventListener('keydown', e=>{ if(e.key==='Enter') checkAnswer(); 
 
 function checkAnswer(){
   try {
+    /* Mevcut soruyu önceki soru olarak sakla (feedback için) */
+    if (typeof questionText !== 'undefined' && questionText.innerText && typeof correctAnswer !== 'undefined') {
+      window._lastMathQ = { q: questionText.innerText, ans: String(correctAnswer), userAns: answerInput ? answerInput.value : '' };
+    }
     /* ── Girdi doğrulama ── */
     const raw = answerInput.value.trim();
     if (raw === '') {
@@ -5852,7 +5870,7 @@ pauseSettingsBtn.addEventListener('click', ()=>{
   openSettingsModal();
 });
 pauseMenuBtn.addEventListener('click', async ()=>{
-  const ok = await showConfirm('Ana Menü', 'Ana menüye dön? Oyun durumu kaydedildi.');
+  const ok = await showConfirm('Main Menu', 'Ana menüye dön? Oyun durumu kaydedildi.');
   if(!ok) return;
   clickSound();
   pauseOverlay.classList.remove('show'); bgLayer.style.filter='';
@@ -7826,7 +7844,8 @@ try {
       updateProfileBtn();
       showScreen('menu');
       refreshMenuPanels();
-      showToast('✅ Hoş geldin, ' + name + '!');
+      showToast('✅ Welcome, ' + name + '!');
+      setTimeout(checkPendingInvite, 2000);
       trackEvent('login', { method: 'google' });
       try { await syncOnlineScore(); } catch(e) { console.warn('syncOnlineScore hata:', e); }
       try { await loadProfileFromCloud(); } catch(e) { console.warn('loadProfileFromCloud hata:', e); }
@@ -8127,7 +8146,7 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch(e) { if(msg){msg.textContent='❌ Bağlantı hatası';msg.style.color='#ef4444';} }
   });
 
-  /* Çıkış butonu */
+  /* Sign Out butonu */
   document.getElementById('pmLogoutBtn')?.addEventListener('click', async function() {
     closeProfileModal();
     try { if(fbAuth && fbAuth.currentUser) await fbAuth.signOut(); } catch(e){ console.warn('signOut hata:', e); }
@@ -8138,7 +8157,7 @@ document.addEventListener('DOMContentLoaded', () => {
     saveState();
     _adminChecked  = false;
     _adminVerified = false;
-    showToast('👋 Çıkış yapıldı');
+    showToast('👋 Sign Out yapıldı');
     /* Profil butonunu gizle */
     const pb = document.getElementById('profileBtn');
     if (pb) pb.style.display = 'none';
@@ -8682,7 +8701,7 @@ async function fetchOnlineLeaderboard() {
   const statusEl = document.getElementById('onlineLbStatus');
   if (!el) return;
 
-  el.innerHTML = '<div style="color:var(--muted);font-size:12px;padding:8px">⏳ Yükleniyor...</div>';
+  el.innerHTML = '<div style="color:var(--muted);font-size:12px;padding:8px">⏳ Loading...</div>';
 
   try {
     const ops   = _currentLbOps; /* Direkt kullan — zaten doğru format */
@@ -9107,6 +9126,30 @@ async function adminGiftCurrency() {
   else adminLog('❌ ' + (r?.error || 'Hata'));
 }
 
+async function adminSearchUser() {
+  /* Kullanıcı adıyla ara, klan bilgisi de göster */
+  var q = (document.getElementById('adminClanSearch')?.value || '').trim();
+  if (!q) return;
+  adminLog('Searching user: ' + q);
+  try {
+    var r = await adminCall('profile', { targetName: q });
+    if (!r || !r.ok) { adminLog('User not found: ' + q); return; }
+    var info = 'User: ' + r.name + ' | Score: ' + (r.score||0) + ' | Role: ' + (r.role||'user');
+    if (r.clanId || (r.uid)) {
+      /* Klan bilgisi de çek */
+      try {
+        var cr = await adminCall('clan-info', { targetName: q });
+        if (cr && cr.ok && cr.clan) {
+          info += '
+Clan: [' + cr.clan.tag + '] ' + cr.clan.name + ' | Members: ' + cr.clan.members.length + ' | Score: ' + (cr.clan.totalScore||0);
+        }
+      } catch(e) {}
+    }
+    adminLog(info);
+    document.getElementById('adminClanResults').innerHTML = '<div style="font-size:12px;white-space:pre;color:var(--neon)">' + info + '</div>';
+  } catch(e) { adminLog('Error: ' + e.message); }
+}
+
 async function adminSearchClan() {
   var q = (document.getElementById('adminClanSearch')?.value || '').trim();
   if (!q) { adminLog('Klan adı veya etiket gir'); return; }
@@ -9344,7 +9387,7 @@ async function adminShowUserList(filter) {
   var box = document.getElementById('adminUserListBox');
   if (!box) { return; }
   box.style.display = 'flex';
-  box.innerHTML = '<div style="color:var(--muted);font-size:12px;text-align:center;padding:8px">&#x23F3; Yükleniyor...</div>';
+  box.innerHTML = '<div style="color:var(--muted);font-size:12px;text-align:center;padding:8px">&#x23F3; Loading...</div>';
   var r = await adminCall('admin/user-list', { filter: filter });
   if (!r || !r.ok) { box.innerHTML = '<div style="color:#ef4444;font-size:12px;padding:8px">Hata</div>'; return; }
   var users = r.users || [];
@@ -9721,7 +9764,7 @@ async function loadGA4Stats() {
   var dash    = document.getElementById('ga4Dashboard');
   var errEl   = document.getElementById('ga4Error');
   var btn     = document.querySelector('[onclick="loadGA4Stats()"]');
-  if (btn) { btn.textContent = '⏳ Yükleniyor...'; btn.disabled = true; }
+  if (btn) { btn.textContent = '⏳ Loading...'; btn.disabled = true; }
   if (errEl) errEl.style.display = 'none';
 
   try {
@@ -9947,33 +9990,74 @@ async function loadOnlineStatusForProfile(targetUid) {
    ══════════════════════════════════════════════════════ */
 window.addEventListener('load', function() {
   try {
-    const raw = localStorage.getItem('mathgame_auth_v1');
+    var raw = localStorage.getItem('mathgame_auth_v1');
     if (raw) {
-      const saved = JSON.parse(raw);
+      var saved = JSON.parse(raw);
       if (saved && saved.uid && saved.name) {
-        /* Firebase onAuthStateChanged zaten halledecek — 2sn fallback */
+        /* Local kayıt var — HEMEN aç, Firebase'i bekleme */
+        authUser = saved;
+        loadState(saved.uid);
+        state.player = saved.name;
+        updateProfileBtn();
+        updateAllScoreDisplays();
+        updateWallet();
+        showScreen('menu');
+        try { refreshMenuPanels(); } catch(e) {}
+        /* Arka planda Firebase sync et — UI'ı bloklama */
         setTimeout(function() {
-          if (authUser) return; /* Firebase halletti */
-          authUser = saved;
-          loadState(saved.uid);
-          state.player = saved.name;
-          updateProfileBtn();
-          updateAllScoreDisplays();
-          updateWallet();
-          showScreen('menu');
-          refreshMenuPanels();
-          saveState();
-        }, 2000);
-        return; /* Auth kaydı var — openAuthModal çağırma */
+          if (typeof fbAuth !== 'undefined' && fbAuth) {
+            /* onAuthStateChanged zaten tetiklenecek, profil güncelleyecek */
+          }
+          /* Worker'dan güncel token al (arka planda) */
+          if (saved.uid && saved.token) {
+            workerPost('load-profile', { token: saved.token }).then(function(r) {
+              if (r && r.ok) {
+                if (r.coins !== undefined) {
+                  state.coins = r.coins || 0;
+                  state.diamonds = r.diamonds || 0;
+                  state.jokers = r.jokers || state.jokers;
+                  state.clanId = r.clanId || state.clanId || null;
+                  updateWallet();
+                  try { updateChestQuickInfo(); } catch(e) {}
+                }
+              }
+            }).catch(function() {});
+          }
+        }, 1000);
+        /* Davet URL'i varsa kaydet, giriş sonrası işle */
+        var urlInvite = new URLSearchParams(window.location.search).get('invite');
+        if (urlInvite) localStorage.setItem('mg_pending_invite', urlInvite);
+        return; /* Bitti — giriş ekranı açma */
       }
     }
   } catch(e) {}
-  /* Auth kaydı yok — 500ms bekle, hala auth yoksa giriş ekranı */
+  /* Local kayıt yok — kısa bekle, Firebase hallettiyse geç, yoksa giriş ekranı */
   setTimeout(function() {
-    if (authUser) return; /* onAuthStateChanged halletti */
+    if (authUser) return;
     try { openAuthModal(); } catch(e) {}
-  }, 500);
+  }, 800);
 });
+
+/* Giriş sonrası bekleyen davet kontrolü */
+function checkPendingInvite() {
+  var code = localStorage.getItem('mg_pending_invite');
+  if (!code || !authUser) return;
+  localStorage.removeItem('mg_pending_invite');
+  setTimeout(function() {
+    openClanModal();
+    switchClanTab('my');
+    workerPost('clan/join-invite', { token: authUser.token, inviteToken: code }).then(function(r) {
+      if (r && r.ok) {
+        state.clanId = r.clan ? r.clan.id : null;
+        saveState();
+        showToast('🎉 Joined clan: ' + (r.clan ? r.clan.name : ''), '#00ff88');
+        switchClanTab('my');
+      } else {
+        showToast('Invite error: ' + (r ? r.error : 'Invalid'), '#ef4444');
+      }
+    }).catch(function() { showToast('Connection error', '#ef4444'); });
+  }, 1500);
+}
 
 /* ══════════════════════════════════════════════════════
    GİRİŞ SEÇİM EKRANI
@@ -10368,7 +10452,7 @@ function closeChatModal() {
 function loadChatMessages(uid) {
   var messagesEl = document.getElementById('chatMessages');
   if (!messagesEl) { return; }
-  messagesEl.innerHTML = '<div class="chat-msg from-system">Yükleniyor...</div>';
+  messagesEl.innerHTML = '<div class="chat-msg from-system">Loading...</div>';
 
   /* Eski listener'ı kaldır */
   if (_chatListener) {
@@ -10516,7 +10600,7 @@ async function loadMyRequests() {
     el.innerHTML = '<div style="color:var(--muted);font-size:12px;text-align:center;padding:8px">Giriş yapman gerekiyor</div>';
     return;
   }
-  el.innerHTML = '<div style="color:var(--muted);font-size:12px;text-align:center;padding:8px">&#x23F3; Yükleniyor...</div>';
+  el.innerHTML = '<div style="color:var(--muted);font-size:12px;text-align:center;padding:8px">&#x23F3; Loading...</div>';
   try {
     var result = await fetch(WORKER_URL + '/my-requests', {
       method: 'POST',
@@ -11400,6 +11484,7 @@ document.getElementById('pauseMenuBtn') && document.getElementById('pauseMenuBtn
 }, true);
 
 /* nextQuestion wrap */
+var _lastMathQ = null; /* önceki soru için feedback */
 var _origNQ = nextQuestion;
 nextQuestion = function(reset) {
   if (!reset && _pausedMathQ) {
@@ -11409,6 +11494,10 @@ nextQuestion = function(reset) {
     answerInput.value = ''; try { answerInput.focus(); } catch(e) {}
     startQTimer(Math.min(40, 15 + Math.floor((state.level || 1) * 0.5)));
     return;
+  }
+  /* Mevcut soruyu feedback için sakla */
+  if (typeof questionText !== 'undefined' && questionText.innerText && typeof correctAnswer !== 'undefined') {
+    _lastMathQ = { q: questionText.innerText, ans: String(correctAnswer), userAns: answerInput ? answerInput.value : '' };
   }
   _pausedMathQ = null;
   _origNQ.call(this, reset);
@@ -11451,11 +11540,13 @@ var _fbCtx = null;
 document.getElementById('feedbackBtn') && document.getElementById('feedbackBtn').addEventListener('click', function() {
   if (!authUser) { showToast('Sign in to send feedback', '#f59e0b'); return; }
   pauseQTimer();
+  /* Önceki soruyu göster (yeni soru açılmış olabilir) */
+  var fbQ = _lastMathQ || { q: (questionText ? questionText.innerText : '—'), ans: (typeof correctAnswer!=='undefined'?String(correctAnswer):'—'), userAns: (answerInput?answerInput.value:'') };
   _fbCtx = {
     mode: gameMode || 'math',
-    question: questionText ? questionText.innerText : '—',
-    userAnswer: answerInput ? answerInput.value : '—',
-    correctAnswer: typeof correctAnswer !== 'undefined' ? String(correctAnswer) : '—',
+    question: fbQ.q,
+    userAnswer: fbQ.userAns,
+    correctAnswer: fbQ.ans,
     score: state ? (state.score || 0) : 0,
     level: state ? (state.level || 1) : 1,
   };
@@ -11830,7 +11921,7 @@ function loadClanChat(clanId) {
     if (msgs) msgs.innerHTML = '';
     if (snap.exists()) {
       snap.forEach(function(child) {
-        appendChatMsg(child.val());
+        appendChatMsg(child.val(), child.key);
       });
     }
     /* Sonra yeni mesajları dinle */
@@ -11840,25 +11931,56 @@ function loadClanChat(clanId) {
       ? fbDB.ref('clan_chat/' + clanId).orderByKey().startAfter(lastKey)
       : fbDB.ref('clan_chat/' + clanId).limitToLast(1);
     _clanChatListener = listenRef.on('child_added', function(child) {
-      appendChatMsg(child.val());
+      appendChatMsg(child.val(), child.key);
     });
     _clanChatRef = listenRef;
     scrollChatToBottom();
   });
 }
 
-function appendChatMsg(msg) {
+function appendChatMsg(msg, msgKey) {
   var msgs = document.getElementById('clanChatMessages');
   if (!msgs) return;
+  if (msg.deleted) return; /* silinen mesajı gösterme */
   var isMe = authUser && msg.uid === authUser.uid;
+  var isLeaderOrCoLeader = _clanData && (
+    _clanData.leaderId === (authUser && authUser.uid) ||
+    (_clanData.members || []).some(function(m) { return m.uid === (authUser && authUser.uid) && (m.role === 'leader' || m.role === 'coleader'); })
+  );
   var time = msg.ts ? new Date(msg.ts).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) : '';
   var div = document.createElement('div');
+  div.dataset.msgKey = msgKey || '';
   div.style.cssText = 'display:flex;flex-direction:column;align-items:' + (isMe?'flex-end':'flex-start') + ';margin-bottom:8px';
+  var actions = '';
+  if (isMe || isLeaderOrCoLeader) {
+    actions += '<button onclick="deleteClanMsg('' + (msgKey||'') + '')" style="background:none;border:none;color:var(--muted);font-size:10px;cursor:pointer;padding:0 4px;margin-top:2px">🗑</button>';
+  }
+  if (!isMe) {
+    actions += '<button onclick="reportClanMsg('' + (msgKey||'') + '','' + escHtml(msg.name||'?') + '')" style="background:none;border:none;color:var(--muted);font-size:10px;cursor:pointer;padding:0 4px;margin-top:2px">⚠️</button>';
+  }
   div.innerHTML = '<div style="font-size:10px;color:var(--muted);margin-bottom:2px">' + (isMe ? 'You' : (msg.name || '?')) + ' · ' + time + '</div>'
     + '<div style="max-width:75%;padding:8px 12px;border-radius:' + (isMe?'14px 14px 4px 14px':'14px 14px 14px 4px') + ';background:' + (isMe?'rgba(0,255,136,0.12)':'rgba(255,255,255,0.07)') + ';border:1px solid ' + (isMe?'rgba(0,255,136,0.2)':'var(--border)') + ';font-size:13px;color:var(--text);word-break:break-word">'
-    + escHtml(msg.text || '') + '</div>';
+    + escHtml(msg.text || '') + '</div>'
+    + (actions ? '<div style="display:flex;gap:2px">' + actions + '</div>' : '');
   msgs.appendChild(div);
   scrollChatToBottom();
+}
+
+function deleteClanMsg(msgKey) {
+  if (!msgKey || !_clanChatClanId || !fbDB) return;
+  if (!confirm('Delete this message?')) return;
+  fbDB.ref('clan_chat/' + _clanChatClanId + '/' + msgKey).update({ deleted: true, text: '[deleted]' });
+}
+
+function reportClanMsg(msgKey, senderName) {
+  if (!authUser) return;
+  showToast('Report sent to clan leader', '#f59e0b');
+  /* Leader'a bildir - requests'e yaz */
+  workerPost('feedback', {
+    token: authUser.token,
+    message: 'Clan chat report: msg by ' + senderName + ' (key: ' + msgKey + ')',
+    context: { mode: 'clan_chat', question: msgKey, userAnswer: senderName, correctAnswer: '', score: 0, level: 0 }
+  }).catch(function(){});
 }
 
 function scrollChatToBottom() {
@@ -11918,6 +12040,22 @@ if (typeof STRINGS !== 'undefined') {
 /* ══════════════════════════════════════════════════════════════
    ADMIN: Klan Sıfırlama
    ══════════════════════════════════════════════════════════════ */
+async function deleteMyClan() {
+  if (!authUser || !_clanData) return;
+  if (_clanData.members && _clanData.members.length > 1) {
+    showToast('Transfer leadership first, then all members must leave', '#ef4444'); return;
+  }
+  if (!confirm('Delete this clan permanently? This cannot be undone.')) return;
+  try {
+    var r = await workerPost('clan/force-reset', { token: authUser.token });
+    if (r && r.ok) {
+      state.clanId = null; _clanData = null; saveState();
+      showToast('Clan deleted', '#00ff88');
+      switchClanTab('search');
+    } else showToast('Error: ' + (r ? r.error : 'Unknown'), '#ef4444');
+  } catch(e) { showToast('Connection error', '#ef4444'); }
+}
+
 async function adminForceResetMyClan() {
   if (!authUser) { adminLog('Not signed in'); return; }
   if (!confirm('Reset your clan data completely? This cannot be undone.')) return;
@@ -12006,7 +12144,7 @@ document.addEventListener('pointerdown', e => {
     </div>
     <div id="reqPanelMy" style="display:none">
       <div id="myRequestList" style="display:flex;flex-direction:column;gap:8px;max-height:300px;overflow-y:auto"></div>
-      <button onclick="loadMyRequests()" style="margin-top:8px;width:100%;background:rgba(255,255,255,0.05);border:1px solid #1a2f28;border-radius:10px;color:var(--muted);font-size:12px;padding:8px;font-family:inherit;cursor:pointer">&#x1F504; Yenile</button>
+      
     </div>
 
     <div style="border-top:1px solid #1a2f28;padding-top:12px">
@@ -12301,7 +12439,7 @@ document.addEventListener('pointerdown', e => {
           <div class="admin-stat-card"><div class="admin-stat-num" id="statRequests">—</div><div class="admin-stat-label">İstek</div></div>
           <div class="admin-stat-card"><div class="admin-stat-num" id="statOpenReqs">—</div><div class="admin-stat-label">Açık İstek</div></div>
         </div>
-        <button class="admin-btn admin-btn-gray" onclick="adminLoadStats()" style="width:100%;margin-bottom:8px">🔄 Yenile</button>
+        
 
         <!-- Süper Admin giriş butonu — sadece kurucu -->
         <div id="superAdminEntrySection" style="display:none;margin-bottom:10px">
@@ -12496,7 +12634,7 @@ document.addEventListener('pointerdown', e => {
           <button class="admin-btn admin-btn-green" onclick="adminAddBadgeToLibrary()" style="width:100%">➕ Kütüphaneye Ekle</button>
         </div>
         <div id="adminLibraryList" style="display:flex;flex-direction:column;gap:6px;max-height:200px;overflow-y:auto"></div>
-        <button class="admin-btn admin-btn-gray" onclick="adminLoadBadgeLibraryFull()" style="width:100%;margin-top:4px">🔄 Listeyi Yenile</button>
+        
 
         <div class="admin-section-title" style="margin-top:10px">👑 Admin</div>
         <div class="admin-row">
@@ -12546,7 +12684,7 @@ document.addEventListener('pointerdown', e => {
         <!-- Klan Ara -->
         <div class="admin-row" style="margin-bottom:6px">
           <input class="admin-input" id="adminClanSearch" placeholder="Klan tag veya adı ara...">
-          <button class="admin-btn admin-btn-green" onclick="adminSearchClan()">🔍 Ara</button>
+          <button class="admin-btn admin-btn-green" onclick="adminSearchUser();adminSearchClan()">🔍 Search</button>
         </div>
         <div id="adminClanResults" style="margin-bottom:12px;font-size:12px;color:var(--muted)"></div>
 
