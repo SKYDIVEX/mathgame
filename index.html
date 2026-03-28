@@ -3462,7 +3462,7 @@ function loadState(uid) {
       state = Object.assign(defaultState(), raw);
       /* v2.6 ekonomi sistemi yeni — eski kayıtta yoksa sıfırdan başlat */
       if (!raw._economyV26) {
-        state.coinss    = 0;
+        state.coins    = 0;
         state.diamonds = 0;
         state.jokers   = { skip:0, hint:0, freeze:0, double:0 };
         state.inventory = [];
@@ -3911,7 +3911,7 @@ var LOGIN_REWARDS = [
 /* Para güncelle ve göstergeni yenile */
 function updateWallet() {
   if (!state) return;
-  var coinss    = state.coinss    || 0;
+  var coins    = state.coins    || 0;
   var diamonds = state.diamonds || 0;
 
   var cd = document.getElementById('coinsDisplay');
@@ -3929,7 +3929,7 @@ function updateWallet() {
 
 /* Coin ekle */
 function addCoins(amount, reason) {
-  state.coinss = (state.coinss || 0) + amount;
+  state.coins = (state.coins || 0) + amount;
   saveState();
   updateWallet();
   if (reason) showFloatingReward('+' + amount + ' 💰', '#ffd700');
@@ -4069,7 +4069,7 @@ function buyShopItem(itemId) {
   var item = allItems.find(function(i) { return i.id === itemId; });
   if (!item) return;
 
-  var balance = item.currency === 'diamonds' ? (state.diamonds || 0) : (state.coinss || 0);
+  var balance = item.currency === 'diamonds' ? (state.diamonds || 0) : (state.coins || 0);
   if (balance < item.cost) {
     showToast('❌ Yeterli ' + (item.currency === 'diamonds' ? '💎 elmas' : '💰 coins') + ' yok!', '#ef4444');
     return;
@@ -4077,7 +4077,7 @@ function buyShopItem(itemId) {
 
   /* Ödemeyi yap */
   if (item.currency === 'diamonds') { state.diamonds = (state.diamonds || 0) - item.cost; }
-  else { state.coinss = (state.coinss || 0) - item.cost; }
+  else { state.coins = (state.coins || 0) - item.cost; }
 
   /* Ürünü ver */
   if (!state.jokers) state.jokers = { skip:0, hint:0, freeze:0, double:0 };
@@ -4099,7 +4099,7 @@ function buyShopItem(itemId) {
   /* Bonus varsa */
   if (item.bonus) {
     if (item.bonus.diamonds) { state.diamonds = (state.diamonds || 0) + item.bonus.diamonds; }
-    if (item.bonus.coinss)    { state.coinss    = (state.coinss    || 0) + item.bonus.coinss; }
+    if (item.bonus.coins)    { state.coins    = (state.coins    || 0) + item.bonus.coins; }
   }
 
   saveState();
@@ -4275,7 +4275,7 @@ function claimDailyLogin() {
   }
   if (reward.bonus) {
     if (reward.bonus.diamonds) addDiamonds(reward.bonus.diamonds);
-    if (reward.bonus.coinss)    addCoins(reward.bonus.coinss);
+    if (reward.bonus.coins)    addCoins(reward.bonus.coins);
   }
 
   updateJokerUI();
@@ -4301,7 +4301,7 @@ function claimDailyReward(taskId) {
   saveTodaysTasks(tasks);
 
   if (task.reward) {
-    if (task.reward.coinss)    addCoins(task.reward.coinss, true);
+    if (task.reward.coins)    addCoins(task.reward.coins, true);
     if (task.reward.diamonds) addDiamonds(task.reward.diamonds, true);
   } else if (task.bonus) {
     state.score = (state.score || 0) + task.bonus;
@@ -4310,11 +4310,11 @@ function claimDailyReward(taskId) {
     setCurrentBoard(board);
     saveState();
     try { pushScoreToWorker(); } catch(e) {}
-    try { updateClaimlScoreDisplays(); } catch(e) {}
+    try { updateAllScoreDisplays(); } catch(e) {}
   }
 
   spawnConfetti(20);
-  showToast('🎁 ' + (task.reward ? '+' + (task.reward.coinss||0) + '💰' : '+' + task.bonus + 'p') + ' kazandın!', '#ffd700');
+  showToast('🎁 ' + (task.reward ? '+' + (task.reward.coins||0) + '💰' : '+' + task.bonus + 'p') + ' kazandın!', '#ffd700');
 
   var list = document.getElementById('dailyTasksList');
   if (list) renderTaskList(tasks, list, 'daily');
@@ -4382,11 +4382,11 @@ async function renderClanTab(tab) {
   }
 
   else if (tab === 'create') {
-    var hasCoins = (state.coinss || 0) >= 1000;
+    var hasCoins = (state.coins || 0) >= 1000;
     el.innerHTML =
       '<div style="background:rgba(255,215,0,0.06);border:1px solid rgba(255,215,0,0.2);border-radius:14px;padding:12px;margin-bottom:14px;text-align:center">' +
         '<div style="font-size:13px;color:#ffd700;font-weight:700">💰 Klan creation costs 1000 coinss</div>' +
-        '<div style="font-size:11px;color:var(--muted);margin-top:3px">Balance: ' + (state.coinss||0) + ' coins</div>' +
+        '<div style="font-size:11px;color:var(--muted);margin-top:3px">Balance: ' + (state.coins||0) + ' coins</div>' +
       '</div>' +
       '<div style="display:flex;flex-direction:column;gap:10px">' +
         '<div><label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px">Clan Name (2-24 karakter)</label>' +
@@ -4647,7 +4647,7 @@ function renderTournamentTab(el, tournament) {
       return '<div style="text-align:center;background:' + p.bg + ';border:1px solid ' + p.border + ';border-radius:12px;padding:10px 6px">' +
         '<div style="font-size:20px">' + p.icon + '</div>' +
         '<div style="font-size:9px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-top:3px">' + p.label + '</div>' +
-        (p.prz ? '<div style="font-size:11px;color:#ffd700;font-weight:800;margin-top:4px">' + (p.prz.coinss||0).toLocaleString() + '💰</div>' +
+        (p.prz ? '<div style="font-size:11px;color:#ffd700;font-weight:800;margin-top:4px">' + (p.prz.coins||0).toLocaleString() + '💰</div>' +
                  '<div style="font-size:10px;color:#63b3ed;font-weight:700">' + (p.prz.diamonds||0) + '💎</div>' : '<div style="font-size:10px;color:var(--muted)">—</div>') +
       '</div>';
     }).join('') + '</div>';
@@ -4783,7 +4783,7 @@ async function searchClan() {
 
 async function createClan() {
   if (!authUser) { showToast('Önce giriş yap', '#ef4444'); return; }
-  if ((state.coinss||0) < 1000) { showToast('Yeterli coins yok! 1000 💰 gerekli', '#ef4444'); return; }
+  if ((state.coins||0) < 1000) { showToast('Not enough coins! Need 1000 💰', '#ef4444'); return; }
   var name = (document.getElementById('clanNameInput')?.value || '').trim();
   var tag  = (document.getElementById('clanTagInput')?.value  || '').trim().toUpperCase();
   var desc = (document.getElementById('clanDescInput')?.value || '').trim();
@@ -4795,7 +4795,7 @@ async function createClan() {
   try {
     var r = await workerPost('clan/create', { token: authUser.token, name, tag, description: desc, isPublic: pub, minScore, maxMembers });
     if (!r || !r.ok) { showToast('❌ ' + (r?.error || 'Error'), '#ef4444'); return; }
-    state.coinss = (state.coinss||0) - 1000;
+    state.coins = (state.coins||0) - 1000;
     state.clanId = r.clanId;
     if (!state._shopBuys) state._shopBuys = 0;
     state._shopBuys++;
@@ -4935,10 +4935,10 @@ async function checkTournamentPrizes() {
     if (!r || !r.ok || !r.prizes || !r.prizes.length) return;
     /* Ödül var — claim et */
     var cr = await workerPost('clan/prizes/claim', { token: authUser.token });
-    if (cr && cr.ok && (cr.coinss || cr.diamonds)) {
-      if (cr.coinss)    addCoins(cr.coinss, true);
+    if (cr && cr.ok && (cr.coins || cr.diamonds)) {
+      if (cr.coins)    addCoins(cr.coins, true);
       if (cr.diamonds) addDiamonds(cr.diamonds, true);
-      showToast('🏆 Turnuva ödülü: +' + (cr.coinss||0) + '💰 +' + (cr.diamonds||0) + '💎', '#ffd700');
+      showToast('🏆 Turnuva ödülü: +' + (cr.coins||0) + '💰 +' + (cr.diamonds||0) + '💎', '#ffd700');
       spawnConfetti(40);
     }
   } catch(e) {}
@@ -4948,7 +4948,7 @@ function renderClanShop(el) {
   el.innerHTML =
     '<button onclick="closeModal(document.getElementById(\'shopModal\'));openClanModal()" class="btn" style="width:100%;margin-bottom:12px">👥 Klanlar Sayfasına Git</button>' +
     SHOP_ITEMS.clans.map(function(item) {
-      var balance = state.coinss || 0;
+      var balance = state.coins || 0;
       var canAfford = balance >= item.cost;
       return '<div class="shop-item">' +
         '<div class="shop-item-icon">' + item.icon + '</div>' +
@@ -5114,7 +5114,7 @@ if (authUser && authUser.uid) {
   var _lbh = document.getElementById('loginBtnHeader');
   if (_lbh) _lbh.style.display = 'none';
   state.player = authUser.name;
-  updateClaimlScoreDisplays();
+  updateAllScoreDisplays();
   updateProfileBtn();
   updateWallet();
   showScreen('menu');
@@ -5125,12 +5125,12 @@ if (authUser && authUser.uid) {
     if (!authUser || !authUser.token) return;
     try { await syncOnlineScore(); } catch(e) {}
     try { await loadProfileFromCloud(); } catch(e) {}
-    updateClaimlScoreDisplays();
+    updateAllScoreDisplays();
     updateWallet();
   }, 100);
 } else if (state.player) {
   showScreen('menu');
-  updateClaimlScoreDisplays();
+  updateAllScoreDisplays();
   updateMiniInfo();
 }
 /* Auth yoksa window.load halleder */
@@ -7045,7 +7045,7 @@ function claimQuestReward(taskId, tabType) {
 
   /* Ödülü ver */
   if (task.reward) {
-    if (task.reward.coinss)    addCoins(task.reward.coinss, true);
+    if (task.reward.coins)    addCoins(task.reward.coins, true);
     if (task.reward.diamonds) addDiamonds(task.reward.diamonds, true);
   }
 
@@ -7058,7 +7058,7 @@ function claimQuestReward(taskId, tabType) {
   }
 
   spawnConfetti(20);
-  showToast('🎁 +' + (task.reward.coinss || 0) + ' 💰' + (task.reward.diamonds ? ' +' + task.reward.diamonds + ' 💎' : '') + ' kazandın!', '#ffd700');
+  showToast('🎁 +' + (task.reward.coins || 0) + ' 💰' + (task.reward.diamonds ? ' +' + task.reward.diamonds + ' 💎' : '') + ' kazandın!', '#ffd700');
   renderTaskList(tasks, document.getElementById('dailyTasksList'), tabType);
 }
 
@@ -7095,7 +7095,7 @@ function renderTaskList(tasks, listEl, tabType) {
     var isClaim = task.completed && !task.rewardGiven;
     var isGiven = task.rewardGiven;
     var rewardStr = task.reward
-      ? (task.reward.coinss ? '+' + task.reward.coinss + '💰' : '') + (task.reward.diamonds ? ' +' + task.reward.diamonds + '💎' : '')
+      ? (task.reward.coins ? '+' + task.reward.coins + '💰' : '') + (task.reward.diamonds ? ' +' + task.reward.diamonds + '💎' : '')
       : ('+' + (task.bonus||0) + 'p');
 
     var cardBg = isGiven ? 'background:rgba(0,255,136,0.03);border-color:rgba(0,255,136,0.12)'
@@ -7299,7 +7299,7 @@ function claimDailyReward(taskId) {
     setCurrentBoard(board);
     saveState();
     try { pushScoreToWorker(); } catch(e) {}
-    try { updateClaimlScoreDisplays(); } catch(e) {}
+    try { updateAllScoreDisplays(); } catch(e) {}
 
     showToast('🎁 +' + task.bonus + 'p kazandın!', '#ffd700');
     try { spawnConfetti(25); } catch(e) {}
@@ -7835,7 +7835,7 @@ try {
       /* Sayfa yenilenmiş olabilir — cloud'dan ekonomi/profil yükle */
       try { await syncOnlineScore(); } catch(e) {}
       try { await loadProfileFromCloud(); } catch(e) {}
-      updateClaimlScoreDisplays();
+      updateAllScoreDisplays();
       try { updateWallet(); } catch(e) {}
       try { scheduleDailyReset(); } catch(e) {}
       setTimeout(function() { try { checkDailyLogin(); } catch(e) {} }, 2500);
@@ -7854,7 +7854,7 @@ try {
       try { await syncOnlineScore(); } catch(e) { console.warn('syncOnlineScore hata:', e); }
       try { await loadProfileFromCloud(); } catch(e) { console.warn('loadProfileFromCloud hata:', e); }
       /* Cloud yüklendi — UI güncelle */
-      updateClaimlScoreDisplays();
+      updateAllScoreDisplays();
       try { updateWallet(); } catch(e) {}
       try { loadGroqDailyTasks().then(function() { updateDailyTasks(); }); } catch(e) {}
       try { loadGroqWeeklyTasks(); } catch(e) {}
@@ -8311,7 +8311,7 @@ async function handleEmailAuth() {
     try { await syncOnlineScore(); } catch(e) {}
     try { await loadProfileFromCloud(); } catch(e) {}
     /* Cloud yüklendi — UI güncelle */
-    updateClaimlScoreDisplays();
+    updateAllScoreDisplays();
     try { updateWallet(); } catch(e) {}
     try { loadGroqDailyTasks().then(function() { updateDailyTasks(); }); } catch(e) {}
     try { loadGroqWeeklyTasks(); } catch(e) {}
@@ -8511,12 +8511,12 @@ async function syncOnlineScore() {
       try { pushScoreToWorker(); } catch(e) {}
     }
     /* Tüm göstergeleri senkronize et */
-    updateClaimlScoreDisplays();
+    updateAllScoreDisplays();
   } catch(e) { console.warn('syncScore hata:', e); }
 }
 
 /* Tüm puan/seviye göstergelerini tek yerden güncelle */
-function updateClaimlScoreDisplays() {
+function updateAllScoreDisplays() {
   var s = state.score || 0;
   var l = state.level || 1;
   /* Player label */
@@ -8555,7 +8555,7 @@ async function saveProfileToCloud() {
       theme: state.theme || 'green',
       bg: state.bgImage || '',
       /* Ekonomi verileri */
-      coinss: state.coinss || 0,
+      coins: state.coins || 0,
       diamonds: state.diamonds || 0,
       jokers: state.jokers || { skip:0, hint:0, freeze:0, double:0 },
       inventory: state.inventory || [],
@@ -8603,8 +8603,8 @@ async function loadProfileFromCloud() {
       state.score = result.score;
     }
     /* Ekonomi — her zaman cloud'dan yükle (cloud kaynak of truth) */
-    if (result.coinss !== undefined) {
-      state.coinss    = result.coinss    || 0;
+    if (result.coins !== undefined) {
+      state.coins    = result.coins    || 0;
       state.diamonds = result.diamonds || 0;
       state.jokers   = result.jokers   || { skip:0, hint:0, freeze:0, double:0 };
       state.inventory = result.inventory || [];
@@ -8649,7 +8649,7 @@ async function loadProfileFromCloud() {
       try { applyBg(result.bg); } catch(e) {}
     }
     saveState();
-    updateClaimlScoreDisplays();
+    updateAllScoreDisplays();
     updateWallet();
     refreshMenuPanels();
     showToast('☁️ Statistics buluttan yüklendi', '#38bdf8');
@@ -9120,13 +9120,13 @@ async function adminResetPass() {
 
 async function adminGiftCurrency() {
   var name     = (document.getElementById('adminGiftTarget')?.value || '').trim();
-  var coinss    = parseInt(document.getElementById('adminGiftCoins')?.value    || '0') || 0;
+  var coins    = parseInt(document.getElementById('adminGiftCoins')?.value    || '0') || 0;
   var diamonds = parseInt(document.getElementById('adminGiftDiamonds')?.value || '0') || 0;
   if (!name) { adminLog('Oyuncu adı gir'); return; }
   if (coinss === 0 && diamonds === 0) { adminLog('Miktar gir'); return; }
   adminLog('⏳ Sendiliyor: ' + name + ' → ' + coinss + '💰 ' + diamonds + '💎');
   var r = await adminCall('admin/gift-currency', { targetName: name, coinss, diamonds });
-  if (r?.ok) adminLog('✅ Sendildi! ' + name + ' yeni bakiye: ' + r.coinss + '💰 ' + r.diamonds + '💎');
+  if (r?.ok) adminLog('✅ Sent! ' + name + ' yeni bakiye: ' + r.coins + '💰 ' + r.diamonds + '💎');
   else adminLog('❌ ' + (r?.error || 'Error'));
 }
 
@@ -9247,7 +9247,7 @@ async function adminGiveClanReward() {
   var clanId = (document.getElementById('adminClanBadgeId')?.value || '').trim();
   var label  = (document.getElementById('adminClanBadgeLabel')?.value || '').trim();
   var icon   = (document.getElementById('adminClanBadgeIcon')?.value || '🏆').trim();
-  var coinss  = parseInt(document.getElementById('adminClanBadgeCoins')?.value || '0') || 0;
+  var coins  = parseInt(document.getElementById('adminClanBadgeCoins')?.value || '0') || 0;
   var diamonds = parseInt(document.getElementById('adminClanBadgeDiamonds')?.value || '0') || 0;
   if (!clanId || !label) { adminLog('Klan ID ve rozet adı zorunlu'); return; }
   var ok = await showConfirm('Klan Ödülü', '[' + icon + ' ' + label + '] rozeti ve ' + coinss + '💰 ' + diamonds + '💎 tüm memberslere verilecek');
@@ -9994,53 +9994,34 @@ async function loadOnlineStatusForProfile(targetUid) {
    ══════════════════════════════════════════════════════ */
 window.addEventListener('load', function() {
   try {
-    var raw = localStorage.getItem('mathgame_auth_v1');
+    const raw = localStorage.getItem('mathgame_auth_v1');
     if (raw) {
-      var saved = JSON.parse(raw);
+      const saved = JSON.parse(raw);
       if (saved && saved.uid && saved.name) {
-        /* Local kayıt var — HEMEN aç, Firebase'i bekleme */
-        authUser = saved;
-        loadState(saved.uid);
-        state.player = saved.name;
-        updateProfileBtn();
-        updateClaimlScoreDisplays();
-        updateWallet();
-        showScreen('menu');
-        try { refreshMenuPanels(); } catch(e) {}
-        /* Arka planda Firebase sync et — UI'ı bloklama */
+        /* Firebase onAuthStateChanged zaten halledecek — 2sn fallback */
         setTimeout(function() {
-          if (typeof fbAuth !== 'undefined' && fbAuth) {
-            /* onAuthStateChanged zaten tetiklenecek, profil güncelleyecek */
-          }
-          /* Worker'dan güncel token al (arka planda) */
-          if (saved.uid && saved.token) {
-            workerPost('load-profile', { token: saved.token }).then(function(r) {
-              if (r && r.ok) {
-                if (r.coinss !== undefined) {
-                  state.coinss = r.coinss || 0;
-                  state.diamonds = r.diamonds || 0;
-                  state.jokers = r.jokers || state.jokers;
-                  state.clanId = r.clanId || state.clanId || null;
-                  updateWallet();
-                  try { updateChestQuickInfo(); } catch(e) {}
-                }
-              }
-            }).catch(function() {});
-          }
-        }, 1000);
-        /* Davet URL'i varsa kaydet, giriş sonrası işle */
-        var urlInvite = new URLSearchParams(window.location.search).get('invite');
-        if (urlInvite) localStorage.setItem('mg_pending_invite', urlInvite);
-        return; /* Bitti — giriş ekranı açma */
+          if (authUser) return; /* Firebase halletti */
+          authUser = saved;
+          loadState(saved.uid);
+          state.player = saved.name;
+          updateProfileBtn();
+          updateAllScoreDisplays();
+          updateWallet();
+          showScreen('menu');
+          refreshMenuPanels();
+          saveState();
+        }, 2000);
+        return; /* Auth kaydı var — openAuthModal çağırma */
       }
     }
   } catch(e) {}
-  /* Local kayıt yok — kısa bekle, Firebase hallettiyse geç, yoksa giriş ekranı */
+  /* Auth kaydı yok — 500ms bekle, hala auth yoksa giriş ekranı */
   setTimeout(function() {
-    if (authUser) return;
+    if (authUser) return; /* onAuthStateChanged halletti */
     try { openAuthModal(); } catch(e) {}
-  }, 800);
+  }, 500);
 });
+
 
 /* Giriş sonrası bekleyen davet kontrolü */
 function checkPendingInvite() {
@@ -11603,7 +11584,7 @@ function renderChestContent() {
   var el = document.getElementById('chestContent');
   if (!el) return;
   var jokers   = state.jokers   || { skip:0, hint:0, freeze:0, double:0 };
-  var coinss    = state.coinss    || 0;
+  var coins    = state.coins    || 0;
   var diamonds = state.diamonds || 0;
   var inv      = state.inventory|| [];
   var badges   = (state.profile && state.profile.badges) ? state.profile.badges : [];
