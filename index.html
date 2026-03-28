@@ -9144,8 +9144,7 @@ async function adminSearchUser() {
       try {
         var cr = await adminCall('clan-info', { targetName: q });
         if (cr && cr.ok && cr.clan) {
-          info += '
-Clan: [' + cr.clan.tag + '] ' + cr.clan.name + ' | Members: ' + cr.clan.members.length + ' | Score: ' + (cr.clan.totalScore||0);
+          info += ' | Clan: [' + cr.clan.tag + '] ' + cr.clan.name + ' | Members: ' + cr.clan.members.length + ' | Score: ' + (cr.clan.totalScore||0);
         }
       } catch(e) {}
     }
