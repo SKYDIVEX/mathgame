@@ -209,7 +209,10 @@ input, textarea, select {
 .header-right {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
+  min-width: 0;
+  flex-shrink: 0;
+  max-width: calc(100vw - 110px);
 }
 .profile-btn {
   display: flex;
@@ -1701,6 +1704,8 @@ input, textarea, select {
   border: 1px solid var(--border2);
   border-radius: 24px 24px 0 0;
   overflow-y: auto;
+  overflow-x: hidden;
+  word-break: break-word;
   padding: 24px 20px 40px;
   animation: slideUp .35s ease;
 }
@@ -2492,7 +2497,7 @@ input, textarea, select {
       </div>
       <div id="quickActions" style="display:none"></div>
       <div id="miniInfo" style="display:none"></div>
-      <div id="profileBtnWrap">
+      <div id="profileBtnWrap" style="flex-shrink:0;min-width:0;max-width:160px;overflow:hidden">
         <button class="profile-btn" id="profileBtn" onclick="openProfileModal()" style="display:none">
           <div id="pbAvatar">E</div>
           <span id="pbName">—</span>
@@ -4425,7 +4430,7 @@ async function renderClanTab(tab) {
           ? '<div style="background:rgba(0,255,136,0.06);border:1px solid rgba(0,255,136,0.2);border-radius:10px;padding:10px;font-family:monospace;font-size:12px;color:var(--neon);margin-bottom:8px;word-break:break-all">' + clan.inviteToken + '</div>' +
             '<div style="display:flex;gap:8px">' +
               '<button onclick="copyInviteLink(\'' + clan.inviteToken + '\')" class="btn ghost" style="flex:1;font-size:12px">📋 Kopyala</button>' +
-              '<button onclick="generateInviteLink()" class="btn ghost" style="flex:1;font-size:12px">🔄 Yenile</button>' +
+              '' +
             '</div>'
           : '<button onclick="generateInviteLink()" class="btn" style="width:100%">🔗 Davet Linki Oluştur</button>'
         ) +
@@ -4433,7 +4438,7 @@ async function renderClanTab(tab) {
       /* Katkıcı Seçimi */
       '<div style="background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:10px">' +
         '<div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--muted2);margin-bottom:6px">⚽ Katkıcı Oyuncular</div>' +
-        '<div style="font-size:12px;color:var(--muted);margin-bottom:10px">En fazla <strong style="color:var(--neon)">' + maxC + '</strong> oyuncu seçebilirsin. Sadece seçilen oyuncuların puanları klana katkı sağlar.</div>' +
+        '<div style="font-size:12px;color:var(--muted);margin-bottom:10px">En fazla <strong style="color:var(--neon)">' + maxC + '</strong> oyuncu seçebilirsin. Turnuvada klani temsil edecek oyuncuları seç. Puana tüm üyeler katkı yapar.</div>' +
         '<div id="contributorPicker">' +
           clan.members.filter(function(m) { return m.role !== 'leader'; }).map(function(m) {
             var isContrib = (clan.contributors || []).includes(m.uid);
@@ -4465,6 +4470,7 @@ async function renderClanTab(tab) {
             '<label for="settingIsPublic" style="font-size:13px;color:var(--text)">Public klan (herkes katılabilir)</label>' +
           '</div>' +
           '<button onclick="saveClanSettings()" class="btn" style="width:100%">💾 Ayarları Kaydet</button>' +
+          '<button onclick="deleteMyClan()" class="btn ghost" style="width:100%;margin-top:8px;color:#ef4444;border-color:rgba(239,68,68,0.3)">🗑 Klanı Sil</button>' +
         '</div>' +
       '</div>';
   }
@@ -4540,8 +4546,8 @@ function renderClanInfo(el, clan) {
     /* Benim katkım */
     '<div style="background:' + (isContrib ? 'rgba(0,255,136,0.05)' : 'rgba(255,165,0,0.05)') + ';border:1px solid ' + (isContrib ? 'rgba(0,255,136,0.2)' : 'rgba(255,165,0,0.2)') + ';border-radius:12px;padding:10px 12px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center">' +
       '<div>' +
-        '<div style="font-size:12px;font-weight:700;color:' + (isContrib ? 'var(--neon)' : '#f59e0b') + '">' + (isContrib ? '✅ Katkıcısın' : '⏳ Katkıcı Değilsin') + '</div>' +
-        '<div style="font-size:11px;color:var(--muted)">' + (isContrib ? 'Oyunun klan puanına yansıyor' : 'Liderden katkıcı olmayı iste') + '</div>' +
+        '<div style="font-size:12px;font-weight:700;color:' + (isContrib ? 'var(--neon)' : '#f59e0b') + '">' + ('✅ Katkıcısın') + '</div>' +
+        '<div style="font-size:11px;color:var(--muted)">' + ('Tüm üyelerin puanı klana yansır') + '</div>' +
       '</div>' +
       '<div style="text-align:right"><div style="font-size:14px;font-weight:800;color:#ffd700">' + myScore.toLocaleString() + 'p</div><div style="font-size:10px;color:var(--muted)">Katkın</div></div>' +
     '</div>' +
@@ -4752,15 +4758,19 @@ async function searchClan() {
     if (!r || !r.clans || !r.clans.length) { res.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:8px">Klan bulunamadı</div>'; return; }
     res.innerHTML = r.clans.map(function(c) {
       var alreadyIn = state.clanId === c.id;
-      return '<div style="display:flex;align-items:center;gap:12px;padding:14px;border-radius:14px;background:rgba(255,255,255,0.02);border:1px solid var(--border);margin-bottom:8px">' +
+      var isPrivate = c.isPublic === false;
+      return '<div style="display:flex;align-items:center;gap:12px;padding:14px;border-radius:14px;background:rgba(255,255,255,0.02);border:1px solid ' + (isPrivate ? 'rgba(239,68,68,0.2)' : 'var(--border)') + ';margin-bottom:8px">' +
         '<div style="flex:1">' +
-          '<div style="font-size:14px;font-weight:800">[' + c.tag + '] ' + escapeHtml(c.name) + '</div>' +
+          '<div style="font-size:14px;font-weight:800">[' + c.tag + '] ' + escapeHtml(c.name) + ' ' + (isPrivate ? '🔒' : '🔓') + '</div>' +
           '<div style="font-size:11px;color:var(--muted);margin-top:2px">' + c.members + ' üye' + (c.description ? ' · ' + escapeHtml(c.description).slice(0,40) : '') + '</div>' +
           (c.minScore ? '<div style="font-size:10px;color:#f59e0b;margin-top:2px">Min. ' + c.minScore + ' puan gerekli</div>' : '') +
+          (isPrivate ? '<div style="font-size:10px;color:#ef4444;margin-top:2px">Özel klan — davet linki gerekli</div>' : '') +
         '</div>' +
         (alreadyIn
           ? '<div style="font-size:12px;color:var(--neon)">✓ Üyesin</div>'
-          : '<button onclick="joinClan(\'' + c.id + '\')" class="btn" style="padding:8px 14px;font-size:12px">Katıl</button>'
+          : isPrivate
+            ? '<button onclick="showToast(\'Liderden davet linki iste\',\'#f59e0b\')" class="btn ghost" style="padding:8px 14px;font-size:12px;opacity:0.6">🔒 Özel</button>'
+            : '<button onclick="joinClan(\'' + c.id + '\')" class="btn" style="padding:8px 14px;font-size:12px">Katıl</button>'
         ) +
       '</div>';
     }).join('');
@@ -9114,6 +9124,22 @@ async function adminGiftCurrency() {
 async function adminSearchClan() {
   var q = (document.getElementById('adminClanSearch')?.value || '').trim();
   if (!q) { adminLog('Klan adı veya etiket gir'); return; }
+  /* Kullanıcı adıyla ara — klan bilgisi de göster */
+  try {
+    var ur = await adminCall('profile', { targetName: q });
+    if (ur && ur.ok) {
+      var uinfo = 'Kullanıcı: ' + ur.name + ' | Puan: ' + (ur.score||0) + ' | Rol: ' + (ur.role||'user');
+      if (ur.uid) {
+        try {
+          var cr = await adminCall('clan-info', { targetUid: ur.uid });
+          if (cr && cr.ok && cr.clan) {
+            uinfo += ' | Klan: [' + cr.clan.tag + '] ' + cr.clan.name + ' | Üye: ' + cr.clan.members.length + ' | Puan: ' + (cr.clan.totalScore||0);
+          }
+        } catch(ec) {}
+      }
+      adminLog(uinfo);
+    }
+  } catch(eu) {}
   adminLog('⏳ Aranıyor: ' + q);
   var r = await adminCall('clan/search', { query: q });
   var el = document.getElementById('adminClanResults');
@@ -11848,6 +11874,25 @@ if (_origRM) {
   };
 })();
 
+
+/* Klanı sil */
+async function deleteMyClan() {
+  if (!authUser || !_clanData) return;
+  if (_clanData.members && _clanData.members.length > 1) {
+    showToast('Önce tüm üyeler ayrılmalı veya liderliği devret', '#ef4444');
+    return;
+  }
+  if (!confirm('Klanı kalıcı olarak sil? Bu işlem geri alınamaz.')) return;
+  try {
+    var r = await workerPost('clan/force-reset', { token: authUser.token });
+    if (r && r.ok) {
+      state.clanId = null; _clanData = null; saveState();
+      showToast('Klan silindi', '#00ff88');
+      switchClanTab('search');
+    } else showToast('Hata: ' + (r ? r.error : 'Bilinmeyen'), '#ef4444');
+  } catch(e) { showToast('Bağlantı hatası', '#ef4444'); }
+}
+
 window._mathgame={ state, nextQuestion, checkAnswer };
 
 /* ── LIQUID RIPPLE ─────────────────────────────────── */
@@ -11915,7 +11960,7 @@ document.addEventListener('pointerdown', e => {
     </div>
     <div id="reqPanelMy" style="display:none">
       <div id="myRequestList" style="display:flex;flex-direction:column;gap:8px;max-height:300px;overflow-y:auto"></div>
-      <button onclick="loadMyRequests()" style="margin-top:8px;width:100%;background:rgba(255,255,255,0.05);border:1px solid #1a2f28;border-radius:10px;color:var(--muted);font-size:12px;padding:8px;font-family:inherit;cursor:pointer">&#x1F504; Yenile</button>
+      
     </div>
 
     <div style="border-top:1px solid #1a2f28;padding-top:12px">
@@ -12210,7 +12255,7 @@ document.addEventListener('pointerdown', e => {
           <div class="admin-stat-card"><div class="admin-stat-num" id="statRequests">—</div><div class="admin-stat-label">İstek</div></div>
           <div class="admin-stat-card"><div class="admin-stat-num" id="statOpenReqs">—</div><div class="admin-stat-label">Açık İstek</div></div>
         </div>
-        <button class="admin-btn admin-btn-gray" onclick="adminLoadStats()" style="width:100%;margin-bottom:8px">🔄 Yenile</button>
+        
 
         <!-- Süper Admin giriş butonu — sadece kurucu -->
         <div id="superAdminEntrySection" style="display:none;margin-bottom:10px">
@@ -12405,7 +12450,7 @@ document.addEventListener('pointerdown', e => {
           <button class="admin-btn admin-btn-green" onclick="adminAddBadgeToLibrary()" style="width:100%">➕ Kütüphaneye Ekle</button>
         </div>
         <div id="adminLibraryList" style="display:flex;flex-direction:column;gap:6px;max-height:200px;overflow-y:auto"></div>
-        <button class="admin-btn admin-btn-gray" onclick="adminLoadBadgeLibraryFull()" style="width:100%;margin-top:4px">🔄 Listeyi Yenile</button>
+        
 
         <div class="admin-section-title" style="margin-top:10px">👑 Admin</div>
         <div class="admin-row">
