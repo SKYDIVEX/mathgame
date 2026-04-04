@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
 <title>MathGame — v3.1 — SKYDIVEX</title>
-<link rel="manifest" href="manifest.json">
+<link rel="manifest" href="/mathgame/manifest.json">
 <meta name="theme-color" content="#080b12">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -22,7 +22,7 @@ var APP_VERSION = 'v3.1';
 /* ── Service Worker kaydı ─────────────────────────────── */
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function() {
-    navigator.serviceWorker.register('sw.js').then(function(reg) {
+    navigator.serviceWorker.register('/mathgame/sw.js', { scope: '/mathgame/' }).then(function(reg) {
       console.log('[SW] Kayıtlı:', reg.scope);
       window._swReg = reg;
     }).catch(function(e) {
