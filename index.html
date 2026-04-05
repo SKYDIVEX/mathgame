@@ -3548,7 +3548,7 @@ input, textarea, select {
 
       <!-- Esleew -->
       <div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:12px;padding:10px 12px">
-        <div style="font-size:28px;line-height:1">🫰🏿</div>
+        <div style="font-size:28px;line-height:1">⭐</div>
         <div>
           <div style="font-size:13px;font-weight:800;color:var(--text)">Esleew</div>
           <div style="font-size:11px;color:var(--muted);margin-top:2px">Geliştirmedemde kafayı yememi engellemede çok büyük yardımı olan ablam</div>
@@ -15071,6 +15071,214 @@ async function calPopSave(day) {
 
 /* Admin paneli "Takvim Düzenle" butonunu bağla */
 window.adminViewCalendar = adminOpenCalendarEditor;
+
+/* ══════════════════════════════════════════════════════════════
+   MathGame V3.5 — Frontend Patch
+   1. iOS "Ana Ekrana Ekle" popup
+   2. Android geri tuşu → modal kapat
+   3. Düşük Güç Modu
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── 1. iOS Safari "Ana Ekrana Ekle" rehber popup'ı ─────────── */
+(function() {
+  var isIOS        = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  var isSafari     = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+  var isStandalone = (window.navigator.standalone === true)
+                   || window.matchMedia('(display-mode: standalone)').matches;
+
+  if (!isIOS || !isSafari || isStandalone) { return; }
+  if (localStorage.getItem('mg_ios_install_dismissed')) { return; }
+
+  var popup = document.createElement('div');
+  popup.id = 'iosInstallPopup';
+  popup.style.cssText = [
+    'position:fixed', 'bottom:20px', 'left:50%', 'transform:translateX(-50%)',
+    'z-index:99999', 'width:calc(100% - 40px)', 'max-width:400px',
+    'background:#0d1420', 'border:1px solid rgba(0,255,136,0.25)',
+    'border-radius:20px', 'padding:18px 20px',
+    'box-shadow:0 8px 40px rgba(0,0,0,0.6)',
+    'animation:slideUp .4s ease',
+    'display:flex', 'flex-direction:column', 'gap:12px',
+  ].join(';');
+  popup.innerHTML =
+    '<div style="display:flex;align-items:center;gap:12px">' +
+      '<img src="icon-192.png" style="width:48px;height:48px;border-radius:14px;flex-shrink:0" alt="MathGame">' +
+      '<div style="flex:1;min-width:0">' +
+        '<div style="font-size:15px;font-weight:800;color:#e8f4f0">Ana Ekrana Ekle</div>' +
+        '<div style="font-size:12px;color:rgba(232,244,240,0.55);margin-top:2px">MathGame\'i uygulama gibi kullan</div>' +
+      '</div>' +
+      '<button id="iosInstallClose" style="background:none;border:none;color:rgba(232,244,240,0.4);font-size:20px;cursor:pointer;flex-shrink:0;line-height:1;padding:0">✕</button>' +
+    '</div>' +
+    '<div style="display:flex;flex-direction:column;gap:8px">' +
+      '<div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.04);border-radius:12px;padding:10px 12px">' +
+        '<span style="font-size:20px">①</span>' +
+        '<div style="font-size:13px;color:#e8f4f0">Alttaki <span style="background:rgba(0,122,255,0.15);border-radius:6px;padding:1px 6px;color:#4da3ff;font-size:12px">⬆️ Paylaş</span> butonuna dokun</div>' +
+      '</div>' +
+      '<div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.04);border-radius:12px;padding:10px 12px">' +
+        '<span style="font-size:20px">②</span>' +
+        '<div style="font-size:13px;color:#e8f4f0"><span style="font-weight:700;color:#00ff88">Ana Ekrana Ekle</span>\'yi seç</div>' +
+      '</div>' +
+    '</div>' +
+    '<div style="text-align:center;margin-top:-4px">' +
+      '<div style="display:inline-block;width:0;height:0;border-left:10px solid transparent;border-right:10px solid transparent;border-top:10px solid rgba(0,255,136,0.25)"></div>' +
+    '</div>';
+
+  setTimeout(function() {
+    try {
+      document.body.appendChild(popup);
+      document.getElementById('iosInstallClose').addEventListener('click', function() {
+        popup.remove();
+        localStorage.setItem('mg_ios_install_dismissed', '1');
+      });
+    } catch(e) {}
+  }, 3000);
+})();
+
+/* ── 2. Android geri tuşu → açık modalı kapat ───────────────── */
+(function() {
+  var MODAL_IDS = [
+    'bgLibModal', 'achModal', 'superAdminModal', 'adminModal',
+    'clanChatModal', 'shopModal', 'clanModal', 'questModal',
+    'settingsModal', 'authModal', 'profileModal', 'publicProfileModal',
+    'playerSearchPage', 'profileFullPage',
+  ];
+
+  /* Sayfa yüklenince base state koy */
+  history.replaceState({ mg_base: true }, '');
+
+  /* Modal açılışını izle — her "show" class eklenince pushState */
+  var mgModalObserver = new MutationObserver(function(mutations) {
+    for (var i = 0; i < mutations.length; i++) {
+      var target = mutations[i].target;
+      if (MODAL_IDS.indexOf(target.id) < 0) { continue; }
+      if (target.classList.contains('show')) {
+        history.pushState({ mg_modal: target.id }, '');
+      }
+    }
+  });
+  mgModalObserver.observe(document.body, {
+    attributes: true, subtree: true, attributeFilter: ['class'],
+  });
+
+  /* Geri tuşu — üstteki açık modalı kapat */
+  window.addEventListener('popstate', function() {
+    for (var i = 0; i < MODAL_IDS.length; i++) {
+      var el = document.getElementById(MODAL_IDS[i]);
+      if (!el) { continue; }
+
+      /* Tam sayfa modaller */
+      if (el.id === 'playerSearchPage' || el.id === 'profileFullPage') {
+        if (el.classList.contains('show')) { el.classList.remove('show'); return; }
+        continue;
+      }
+      /* Klan chat — display:flex */
+      if (el.id === 'clanChatModal') {
+        if (el.style.display === 'flex') {
+          try { closeClanChat(); } catch(e) { el.style.display = 'none'; }
+          return;
+        }
+        continue;
+      }
+      /* Standart modallar */
+      if (el.classList.contains('show')) {
+        try { closeModal(el); } catch(e) { el.classList.remove('show'); }
+        return;
+      }
+    }
+  });
+})();
+
+/* ── 3. Düşük Güç Modu ───────────────────────────────────────── */
+var _lowPowerMode = false;
+
+(function() {
+  try {
+    _lowPowerMode = localStorage.getItem('mg_low_power') === '1';
+    if (_lowPowerMode) { applyLowPowerMode(true); }
+  } catch(e) {}
+})();
+
+function applyLowPowerMode(active) {
+  var styleId  = 'mg-low-power-style';
+  var existing = document.getElementById(styleId);
+  if (active) {
+    if (existing) { return; }
+    var style = document.createElement('style');
+    style.id = styleId;
+    style.textContent =
+      '*, *::before, *::after {' +
+      '  animation-duration: 0.001ms !important;' +
+      '  animation-iteration-count: 1 !important;' +
+      '  transition-duration: 0.001ms !important;' +
+      '}' +
+      '[style*="blur"], .desktop-topbar, .search-page-header {' +
+      '  backdrop-filter: none !important;' +
+      '  -webkit-backdrop-filter: none !important;' +
+      '}' +
+      '.desktop-widget, .admin-stat-card, .btn { box-shadow: none !important; }' +
+      'body { background-attachment: scroll !important; }';
+    document.head.appendChild(style);
+  } else {
+    if (existing) { existing.remove(); }
+  }
+}
+
+function toggleLowPowerMode() {
+  _lowPowerMode = !_lowPowerMode;
+  try { localStorage.setItem('mg_low_power', _lowPowerMode ? '1' : '0'); } catch(e) {}
+  applyLowPowerMode(_lowPowerMode);
+  var btn = document.getElementById('lowPowerToggleBtn');
+  if (btn) {
+    btn.textContent   = _lowPowerMode ? 'Kapat' : 'Aç';
+    btn.style.color   = _lowPowerMode ? '#00ff88' : 'var(--muted)';
+    btn.style.borderColor = _lowPowerMode ? 'rgba(0,255,136,0.3)' : 'var(--border)';
+  }
+  showToast(_lowPowerMode ? '⚡ Düşük Güç Modu Açık' : '✨ Normal Mod',
+            _lowPowerMode ? '#00ff88' : '#7c6fff');
+}
+
+/* Ayarlar modalı açılınca Düşük Güç Modu satırını enjekte et */
+(function() {
+  function injectLowPowerRow() {
+    if (document.getElementById('lowPowerRow')) { return; }
+    var saveBtn = document.getElementById('saveSettingsBtn');
+    if (!saveBtn) { return; }
+    var section = document.createElement('div');
+    section.id = 'lowPowerRow';
+    section.style.cssText = 'padding:16px 20px;border-bottom:1px solid var(--border)';
+    section.innerHTML =
+      '<div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:rgba(232,244,240,0.25);margin-bottom:12px">⚡ Performans</div>' +
+      '<div style="display:flex;align-items:center;justify-content:space-between">' +
+        '<div>' +
+          '<div style="font-size:14px;color:#e8f4f0">Düşük Güç Modu</div>' +
+          '<div style="font-size:11px;color:rgba(232,244,240,0.5);margin-top:2px">Animasyonları ve blur efektlerini kapat</div>' +
+        '</div>' +
+        '<button id="lowPowerToggleBtn" onclick="toggleLowPowerMode()" ' +
+          'style="padding:7px 14px;border-radius:10px;border:1px solid var(--border);' +
+          'background:var(--glass2);font-size:12px;font-weight:700;cursor:pointer;' +
+          'font-family:inherit;color:' + (_lowPowerMode ? '#00ff88' : 'var(--muted)') + ';' +
+          'border-color:' + (_lowPowerMode ? 'rgba(0,255,136,0.3)' : 'var(--border)') + '">' +
+          (_lowPowerMode ? 'Kapat' : 'Aç') +
+        '</button>' +
+      '</div>';
+    var saveRow = saveBtn.closest('div');
+    if (saveRow && saveRow.parentNode) {
+      saveRow.parentNode.insertBefore(section, saveRow);
+    }
+  }
+
+  var settingsModalEl = document.getElementById('settingsModal');
+  if (settingsModalEl) {
+    new MutationObserver(function(mutations) {
+      for (var i = 0; i < mutations.length; i++) {
+        if (settingsModalEl.classList.contains('show')) {
+          setTimeout(injectLowPowerRow, 50);
+          break;
+        }
+      }
+    }).observe(settingsModalEl, { attributes: true, attributeFilter: ['class'] });
+  }
+})();
 
 </script>
 </body>
