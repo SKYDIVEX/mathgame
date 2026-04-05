@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
-<title>MathGame — v3.1 — SKYDIVEX</title>
-<link rel="manifest" href="/mathgame/manifest.json">
+<title>MathGame — v3.2 — SKYDIVEX</title>
+<link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#080b12">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -17,12 +17,12 @@
 <script>
 /* Kritik global değişkenler — en başta tanımla */
 var WORKER_URL = 'https://mathgame.enesseker2113.workers.dev';
-var APP_VERSION = 'v3.1';
+var APP_VERSION = 'v3.2';
 
 /* ── Service Worker kaydı ─────────────────────────────── */
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function() {
-    navigator.serviceWorker.register('/mathgame/sw.js', { scope: '/mathgame/' }).then(function(reg) {
+    navigator.serviceWorker.register('sw.js').then(function(reg) {
       console.log('[SW] Kayıtlı:', reg.scope);
       window._swReg = reg;
     }).catch(function(e) {
@@ -79,7 +79,7 @@ window.onerror = function(msg, src, line, col, err) {
 
 <style>
 /* ═══════════════════════════════════════════════════════
-   MathGame CSS — v3.1 SKYDIVEX
+   MathGame CSS — v3.2 SKYDIVEX
    BUTON BÜYÜME: transform KULLANILMIYOR, ASLA
    ═══════════════════════════════════════════════════════ */
 
@@ -88,7 +88,47 @@ window.onerror = function(msg, src, line, col, err) {
   box-sizing: border-box;
   margin: 0; padding: 0;
   -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
 }
+/* Input/textarea seçime izin ver */
+input, textarea, [contenteditable] {
+  -webkit-user-select: text !important;
+  user-select: text !important;
+}
+
+/* ── Düşük Performans Modu ───────────────────────────── */
+body.low-perf *, body.low-perf *::before, body.low-perf *::after {
+  animation-duration: 0.001ms !important;
+  transition-duration: 0.001ms !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
+}
+body.low-perf .confetti-piece, body.low-perf .particle { display:none!important; }
+
+/* ── Animasyon değişkenleri ─────────────────────────── */
+:root { --anim-scale:1; --anim-speed:1; }
+
+/* ── FC Mobile Takvim Kartları ─────────────────────── */
+.fc-cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:5px; padding:4px 0; }
+.fc-cal-card { position:relative; border-radius:12px; padding:6px 2px; text-align:center; min-height:68px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; overflow:hidden; }
+.fc-cal-card.past  { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.05); opacity:0.55; }
+.fc-cal-card.today { background:rgba(0,255,136,0.09); border:2px solid var(--neon); animation:fcGlow 2s ease-in-out infinite alternate; }
+.fc-cal-card.future { background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); opacity:0.45; }
+.fc-cal-card.admin-editable { cursor:pointer; }
+.fc-cal-card.admin-editable:hover { background:rgba(255,215,0,0.08)!important; border-color:rgba(255,215,0,0.3)!important; opacity:1!important; }
+@keyframes fcGlow { from { box-shadow:0 0 8px rgba(0,255,136,0.2); } to { box-shadow:0 0 22px rgba(0,255,136,0.5); } }
+.fc-cal-day-num { font-size:8px; font-weight:800; letter-spacing:0.5px; }
+.fc-cal-icon { font-size:18px; line-height:1; position:relative; }
+.fc-cal-card.past .fc-cal-icon::after { content:'✔️'; position:absolute; inset:-2px; display:flex; align-items:center; justify-content:center; font-size:18px; background:rgba(0,0,0,0.55); border-radius:4px; }
+.fc-cal-label { font-size:7px; font-weight:700; color:var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; width:100%; padding:0 2px; }
+.fc-cal-claim-btn { margin-top:3px; padding:3px 6px; border-radius:6px; background:linear-gradient(135deg,#ffd700,#f59e0b); border:none; color:#000; font-size:8px; font-weight:900; cursor:pointer; font-family:inherit; width:100%; }
+.fc-cal-lock { font-size:14px; opacity:0.35; margin-top:4px; }
+
+/* Admin takvim popup */
+.cal-day-popup { position:fixed; inset:0; z-index:99999; background:rgba(4,6,12,0.96); display:flex; align-items:center; justify-content:center; padding:20px; backdrop-filter:blur(20px); }
+.cal-day-popup-card { background:#0d1117; border:1px solid rgba(255,215,0,0.25); border-radius:20px; padding:24px 20px; width:100%; max-width:340px; }
 html {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
@@ -3126,7 +3166,7 @@ input, textarea, select {
 
 <!-- Sol Sidebar (sadece masaüstünde) -->
 <div class="desktop-sidebar">
-  <div class="desktop-sidebar-logo">🧮 <span>Math</span>Game <span style="font-size:11px;color:var(--muted);font-weight:400">v3.1</span></div>
+  <div class="desktop-sidebar-logo">🧮 <span>Math</span>Game <span style="font-size:11px;color:var(--muted);font-weight:400">v3.2</span></div>
   <div style="padding:8px 8px 0">
     <div class="desktop-sidebar-section">Oyun</div>
     <a class="desktop-nav-item active" onclick="desktopNavTo('home')">
@@ -3501,14 +3541,14 @@ input, textarea, select {
   <div class="card" style="padding:12px 14px;font-size:12px;color:var(--muted)">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
       <div>Geliştirici: <strong style="color:var(--neon)">SKYDIVEX</strong></div>
-      <div>Sürüm: <strong>v3.1</strong></div>
+      <div>Sürüm: <strong>v3.2</strong></div>
     </div>
     <div style="border-top:1px solid var(--border);padding-top:10px;display:flex;flex-direction:column;gap:10px">
       <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--muted2)">Katkıda Bulunanlar</div>
 
       <!-- Esleew -->
       <div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:12px;padding:10px 12px">
-        <div style="font-size:28px;line-height:1">⭐</div>
+        <div style="font-size:28px;line-height:1">🫰🏿</div>
         <div>
           <div style="font-size:13px;font-weight:800;color:var(--text)">Esleew</div>
           <div style="font-size:11px;color:var(--muted);margin-top:2px">Geliştirmedemde kafayı yememi engellemede çok büyük yardımı olan ablam</div>
@@ -3565,33 +3605,46 @@ input, textarea, select {
     <div style="position:sticky;top:0;z-index:10;background:#0a0e16;display:flex;justify-content:space-between;align-items:center;padding:20px 20px 16px;border-bottom:1px solid var(--border)">
       <div>
         <div style="font-family:var(--font-head);font-size:20px;font-weight:900;color:var(--text)">⚙️ Ayarlar</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:2px">MathGame v3.1 — SKYDIVEX</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">MathGame v3.2 — SKYDIVEX</div>
       </div>
       <button id="closeSettingsModal" style="width:32px;height:32px;border-radius:50%;background:var(--glass2);border:1px solid var(--border);color:var(--muted);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
     </div>
 
-    <!-- İşlem Türleri -->
+    <!-- Performans Modu -->
     <div style="padding:16px 20px;border-bottom:1px solid var(--border)">
-      <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted2);margin-bottom:12px">🎯 İşlem Türleri</div>
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
-        <button class="op-btn active" data-op="+" style="padding:14px 0;border-radius:14px;border:2px solid var(--border);background:var(--glass);display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;transition:all 0.2s;font-size:22px">＋<span style="font-size:10px;font-weight:700;color:var(--muted)">Toplama</span></button>
-        <button class="op-btn active" data-op="-" style="padding:14px 0;border-radius:14px;border:2px solid var(--border);background:var(--glass);display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;transition:all 0.2s;font-size:22px">－<span style="font-size:10px;font-weight:700;color:var(--muted)">Çıkarma</span></button>
-        <button class="op-btn" data-op="*" style="padding:14px 0;border-radius:14px;border:2px solid var(--border);background:var(--glass);display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;transition:all 0.2s;font-size:22px">✕<span style="font-size:10px;font-weight:700;color:var(--muted)">Çarpma</span></button>
-        <button class="op-btn" data-op="/" style="padding:14px 0;border-radius:14px;border:2px solid var(--border);background:var(--glass);display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;transition:all 0.2s;font-size:22px">÷<span style="font-size:10px;font-weight:700;color:var(--muted)">Bölme</span></button>
-      </div>
-      <div style="margin-top:8px;font-size:11px;color:var(--muted)">En az bir işlem türü seçili olmalı.</div>
-    </div>
-
-    <!-- Seviye Hızı -->
-    <div style="padding:16px 20px;border-bottom:1px solid var(--border)">
-      <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted2);margin-bottom:12px">⚡ Seviye Atlama Hızı</div>
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-        <span style="font-size:13px;color:var(--muted)">Her <strong id="levelUpVal" style="color:var(--neon)">4</strong> doğru cevaptan sonra</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px">
-        <span style="font-size:11px;color:var(--muted);white-space:nowrap">Hızlı</span>
-        <input type="range" id="levelUpSpeed" min="2" max="10" value="4" step="1" style="flex:1;accent-color:var(--neon)">
-        <span style="font-size:11px;color:var(--muted);white-space:nowrap">Yavaş</span>
+      <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted2);margin-bottom:12px">⚡ Performans & Grafik</div>
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <span style="font-size:14px;color:var(--text)">Animasyon Ölçeği</span>
+            <span id="animScaleLabel" style="font-size:12px;font-weight:800;color:var(--neon)">1x</span>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
+            <button id="animBtn0" onclick="setAnimScale(0)" style="padding:8px;border-radius:10px;border:1px solid var(--border);background:var(--glass);font-size:12px;font-weight:700;color:var(--muted);cursor:pointer;font-family:inherit">Kapalı</button>
+            <button id="animBtn05" onclick="setAnimScale(0.5)" style="padding:8px;border-radius:10px;border:1px solid var(--border);background:var(--glass);font-size:12px;font-weight:700;color:var(--muted);cursor:pointer;font-family:inherit">0.5x</button>
+            <button id="animBtn1" onclick="setAnimScale(1)" style="padding:8px;border-radius:10px;border:2px solid var(--neon);background:rgba(0,255,136,0.08);font-size:12px;font-weight:800;color:var(--neon);cursor:pointer;font-family:inherit">1x</button>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div>
+            <div style="font-size:14px;color:var(--text)">Düşük Güç Modu</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px">Blur, gölge ve ağır efektleri kapat</div>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="lowPerfToggle" onchange="setLowPerf(this.checked)">
+            <span class="toggle-track"></span>
+          </label>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div>
+            <div style="font-size:14px;color:var(--text)">Konfeti Efekti</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px">Level-up ve ödül animasyonu</div>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="confettiToggle" checked onchange="state.confettiOff=!this.checked;saveState()">
+            <span class="toggle-track"></span>
+          </label>
+        </div>
       </div>
     </div>
 
@@ -3741,8 +3794,8 @@ input, textarea, select {
       <div style="display:flex;justify-content:space-between;align-items:flex-start">
         <div>
           <div class="about-hero-title">MathGame</div>
-          <div class="about-hero-sub">Skydivex Edition — v3.1</div>
-          <div class="about-badge">⚡ v3.1</div>
+          <div class="about-hero-sub">Skydivex Edition — v3.2</div>
+          <div class="about-badge">⚡ v3.2</div>
         </div>
         <button id="closeAboutModal" class="btn ghost" style="padding:7px 14px;font-size:13px">✕</button>
       </div>
@@ -3944,7 +3997,7 @@ input, textarea, select {
 
 <script>
 /* --------------------------
-   MathGame v3.1 - Logic JS
+   MathGame v3.2 - Logic JS
    -------------------------- */
 
 /* ══════════════════════════════════════════════
@@ -4790,58 +4843,24 @@ var SHOP_ITEMS = {
   ],
 };
 
-/* ── Aylık Giriş Takvimi ────────────────────────────────
-   30 günlük, her ay başı yenilenir.
-   Admin KV'den override edebilir: 'monthly-rewards:YYYY-MM'
-   ─────────────────────────────────────────────────────── */
-var DEFAULT_MONTHLY_REWARDS = (function() {
-  var r = [];
-  for (var d = 1; d <= 30; d++) {
-    if      (d % 7 === 0)  r.push({ day:d, icon:'🏆', reward:'coins',    amount: d * 80,  label: (d*80) + ' Coin + ' + Math.floor(d/3) + ' Elmas', bonus:{diamonds: Math.floor(d/3)} });
-    else if (d % 5 === 0)  r.push({ day:d, icon:'🃏', reward:'joker',    jkey:'double',   amount:2,       label:'2 Çift Puan Jokeri' });
-    else if (d % 3 === 0)  r.push({ day:d, icon:'💎', reward:'diamonds', amount: Math.ceil(d/3), label: Math.ceil(d/3) + ' Elmas' });
-    else                   r.push({ day:d, icon:'💰', reward:'coins',    amount: d * 50,  label: (d*50) + ' Coin' });
-  }
-  return r;
-})();
-
-/* Aktif ay ödüllerini döndür (önce KV cache'e bak, sonra default) */
-var _cachedMonthlyRewards = null;
-var _cachedMonthlyKey     = null;
-
-function getMonthKey() {
-  var now = new Date(Date.now() + 3 * 3600000);
-  return now.toISOString().slice(0, 7); /* YYYY-MM */
-}
-
-async function loadMonthlyRewards() {
-  var key = getMonthKey();
-  if (_cachedMonthlyKey === key && _cachedMonthlyRewards) return _cachedMonthlyRewards;
-  try {
-    var r = await workerGet('monthly-rewards', { month: key });
-    if (r && r.rewards && r.rewards.length >= 28) {
-      _cachedMonthlyRewards = r.rewards;
-      _cachedMonthlyKey = key;
-      return r.rewards;
-    }
-  } catch(e) {}
-  _cachedMonthlyRewards = DEFAULT_MONTHLY_REWARDS;
-  _cachedMonthlyKey = key;
-  return DEFAULT_MONTHLY_REWARDS;
-}
-
-function getLoginRewards() {
-  return _cachedMonthlyRewards || DEFAULT_MONTHLY_REWARDS;
-}
-
-/* Bugün ayın kaçıncı günü (1-30) */
-function getTodayDayOfMonth() {
-  var now = new Date(Date.now() + 3 * 3600000);
-  return now.getDate(); /* 1-31 */
-}
-
-/* LOGIN_REWARDS geriye uyumluluk */
-var LOGIN_REWARDS = DEFAULT_MONTHLY_REWARDS;
+/* Günlük giriş ödülleri (15 günlük döngü) */
+var LOGIN_REWARDS = [
+  { day:1,  icon:'💰', reward:'coins',    amount:100,  label:'100 Coin' },
+  { day:2,  icon:'💎', reward:'diamonds', amount:5,    label:'5 Elmas' },
+  { day:3,  icon:'💰', reward:'coins',    amount:200,  label:'200 Coin' },
+  { day:4,  icon:'🃏', reward:'joker',    jkey:'skip', amount:1, label:'1 Atlama Jokeri' },
+  { day:5,  icon:'💰', reward:'coins',    amount:300,  label:'300 Coin' },
+  { day:6,  icon:'💎', reward:'diamonds', amount:10,   label:'10 Elmas' },
+  { day:7,  icon:'🎁', reward:'coins',    amount:500,  label:'500 Coin + 5 Elmas', bonus:{diamonds:5} },
+  { day:8,  icon:'💰', reward:'coins',    amount:200,  label:'200 Coin' },
+  { day:9,  icon:'💎', reward:'diamonds', amount:8,    label:'8 Elmas' },
+  { day:10, icon:'🃏', reward:'joker',    jkey:'double', amount:2, label:'2 2x Jokeri' },
+  { day:11, icon:'💰', reward:'coins',    amount:400,  label:'400 Coin' },
+  { day:12, icon:'💎', reward:'diamonds', amount:15,   label:'15 Elmas' },
+  { day:13, icon:'🃏', reward:'joker',    jkey:'hint', amount:3, label:'3 İpucu Jokeri' },
+  { day:14, icon:'💰', reward:'coins',    amount:600,  label:'600 Coin' },
+  { day:15, icon:'🏆', reward:'coins',    amount:1000, label:'1000 Coin + 20 Elmas', bonus:{diamonds:20} },
+];
 
 /* Para güncelle ve göstergeni yenile */
 function updateWallet() {
@@ -5041,8 +5060,6 @@ function buyShopItem(itemId) {
   updateWallet();
   renderShopTab(document.querySelector('.shop-tab.active')?.id?.replace('shopTab','').toLowerCase() || 'jokers');
   updateJokerUI();
-  /* Cloud'a kaydet — inventory değişti */
-  setTimeout(function() { try { saveProfileToCloud(); } catch(e) {} }, 300);
 }
 
 /* Ekipman takt */
@@ -5065,8 +5082,6 @@ function equipItem(itemId, type) {
   }
   saveState();
   renderShopTab(type + 's');
-  /* Cloud'a kaydet */
-  setTimeout(function() { try { saveProfileToCloud(); } catch(e) {} }, 300);
 }
 
 /* Joker UI'ını güncelle (oyun içi) */
@@ -5139,25 +5154,30 @@ function useHintJoker() {
 }
 
 /* ── Günlük Giriş Sistemi ── */
-/* Günün anahtarını döndür — UTC+3 (Türkiye) gece 00:00'a göre */
-function getTodayKey() {
-  var now = new Date(Date.now() + 3 * 3600000); /* UTC+3 */
-  return now.toISOString().slice(0, 10); /* YYYY-MM-DD */
+function getDailyLoginKey() {
+  /* UTC+3 Türkiye saatiyle gün — gece 00:00'da yenilenir */
+  var d = new Date(Date.now() + 3 * 3600000);
+  return d.toISOString().slice(0, 10);
 }
 
 function checkDailyLogin() {
   if (!authUser) return;
-  var today = getTodayKey();
+  var today = getDailyLoginKey();
   var lastLogin = state.lastLoginDate;
-  if (lastLogin === today) return; /* Bugün zaten giriş yapıldı — tekrar alma */
+  /* Bugün zaten ödül alındıysa gösterme */
+  if (lastLogin === today) return;
+  /* claimedRewards kontrolü — cloud tabanlı */
+  var claimedKey = 'dailyReward_' + today;
+  if (localStorage.getItem(claimedKey) === authUser.uid) return;
 
   /* Seriyi hesapla */
-  var yesterdayTs = Date.now() + 3 * 3600000 - 86400000;
-  var yesterday = new Date(yesterdayTs).toISOString().slice(0, 10);
+  var d = new Date(Date.now() + 3*3600000);
+  var yd = new Date(d - 86400000);
+  var yesterday = yd.toISOString().slice(0, 10);
   if (lastLogin === yesterday) {
     state.loginStreak = (state.loginStreak || 0) + 1;
   } else {
-    state.loginStreak = 1; /* Seri koptu */
+    state.loginStreak = 1;
   }
 
   state.lastLoginDate = today;
@@ -5169,109 +5189,90 @@ function checkDailyLogin() {
 }
 
 async function showDailyLoginModal() {
-  var rewards = await loadMonthlyRewards();
-  var todayDay = getTodayDayOfMonth(); /* 1-30 */
-  var todayR = rewards[Math.min(todayDay - 1, rewards.length - 1)];
+  var streak = state.loginStreak || 1;
+  /* Aylık takvimden ödülleri yükle — yoksa varsayılan */
+  var rewards = LOGIN_REWARDS;
+  try {
+    var now = new Date(Date.now() + 3*3600000);
+    var mKey = now.toISOString().slice(0,7);
+    var calR = await workerGet('monthly-rewards', { month: mKey });
+    if (calR && calR.rewards && calR.rewards.length >= 28) rewards = calR.rewards;
+  } catch(e) {}
 
-  /* 7 günlük pencere — önceki 2 gün + bugün + sonraki 4 gün */
-  var windowStart = Math.max(1, todayDay - 2);
-  var windowDays = [];
-  for (var i = windowStart; i <= Math.min(windowStart + 6, rewards.length); i++) {
-    windowDays.push(i);
-  }
+  var todayDay = new Date(Date.now() + 3*3600000).getDate(); /* 1-31 */
+  var todayIdx = Math.min(todayDay - 1, rewards.length - 1);
+  var todayR = rewards[todayIdx];
+
+  /* 15 günlük pencere — önceki hafta + bu hafta + sonraki hafta */
+  var windowStart = Math.max(0, todayIdx - 3);
+  var windowEnd   = Math.min(rewards.length - 1, windowStart + 13);
+  var windowRewards = rewards.slice(windowStart, windowEnd + 1);
 
   var modal = document.createElement('div');
   modal.id = 'loginRewardModal';
-  modal.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(8,11,18,0.95);display:flex;align-items:center;justify-content:center;backdrop-filter:blur(20px);padding:16px';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(8,11,18,0.97);display:flex;align-items:flex-end;justify-content:center;backdrop-filter:blur(20px)';
 
-  var html =
-    '<div style="width:100%;max-width:380px;background:#0d1117;border:1px solid rgba(255,215,0,0.25);border-radius:24px;padding:24px 20px;text-align:center">' +
-    '<div style="font-size:13px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">🎁 Günlük Giriş Ödülü</div>' +
-    '<div style="font-size:22px;font-weight:900;font-family:var(--font-head);color:#ffd700;margin-bottom:2px">' + todayDay + '. Gün</div>' +
-    '<div style="font-size:11px;color:var(--muted);margin-bottom:16px">' + getMonthKey().replace('-', ' / ') + ' takvimi</div>' +
-    /* 7 günlük pencere */
-    '<div style="display:flex;gap:4px;margin-bottom:16px;justify-content:center">' +
-    windowDays.map(function(d) {
-      var r = rewards[d - 1];
-      if (!r) return '';
-      var st = d < todayDay ? 'claimed' : d === todayDay ? 'today' : 'locked';
-      return '<div class="login-day ' + st + '" style="flex:1;min-width:0">' +
-        '<div style="font-size:8px;font-weight:700;color:var(--muted)">' + d + '</div>' +
-        '<div style="font-size:16px">' + r.icon + '</div>' +
+  /* FC Mobile tarzı grid */
+  var gridHtml = '<div class="fc-cal-grid" style="grid-template-columns:repeat(7,1fr)">' +
+    windowRewards.map(function(r, i) {
+      var realIdx = windowStart + i;
+      var realDay = realIdx + 1;
+      var isPast  = realDay < todayDay;
+      var isToday = realDay === todayDay;
+      var cls = isPast ? 'past' : isToday ? 'today' : 'future';
+      return '<div class="fc-cal-card ' + cls + '">' +
+        '<div class="fc-cal-day-num" style="color:' + (isToday ? 'var(--neon)' : 'var(--muted)') + '">' + realDay + '</div>' +
+        '<div class="fc-cal-icon">' + (r.icon || '💰') + '</div>' +
+        '<div class="fc-cal-label">' + (r.label || '').split('+')[0].trim().slice(0,9) + '</div>' +
+        (isPast ? '' : isToday ? '<button class="fc-cal-claim-btn" onclick="claimDailyLogin()">🎁 AL</button>' : '<div class="fc-cal-lock">🔒</div>') +
       '</div>';
     }).join('') +
-    '</div>' +
-    /* Bugünkü ödül */
-    '<div style="background:rgba(255,215,0,0.08);border:1px solid rgba(255,215,0,0.25);border-radius:16px;padding:14px;margin-bottom:16px">' +
-      '<div style="font-size:36px;margin-bottom:6px">' + todayR.icon + '</div>' +
-      '<div style="font-size:17px;font-weight:900;color:#ffd700">' + todayR.label + '</div>' +
-    '</div>' +
-    /* Tüm ayı gör butonu */
-    '<div style="display:flex;gap:8px;margin-bottom:12px">' +
-      '<button onclick="showFullMonthCalendar()" style="flex:1;padding:10px;border-radius:12px;background:rgba(255,255,255,0.05);border:1px solid var(--border);color:var(--muted);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">📅 Tüm Ay</button>' +
-      '<button onclick="claimDailyLogin()" id="claimLoginBtn" style="flex:2;padding:10px;border-radius:12px;background:linear-gradient(135deg,#ffd700,#f59e0b);border:none;color:#000;font-size:14px;font-weight:900;cursor:pointer;font-family:inherit">🎁 AL</button>' +
-    '</div>' +
   '</div>';
 
-  modal.innerHTML = html;
-  modal.addEventListener('click', function(e) { if (e.target === modal) modal.remove(); });
-  document.body.appendChild(modal);
-}
-
-/* Tüm aylık takvim görünümü */
-async function showFullMonthCalendar() {
-  var rewards = await loadMonthlyRewards();
-  var todayDay = getTodayDayOfMonth();
-  var monthKey = getMonthKey();
-
-  var existing = document.getElementById('monthCalendarModal');
-  if (existing) existing.remove();
-
-  var modal = document.createElement('div');
-  modal.id = 'monthCalendarModal';
-  modal.style.cssText = 'position:fixed;inset:0;z-index:100000;background:rgba(8,11,18,0.97);display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(20px)';
-
-  var grid = rewards.map(function(r, i) {
-    var d = i + 1;
-    var st = d < todayDay ? 'claimed' : d === todayDay ? 'today' : 'locked';
-    var borderColor = d === todayDay ? 'rgba(255,215,0,0.6)' : d < todayDay ? 'rgba(0,255,136,0.2)' : 'rgba(255,255,255,0.07)';
-    var bg = d === todayDay ? 'rgba(255,215,0,0.1)' : d < todayDay ? 'rgba(0,255,136,0.04)' : 'rgba(255,255,255,0.02)';
-    return '<div style="background:' + bg + ';border:1px solid ' + borderColor + ';border-radius:10px;padding:8px 4px;text-align:center">' +
-      '<div style="font-size:9px;font-weight:800;color:' + (d === todayDay ? '#ffd700' : 'var(--muted)') + ';margin-bottom:2px">' + d + '</div>' +
-      '<div style="font-size:18px;' + (d < todayDay ? 'opacity:0.4' : '') + '">' + (d < todayDay ? '✅' : r.icon) + '</div>' +
-      '<div style="font-size:8px;color:var(--muted);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + r.label.split('+')[0].trim() + '</div>' +
-    '</div>';
-  }).join('');
-
   modal.innerHTML =
-    '<div style="width:100%;max-width:520px;background:#0d1117;border:1px solid rgba(255,215,0,0.2);border-radius:24px;padding:20px;max-height:90vh;overflow-y:auto">' +
-      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">' +
+    '<div style="width:100%;max-width:500px;background:#0d1117;border-top:1px solid rgba(255,215,0,0.2);border-radius:24px 24px 0 0;padding:20px 16px 36px;animation:slideUp 0.3s ease">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">' +
         '<div>' +
-          '<div style="font-family:var(--font-head);font-size:18px;font-weight:900;color:#ffd700">📅 ' + monthKey.replace('-', '. Ay / ') + '</div>' +
-          '<div style="font-size:11px;color:var(--muted);margin-top:2px">Aylık Giriş Takvimi</div>' +
+          '<div style="font-family:var(--font-head);font-size:18px;font-weight:900;color:#ffd700">🎁 Günlük Giriş</div>' +
+          '<div style="font-size:11px;color:var(--muted);margin-top:2px">Üst üste ' + streak + ' gün — ' + todayDay + '. gün ödülü</div>' +
         '</div>' +
-        '<button onclick="document.getElementById(\'monthCalendarModal\').remove()" style="width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,0.06);border:1px solid var(--border);color:var(--muted);font-size:16px;cursor:pointer">✕</button>' +
+        '<button onclick="var m=document.getElementById(\'loginRewardModal\');if(m)m.remove()" style="width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,0.06);border:none;color:var(--muted);font-size:16px;cursor:pointer">✕</button>' +
       '</div>' +
-      '<div style="display:grid;grid-template-columns:repeat(6,1fr);gap:6px">' + grid + '</div>' +
+      gridHtml +
+      '<div style="margin-top:14px;background:rgba(255,215,0,0.07);border:1px solid rgba(255,215,0,0.2);border-radius:14px;padding:14px;text-align:center">' +
+        '<div style="font-size:32px;margin-bottom:6px">' + todayR.icon + '</div>' +
+        '<div style="font-size:16px;font-weight:900;color:#ffd700">' + todayR.label + '</div>' +
+        '<div style="font-size:11px;color:var(--muted);margin-top:3px">Bugünkü ödülün</div>' +
+      '</div>' +
     '</div>';
 
-  modal.addEventListener('click', function(e) { if (e.target === modal) modal.remove(); });
+  modal.addEventListener('click', function(e){ if(e.target===modal) modal.remove(); });
   document.body.appendChild(modal);
+  window._dailyLoginRewards = rewards;
 }
 
 function claimDailyLogin() {
-  var btn = document.getElementById('claimLoginBtn');
-  if (btn) { btn.disabled = true; btn.textContent = '⏳'; }
+  var today = getDailyLoginKey();
+  var claimedKey = 'dailyReward_' + today;
+  /* Çift alma engeli */
+  if (localStorage.getItem(claimedKey) === (authUser && authUser.uid)) {
+    showToast('✅ Bugünkü ödülünü zaten aldın!', '#ffd700');
+    var modal = document.getElementById('loginRewardModal');
+    if (modal) modal.remove();
+    return;
+  }
 
-  var rewards = getLoginRewards();
-  var todayDay = getTodayDayOfMonth();
-  var reward = rewards[Math.min(todayDay - 1, rewards.length - 1)];
+  var rewards = window._dailyLoginRewards || LOGIN_REWARDS;
+  var todayDay = new Date(Date.now() + 3*3600000).getDate();
+  var todayIdx = Math.min(todayDay - 1, rewards.length - 1);
+  var reward = rewards[todayIdx];
 
+  /* Ödülü ver */
   if (reward.reward === 'coins')    addCoins(reward.amount);
   if (reward.reward === 'diamonds') addDiamonds(reward.amount);
   if (reward.reward === 'joker') {
     if (!state.jokers) state.jokers = { skip:0, hint:0, freeze:0, double:0 };
-    state.jokers[reward.jkey] = (state.jokers[reward.jkey] || 0) + reward.amount;
+    state.jokers[reward.jkey] = (state.jokers[reward.jkey] || 0) + (reward.amount || 1);
     saveState();
   }
   if (reward.bonus) {
@@ -5279,16 +5280,21 @@ function claimDailyLogin() {
     if (reward.bonus.coins)    addCoins(reward.bonus.coins);
   }
 
+  /* Alındı olarak işaretle — UID ile */
+  try { localStorage.setItem(claimedKey, authUser ? authUser.uid : 'guest'); } catch(e) {}
+
   updateJokerUI();
   spawnConfetti(30);
-  showToast('🎁 Günlük ödül: ' + reward.label, '#ffd700');
+  showToast('🎁 Günlük ödül alındı: ' + reward.label, '#ffd700');
 
   var modal = document.getElementById('loginRewardModal');
   if (modal) modal.remove();
-  var calModal = document.getElementById('monthCalendarModal');
-  if (calModal) calModal.remove();
 
+  /* Worker'a claim kaydını gönder */
   if (authUser && authUser.token) {
+    try {
+      workerPost('daily-reward-claim', { token: authUser.token, day: todayDay, rewardKey: today }).catch(function(){});
+    } catch(e) {}
     setTimeout(function() { try { saveProfileToCloud(); } catch(e) {} }, 500);
   }
 }
@@ -8817,18 +8823,22 @@ try {
   });
 
   fbAuth.onAuthStateChanged(async (user) => {
+    try { /* v3.2: Tüm auth bloğu try-catch içinde — donma engeli */
+
     if (!user) {
-      /* Firebase oturumu kapandı */
       if (authUser) {
-        /* Gerçekten çıkış yapıldıysa temizle */
         authUser = null;
         localStorage.removeItem('mathgame_auth_v1');
-        updateProfileBtn(); /* loginBtnHeader'ı güncelle */
+        updateProfileBtn();
       }
-      /* authUser zaten null ise — init sırasındaki ilk null callback, yoksay */
       return;
     }
-    const name = sanitizeUsername(user.displayName || user.email.split('@')[0]);
+
+    /* Kullanıcı adı temizle — hata varsa güvenli fallback */
+    var name;
+    try {
+      name = sanitizeUsername(user.displayName || (user.email ? user.email.split('@')[0] : 'Oyuncu'));
+    } catch(e) { name = 'Oyuncu' + user.uid.slice(0,4); }
 
     /* Worker'a firebase-login gönder — token yenile */
     var workerToken = null;
@@ -8838,6 +8848,11 @@ try {
       if (fbLoginResult && fbLoginResult.ok) {
         workerToken  = fbLoginResult.token;
         workerHasPin = fbLoginResult.hasPin === true;
+      } else if (fbLoginResult && fbLoginResult.error === 'Oturum gecersiz') {
+        /* Token geçersiz — güvenli çıkış */
+        console.warn('v3.2: Token geçersiz, çıkış yapılıyor');
+        try { await fbAuth.signOut(); } catch(e2) {}
+        return;
       }
     } catch(e) { console.warn('Worker firebase-login hata:', e); }
 
@@ -8886,9 +8901,7 @@ try {
     /* Okunmamış mesaj listener'ı başlat */
     try { startUnreadListener(); } catch(e) {}
     try { startOnlinePing(); } catch(e) {}
-    try { loadAnnouncements(); } catch(e) {}
-    /* Aylık takvimi önceden yükle — cache'e al */
-    try { loadMonthlyRewards(); } catch(e) {}
+    try { loadAnnouncement(); } catch(e) {}
 
     /* PIN ayarlanmamışsa belirleme ekranı göster */
     if (workerToken && !workerHasPin) {
@@ -8898,6 +8911,13 @@ try {
           openPinModal('set');
         }, 1000);
       }
+    }
+
+    } catch(authErr) {
+      /* v3.2: Auth bloğu içinde beklenmedik hata — güvenli çıkış */
+      console.error('v3.2 auth hata:', authErr);
+      try { showToast('Oturum hatası. Tekrar giriş yapın.', '#ef4444'); } catch(e) {}
+      try { fbAuth.signOut(); } catch(e) {}
     }
   });
 } catch(e) {
@@ -12228,80 +12248,33 @@ function fabGo(target) {
    ══════════════════════════════════════════════════════ */
 
 var _currentAnnouncement = null;
-var _allAnnouncements = [];
 
-/* Birden fazla duyuruyu yükle ve göster */
-async function loadAnnouncements() {
+async function loadAnnouncement() {
   try {
-    var anns = await workerGet('announcements', {});
-    if (!anns || !Array.isArray(anns) || anns.length === 0) {
-      /* Eski tek duyuru endpoint'ine fallback */
-      var single = await workerGet('announcement', {});
-      anns = (single && single.active && (single.title || single.text)) ? [single] : [];
-    }
-    _allAnnouncements = anns.filter(function(ann) {
-      if (!ann || !ann.active) return false;
-      if (!ann.title && !ann.text) return false;
-      if (ann.id && localStorage.getItem('ann_closed_' + ann.id)) return false;
-      return true;
-    });
-    if (_allAnnouncements.length === 0) {
-      var banner = document.getElementById('announcementBanner');
-      if (banner) banner.style.display = 'none';
-      return;
-    }
-    /* İlk aktif duyuruyu göster */
-    _currentAnnouncement = _allAnnouncements[0];
-    showAnnouncement(_currentAnnouncement, _allAnnouncements.length);
+    var ann = await workerGet('announcement', {});
+    if (!ann || !ann.active) return;
+    if (!ann.title && !ann.text) return; /* boş duyuru gösterme */
+    if (ann.id && localStorage.getItem('ann_closed_' + ann.id)) return; /* kapatılmış */
+    _currentAnnouncement = ann;
+    showAnnouncement(ann);
   } catch(e) {}
 }
 
-/* Geriye uyumluluk */
-async function loadAnnouncement() {
-  return loadAnnouncements();
-}
-
-function showAnnouncement(ann, totalCount) {
+function showAnnouncement(ann) {
   var banner = document.getElementById('announcementBanner');
   if (!banner) return;
+
+  /* Boş duyuruyu gösterme */
   if (!ann.title && !ann.text) { banner.style.display = 'none'; return; }
-  if (ann.id && localStorage.getItem('ann_closed_' + ann.id)) {
-    /* Bu kapatılmışsa sıradakini dene */
-    var next = _allAnnouncements.find(function(a) {
-      return !localStorage.getItem('ann_closed_' + a.id);
-    });
-    if (next) { _currentAnnouncement = next; showAnnouncement(next, _allAnnouncements.length); }
-    else { banner.style.display = 'none'; }
-    return;
-  }
+
+  /* Kapatılmış mı? */
+  if (ann.id && localStorage.getItem('ann_closed_' + ann.id)) { return; }
 
   document.getElementById('annBannerIcon').textContent  = ann.icon || '📢';
   document.getElementById('annBannerTitle').textContent = ann.title || '';
   document.getElementById('annBannerText').textContent  = ann.text || '';
 
-  /* Çoklu duyuru sayacı */
-  var currentIdx = _allAnnouncements.indexOf(ann);
-  var total = totalCount || _allAnnouncements.length;
-  var counterEl = document.getElementById('annBannerCounter');
-  if (!counterEl) {
-    counterEl = document.createElement('div');
-    counterEl.id = 'annBannerCounter';
-    counterEl.style.cssText = 'display:flex;align-items:center;gap:6px;margin-top:4px';
-    var bannerBody = banner.querySelector('#annBannerTitle');
-    if (bannerBody && bannerBody.parentNode) {
-      bannerBody.parentNode.insertBefore(counterEl, bannerBody);
-    }
-  }
-  if (total > 1) {
-    counterEl.innerHTML =
-      (currentIdx > 0 ? '<button onclick="prevAnnouncement()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:0 2px">‹</button>' : '<span style="width:20px"></span>') +
-      '<span style="font-size:10px;color:var(--muted)">' + (currentIdx+1) + '/' + total + '</span>' +
-      (currentIdx < total-1 ? '<button onclick="nextAnnouncement()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:0 2px">›</button>' : '<span style="width:20px"></span>');
-    counterEl.style.display = 'flex';
-  } else {
-    counterEl.style.display = 'none';
-  }
-
+  /* Otomatik çeviri — tarayıcı diline göre */
   translateAnnouncement(ann);
 
   var pollEl = document.getElementById('annBannerPoll');
@@ -12317,8 +12290,7 @@ function showAnnouncement(ann, totalCount) {
       var btn = document.createElement('div');
       btn.style.cssText = 'padding:6px 12px;border-radius:20px;border:1px solid rgba(56,189,248,0.3);background:rgba(56,189,248,' + (myVote ? '0.2' : '0.07') + ');color:#38bdf8;font-size:12px;font-weight:700;cursor:pointer;min-width:80px;text-align:center';
       btn.innerHTML = escapeHtml(opt) + (totalVotes > 0 ? ' <span style="opacity:0.6;font-size:10px">%' + pct + '</span>' : '');
-      var _annIdPoll = ann.id;
-      btn.onclick = (function(idx, aid) { return function() { voteAnnouncement(idx, aid); }; })(i, _annIdPoll);
+      btn.onclick = function() { voteAnnouncement(i); };
       pollEl.appendChild(btn);
     });
   }
@@ -12346,9 +12318,8 @@ function showAnnouncement(ann, totalCount) {
       var sendBtn = document.createElement('button');
       sendBtn.textContent = 'Gönder';
       sendBtn.style.cssText = 'padding:8px 16px;border-radius:10px;border:none;background:var(--neon);color:#030608;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;white-space:nowrap';
-      var _annIdTP = ann.id;
-      sendBtn.onclick = function() { submitTextPoll(inp.value, _annIdTP); };
-      inp.addEventListener('keydown', function(e) { if (e.key === 'Enter') { submitTextPoll(inp.value, _annIdTP); } });
+      sendBtn.onclick = function() { submitTextPoll(inp.value); };
+      inp.addEventListener('keydown', function(e) { if (e.key === 'Enter') { submitTextPoll(inp.value); } });
       var countDiv = document.createElement('div');
       countDiv.style.cssText = 'width:100%;font-size:10px;color:var(--muted);margin-top:2px';
       countDiv.textContent = totalAnswers + ' kişi katıldı';
@@ -12396,76 +12367,69 @@ async function translateAnnouncement(ann) {
 }
 
 function closeAnnouncement() {
-  if (_currentAnnouncement && _currentAnnouncement.id) {
+  var banner = document.getElementById('announcementBanner');
+  if (banner) { banner.style.display = 'none'; }
+  if (_currentAnnouncement) {
     localStorage.setItem('ann_closed_' + _currentAnnouncement.id, '1');
   }
-  /* Sıradaki duyuruya geç */
-  var next = _allAnnouncements.find(function(a) {
-    return a !== _currentAnnouncement && !localStorage.getItem('ann_closed_' + a.id);
-  });
-  if (next) {
-    _currentAnnouncement = next;
-    showAnnouncement(next, _allAnnouncements.length);
-  } else {
-    var banner = document.getElementById('announcementBanner');
-    if (banner) banner.style.display = 'none';
-  }
 }
 
-function nextAnnouncement() {
-  var idx = _allAnnouncements.indexOf(_currentAnnouncement);
-  if (idx < _allAnnouncements.length - 1) {
-    _currentAnnouncement = _allAnnouncements[idx + 1];
-    showAnnouncement(_currentAnnouncement, _allAnnouncements.length);
-  }
-}
-
-function prevAnnouncement() {
-  var idx = _allAnnouncements.indexOf(_currentAnnouncement);
-  if (idx > 0) {
-    _currentAnnouncement = _allAnnouncements[idx - 1];
-    showAnnouncement(_currentAnnouncement, _allAnnouncements.length);
-  }
-}
-
-async function voteAnnouncement(optionIndex, annId) {
+async function voteAnnouncement(optionIndex) {
   if (!authUser) { showToast('Oy vermek için giriş yap'); return; }
-  var id = annId || (_currentAnnouncement && _currentAnnouncement.id);
   try {
-    var r = await workerPost('admin/announcement-vote', { token: authUser.token, optionIndex, annId: id });
+    var r = await workerPost('admin/announcement-vote', { token: authUser.token, optionIndex });
     if (r && r.ok) {
-      if (_currentAnnouncement && _currentAnnouncement.id === id) {
+      if (_currentAnnouncement) {
         _currentAnnouncement.pollVotes = r.votes;
-        showAnnouncement(_currentAnnouncement, _allAnnouncements.length);
+        showAnnouncement(_currentAnnouncement);
       }
-    } else {
-      showToast('❌ ' + (r ? r.error : 'Hata'), '#ef4444');
     }
   } catch(e) {}
 }
 
 async function submitTextPoll(rawText, annId) {
-  if (!authUser) { showToast('Cevap vermek için giriş yap'); return; }
+  if (!authUser) { showToast('Cevap vermek için giriş yap', '#f59e0b'); return; }
   var text = (rawText || '').trim();
-  if (!text) { showToast('Bir şeyler yaz!', '#f59e0b'); return; }
-  var id = annId || (_currentAnnouncement && _currentAnnouncement.id);
-  var ann = _allAnnouncements.find(function(a) { return a.id === id; }) || _currentAnnouncement;
+  if (!text || text.length < 1) { showToast('Bir şeyler yaz!', '#f59e0b'); return; }
+
+  /* annId'yi bul — parametre > _currentAnnouncement > ilk text-poll */
+  var id = annId
+    || (_currentAnnouncement && _currentAnnouncement.id)
+    || (window._allAnnouncements && window._allAnnouncements.length &&
+        (window._allAnnouncements.find(function(a){ return a.type==='text-poll' && a.active; }) || {}).id);
+  var ann = (_currentAnnouncement && _currentAnnouncement.id === id)
+    ? _currentAnnouncement
+    : (window._allAnnouncements || []).find(function(a){ return a.id===id; }) || _currentAnnouncement;
+
   var maxLen = (ann && ann.textPollMaxLen) || 60;
   if (text.length > maxLen) { showToast('Çok uzun! Maks ' + maxLen + ' karakter', '#f59e0b'); return; }
+
+  /* Gönder butonunu devre dışı bırak */
+  var sendBtns = document.querySelectorAll('[onclick*="submitTextPoll"]');
+  sendBtns.forEach(function(b){ b.disabled=true; b.textContent='⏳'; });
+
   try {
-    var r = await workerPost('admin/text-poll-submit', { token: authUser.token, text: text, annId: id });
+    var payload = { token: authUser.token, text: text };
+    if (id) payload.annId = id;
+    var r = await workerPost('admin/text-poll-submit', payload);
     if (r && r.ok) {
-      showToast('✅ Cevabın alındı!', '#00ff88');
+      showToast('✅ Cevabın alındı! ' + (r.totalAnswers ? r.totalAnswers + ' katılımcı' : ''), '#00ff88');
+      /* Lokal güncelle */
       if (ann) {
         if (!ann.textAnswers) ann.textAnswers = {};
         ann.textAnswers[authUser.uid] = text;
-        showAnnouncement(ann, _allAnnouncements.length);
+        try { showAnnouncement(ann, (window._allAnnouncements || []).length); } catch(e) {}
       }
+      /* Butonları kaldır */
+      sendBtns.forEach(function(b){ try { b.closest('[style*="flex-wrap"]').innerHTML = '<div style="font-size:12px;color:var(--neon);padding:8px">✅ Cevabın kaydedildi: <strong>' + escapeHtml(text) + '</strong></div>'; } catch(e) { b.disabled=true; b.textContent='✅ Gönderildi'; } });
     } else {
-      showToast('❌ ' + (r ? r.error : 'Gönderilemedi'), '#ef4444');
+      var errMsg = (r && r.error) ? r.error : 'Gönderilemedi';
+      showToast('❌ ' + errMsg, '#ef4444');
+      sendBtns.forEach(function(b){ b.disabled=false; b.textContent='Gönder'; });
     }
   } catch(e) {
-    showToast('Bağlantı hatası', '#ef4444');
+    showToast('Bağlantı hatası: ' + e.message, '#ef4444');
+    sendBtns.forEach(function(b){ b.disabled=false; b.textContent='Gönder'; });
   }
 }
 
@@ -12490,139 +12454,30 @@ async function adminPublishAnnouncement() {
   if (type === 'text-poll') {
     textPollMaxLen = parseInt(document.getElementById('annTextMaxLen')?.value || '60') || 60;
   }
-  var r = await adminCall('admin/announcement-add', {
+  var r = await adminCall('admin/announcement-set', {
     icon, title, text, type, pollOptions,
     textPollMaxLen: type === 'text-poll' ? textPollMaxLen : undefined,
     expiresHours: expires || null
   });
   if (r && r.ok) {
-    adminLog('✅ Duyuru/Anket yayınlandı (ID: ' + (r.id || '?') + ')');
-    /* Formu temizle */
-    ['annIcon','annTitle','annText','annExpires','annOpt1','annOpt2','annOpt3'].forEach(function(id) {
-      var el = document.getElementById(id);
-      if (el) { el.value = id === 'annIcon' ? '📢' : ''; }
-    });
-    adminLoadAnnouncements();
-    loadAnnouncements();
-  } else { adminLog('❌ ' + (r ? r.error : 'Hata')); }
+    adminLog('✅ Duyuru/Anket yayınlandı');
+    loadAnnouncement();
+  } else adminLog('❌ ' + (r ? r.error : 'Hata'));
 }
 
-async function adminLoadAnnouncements() {
-  var listEl = document.getElementById('adminAnnouncementList');
-  if (!listEl) return;
-  listEl.innerHTML = '<div style="font-size:12px;color:var(--muted)">⏳ Yükleniyor...</div>';
-  try {
-    var r = await adminCall('admin/announcement-list', {});
-    if (!r || !r.ok || !r.announcements || r.announcements.length === 0) {
-      listEl.innerHTML = '<div style="font-size:12px;color:var(--muted)">Aktif duyuru yok</div>';
-      return;
-    }
-    listEl.innerHTML = r.announcements.map(function(ann) {
-      var typeColor = ann.type === 'poll' ? '#38bdf8' : ann.type === 'text-poll' ? '#a855f7' : ann.type === 'warning' ? '#f59e0b' : 'var(--neon)';
-      var answerCount = ann.type === 'text-poll' ? Object.keys(ann.textAnswers || {}).length : Object.keys(ann.pollVotes || {}).length;
-      return '<div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px">' +
-        '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">' +
-          '<div style="flex:1;min-width:0">' +
-            '<div style="font-size:13px;font-weight:800;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + escapeHtml(ann.icon || '📢') + ' ' + escapeHtml(ann.title || '') + '</div>' +
-            '<div style="font-size:10px;color:' + typeColor + ';font-weight:700;margin-top:2px">' + (ann.type || 'info') + (answerCount > 0 ? ' · ' + answerCount + ' katılımcı' : '') + '</div>' +
-            (ann.expiresAt ? '<div style="font-size:10px;color:var(--muted)">Bitiş: ' + new Date(ann.expiresAt).toLocaleString('tr-TR') + '</div>' : '') +
-          '</div>' +
-          '<div style="display:flex;gap:4px;flex-shrink:0">' +
-            (ann.type === 'text-poll' ? '<button onclick="adminViewTextPollResultsById(\'' + ann.id + '\')" class="admin-btn" style="padding:4px 8px;font-size:10px;background:rgba(168,85,247,0.12);color:#a855f7">📊</button>' : '') +
-            '<button onclick="adminSharePollResults(\'' + ann.id + '\')" class="admin-btn admin-btn-green" style="padding:4px 8px;font-size:10px" title="Sonuçları paylaş">↗️</button>' +
-            '<button onclick="adminDeleteAnnouncement(\'' + ann.id + '\')" class="admin-btn admin-btn-red" style="padding:4px 8px;font-size:10px">🗑</button>' +
-          '</div>' +
-        '</div>' +
-      '</div>';
-    }).join('');
-  } catch(e) {
-    listEl.innerHTML = '<div style="font-size:12px;color:#ef4444">Hata: ' + e.message + '</div>';
-  }
-}
-
-async function adminDeleteAnnouncement(annId) {
-  var r = await adminCall('admin/announcement-delete', { annId });
-  if (r && r.ok) {
-    adminLog('✅ Duyuru silindi');
-    adminLoadAnnouncements();
-    loadAnnouncements();
-  } else { adminLog('❌ ' + (r ? r.error : 'Hata')); }
-}
-
-/* Anket sonuçlarını paylaş (duyuru olarak yayınla) */
-async function adminSharePollResults(annId) {
-  var r = await adminCall('admin/announcement-list', {});
-  if (!r || !r.ok) { adminLog('❌ Duyuru listesi alınamadı'); return; }
-  var ann = (r.announcements || []).find(function(a) { return a.id === annId; });
-  if (!ann) { adminLog('❌ Duyuru bulunamadı'); return; }
-
-  var resultText = '';
-  if (ann.type === 'text-poll') {
-    var answers = Object.values(ann.textAnswers || {});
-    var freq = {};
-    answers.forEach(function(a) {
-      var k = a.toLowerCase().trim();
-      freq[k] = (freq[k] || 0) + 1;
-    });
-    var sorted = Object.entries(freq).sort(function(a,b) { return b[1]-a[1]; }).slice(0,5);
-    resultText = answers.length + ' katılımcı. En popüler cevaplar: ' + sorted.map(function(e) { return e[0] + ' (' + e[1] + ')'; }).join(', ');
-  } else if (ann.type === 'poll') {
-    var votes = ann.pollVotes || {};
-    var total = Object.keys(votes).length;
-    resultText = total + ' oy. ' + (ann.pollOptions || []).map(function(opt, i) {
-      var cnt = Object.values(votes).filter(function(v) { return v === i; }).length;
-      var pct = total > 0 ? Math.round(cnt/total*100) : 0;
-      return opt + ': %' + pct;
-    }).join(', ');
-  }
-
-  if (!resultText) { adminLog('Paylaşılacak sonuç yok'); return; }
-
-  var pub = await adminCall('admin/announcement-add', {
-    icon: '📊',
-    title: '📊 Anket Sonuçları: ' + ann.title,
-    text: resultText,
-    type: 'info',
-    expiresHours: 48
-  });
-  if (pub && pub.ok) {
-    adminLog('✅ Sonuçlar duyuru olarak paylaşıldı');
-    adminLoadAnnouncements();
-    loadAnnouncements();
-  } else { adminLog('❌ Paylaşılamadı'); }
-}
-
-async function adminViewTextPollResultsById(annId) {
-  var r = await adminCall('admin/text-poll-results-by-id', { annId });
+/* Serbest metin anket sonuçlarını admin olarak gör */
+async function adminViewTextPollResults() {
+  var r = await adminCall('admin/text-poll-results', {});
   if (!r || !r.ok) { adminLog('❌ Sonuçlar alınamadı'); return; }
   var answers = r.answers || [];
   if (answers.length === 0) { adminLog('Henüz cevap yok'); return; }
+  /* Frekans sayımı */
   var freq = {};
-  answers.forEach(function(a) { var k = a.text.toLowerCase().trim(); freq[k] = (freq[k] || 0) + 1; });
-  var sorted = Object.entries(freq).sort(function(a,b) { return b[1]-a[1]; });
-  var box = document.getElementById('adminLog');
-  var html = '<div style="background:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.2);border-radius:10px;padding:10px;margin-top:6px">' +
-    '<div style="font-size:11px;font-weight:800;color:#a855f7;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">📊 ' + r.question + ' (' + answers.length + ' cevap)</div>';
-  sorted.slice(0, 20).forEach(function(entry) {
-    var pct = Math.round(entry[1] / answers.length * 100);
-    html += '<div style="margin-bottom:4px;font-size:12px;display:flex;justify-content:space-between">' +
-      '<span style="color:var(--text)">' + escapeHtml(entry[0]) + '</span>' +
-      '<span style="color:#a855f7;font-weight:700">' + entry[1] + ' (%' + pct + ')</span>' +
-    '</div>';
+  answers.forEach(function(a) {
+    var key = a.text.toLowerCase().trim();
+    freq[key] = (freq[key] || 0) + 1;
   });
-  html += '</div>';
-  if (box) { box.innerHTML += html; box.scrollTop = box.scrollHeight; }
-}
-
-async function adminViewTextPollResults() {
-  adminLog('⏳ Aktif serbest anket aranıyor...');
-  var r = await adminCall('admin/text-poll-results', {});
-  if (!r || !r.ok) { adminLog('❌ ' + (r ? r.error : 'Hata')); return; }
-  var answers = r.answers || [];
-  if (answers.length === 0) { adminLog('Henüz cevap yok'); return; }
-  var freq = {};
-  answers.forEach(function(a) { var k = a.text.toLowerCase().trim(); freq[k] = (freq[k] || 0) + 1; });
-  var sorted = Object.entries(freq).sort(function(a,b) { return b[1]-a[1]; });
+  var sorted = Object.entries(freq).sort(function(a, b) { return b[1] - a[1]; });
   var box = document.getElementById('adminLog');
   var html = '<div style="background:rgba(99,179,237,0.08);border:1px solid rgba(99,179,237,0.2);border-radius:10px;padding:10px;margin-top:8px">' +
     '<div style="font-size:11px;font-weight:800;color:#63b3ed;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">📊 Anket Sonuçları (' + answers.length + ' cevap)</div>';
@@ -12631,7 +12486,7 @@ async function adminViewTextPollResults() {
     html += '<div style="margin-bottom:6px">' +
       '<div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:2px">' +
         '<span style="color:var(--text);font-weight:600">' + escapeHtml(entry[0]) + '</span>' +
-        '<span style="color:#63b3ed;font-weight:700">' + entry[1] + ' (%' + pct + ')</span>' +
+        '<span style="color:#63b3ed;font-weight:700">' + entry[1] + ' (' + pct + '%)</span>' +
       '</div>' +
       '<div style="height:4px;background:rgba(255,255,255,0.06);border-radius:4px">' +
         '<div style="height:100%;width:' + pct + '%;background:#63b3ed;border-radius:4px"></div>' +
@@ -12639,64 +12494,6 @@ async function adminViewTextPollResults() {
   });
   html += '</div>';
   if (box) { box.innerHTML += html; box.scrollTop = box.scrollHeight; }
-}
-
-/* ── Aylık Takvim Admin Fonksiyonları ─── */
-async function adminUpdateCalendarDay() {
-  var day = parseInt(document.getElementById('calEditDay')?.value || '0');
-  if (!day || day < 1 || day > 30) { adminLog('❌ Geçerli bir gün gir (1-30)'); return; }
-  var rewardType = document.getElementById('calEditRewardType')?.value || 'coins';
-  var amount = parseInt(document.getElementById('calEditAmount')?.value || '0');
-  var icon = (document.getElementById('calEditIcon')?.value || '').trim();
-  var label = (document.getElementById('calEditLabel')?.value || '').trim();
-  if (!amount || amount < 1) { adminLog('❌ Miktar gerekli'); return; }
-
-  var reward = {};
-  if (rewardType === 'coins')    { reward = { reward:'coins', amount, icon: icon||'💰', label: label||(amount+' Coin') }; }
-  else if (rewardType === 'diamonds') { reward = { reward:'diamonds', amount, icon: icon||'💎', label: label||(amount+' Elmas') }; }
-  else {
-    var jkey = rewardType.replace('joker_','');
-    reward = { reward:'joker', jkey, amount, icon: icon||'🃏', label: label||(amount+' '+jkey+' Jokeri') };
-  }
-  reward.day = day;
-
-  var r = await adminCall('admin/calendar-update-day', { day, reward, month: getMonthKey() });
-  if (r && r.ok) {
-    adminLog('✅ ' + day + '. gün güncellendi');
-    document.getElementById('adminCalendarResult').textContent = '✅ ' + day + '. gün: ' + reward.label;
-    /* Cache'i temizle — yeniden yüklensin */
-    _cachedMonthlyRewards = null;
-    _cachedMonthlyKey = null;
-  } else { adminLog('❌ ' + (r ? r.error : 'Hata')); }
-}
-
-async function adminViewCalendar() {
-  _cachedMonthlyRewards = null;
-  var rewards = await loadMonthlyRewards();
-  var todayDay = getTodayDayOfMonth();
-  adminLog('📅 ' + getMonthKey() + ' takvimi:\n' +
-    rewards.map(function(r) {
-      return (r.day === todayDay ? '→ ' : '  ') + r.day + '. gün: ' + r.icon + ' ' + r.label;
-    }).slice(0, 30).join('\n')
-  );
-}
-
-async function adminResetCalendar() {
-  var r = await adminCall('admin/calendar-reset', { month: getMonthKey() });
-  if (r && r.ok) {
-    adminLog('✅ Takvim varsayılana sıfırlandı');
-    _cachedMonthlyRewards = null;
-    _cachedMonthlyKey = null;
-  } else { adminLog('❌ ' + (r ? r.error : 'Hata')); }
-}
-
-async function adminClearAnnouncement() {
-  var r = await adminCall('admin/announcement-clear', {});
-  if (r && r.ok) {
-    adminLog('✅ Tüm duyurular kaldırıldı');
-    adminLoadAnnouncements();
-    loadAnnouncements();
-  } else { adminLog('❌ ' + (r ? r.error : 'Hata')); }
 }
 
 async function adminClearAnnouncement() {
@@ -13690,80 +13487,42 @@ document.addEventListener('pointerdown', e => {
 
       <!-- SİSTEM -->
       <div class="admin-tab-panel" id="adminTab-system">
-
-        <!-- DUYURU / ANKET — Çoklu destek -->
-        <div class="admin-section-title">📢 Duyurular & Anketler</div>
-        <div style="background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:14px;padding:12px;margin-bottom:8px">
-          <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--muted2);margin-bottom:10px">Yeni Duyuru / Anket</div>
-          <div style="display:flex;flex-direction:column;gap:6px">
-            <div style="display:flex;gap:6px">
-              <input class="admin-input" id="annIcon" placeholder="📢" style="width:48px;flex:none">
-              <input class="admin-input" id="annTitle" placeholder="Başlık">
-            </div>
-            <textarea id="annText" placeholder="Metin..." style="width:100%;box-sizing:border-box;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;color:#e6f7ea;font-size:13px;padding:9px 12px;font-family:inherit;resize:none;outline:none;min-height:50px"></textarea>
-            <div style="display:flex;gap:6px">
-              <select id="annType" style="flex:1;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;color:#e6f7ea;font-size:13px;padding:9px 12px;font-family:inherit;outline:none">
-                <option value="info">📢 Duyuru</option>
-                <option value="warning">⚠️ Uyarı</option>
-                <option value="poll">📊 Çoktan Seçmeli</option>
-                <option value="text-poll">✏️ Serbest Metin</option>
-              </select>
-              <input class="admin-input" id="annExpires" placeholder="Süre (saat)" type="number" style="width:90px;flex:none">
-            </div>
-            <div id="annPollOptions" style="display:none;flex-direction:column;gap:4px">
-              <input class="admin-input" id="annOpt1" placeholder="Seçenek 1">
-              <input class="admin-input" id="annOpt2" placeholder="Seçenek 2">
-              <input class="admin-input" id="annOpt3" placeholder="Seçenek 3 (isteğe bağlı)">
-            </div>
-            <div id="annTextPollOptions" style="display:none;flex-direction:column;gap:4px">
-              <div style="display:flex;gap:6px;align-items:center">
-                <span style="font-size:11px;color:var(--muted)">Maks karakter:</span>
-                <input class="admin-input" id="annTextMaxLen" type="number" value="60" min="10" max="200" style="width:70px">
-              </div>
-              <div style="font-size:11px;color:#f59e0b;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:8px;padding:6px 10px">
-                ⚠️ Küfür filtresi aktif. Sonuçları "Serbest Anket Sonuçları" butonuyla gör.
-              </div>
-            </div>
-            <button class="admin-btn admin-btn-green" onclick="adminPublishAnnouncement()" style="width:100%">📢 Yayınla</button>
+        <div class="admin-section-title">📢 Duyuru / Anket</div>
+        <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px">
+          <div style="display:flex;gap:6px">
+            <input class="admin-input" id="annIcon" placeholder="📢" style="width:48px;flex:none">
+            <input class="admin-input" id="annTitle" placeholder="Duyuru başlığı">
           </div>
-        </div>
-
-        <!-- Aktif duyuru listesi -->
-        <div style="margin-bottom:8px">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-            <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--muted2)">Aktif Duyurular</div>
-            <button class="admin-btn admin-btn-gray" onclick="adminLoadAnnouncements()" style="padding:4px 10px;font-size:11px">↺ Yükle</button>
-          </div>
-          <div id="adminAnnouncementList" style="display:flex;flex-direction:column;gap:6px;max-height:200px;overflow-y:auto"></div>
-        </div>
-        <button class="admin-btn admin-btn-gray" onclick="adminViewTextPollResults()" style="width:100%;margin-bottom:10px">📊 Serbest Anket Sonuçları</button>
-
-        <!-- AYLIK ÖDÜL TAKVİMİ -->
-        <div class="admin-section-title" style="margin-top:4px">📅 Aylık Ödül Takvimi</div>
-        <div style="background:rgba(255,215,0,0.04);border:1px solid rgba(255,215,0,0.15);border-radius:14px;padding:12px;margin-bottom:10px">
-          <div style="font-size:11px;color:var(--muted);margin-bottom:8px">Gün seç ve ödülü düzenle. Her ay başı otomatik sıfırlanır.</div>
-          <div style="display:flex;gap:6px;margin-bottom:8px">
-            <input class="admin-input" id="calEditDay" type="number" min="1" max="30" placeholder="Gün (1-30)" style="width:90px">
-            <select id="calEditRewardType" style="flex:1;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;color:#e6f7ea;font-size:13px;padding:9px 10px;font-family:inherit;outline:none">
-              <option value="coins">💰 Coin</option>
-              <option value="diamonds">💎 Elmas</option>
-              <option value="joker_skip">⏭️ Atlama Jokeri</option>
-              <option value="joker_hint">💡 İpucu Jokeri</option>
-              <option value="joker_double">⚡ 2x Jokeri</option>
-              <option value="joker_freeze">🧊 Dondurma Jokeri</option>
+          <textarea id="annText" placeholder="Duyuru metni..." style="width:100%;box-sizing:border-box;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;color:#e6f7ea;font-size:13px;padding:9px 12px;font-family:inherit;resize:none;outline:none;min-height:60px"></textarea>
+          <div style="display:flex;gap:6px">
+            <select id="annType" style="flex:1;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;color:#e6f7ea;font-size:13px;padding:9px 12px;font-family:inherit;outline:none">
+              <option value="info">📢 Duyuru</option>
+              <option value="warning">⚠️ Uyarı</option>
+              <option value="poll">📊 Çoktan Seçmeli Anket</option>
+              <option value="text-poll">✏️ Serbest Metin Anketi</option>
             </select>
+            <input class="admin-input" id="annExpires" placeholder="Süre (saat, boş=süresiz)" type="number" style="width:100px;flex:none">
           </div>
-          <div style="display:flex;gap:6px;margin-bottom:8px">
-            <input class="admin-input" id="calEditAmount" type="number" min="1" placeholder="Miktar" style="width:90px">
-            <input class="admin-input" id="calEditIcon" placeholder="İkon (emoji)" style="width:60px">
-            <input class="admin-input" id="calEditLabel" placeholder="Etiket (ör: 500 Coin)" style="flex:1">
+          <div id="annPollOptions" style="display:none;flex-direction:column;gap:4px">
+            <input class="admin-input" id="annOpt1" placeholder="Seçenek 1">
+            <input class="admin-input" id="annOpt2" placeholder="Seçenek 2">
+            <input class="admin-input" id="annOpt3" placeholder="Seçenek 3 (isteğe bağlı)">
+          </div>
+          <div id="annTextPollOptions" style="display:none;flex-direction:column;gap:4px">
+            <div style="font-size:11px;color:var(--muted)">Oyuncular kendi cevaplarını yazacak. Maks karakter sınırı:</div>
+            <div style="display:flex;gap:6px;align-items:center">
+              <input class="admin-input" id="annTextMaxLen" type="number" value="60" min="10" max="200" style="width:80px">
+              <span style="font-size:11px;color:var(--muted)">karakter (önerilen: 30-80)</span>
+            </div>
+            <div style="font-size:11px;color:#f59e0b;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:8px;padding:6px 10px">
+              ⚠️ Sıradan/küfürlü cevaplar worker tarafında filtrelenir. Sonuçları admin panelinden görürsün.
+            </div>
           </div>
           <div style="display:flex;gap:6px">
-            <button class="admin-btn admin-btn-green" onclick="adminUpdateCalendarDay()" style="flex:1">💾 Güncelle</button>
-            <button class="admin-btn admin-btn-gray" onclick="adminViewCalendar()" style="flex:1">📅 Tüm Takvim</button>
-            <button class="admin-btn admin-btn-red" onclick="adminResetCalendar()" style="flex:1">🔄 Sıfırla</button>
+            <button class="admin-btn admin-btn-green" onclick="adminPublishAnnouncement()" style="flex:1">📢 Yayınla</button>
+            <button class="admin-btn admin-btn-red" onclick="adminClearAnnouncement()" style="flex:1">🗑 Kaldır</button>
           </div>
-          <div id="adminCalendarResult" style="margin-top:6px;font-size:12px;color:var(--neon)"></div>
+          <button class="admin-btn admin-btn-gray" onclick="adminViewTextPollResults()" style="width:100%;margin-top:2px">📊 Serbest Anket Sonuçları</button>
         </div>
 
         <div class="admin-section-title">🎉 Event Oluştur</div>
@@ -14765,7 +14524,7 @@ async function testDiscordWebhook() {
       title: '🧮 MathGame Test Bildirimi',
       description: 'Discord entegrasyonu başarıyla çalışıyor!',
       color: 0x00ff88,
-      footer: { text: 'MathGame v3.1 — SKYDIVEX' }
+      footer: { text: 'MathGame v3.2 — SKYDIVEX' }
     }]
   });
   showToast('✅ Test mesajı Discord kanalına gönderildi', '#00ff88');
@@ -14939,6 +14698,380 @@ setTimeout(function() {
   try { updateDesktopWallet(); } catch(e) {}
   try { fetchOnlineLeaderboard(); } catch(e) {}
 }, 2000);
+
+</script>
+<!-- ════════════════════════════════════════════════════
+     v3.2 — CORE PATCH BLOĞU
+     ════════════════════════════════════════════════════ -->
+<script>
+/* ── v3.2 Cache & localStorage temizliği ────────────── */
+(function v32Init() {
+  var CURRENT_VERSION = 'v3.2';
+  var storedVersion   = localStorage.getItem('mathgame_version');
+  if (storedVersion !== CURRENT_VERSION) {
+    /* Eski cache anahtarlarını temizle */
+    var keysToRemove = [];
+    for (var i = 0; i < localStorage.length; i++) {
+      var k = localStorage.key(i);
+      if (k && (
+        k.startsWith('mathgame_groq_daily_') ||
+        k.startsWith('mathgame_groq_weekly_') ||
+        k.startsWith('ann_closed_')
+      )) { keysToRemove.push(k); }
+    }
+    keysToRemove.forEach(function(k) { try { localStorage.removeItem(k); } catch(e) {} });
+    localStorage.setItem('mathgame_version', CURRENT_VERSION);
+    console.log('[v3.2] Cache temizlendi, yeni sürüm aktif');
+  }
+})();
+
+/* ── Sağ tık engeli ─────────────────────────────────── */
+document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+
+/* ── Overscroll / pull-to-refresh engeli ────────────── */
+document.addEventListener('touchmove', function(e) {
+  if (e.touches.length === 1 && document.scrollingElement &&
+      document.scrollingElement.scrollTop === 0) {
+    e.preventDefault();
+  }
+}, { passive: false });
+
+/* ── Geri tuşu (Android PWA) ────────────────────────── */
+var _backPressCount = 0;
+var _backPressTimer = null;
+document.addEventListener('backbutton', handleBackButton);
+window.addEventListener('popstate', function(e) {
+  e.preventDefault();
+  handleBackButton();
+});
+/* History entry ekle — popstate tetiklensin */
+history.pushState({ mathgame: true }, '');
+
+function handleBackButton() {
+  /* 1. Açık modal varsa kapat */
+  var modals = ['loginRewardModal','monthCalendarModal','calEditorModal','iosGuideModal','clanInvitePage','profileFullPage','playerSearchPage'];
+  for (var i = 0; i < modals.length; i++) {
+    var el = document.getElementById(modals[i]);
+    if (el && (el.classList.contains('show') || el.style.display !== 'none')) {
+      if (el.classList.contains('show')) el.classList.remove('show');
+      else el.style.display = 'none';
+      history.pushState({ mathgame: true }, '');
+      return;
+    }
+  }
+  /* Modal class'lı açık olanlar */
+  var openModal = document.querySelector('#clanModal.show, #questModal.show, #shopModal.show, #settingsModal.show, #aboutModal.show, #publicProfileModal.show, #profileModal.show, #superAdminModal.show, #adminModal.show');
+  if (openModal) {
+    openModal.classList.remove('show');
+    try { closeModal(openModal); } catch(e) {}
+    history.pushState({ mathgame: true }, '');
+    return;
+  }
+  /* 2. Oyun ekranındaysa menüye dön */
+  var gameArea = document.getElementById('gameArea');
+  if (gameArea && gameArea.style.display !== 'none') {
+    try { pauseGame(); } catch(e) {}
+    return;
+  }
+  /* 3. Ana menüdeyse çıkış uyarısı */
+  _backPressCount++;
+  if (_backPressCount >= 2) {
+    /* İkinci kez basıldı — çıkış */
+    if (typeof AndroidInterface !== 'undefined') {
+      AndroidInterface.exitApp();
+    }
+    return;
+  }
+  showToast('Çıkmak için tekrar basın', '#f59e0b');
+  clearTimeout(_backPressTimer);
+  _backPressTimer = setTimeout(function() { _backPressCount = 0; }, 2000);
+  history.pushState({ mathgame: true }, '');
+}
+
+/* ── PWA Install — Tam düzeltme ─────────────────────── */
+var _deferredInstallPrompt = null;
+var _pwaInstalled = false;
+
+window.addEventListener('beforeinstallprompt', function(e) {
+  e.preventDefault();
+  _deferredInstallPrompt = e;
+  /* Tüm install butonlarını göster */
+  document.querySelectorAll('.pwa-install-btn').forEach(function(b) {
+    b.style.opacity = '1';
+    b.style.pointerEvents = 'auto';
+  });
+  console.log('[PWA] beforeinstallprompt yakalandı ✅');
+});
+
+window.addEventListener('appinstalled', function() {
+  _pwaInstalled = true;
+  _deferredInstallPrompt = null;
+  showToast('✅ MathGame ana ekrana eklendi!', '#00ff88');
+});
+
+window.installPWA = function() {
+  /* Zaten standalone */
+  if (window.matchMedia('(display-mode: standalone)').matches || _pwaInstalled) {
+    showToast('✅ Uygulama zaten yüklü!', '#00ff88');
+    return;
+  }
+  /* Native prompt — Android Chrome */
+  if (_deferredInstallPrompt) {
+    _deferredInstallPrompt.prompt();
+    _deferredInstallPrompt.userChoice.then(function(r) {
+      if (r.outcome === 'accepted') showToast('✅ Ana ekrana ekleniyor...', '#00ff88');
+      _deferredInstallPrompt = null;
+    }).catch(function(){});
+    return;
+  }
+  /* iOS */
+  var ua = navigator.userAgent.toLowerCase();
+  if (/iphone|ipad|ipod/.test(ua)) { showIOSGuide(); return; }
+  /* Diğer — menü rehberi */
+  var msg = /samsung/.test(ua) ? 'Samsung Browser: Menü → Ana ekrana ekle'
+    : /firefox/.test(ua) ? 'Firefox: Menü → Sayfayı yükle'
+    : 'Tarayıcı menüsünden (⋮ veya ...) "Ana Ekrana Ekle" seç';
+  showToast('📱 ' + msg, '#a855f7');
+};
+
+function showIOSGuide() {
+  var ex = document.getElementById('iosGuideModal');
+  if (ex) { ex.remove(); return; }
+  var m = document.createElement('div');
+  m.id = 'iosGuideModal';
+  m.style.cssText = 'position:fixed;inset:0;z-index:99998;background:rgba(0,0,0,0.9);display:flex;align-items:flex-end;justify-content:center;backdrop-filter:blur(20px)';
+  var steps = [
+    ['⬆️',"Safari'de alttaki <strong style=\"color:#38bdf8\">Paylaş</strong> butonuna bas"],
+    ['📌','<strong style="color:#38bdf8">Ana Ekrana Ekle</strong> seçeneğini seç'],
+    ['✅','<strong style="color:var(--neon)">Ekle</strong> butonuna bas — tamamdır!'],
+  ];
+  m.innerHTML = "<div style=\"width:100%;max-width:460px;background:#0d1117;border-radius:24px 24px 0 0;padding:28px 20px 40px;animation:slideUp 0.3s ease\">" +
+    "<div style=\"display:flex;justify-content:space-between;align-items:center;margin-bottom:20px\">" +
+      "<div style=\"font-family:var(--font-head);font-size:18px;font-weight:900\">🍎 iOS\'a Ekle</div>" +
+      "<button onclick=\"document.getElementById(\'iosGuideModal\').remove()\" style=\"width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,0.08);border:none;color:var(--muted);cursor:pointer;font-size:14px\">✕</button>" +
+    "</div>" +
+    steps.map(function(s,i) {
+      return '<div style="display:flex;gap:12px;align-items:center;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:12px;margin-bottom:10px">' +
+        '<div style="width:36px;height:36px;border-radius:10px;background:rgba(56,189,248,0.15);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">' + (i+1) + '</div>' +
+        '<div><div style="font-size:14px;font-weight:700;margin-bottom:2px">' + s[0] + '</div><div style="font-size:12px;color:var(--muted)">' + s[1] + '</div></div>' +
+      '</div>';
+    }).join('') +
+    '<div style="font-size:11px;color:var(--muted2);text-align:center">⚠️ Sadece Safari\'de çalışır</div>' +
+  '</div>';
+  m.addEventListener('click', function(e){ if(e.target===m) m.remove(); });
+  document.body.appendChild(m);
+}
+
+/* ── Performans / Animasyon Ayarları ────────────────── */
+function setAnimScale(scale) {
+  state.animScale = scale;
+  saveState();
+  var ids = { 0:'animBtn0', 0.5:'animBtn05', 1:'animBtn1' };
+  Object.keys(ids).forEach(function(k) {
+    var btn = document.getElementById(ids[k]);
+    if (!btn) return;
+    var active = parseFloat(k) === scale;
+    btn.style.border = active ? '2px solid var(--neon)' : '1px solid var(--border)';
+    btn.style.background = active ? 'rgba(0,255,136,0.08)' : 'var(--glass)';
+    btn.style.color = active ? 'var(--neon)' : 'var(--muted)';
+    btn.style.fontWeight = active ? '800' : '700';
+  });
+  var label = document.getElementById('animScaleLabel');
+  if (label) label.textContent = scale === 0 ? 'Kapalı' : scale + 'x';
+  /* CSS değişkeni */
+  document.documentElement.style.setProperty('--anim-scale', String(scale));
+  document.documentElement.style.setProperty('--transition-dur', scale === 0 ? '0.001ms' : (0.3 / scale) + 's');
+  if (scale === 0) {
+    document.documentElement.style.setProperty('--anim-scale', '0.001');
+  }
+  showToast('✅ Animasyon: ' + (scale===0?'Kapalı':scale+'x'), '#00ff88');
+}
+
+function setLowPerf(on) {
+  state.lowPerf = on;
+  saveState();
+  if (on) document.body.classList.add('low-perf');
+  else    document.body.classList.remove('low-perf');
+  var toggle = document.getElementById('lowPerfToggle');
+  if (toggle) toggle.checked = on;
+}
+
+/* Ayarlar açılınca senkronize et */
+(function() {
+  var _origOpen = typeof openSettingsModal === 'function' ? openSettingsModal : null;
+  if (_origOpen) {
+    openSettingsModal = function() {
+      _origOpen.apply(this, arguments);
+      setTimeout(function() {
+        /* Animasyon ölçeği */
+        var sc = state.animScale !== undefined ? state.animScale : 1;
+        setAnimScale(sc);
+        /* Low perf */
+        var lpt = document.getElementById('lowPerfToggle');
+        if (lpt) lpt.checked = !!state.lowPerf;
+        /* Konfeti */
+        var ct = document.getElementById('confettiToggle');
+        if (ct) ct.checked = !state.confettiOff;
+      }, 80);
+    };
+  }
+  /* Başlangıçta uygula */
+  setTimeout(function() {
+    if (state.lowPerf) setLowPerf(true);
+    if (state.animScale !== undefined) setAnimScale(state.animScale);
+  }, 600);
+})();
+
+/* spawnConfetti override — konfetti kapalıysa engelle */
+(function() {
+  var _orig = typeof spawnConfetti === 'function' ? spawnConfetti : null;
+  if (_orig) {
+    spawnConfetti = function(n) {
+      if (state.confettiOff || state.lowPerf) return;
+      var sc = state.animScale !== undefined ? state.animScale : 1;
+      if (sc === 0) return;
+      _orig(Math.round((n||20) * Math.min(sc, 1)));
+    };
+  }
+})();
+
+/* ── Admin Takvim Editörü — Görsel + Popup ────────────── */
+function adminOpenCalendarEditor() {
+  var ex = document.getElementById('calEditorModal');
+  if (ex) { ex.remove(); return; }
+
+  var now = new Date(Date.now() + 3*3600000);
+  var year = now.getFullYear();
+  var month = now.getMonth();
+  var todayDay = now.getDate();
+  var monthKey = now.toISOString().slice(0,7);
+  var monthNames = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
+  var monthLabel = monthNames[month] + ' ' + year;
+
+  var daysInMonth = new Date(year, month+1, 0).getDate();
+  var firstDay = (new Date(year, month, 1).getDay() + 6) % 7; /* Pazartesi=0 */
+
+  var rewards = window._cachedMonthlyRewards || window.DEFAULT_MONTHLY_REWARDS || [];
+  for (var fi = rewards.length; fi < 31; fi++) {
+    rewards.push({ day: fi+1, icon:'💰', reward:'coins', amount:(fi+1)*50, label:((fi+1)*50)+' Coin' });
+  }
+
+  /* Grid HTML */
+  var cells = '';
+  for (var bl = 0; bl < firstDay; bl++) cells += '<div></div>';
+  for (var d = 1; d <= daysInMonth; d++) {
+    var r = rewards[d-1] || { icon:'💰', label:'-' };
+    var isPast = d < todayDay, isToday = d === todayDay;
+    var cls = isPast ? 'past' : isToday ? 'today' : 'future';
+    var dCopy = d;
+    cells += '<div class="fc-cal-card ' + cls + ' admin-editable" onclick="adminCalDayPopup(' + dCopy + ')">' +
+      '<div class="fc-cal-day-num" style="color:' + (isToday?'var(--neon)':'var(--muted)') + '">' + d + '</div>' +
+      '<div class="fc-cal-icon">' + (r.icon||'💰') + '</div>' +
+      '<div class="fc-cal-label">' + (r.label||'').split('+')[0].trim().slice(0,8) + '</div>' +
+    '</div>';
+  }
+
+  var m = document.createElement('div');
+  m.id = 'calEditorModal';
+  m.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(4,6,12,0.97);display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(20px)';
+  m.innerHTML =
+    '<div style="width:100%;max-width:480px;background:#0d1117;border:1px solid rgba(255,215,0,0.2);border-radius:20px;padding:18px 14px;max-height:90vh;overflow-y:auto">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">' +
+        '<div style="font-family:var(--font-head);font-size:16px;font-weight:900;color:#ffd700">📅 ' + monthLabel + ' Takvimi</div>' +
+        '<button onclick="document.getElementById(\'calEditorModal\').remove()" style="width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,0.06);border:none;color:var(--muted);cursor:pointer;font-size:14px">✕</button>' +
+      '</div>' +
+      '<div style="font-size:11px;color:var(--muted);background:rgba(0,255,136,0.06);border:1px solid rgba(0,255,136,0.15);border-radius:8px;padding:6px 10px;margin-bottom:10px">💡 Herhangi bir güne dokun → ödülü düzenle</div>' +
+      '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:8px">' +
+        ['Pzt','Sal','Çar','Per','Cum','Cmt','Paz'].map(function(d){ return '<div style="font-size:8px;font-weight:800;color:var(--muted2);text-align:center;padding:3px 0">' + d + '</div>'; }).join('') +
+      '</div>' +
+      '<div class="fc-cal-grid" style="gap:3px">' + cells + '</div>' +
+    '</div>';
+
+  m.addEventListener('click', function(e){ if(e.target===m) m.remove(); });
+  document.body.appendChild(m);
+  window._calEditorMonth = monthKey;
+  window._calEditorRewards = rewards.slice();
+}
+
+function adminCalDayPopup(day) {
+  var ex = document.getElementById('calDayPopup');
+  if (ex) ex.remove();
+  var rewards = window._calEditorRewards || [];
+  var r = rewards[day-1] || { reward:'coins', amount:day*50, icon:'💰', label:(day*50)+' Coin' };
+
+  var popup = document.createElement('div');
+  popup.id = 'calDayPopup';
+  popup.className = 'cal-day-popup';
+  popup.innerHTML =
+    '<div class="cal-day-popup-card">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">' +
+        '<div style="font-family:var(--font-head);font-size:16px;font-weight:900;color:#ffd700">✏️ ' + day + '. Gün</div>' +
+        '<button onclick="document.getElementById(\'calDayPopup\').remove()" style="width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,0.06);border:none;color:var(--muted);cursor:pointer;font-size:14px">✕</button>' +
+      '</div>' +
+      '<div style="display:flex;flex-direction:column;gap:10px">' +
+        '<div style="display:flex;gap:8px">' +
+          '<input id="calPopIcon" class="admin-input" value="' + (r.icon||'💰') + '" placeholder="İkon" style="width:50px;flex:none;text-align:center;font-size:18px">' +
+          '<select id="calPopType" style="flex:1;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:13px;padding:8px;font-family:inherit" onchange="calPopUpdateLabel()">' +
+            '<option value="coins"' + (r.reward==='coins'?' selected':'') + '>💰 Coin</option>' +
+            '<option value="diamonds"' + (r.reward==='diamonds'?' selected':'') + '>💎 Elmas</option>' +
+            '<option value="joker_skip"' + (r.jkey==='skip'?' selected':'') + '>⏭️ Atlama Jokeri</option>' +
+            '<option value="joker_hint"' + (r.jkey==='hint'?' selected':'') + '>💡 İpucu Jokeri</option>' +
+            '<option value="joker_double"' + (r.jkey==='double'?' selected':'') + '>⚡ 2x Jokeri</option>' +
+            '<option value="joker_freeze"' + (r.jkey==='freeze'?' selected':'') + '>🧊 Dondurma</option>' +
+          '</select>' +
+        '</div>' +
+        '<div style="display:flex;gap:8px">' +
+          '<input id="calPopAmount" type="number" class="admin-input" value="' + (r.amount||day*50) + '" placeholder="Miktar" style="width:90px;flex:none">' +
+          '<input id="calPopLabel" class="admin-input" value="' + (r.label||'').replace(/"/g,"&quot;") + '" placeholder="Etiket" style="flex:1">' +
+        '</div>' +
+        '<div style="display:flex;gap:8px">' +
+          '<button onclick="calPopSave(' + day + ')" class="btn" style="flex:1;padding:11px">💾 Kaydet</button>' +
+          '<button onclick="document.getElementById(\'calDayPopup\').remove()" class="btn ghost" style="flex:1;padding:11px">İptal</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  popup.addEventListener('click', function(e){ if(e.target===popup) popup.remove(); });
+  document.body.appendChild(popup);
+}
+
+function calPopUpdateLabel() {
+  var type = document.getElementById('calPopType').value;
+  var amt  = document.getElementById('calPopAmount').value || '?';
+  var map  = { coins:amt+' Coin', diamonds:amt+' Elmas', joker_skip:amt+' Atlama Jokeri', joker_hint:amt+' İpucu Jokeri', joker_double:amt+' 2x Jokeri', joker_freeze:amt+' Dondurma' };
+  var el   = document.getElementById('calPopLabel');
+  if (el) el.value = map[type] || amt + ' ödül';
+}
+
+async function calPopSave(day) {
+  var icon   = (document.getElementById('calPopIcon').value || '').trim() || '💰';
+  var type   = document.getElementById('calPopType').value;
+  var amount = parseInt(document.getElementById('calPopAmount').value || '0');
+  var label  = (document.getElementById('calPopLabel').value || '').trim();
+  if (!amount || amount < 1) { showToast('Miktar gerekli', '#f59e0b'); return; }
+
+  var reward = { day:day, icon:icon, label:label||(amount+' ödül') };
+  if (type==='coins')         { reward.reward='coins';    reward.amount=amount; }
+  else if (type==='diamonds') { reward.reward='diamonds'; reward.amount=amount; }
+  else                        { reward.reward='joker'; reward.jkey=type.replace('joker_',''); reward.amount=amount; }
+
+  var monthKey = window._calEditorMonth || (new Date(Date.now()+3*3600000)).toISOString().slice(0,7);
+  var r = await adminCall('admin/calendar-update-day', { day:day, reward:reward, month:monthKey });
+  if (r && r.ok) {
+    showToast('✅ ' + day + '. gün güncellendi!', '#00ff88');
+    if (window._calEditorRewards) window._calEditorRewards[day-1] = reward;
+    if (window._cachedMonthlyRewards) window._cachedMonthlyRewards[day-1] = reward;
+    window._cachedMonthlyKey = null;
+    document.getElementById('calDayPopup').remove();
+    /* Takvimi yenile */
+    adminOpenCalendarEditor();
+  } else {
+    showToast('❌ ' + (r?r.error:'Hata'), '#ef4444');
+  }
+}
+
+/* Admin paneli "Takvim Düzenle" butonunu bağla */
+window.adminViewCalendar = adminOpenCalendarEditor;
+
 </script>
 </body>
 </html>
