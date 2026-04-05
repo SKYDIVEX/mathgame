@@ -14728,14 +14728,6 @@ setTimeout(function() {
 /* ── Sağ tık engeli ─────────────────────────────────── */
 document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
 
-/* ── Overscroll / pull-to-refresh engeli ────────────── */
-document.addEventListener('touchmove', function(e) {
-  if (e.touches.length === 1 && document.scrollingElement &&
-      document.scrollingElement.scrollTop === 0) {
-    e.preventDefault();
-  }
-}, { passive: false });
-
 /* ── Geri tuşu (Android PWA) ────────────────────────── */
 var _backPressCount = 0;
 var _backPressTimer = null;
