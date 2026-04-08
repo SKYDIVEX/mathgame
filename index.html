@@ -14729,11 +14729,21 @@ setTimeout(function() {
 document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
 
 /* ── Overscroll / pull-to-refresh engeli ────────────── */
+/* Sadece scroll edilebilir eleman yoksa engelle — normal kaydırmayı KORU */
 document.addEventListener('touchmove', function(e) {
-  if (e.touches.length === 1 && document.scrollingElement &&
-      document.scrollingElement.scrollTop === 0) {
-    e.preventDefault();
+  /* Dokunulan veya üst elementlerden biri scroll edilebiliyorsa izin ver */
+  var el = e.target;
+  while (el && el !== document.body) {
+    var style = window.getComputedStyle(el);
+    var overflow = style.overflowY;
+    var isScrollable = (overflow === 'auto' || overflow === 'scroll');
+    if (isScrollable && el.scrollHeight > el.clientHeight) { return; }
+    el = el.parentElement;
   }
+  /* Body'nin kendisi scroll edilebiliyorsa izin ver */
+  if (document.scrollingElement && document.scrollingElement.scrollHeight > window.innerHeight) { return; }
+  /* Gerçekten scroll edilecek yer yoksa engelle (pull-to-refresh) */
+  if (e.touches.length === 1) { e.preventDefault(); }
 }, { passive: false });
 
 /* ── Geri tuşu (Android PWA) ────────────────────────── */
