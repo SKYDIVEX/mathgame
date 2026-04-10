@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
-<title>MathGame — v3.2 — SKYDIVEX</title>
+<title>MathGame — v3.5 — SKYDIVEX</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#080b12">
 <meta name="mobile-web-app-capable" content="yes">
@@ -17,7 +17,7 @@
 <script>
 /* Kritik global değişkenler — en başta tanımla */
 var WORKER_URL = 'https://mathgame.enesseker2113.workers.dev';
-var APP_VERSION = 'v3.2';
+var APP_VERSION = 'v3.5';
 
 /* ── Service Worker kaydı ─────────────────────────────── */
 if ('serviceWorker' in navigator) {
@@ -79,7 +79,7 @@ window.onerror = function(msg, src, line, col, err) {
 
 <style>
 /* ═══════════════════════════════════════════════════════
-   MathGame CSS — v3.2 SKYDIVEX
+   MathGame CSS — v3.5 SKYDIVEX
    BUTON BÜYÜME: transform KULLANILMIYOR, ASLA
    ═══════════════════════════════════════════════════════ */
 
@@ -430,6 +430,64 @@ input, textarea, select {
   .desktop-main { display: contents; }
   .desktop-right-panel { display: none; }
   .desktop-only { display: none !important; }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   LANDSCAPE (YATAY) MOD — Side-by-Side Oyun Düzeni
+   Telefon yatay çevrilince oyun alanı iki sütuna bölünür:
+   Sol → oyuncu statları  |  Sağ → soru + şıklar
+   ══════════════════════════════════════════════════════════════ */
+@media (orientation: landscape) and (max-height: 500px) {
+  body { overflow-y: auto; }
+
+  #gameArea {
+    display: grid !important;
+    grid-template-columns: 170px 1fr;
+    gap: 0 10px;
+    align-items: start;
+    padding: 8px 10px !important;
+    margin-top: 4px !important;
+  }
+  #gameArea .topbar { display: none !important; }
+
+  #landscapeStatsPanel {
+    display: flex !important;
+    flex-direction: column;
+    gap: 7px;
+    grid-column: 1;
+    grid-row: 1 / 8;
+    position: sticky;
+    top: 0;
+    background: var(--glass);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 10px 9px;
+    align-self: start;
+  }
+
+  #questionBlock  { grid-column: 2; grid-row: 1; }
+  #resultMsg      { grid-column: 2; grid-row: 2; min-height: 20px; }
+  #jokerBar       { grid-column: 2; grid-row: 3; }
+  #gameArea > div[style*="margin-top:10px"] { grid-column: 2; grid-row: 4; }
+  #gameArea hr, #gameArea h3, #board { display: none !important; }
+
+  #questionText       { font-size: 16px !important; margin-bottom: 6px !important; }
+  #qTimerWrap         { height: 3px !important; margin: 5px 0 !important; }
+  #qTimerTxt          { font-size: 10px !important; }
+  #fbkBtn             { display: none !important; }
+  .absurd-choice      { padding: 7px 10px !important; font-size: 13px !important; }
+  .input              { padding: 9px 11px !important; font-size: 15px !important; }
+
+  /* Landscape stat panel içi */
+  .ls-label  { font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:.7px; color:var(--muted2); }
+  .ls-val    { font-size:17px; font-weight:900; color:var(--text); line-height:1.1; }
+  .ls-div    { height:1px; background:var(--border); margin:3px 0; }
+  .ls-jrow   { display:flex; flex-wrap:wrap; gap:3px; margin-top:2px; }
+  .ls-jbtn   { flex:1; min-width:32px; padding:4px 3px; border-radius:7px;
+               background:var(--glass2); border:1px solid var(--border);
+               color:var(--text); font-size:13px; cursor:pointer; text-align:center;
+               font-family:inherit; }
+  .ls-jbtn:disabled { opacity:.3; cursor:not-allowed; }
 }
 
 /* ── Oyuncu Arama Sayfası ─────────────────────────────── */
@@ -3046,22 +3104,16 @@ input, textarea, select {
         <span>Oturumu Kapat</span>
       </button>
 
-      <a id="pmDiscordBtn" href="#" onclick="connectDiscordOAuth(event)"
-        style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:14px;
-               background:linear-gradient(135deg,rgba(88,101,242,0.13),rgba(71,82,196,0.20));
-               border:1.5px solid rgba(88,101,242,0.38);text-decoration:none;
-               margin-bottom:20px;transition:background .2s,border-color .2s;cursor:pointer"
-        onmouseover="this.style.background='linear-gradient(135deg,rgba(88,101,242,0.24),rgba(71,82,196,0.30))';this.style.borderColor='rgba(88,101,242,0.65)'"
-        onmouseout="this.style.background='linear-gradient(135deg,rgba(88,101,242,0.13),rgba(71,82,196,0.20))';this.style.borderColor='rgba(88,101,242,0.38)'">
-        <svg width="22" height="17" viewBox="0 0 127.14 96.36" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0">
-          <path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.25,105.25,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74S96.23,46,96.12,53,91.08,65.69,84.69,65.69Z" fill="#5865F2"/>
-        </svg>
-        <div style="flex:1;min-width:0">
-          <div style="font-size:13px;font-weight:700;color:#c0c7ff">Discord ile Bağlan</div>
-          <div style="font-size:11px;color:rgba(148,155,255,0.72);margin-top:1px">OAuth2 · Hesabını Discord'a bağla</div>
-        </div>
-        <span style="font-size:16px;color:rgba(88,101,242,0.55);flex-shrink:0">›</span>
-      </a>
+      <button class="pm-action-btn" id="pmDiscordBtn" onclick="connectDiscordOAuth()"
+        style="margin-bottom:20px;background:linear-gradient(135deg,rgba(88,101,242,0.13),rgba(71,82,196,0.20));border-color:rgba(88,101,242,0.38)">
+        <span class="pm-btn-icon">
+          <svg width="18" height="14" viewBox="0 0 127.14 96.36" fill="none">
+            <path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.25,105.25,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74S96.23,46,96.12,53,91.08,65.69,84.69,65.69Z" fill="#5865F2"/>
+          </svg>
+        </span>
+        <span id="pmDiscordLabel">Discord ile Bağlan</span>
+        <span style="margin-left:auto;font-size:10px;opacity:0.6">→</span>
+      </button>
     </div>
   </div>
 </div>
@@ -3183,7 +3235,7 @@ input, textarea, select {
 
 <!-- Sol Sidebar (sadece masaüstünde) -->
 <div class="desktop-sidebar">
-  <div class="desktop-sidebar-logo">🧮 <span>Math</span>Game <span style="font-size:11px;color:var(--muted);font-weight:400">v3.2</span></div>
+  <div class="desktop-sidebar-logo">🧮 <span>Math</span>Game <span style="font-size:11px;color:var(--muted);font-weight:400">v3.5</span></div>
   <div style="padding:8px 8px 0">
     <div class="desktop-sidebar-section">Oyun</div>
     <a class="desktop-nav-item active" onclick="desktopNavTo('home')">
@@ -3387,25 +3439,6 @@ input, textarea, select {
       </div>
     </div>
 
-    <!-- Discord Sunucu Butonu -->
-    <a href="https://discord.gg/SVe4jn5S" target="_blank" rel="noopener noreferrer"
-      style="display:flex;align-items:center;gap:12px;padding:13px 16px;border-radius:16px;
-             background:linear-gradient(135deg,rgba(88,101,242,0.15) 0%,rgba(71,82,196,0.20) 100%);
-             border:1.5px solid rgba(88,101,242,0.40);text-decoration:none;margin-bottom:10px;
-             transition:border-color .2s,background .2s,transform .2s,box-shadow .2s;
-             box-shadow:0 2px 16px rgba(88,101,242,0.10)"
-      onmouseover="this.style.background='linear-gradient(135deg,rgba(88,101,242,0.26) 0%,rgba(71,82,196,0.32) 100%)';this.style.borderColor='rgba(88,101,242,0.70)';this.style.transform='translateY(-1px)';this.style.boxShadow='0 6px 22px rgba(88,101,242,0.22)'"
-      onmouseout="this.style.background='linear-gradient(135deg,rgba(88,101,242,0.15) 0%,rgba(71,82,196,0.20) 100%)';this.style.borderColor='rgba(88,101,242,0.40)';this.style.transform='';this.style.boxShadow='0 2px 16px rgba(88,101,242,0.10)'">
-      <svg width="26" height="20" viewBox="0 0 127.14 96.36" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0">
-        <path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.25,105.25,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74S96.23,46,96.12,53,91.08,65.69,84.69,65.69Z" fill="#5865F2"/>
-      </svg>
-      <div style="flex:1;min-width:0">
-        <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:#c0c7ff;letter-spacing:.2px">Resmi Discord Sunucumuza Katıl</div>
-        <div style="font-size:11px;color:rgba(148,155,255,0.80);margin-top:2px">Etkinlikler, duyurular ve topluluk 🚀</div>
-      </div>
-      <div style="font-size:18px;color:rgba(88,101,242,0.60);font-weight:700;flex-shrink:0">›</div>
-    </a>
-
     <!-- Görevler & Mağaza & Klan hızlı erişim -->
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px">
       <button onclick="openQuestModal()" style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 8px;border-radius:14px;background:rgba(56,189,248,0.07);border:1px solid rgba(56,189,248,0.2);cursor:pointer;font-family:inherit">
@@ -3529,6 +3562,21 @@ input, textarea, select {
 
   <!-- Game area -->
   <div id="gameArea" class="card" style="margin-top:12px;display:none">
+
+    <!-- LANDSCAPE STAT PANELİ — sadece yatay modda görünür -->
+    <div id="landscapeStatsPanel" style="display:none">
+      <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--muted2);margin-bottom:6px">📊 Stat</div>
+      <div><div class="ls-label">Oyuncu</div><div class="ls-val" id="lsPlayer" style="font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">—</div></div>
+      <div class="ls-div"></div>
+      <div><div class="ls-label">Seviye</div><div class="ls-val" id="lsLevel">1</div></div>
+      <div><div class="ls-label">Puan</div><div class="ls-val" id="lsScore">0</div></div>
+      <div><div class="ls-label">Çarpan</div><div class="ls-val" id="lsMult" style="font-size:13px">1×10</div></div>
+      <div class="ls-div"></div>
+      <div><div class="ls-label">Jokerler</div><div class="ls-jrow" id="lsJokers"></div></div>
+      <div class="ls-div" id="lsClanDiv" style="display:none"></div>
+      <div id="lsClanWrap" style="display:none"><div class="ls-label">Klan</div><div class="ls-val" id="lsClan" style="font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">—</div></div>
+    </div>
+
     <div class="topbar">
       <div>
         <div class="stat">Oyuncu: <strong id="playerDisplay">—</strong></div>
@@ -3577,7 +3625,7 @@ input, textarea, select {
   <div class="card" style="padding:12px 14px;font-size:12px;color:var(--muted)">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
       <div>Geliştirici: <strong style="color:var(--neon)">SKYDIVEX</strong></div>
-      <div>Sürüm: <strong>v3.2</strong></div>
+      <div>Sürüm: <strong>v3.5</strong></div>
     </div>
     <div style="border-top:1px solid var(--border);padding-top:10px;display:flex;flex-direction:column;gap:10px">
       <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--muted2)">Katkıda Bulunanlar</div>
@@ -3641,7 +3689,7 @@ input, textarea, select {
     <div style="position:sticky;top:0;z-index:10;background:#0a0e16;display:flex;justify-content:space-between;align-items:center;padding:20px 20px 16px;border-bottom:1px solid var(--border)">
       <div>
         <div style="font-family:var(--font-head);font-size:20px;font-weight:900;color:var(--text)">⚙️ Ayarlar</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:2px">MathGame v3.2 — SKYDIVEX</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">MathGame v3.5 — SKYDIVEX</div>
       </div>
       <button id="closeSettingsModal" style="width:32px;height:32px;border-radius:50%;background:var(--glass2);border:1px solid var(--border);color:var(--muted);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
     </div>
@@ -3830,8 +3878,8 @@ input, textarea, select {
       <div style="display:flex;justify-content:space-between;align-items:flex-start">
         <div>
           <div class="about-hero-title">MathGame</div>
-          <div class="about-hero-sub">Skydivex Edition — v3.2</div>
-          <div class="about-badge">⚡ v3.2</div>
+          <div class="about-hero-sub">Skydivex Edition — v3.5</div>
+          <div class="about-badge">⚡ v3.5</div>
         </div>
         <button id="closeAboutModal" class="btn ghost" style="padding:7px 14px;font-size:13px">✕</button>
       </div>
@@ -3899,10 +3947,7 @@ input, textarea, select {
               </div>
               <span class="accordion-arrow">▼</span>
             </div>
-            <div class="accordion-body">
-              Temel soru/cevap motoru, puanlama sistemi ve giriş ekranı.
-              <div style="margin-top:10px"><a href="https://skydivex.github.io/mathgame/?version=1.0" target="_blank" style="color:var(--muted);font-size:12px;border:1px solid var(--border);border-radius:8px;padding:4px 10px;text-decoration:none">⚠️ Bu sürümü oyna (puan kaydedilmez)</a></div>
-            </div>
+            <div class="accordion-body">Temel soru/cevap motoru, puanlama sistemi ve giriş ekranı.</div>
           </div>
 
           <div class="accordion-item">
@@ -3913,10 +3958,7 @@ input, textarea, select {
               </div>
               <span class="accordion-arrow">▼</span>
             </div>
-            <div class="accordion-body">
-              Menü animasyonları, WebAudio ses efektleri, localStorage kayıt.
-              <div style="margin-top:10px"><a href="https://skydivex.github.io/mathgame/?version=1.1" target="_blank" style="color:var(--muted);font-size:12px;border:1px solid var(--border);border-radius:8px;padding:4px 10px;text-decoration:none">⚠️ Bu sürümü oyna (puan kaydedilmez)</a></div>
-            </div>
+            <div class="accordion-body">Menü animasyonları, WebAudio ses efektleri, localStorage kayıt.</div>
           </div>
 
           <div class="accordion-item">
@@ -3927,10 +3969,7 @@ input, textarea, select {
               </div>
               <span class="accordion-arrow">▼</span>
             </div>
-            <div class="accordion-body">
-              Görsel özelleştirme, operatör seçimi, liderlik tablosu iyileştirmeleri.
-              <div style="margin-top:10px"><a href="https://skydivex.github.io/mathgame/?version=1.2" target="_blank" style="color:var(--muted);font-size:12px;border:1px solid var(--border);border-radius:8px;padding:4px 10px;text-decoration:none">⚠️ Bu sürümü oyna (puan kaydedilmez)</a></div>
-            </div>
+            <div class="accordion-body">Görsel özelleştirme, operatör seçimi, liderlik tablosu iyileştirmeleri.</div>
           </div>
 
           <div class="accordion-item">
@@ -3941,10 +3980,7 @@ input, textarea, select {
               </div>
               <span class="accordion-arrow">▼</span>
             </div>
-            <div class="accordion-body">
-              Ayarlar paneli, confirm modal, navigasyon düzeltmeleri, güvenli eval.
-              <div style="margin-top:10px"><a href="https://skydivex.github.io/mathgame/?version=1.3" target="_blank" style="color:var(--muted);font-size:12px;border:1px solid var(--border);border-radius:8px;padding:4px 10px;text-decoration:none">⚠️ Bu sürümü oyna (puan kaydedilmez)</a></div>
-            </div>
+            <div class="accordion-body">Ayarlar paneli, confirm modal, navigasyon düzeltmeleri, güvenli eval.</div>
           </div>
 
           <div class="accordion-item">
@@ -3955,64 +3991,74 @@ input, textarea, select {
               </div>
               <span class="accordion-arrow">▼</span>
             </div>
-            <div class="accordion-body">
-              Absürt Mod (AI/Groq), başarı sistemi (32 rozet), günlük görevler, 5 tema, arka plan kütüphanesi, partikül &amp; konfeti, level-up ekranı, istatistik paneli.
-              <div style="margin-top:10px"><a href="https://skydivex.github.io/mathgame/?version=2.0" target="_blank" style="color:var(--muted);font-size:12px;border:1px solid var(--border);border-radius:8px;padding:4px 10px;text-decoration:none">⚠️ Bu sürümü oyna (puan kaydedilmez)</a></div>
-            </div>
+            <div class="accordion-body">Absürt Mod (AI/Groq), başarı sistemi (32 rozet), günlük görevler, 5 tema, arka plan kütüphanesi, partikül &amp; konfeti, level-up ekranı, istatistik paneli.</div>
           </div>
 
           <div class="accordion-item">
             <div class="accordion-header" onclick="toggleAccordion(this)">
               <div style="display:flex;align-items:center;gap:10px">
                 <span style="font-size:11px;font-weight:800;background:rgba(255,255,255,0.08);border-radius:8px;padding:3px 8px;color:var(--muted)">v2.1</span>
-                <span style="font-size:13px;color:var(--muted)">Online & Auth</span>
+                <span style="font-size:13px;color:var(--muted)">Online &amp; Auth</span>
               </div>
               <span class="accordion-arrow">▼</span>
             </div>
-            <div class="accordion-body">
-              Google + e-posta girişi, oyuna özel PIN sistemi, online liderlik tablosu, istatistik &amp; başarım bulut kaydı, admin paneli, artan zorluk sistemi.
-              <div style="margin-top:10px"><a href="https://skydivex.github.io/mathgame/?version=2.1" target="_blank" style="color:var(--muted);font-size:12px;border:1px solid var(--border);border-radius:8px;padding:4px 10px;text-decoration:none">⚠️ Bu sürümü oyna (puan kaydedilmez)</a></div>
-            </div>
+            <div class="accordion-body">Google + e-posta girişi, oyuna özel PIN sistemi, online liderlik tablosu, istatistik &amp; başarım bulut kaydı, admin paneli, artan zorluk sistemi.</div>
           </div>
 
           <div class="accordion-item">
             <div class="accordion-header" onclick="toggleAccordion(this)">
               <div style="display:flex;align-items:center;gap:10px">
                 <span style="font-size:11px;font-weight:800;background:rgba(255,255,255,0.08);border-radius:8px;padding:3px 8px;color:var(--muted)">v2.5</span>
-                <span style="font-size:13px;color:var(--muted)">i18n & SA</span>
+                <span style="font-size:13px;color:var(--muted)">i18n &amp; SA</span>
               </div>
               <span class="accordion-arrow">▼</span>
             </div>
-            <div class="accordion-body">
-              fb3_ token sistemi, süper admin paneli, online durum, absürt soru cache, hile önleme, GA4, i18n çoklu dil (20 dil), puan bulut senkronizasyonu, günlük giriş ödülleri.
-              <div style="margin-top:10px"><a href="https://skydivex.github.io/mathgame/?version=2.5" target="_blank" style="color:var(--muted);font-size:12px;border:1px solid var(--border);border-radius:8px;padding:4px 10px;text-decoration:none">⚠️ Bu sürümü oyna (puan kaydedilmez)</a></div>
-            </div>
+            <div class="accordion-body">fb3_ token sistemi, süper admin paneli, online durum, absürt soru cache, hile önleme, GA4, i18n çoklu dil (20 dil), puan bulut senkronizasyonu, günlük giriş ödülleri.</div>
           </div>
 
           <div class="accordion-item">
             <div class="accordion-header" onclick="toggleAccordion(this)">
               <div style="display:flex;align-items:center;gap:10px">
                 <span style="font-size:11px;font-weight:800;background:rgba(255,255,255,0.08);border-radius:8px;padding:3px 8px;color:var(--muted)">v2.6</span>
-                <span style="font-size:13px;color:var(--muted)">Ekonomi & Klan</span>
+                <span style="font-size:13px;color:var(--muted)">Ekonomi &amp; Klan</span>
               </div>
               <span class="accordion-arrow">▼</span>
             </div>
-            <div class="accordion-body">
-              Ekonomi sistemi (💰 Coin + 💎 Elmas), 4 joker türü, Mağaza, Klan sistemi, Görev modalı (100+ görev), Groq AI görev üretimi, 15 günlük giriş ödül takvimi.
-              <div style="margin-top:10px"><a href="https://skydivex.github.io/mathgame/?version=2.6" target="_blank" style="color:var(--muted);font-size:12px;border:1px solid var(--border);border-radius:8px;padding:4px 10px;text-decoration:none">⚠️ Bu sürümü oyna (puan kaydedilmez)</a></div>
+            <div class="accordion-body">Ekonomi sistemi (💰 Coin + 💎 Elmas), 4 joker türü, Mağaza, Klan sistemi, Görev modalı (100+ görev), Groq AI görev üretimi, 15 günlük giriş ödül takvimi.</div>
+          </div>
+
+          <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+              <div style="display:flex;align-items:center;gap:10px">
+                <span style="font-size:11px;font-weight:800;background:rgba(255,255,255,0.08);border-radius:8px;padding:3px 8px;color:var(--muted)">v3.1</span>
+                <span style="font-size:13px;color:var(--muted)">Masaüstü &amp; Bildirimler</span>
+              </div>
+              <span class="accordion-arrow">▼</span>
             </div>
+            <div class="accordion-body">Masaüstü tasarımı (sidebar layout), oyuncu arama sayfası (tam sayfa), Discord webhook klan entegrasyonu, klan davet linki (?clan-invite=ID), Web Push bildirimleri, APK indirme butonu, SA klan görüntüleme, RAM optimizasyonu, sürüm accordion.</div>
+          </div>
+
+          <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+              <div style="display:flex;align-items:center;gap:10px">
+                <span style="font-size:11px;font-weight:800;background:rgba(255,255,255,0.08);border-radius:8px;padding:3px 8px;color:var(--muted)">v3.2</span>
+                <span style="font-size:13px;color:var(--muted)">Discord &amp; Topluluk</span>
+              </div>
+              <span class="accordion-arrow">▼</span>
+            </div>
+            <div class="accordion-body">Discord OAuth2 entegrasyonu, resmi sunucu butonu, klan Discord linki, profil Discord bağlantısı, webhook sistemi kaldırıldı, slash komut listesi genişletildi (28 komut), yönetici izin sistemi.</div>
           </div>
 
           <div class="accordion-item" style="border-color:rgba(0,255,136,0.25)">
             <div class="accordion-header open" onclick="toggleAccordion(this)" style="background:rgba(0,255,136,0.06)">
               <div style="display:flex;align-items:center;gap:10px">
-                <span style="font-size:11px;font-weight:800;background:rgba(0,255,136,0.15);border-radius:8px;padding:3px 8px;color:var(--neon)">v3.1 ✦ Şu An</span>
-                <span style="font-size:13px;color:var(--text)">Masaüstü & Bildirimler</span>
+                <span style="font-size:11px;font-weight:800;background:rgba(0,255,136,0.15);border-radius:8px;padding:3px 8px;color:var(--neon)">v3.5 ✦ Şu An</span>
+                <span style="font-size:13px;color:var(--text)">AI Destek &amp; Klan Senkronizasyonu</span>
               </div>
               <span class="accordion-arrow" style="color:var(--neon)">▼</span>
             </div>
             <div class="accordion-body open">
-              Masaüstü tasarımı (sidebar layout), oyuncu arama sayfası (tam sayfa), Discord webhook klan entegrasyonu, klan davet linki (?clan-invite=ID), Web Push bildirimleri (site kapalıyken), APK indirme butonu, SA klan görüntüleme, RAM optimizasyonu, sürüm accordion, eksik İngilizce çeviriler tamamlandı.
+              Akıllı Destek Sistemi (FAQ KV + Groq AI + eskalasyon butonu), admin öğrenme mekanizması (bot cevabı FAQ'a kaydeder), /admin-sync-clans komutu (eski klanları Discord'a aktarır — kanal+rol+üye atama), Discord hesabı bağlandığında klan rolü otomatik atanır, Otomatik Veri Yedeği (Cron Trigger → Discord), landscape yatay ekran modu (side-by-side).
             </div>
           </div>
 
@@ -4033,7 +4079,7 @@ input, textarea, select {
 
 <script>
 /* --------------------------
-   MathGame v3.2 - Logic JS
+   MathGame v3.5 - Logic JS
    -------------------------- */
 
 /* ══════════════════════════════════════════════
@@ -5471,6 +5517,7 @@ async function renderClanTab(tab) {
     }
     var maxC = Math.max(2, Math.min(10, Math.floor(clan.members.length / 2)));
     var inviteUrl = clan.id ? (window.location.origin + window.location.pathname + '?clan-invite=' + clan.id) : null;
+    var savedWebhook = localStorage.getItem('clan_discord_webhook_' + clan.id) || '';
     el.innerHTML =
       /* Davet Linki — URL tabanlı */
       '<div style="background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:10px">' +
@@ -5484,28 +5531,18 @@ async function renderClanTab(tab) {
           : '<div style="color:var(--muted);font-size:12px">Klan ID bulunamadı</div>'
         ) +
       '</div>' +
-      /* Klan Discord Linki */
+      /* Discord Webhook */
       '<div style="background:rgba(88,101,242,0.06);border:1px solid rgba(88,101,242,0.25);border-radius:14px;padding:14px;margin-bottom:10px">' +
-        '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">' +
-          '<svg width="16" height="13" viewBox="0 0 127.14 96.36" fill="none"><path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.25,105.25,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74S96.23,46,96.12,53,91.08,65.69,84.69,65.69Z" fill="#5865F2"/></svg>' +
-          '<div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:rgba(88,101,242,0.85)">Klan Discord Linki</div>' +
+        '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">' +
+          '<div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:rgba(88,101,242,0.8)">🎮 Discord Entegrasyonu</div>' +
+          (savedWebhook ? '<span class="discord-badge connected">✓ Bağlı</span>' : '<span class="discord-badge">Bağlı değil</span>') +
         '</div>' +
-        '<div style="font-size:12px;color:var(--muted);margin-bottom:10px">Klanın için özel bir Discord sunucun varsa davet linkini buraya ekle. Üyeler bu link üzerinden sunucuna katılabilir.</div>' +
-        '<input id="clanDiscordLinkInput" class="admin-input" placeholder="https://discord.gg/..." value="' + escapeHtml(clan.discordInviteLink || '') + '" style="margin-bottom:10px;font-size:12px">' +
-        (clan.discordInviteLink
-          ? '<a href="' + escapeHtml(clan.discordInviteLink) + '" target="_blank" rel="noopener noreferrer" ' +
-              'style="display:flex;align-items:center;justify-content:center;gap:8px;padding:10px 14px;border-radius:12px;' +
-                     'background:linear-gradient(135deg,rgba(88,101,242,0.18),rgba(71,82,196,0.26));' +
-                     'border:1.5px solid rgba(88,101,242,0.45);color:#c0c7ff;text-decoration:none;' +
-                     'font-size:13px;font-weight:700;margin-bottom:10px">' +
-              '<svg width="15" height="12" viewBox="0 0 127.14 96.36" fill="none"><path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.25,105.25,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74S96.23,46,96.12,53,91.08,65.69,84.69,65.69Z" fill="#5865F2"/></svg>' +
-              'Klanın Sunucusuna Git ↗' +
-            '</a>'
-          : ''
-        ) +
-        '<button onclick="saveClanDiscordLink()" class="btn" style="width:100%;font-size:12px;' +
-          'background:linear-gradient(135deg,rgba(88,101,242,0.20),rgba(71,82,196,0.26));' +
-          'border-color:rgba(88,101,242,0.45);color:#c0c7ff">💾 Kaydet</button>' +
+        '<div style="font-size:12px;color:var(--muted);margin-bottom:8px">Discord sunucunda bir Webhook URL\'si oluştur ve yapıştır. Klan etkinlikleri (üye katılımı, puan güncellemeleri) o kanala bildirim gönderir.</div>' +
+        '<input id="discordWebhookInput" class="admin-input" placeholder="https://discord.com/api/webhooks/..." value="' + escapeHtml(savedWebhook) + '" style="margin-bottom:8px;font-size:12px">' +
+        '<div style="display:flex;gap:8px">' +
+          '<button onclick="saveDiscordWebhook()" class="btn" style="flex:1;font-size:12px">💾 Kaydet</button>' +
+          '<button onclick="testDiscordWebhook()" class="btn ghost" style="flex:1;font-size:12px">🧪 Test</button>' +
+        '</div>' +
       '</div>' +
       /* Katkıcı Seçimi */
       '<div style="background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:10px">' +
@@ -14544,55 +14581,148 @@ async function acceptClanInvite() {
   }
 }
 
-/* ── Discord Klan Linki ──────────────────────────────────── */
-async function saveClanDiscordLink() {
-  if (!_clanData || !_clanData.id) { showToast('Klan verisi bulunamadı', '#ef4444'); return; }
+/* ── Discord OAuth2 — Çalışan Popup Akışı ───────────────── */
+async function connectDiscordOAuth() {
   if (!authUser) { showToast('Önce giriş yap', '#ef4444'); return; }
-  var input = document.getElementById('clanDiscordLinkInput');
-  if (!input) { return; }
-  var link = input.value.trim();
-  if (link && !link.startsWith('https://discord.gg/') && !link.startsWith('https://discord.com/invite/')) {
-    showToast('❌ Geçersiz link. https://discord.gg/ ile başlamalı.', '#ef4444');
+  var btn = document.getElementById('pmDiscordBtn');
+  var lbl = document.getElementById('pmDiscordLabel');
+  if (authUser.discordId) {
+    showToast('✅ Discord zaten bağlı: ' + (authUser.discordUsername || authUser.discordId), '#00ff88');
     return;
   }
   try {
-    var r = await workerPost('clan/update-settings', { token: authUser.token, discordInviteLink: link });
-    if (r && r.ok) {
-      _clanData.discordInviteLink = link;
-      showToast(link ? '✅ Discord linki kaydedildi' : '🗑 Discord linki silindi', '#00ff88');
-      renderClanTab('settings');
-    } else {
-      showToast('❌ ' + (r && r.error ? r.error : 'Bağlantı hatası'), '#ef4444');
+    if (lbl) lbl.textContent = 'Bağlanıyor...';
+    if (btn) btn.disabled = true;
+    var resp = await fetch(WORKER_URL + '/discord-oauth-url');
+    if (!resp.ok) throw new Error('OAuth URL alınamadı (' + resp.status + ')');
+    var data = await resp.json();
+    if (!data || !data.url) throw new Error('DISCORD_CLIENT_ID yapılandırılmamış');
+    localStorage.setItem('discord_oauth_state', data.state || '');
+    var popup = window.open(data.url, 'discord_oauth', 'width=500,height=700,menubar=no,toolbar=no');
+    if (!popup) { window.location.href = data.url; return; }
+    function onMsg(ev) {
+      if (!ev.data || !ev.data.type) return;
+      if (ev.data.type === 'DISCORD_OAUTH_ERROR') {
+        window.removeEventListener('message', onMsg);
+        showToast('❌ Discord hata: ' + (ev.data.error || '?'), '#ef4444');
+        if (lbl) lbl.textContent = 'Discord ile Bağlan';
+        if (btn) btn.disabled = false;
+        return;
+      }
+      if (ev.data.type !== 'DISCORD_OAUTH_SUCCESS') return;
+      window.removeEventListener('message', onMsg);
+      var discordId       = ev.data.discordId;
+      var discordUsername = ev.data.discordUsername;
+      var discordAvatar   = ev.data.discordAvatar;
+      var accessToken     = ev.data.accessToken;
+      workerPost('discord-connect', {
+        token: authUser.token, discordId: discordId, discordUsername: discordUsername,
+        discordAvatar: discordAvatar, accessToken: accessToken,
+      }).then(function(r) {
+        if (r && r.ok) {
+          authUser.discordId       = discordId;
+          authUser.discordUsername = discordUsername;
+          authUser.discordAvatar   = discordAvatar;
+          if (lbl) lbl.textContent = '✅ ' + discordUsername + ' bağlı';
+          if (btn) { btn.style.borderColor = 'rgba(0,255,136,0.4)'; btn.disabled = false; }
+          showToast('✅ Discord bağlandı' + (r.clanRoleAssigned ? ' · Klan rolü atandı!' : ''), '#00ff88');
+        } else {
+          showToast('❌ ' + ((r && r.error) || 'Sunucu hatası'), '#ef4444');
+          if (lbl) lbl.textContent = 'Discord ile Bağlan';
+          if (btn) btn.disabled = false;
+        }
+      }).catch(function() {
+        showToast('❌ Sunucu bağlantı hatası', '#ef4444');
+        if (lbl) lbl.textContent = 'Discord ile Bağlan';
+        if (btn) btn.disabled = false;
+      });
     }
-  } catch(e) { showToast('❌ Bağlantı hatası', '#ef4444'); }
-}
-
-/* ── Discord OAuth2 Bağlantısı ──────────────────────────── */
-async function connectDiscordOAuth(e) {
-  if (e) { e.preventDefault(); }
-  if (!authUser) { showToast('Önce giriş yap', '#ef4444'); return; }
-  try {
-    var r = await fetch(WORKER_URL + '/discord-oauth-url');
-    if (!r.ok) { showToast('OAuth2 URL alınamadı', '#ef4444'); return; }
-    var data = await r.json();
-    if (data && data.url) {
-      localStorage.setItem('discord_oauth_state', data.state || '');
-      window.location.href = data.url;
-    } else {
-      showToast('Discord OAuth2 henüz yapılandırılmamış', '#f59e0b');
-    }
+    window.addEventListener('message', onMsg);
+    var timer = setInterval(function() {
+      if (popup.closed) {
+        clearInterval(timer);
+        window.removeEventListener('message', onMsg);
+        if (lbl && lbl.textContent === 'Bağlanıyor...') {
+          lbl.textContent = 'Discord ile Bağlan';
+          if (btn) btn.disabled = false;
+        }
+      }
+    }, 800);
   } catch(err) {
     console.warn('[Discord OAuth2]', err);
-    showToast('Bağlantı hatası', '#ef4444');
+    showToast('❌ ' + err.message, '#ef4444');
+    var l2 = document.getElementById('pmDiscordLabel');
+    var b2 = document.getElementById('pmDiscordBtn');
+    if (l2) l2.textContent = 'Discord ile Bağlan';
+    if (b2) b2.disabled = false;
   }
 }
 
-/* Eski webhook fonksiyonları — stub (geriye dönük uyumluluk) */
+function updateDiscordBtnState() {
+  var lbl = document.getElementById('pmDiscordLabel');
+  var btn = document.getElementById('pmDiscordBtn');
+  if (!lbl || !btn) return;
+  if (authUser && authUser.discordId) {
+    lbl.textContent = '✅ ' + (authUser.discordUsername || 'Discord Bağlı');
+    btn.style.borderColor = 'rgba(0,255,136,0.4)';
+  } else {
+    lbl.textContent = 'Discord ile Bağlan';
+    btn.style.borderColor = 'rgba(88,101,242,0.38)';
+  }
+  btn.disabled = false;
+}
+
+/* Eski webhook fonksiyonları — stub */
 function saveDiscordWebhook() {}
 async function testDiscordWebhook() {}
 async function sendDiscordWebhook() {}
 function notifyDiscordClanEvent() {}
 
+/* ══════════════════════════════════════════════════════════════
+   LANDSCAPE MOD — Stat Paneli Güncelleme
+   ══════════════════════════════════════════════════════════════ */
+(function() {
+  var _lsOn = false;
+  function isLS() { return window.matchMedia('(orientation:landscape) and (max-height:500px)').matches; }
+  function refreshLS() {
+    var panel = document.getElementById('landscapeStatsPanel');
+    var ga    = document.getElementById('gameArea');
+    if (!panel) return;
+    var inGame = ga && ga.style.display !== 'none';
+    if (!isLS() || !inGame) { panel.style.display = 'none'; _lsOn = false; return; }
+    panel.style.display = 'flex'; _lsOn = true;
+    var e; 
+    e = document.getElementById('lsPlayer');   if (e) e.textContent = (authUser && authUser.name) || '—';
+    e = document.getElementById('lsLevel');    if (e) e.textContent = (document.getElementById('levelUI')      || {textContent:'1'}).textContent;
+    e = document.getElementById('lsScore');    if (e) e.textContent = (document.getElementById('scoreUI')      || {textContent:'0'}).textContent;
+    e = document.getElementById('lsMult');     if (e) e.textContent = (document.getElementById('multiplierUI') || {textContent:'1×10'}).textContent;
+    var cDiv  = document.getElementById('lsClanDiv');
+    var cWrap = document.getElementById('lsClanWrap');
+    var cEl   = document.getElementById('lsClan');
+    if (typeof _clanData !== 'undefined' && _clanData && _clanData.name) {
+      if (cDiv)  cDiv.style.display = '';
+      if (cWrap) cWrap.style.display = '';
+      if (cEl)   cEl.textContent = '[' + (_clanData.tag||'?') + '] ' + _clanData.name;
+    } else {
+      if (cDiv)  cDiv.style.display = 'none';
+      if (cWrap) cWrap.style.display = 'none';
+    }
+    var jRow = document.getElementById('lsJokers');
+    if (jRow && typeof state !== 'undefined' && state && state.jokers) {
+      var defs = [{key:'skip',icon:'⏭',lbl:'Atla'},{key:'half',icon:'✂️',lbl:'50%'},{key:'double',icon:'2×',lbl:'2x'},{key:'time',icon:'⏱',lbl:'+Süre'}];
+      jRow.innerHTML = defs.map(function(d) {
+        var c = state.jokers[d.key] || 0;
+        return '<button class="ls-jbtn" title="' + d.lbl + '" ' + (c<1?'disabled':'') + ' onclick="useJoker(\'' + d.key + '\')">' + d.icon + (c>0?'<span style="font-size:8px;display:block;color:var(--neon)">'+c+'</span>':'') + '</button>';
+      }).join('');
+    }
+  }
+  window.matchMedia('(orientation:landscape)').addEventListener('change', function() { setTimeout(refreshLS,150); });
+  window.addEventListener('orientationchange', function() { setTimeout(refreshLS,200); });
+  var _origSS = window.showScreen;
+  if (typeof _origSS === 'function') { window.showScreen = function(n) { _origSS(n); setTimeout(refreshLS,100); }; }
+  setInterval(function() { if (_lsOn) refreshLS(); }, 1500);
+  window.addEventListener('load', function() { setTimeout(refreshLS,600); });
+})();
 /* ── SA — İstediği Klanı Görüntüle ──────────────────────── */
 async function saViewAnyClan() {
   var clanId = (document.getElementById('saViewClanId') || {}).value;
@@ -14760,6 +14890,24 @@ setTimeout(function() {
 
 /* ── Sağ tık engeli ─────────────────────────────────── */
 document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+
+/* ── Overscroll / pull-to-refresh engeli ────────────── */
+/* Sadece scroll edilebilir eleman yoksa engelle — normal kaydırmayı KORU */
+document.addEventListener('touchmove', function(e) {
+  /* Dokunulan veya üst elementlerden biri scroll edilebiliyorsa izin ver */
+  var el = e.target;
+  while (el && el !== document.body) {
+    var style = window.getComputedStyle(el);
+    var overflow = style.overflowY;
+    var isScrollable = (overflow === 'auto' || overflow === 'scroll');
+    if (isScrollable && el.scrollHeight > el.clientHeight) { return; }
+    el = el.parentElement;
+  }
+  /* Body'nin kendisi scroll edilebiliyorsa izin ver */
+  if (document.scrollingElement && document.scrollingElement.scrollHeight > window.innerHeight) { return; }
+  /* Gerçekten scroll edilecek yer yoksa engelle (pull-to-refresh) */
+  if (e.touches.length === 1) { e.preventDefault(); }
+}, { passive: false });
 
 /* ── Geri tuşu (Android PWA) ────────────────────────── */
 var _backPressCount = 0;
