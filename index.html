@@ -2,247 +2,749 @@
 <html lang="tr">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>MathGame — v1.2.5 — SKYDIVEX</title>
-<style>
-/* ---------------------------
-   MathGame v1.2.5 - SKYDIVEX
-   Siyah - Yeşil final tasarım
-   ---------------------------*/
-
-/* Root colors */
-:root{
-  --bg-dark:#060708;
-  --bg-mid:#0b1220;
-  --card:#071022;
-  --neon:#00ff66;
-  --muted:#9fb3b0;
-  --glass: rgba(255,255,255,0.03);
-  --accent: var(--neon);
-  --ui-radius:14px;
-  --ease: cubic-bezier(.2,.9,.25,1);
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+<title>MathGame — v3.5 — SKYDIVEX</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#080b12">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MathGame">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="apple-touch-icon" sizes="152x152" href="icon-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icon-192.png">
+<link rel="apple-touch-icon" sizes="167x167" href="icon-192.png">
+<script>
+var WORKER_URL = 'https://mathgame.enesseker2113.workers.dev';
+var APP_VERSION = 'v3.5';
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('sw.js').then(function(reg) {
+      console.log('[SW] Kayıtlı:', reg.scope);
+      window._swReg = reg;
+    }).catch(function(e) { console.warn('[SW] Kayıt hatası:', e); });
+  });
 }
-
-/* Reset */
-*{box-sizing:border-box}
-html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--bg-dark),var(--bg-mid));color:#e6f7ea;font-family:Inter,ui-sans-serif,system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale}
-a{color:inherit}
-button{font-family:inherit}
-
-/* Background layer (image + radial overlay) */
-#bgLayer{
-  position:fixed; inset:0; z-index:-3;
-  background: radial-gradient(circle at var(--mx,50%) var(--my,50%), rgba(0,255,102,0.02), transparent 18%), linear-gradient(180deg,var(--bg-dark),var(--bg-mid));
-  transition: background 360ms var(--ease), transform 250ms var(--ease), filter 300ms linear;
-  background-size: cover;
-  background-position: center center;
-}
-
-/* container */
-.app {
-  max-width:980px;
-  margin:28px auto;
-  padding:18px;
-}
-
-/* card look */
-.card {
-  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-  border:1px solid rgba(255,255,255,0.04);
-  border-radius:var(--ui-radius);
-  padding:14px;
-  box-shadow:0 10px 30px rgba(2,6,10,0.6);
-}
-
-/* header */
-.header {
-  display:flex; justify-content:space-between; align-items:center; gap:12px;
-}
-.title {
-  font-size:20px; font-weight:700; letter-spacing:0.2px;
-}
-.subtitle { color:var(--muted); font-size:13px; }
-
-/* small helper classes */
-.row{display:flex;gap:8px;align-items:center}
-.col{display:flex;flex-direction:column;gap:8px}
-.space-between{display:flex;justify-content:space-between;align-items:center}
-.center{display:flex;justify-content:center;align-items:center}
-
-/* buttons */
-.btn {
-  padding:10px 14px; border-radius:12px; border:0; cursor:pointer;
-  background:linear-gradient(180deg,var(--neon), #00d458); color:#06110b; font-weight:800;
-  box-shadow:0 8px 30px rgba(0,255,102,0.06);
-  transition: transform .12s var(--ease), box-shadow .12s var(--ease), filter .12s var(--ease);
-}
-.btn:hover{ transform:translateY(-6px) scale(1.02); box-shadow:0 20px 40px rgba(0,255,102,0.12); filter:brightness(1.02) }
-.btn:active{ transform:translateY(0) scale(.985); box-shadow:0 6px 12px rgba(0,0,0,0.6) }
-.btn.ghost { background:transparent; color:var(--neon); border:1px solid rgba(255,255,255,0.04); box-shadow:none; font-weight:700 }
-
-/* layout: left & right */
-.main-grid { display:grid; grid-template-columns: 1fr 340px; gap:14px; margin-top:12px; }
-@media (max-width:880px){ .main-grid{ grid-template-columns: 1fr; } }
-
-/* input */
-.input {
-  padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.04); background:transparent; color:inherit;
-}
-
-/* menu styles */
-#entryCard .card { display:flex; flex-direction:column; gap:10px; align-items:center; text-align:center; padding:18px }
-#entryCard input { min-width:240px }
-
-/* menu slide - visually identical to final model */
-#menuCard {
-  margin-top:14px; transform-origin:top; transition: transform .48s var(--ease), opacity .28s var(--ease); opacity:0; transform:translateY(-16px) scale(.995)
-}
-#menuCard.show { opacity:1; transform:translateY(0) scale(1) }
-
-/* leader board */
-.lb { margin-top:10px; max-height:300px; overflow:auto; }
-.lbItem { display:flex;justify-content:space-between; padding:8px; border-radius:8px; background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); margin-bottom:6px }
-
-/* game area */
-#gameArea { display:none; margin-top:14px; padding:16px; border-radius:14px; }
-.topbar { display:flex; gap:12px; justify-content:space-between; align-items:center; margin-bottom:10px; }
-.stat { font-size:13px; color:var(--muted) }
-.stat strong { color:var(--neon); font-weight:800 }
-
-/* question block */
-#questionBlock { margin-top:6px; display:flex; gap:10px; align-items:center; flex-wrap:wrap }
-#questionText { font-size:20px; font-weight:800 }
-#answerInput{ padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.04); background:transparent; color:inherit; width:160px }
-
-/* result message */
-#resultMsg { min-height:26px; margin-top:10px; font-weight:700; transition:opacity .44s ease }
-
-/* pause overlay */
-#pauseOverlay {
-  position:fixed; inset:0; display:none; z-index:60; align-items:center; justify-content:center;
-  background: rgba(1,4,6,0.45); backdrop-filter: blur(0px); transition: backdrop-filter .45s linear, opacity .35s ease;
-}
-#pauseOverlay.show { display:flex; backdrop-filter: blur(6px); }
-#pauseCard { width:360px; background:linear-gradient(180deg,#071022,#0b1626); padding:18px; border-radius:12px; border:1px solid rgba(255,255,255,0.03); transform:translateY(-24px); transition: transform .38s var(--ease), opacity .28s var(--ease) }
-#pauseOverlay.show #pauseCard { transform:translateY(0) }
-
-/* settings slide (inside pause) */
-#settingsPanel { margin-top:12px; background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); padding:12px; border-radius:10px; max-width:360px; width:100% }
-
-/* about modal - simple */
-#aboutModal {
-  position:fixed; inset:0; display:none; z-index:80; align-items:center; justify-content:center;
-  background: rgba(0,0,0,0.6);
-}
-#aboutModal.show { display:flex; }
-#aboutCard { width:720px; max-width:95%; padding:18px; border-radius:12px; background:linear-gradient(180deg,#071022,#081426); border:1px solid rgba(255,255,255,0.03) }
-
-/* version list buttons */
-.verList { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px }
-.verBtn { padding:8px 12px; border-radius:8px; background:transparent; border:1px solid rgba(255,255,255,0.04); color:var(--muted); cursor:pointer }
-.verBtn:hover { color:var(--neon); transform:translateY(-4px) }
-
-/* small screens adjustments */
-@media (max-width:720px){
-  .main-grid{ grid-template-columns: 1fr; }
-  #pauseCard { width:90%; }
-  #aboutCard { width:92%; padding:12px; }
-}
-
-/* tiny flourish */
-.signature { font-size:12px; color:var(--muted); margin-top:10px }
-</style>
+(function() {
+  try {
+    var params = new URLSearchParams(window.location.search);
+    var inviteId = params.get('clan-invite');
+    if (inviteId) { window._pendingClanInvite = inviteId; }
+  } catch(e) {}
+})();
+document.addEventListener('touchstart', function(e) { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
+var lastTouch = 0;
+document.addEventListener('touchend', function(e) { var now = Date.now(); if (now - lastTouch < 300) e.preventDefault(); lastTouch = now; }, { passive: false });
+document.addEventListener('gesturestart', function(e) { e.preventDefault(); }, { passive: false });
+window.onerror = function(msg, src, line, col, err) {
+  console.error('[MathGame Error]', msg, 'satır:', line, 'kaynak:', src);
+  try { if (typeof gtag === 'function') { gtag('event', 'exception', { description: msg + ' (satır ' + line + ', ' + (src || '').split('/').pop() + ')', fatal: false }); } } catch(e) {}
+  return false;
+};
+</script>
+<link rel="stylesheet" href="css/style.css">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-0315CE76DC"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-0315CE76DC');
+  function trackEvent(name, params) { try { if (typeof gtag === 'function') { gtag('event', name, params || {}); } } catch(e) {} }
+</script>
 </head>
 <body>
-<div id="bgLayer"></div>
 
-<div class="app">
-  <!-- Header -->
-  <div class="card header">
-    <div>
-      <div class="title">MathGame</div>
-      <div class="subtitle">Skydivex Edition — final</div>
-    </div>
-    <div class="space-between">
-      <div class="signature">© SKYDIVEX</div>
-      <div class="signature" id="miniInfo"></div>
+<div id="bgLayer"></div>
+<div id="comboDisplay"></div>
+
+<!-- ════════════════════════════════════════════════════════
+     OYUNCU ARAMA SAYFASI — Instagram/Twitter tarzı
+     ════════════════════════════════════════════════════════ -->
+<div id="playerSearchPage">
+  <div class="search-page-header">
+    <button onclick="closePlayerSearch()" style="width:36px;height:36px;border-radius:50%;background:var(--glass2);border:1px solid var(--border);color:var(--muted);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">←</button>
+    <div class="search-page-input-wrap">
+      <span class="search-page-input-icon">🔍</span>
+      <input id="playerSearchInput" class="search-page-input" placeholder="Oyuncu ara..." autocomplete="off" oninput="onPlayerSearchInput(this.value)">
     </div>
   </div>
+  <div id="playerSearchSuggestions" style="padding:12px 16px 6px">
+    <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--muted2);margin-bottom:10px">⭐ Önerilen</div>
+    <div id="playerSearchSuggestList"></div>
+  </div>
+  <div id="playerSearchResults" style="display:none"></div>
+  <div id="playerSearchEmpty" style="display:none;text-align:center;padding:60px 20px">
+    <div style="font-size:48px;margin-bottom:12px">🔍</div>
+    <div style="font-size:15px;font-weight:800;color:var(--text)">Sonuç yok</div>
+    <div style="font-size:13px;color:var(--muted);margin-top:6px">Bu isimde oyuncu bulunamadı</div>
+  </div>
+  <div id="playerSearchLoading" style="display:none;text-align:center;padding:40px">
+    <div style="font-size:28px;display:inline-block;animation:spin 0.8s linear infinite">⏳</div>
+    <div style="font-size:13px;color:var(--muted);margin-top:10px">Aranıyor...</div>
+  </div>
+</div>
 
-  <!-- Entry card (simple) -->
-  <div id="entryCard" class="card" style="margin-top:12px">
-    <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
-      <h2 style="margin:6px 0">Giriş</h2>
-      <input id="playerName" class="input" placeholder="Adın (ör. Enes)">
-      <div style="display:flex;gap:10px;margin-top:6px">
-        <button id="enterBtn" class="btn">Giriş Yap</button>
-        <button id="guestBtn" class="btn ghost">Misafir</button>
-      </div>
-      <div class="small muted" style="color:var(--muted);margin-top:8px">Sadece adını yaz — hesabın lokal olarak kaydedilecek.</div>
+<!-- ════════════════════════════════════════════════════════
+     TAM SAYFA PROFİL — modal değil, gerçek sayfa
+     ════════════════════════════════════════════════════════ -->
+<div id="profileFullPage">
+  <div class="profile-page-cover">
+    <div class="profile-page-cover-art"></div>
+    <div class="profile-page-avatar-wrap">
+      <div class="profile-page-avatar" id="pfpAvatar">?</div>
     </div>
+    <button onclick="closeProfileFullPage()" style="position:absolute;top:14px;left:14px;width:36px;height:36px;border-radius:50%;background:rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.2);color:var(--text);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(10px)">←</button>
+    <div id="pfpOnlineDot" style="position:absolute;bottom:8px;right:14px;font-size:11px;color:var(--muted)"></div>
+  </div>
+  <div class="profile-page-body">
+    <div class="profile-page-name" id="pfpName">—</div>
+    <div id="pfpClanBadge" style="display:none" class="profile-page-clan-badge">👥 <span id="pfpClanName"></span></div>
+    <div style="font-size:13px;color:var(--muted);margin-top:8px;font-style:italic" id="pfpBio"></div>
+    <!-- Stats -->
+    <div class="profile-page-stats-row">
+      <div class="profile-page-stat">
+        <div class="profile-page-stat-val" id="pfpScore">—</div>
+        <div class="profile-page-stat-label">Puan</div>
+      </div>
+      <div class="profile-page-stat">
+        <div class="profile-page-stat-val" id="pfpLevel">—</div>
+        <div class="profile-page-stat-label">Seviye</div>
+      </div>
+      <div class="profile-page-stat">
+        <div class="profile-page-stat-val" id="pfpRank">—</div>
+        <div class="profile-page-stat-label">Sıra</div>
+      </div>
+    </div>
+    <!-- Meta bilgiler -->
+    <div style="background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--muted2)">Profil Bilgileri</div>
+        <div id="pfpProviderBadge" style="font-size:11px;color:var(--muted)"></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;font-size:13px">
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Katılım</span><span id="pfpJoined" style="color:var(--text)">—</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Durum</span><span id="pfpStatus" style="color:var(--text)">—</span></div>
+        <div id="pfpBanRow" style="display:none;display:flex;justify-content:space-between"><span style="color:#ef4444">Ban</span><span id="pfpBanReason" style="color:#ef4444">—</span></div>
+      </div>
+    </div>
+    <!-- Rozetler -->
+    <div id="pfpBadgesSection" style="display:none">
+      <div class="profile-section-title">🏅 Rozetler</div>
+      <div id="pfpBadges" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px"></div>
+    </div>
+    <!-- Başarımlar -->
+    <div id="pfpAchSection" style="display:none">
+      <div class="profile-section-title">🎖 Başarımlar</div>
+      <div id="pfpAchGrid" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px"></div>
+    </div>
+    <!-- Admin butonları -->
+    <div id="pfpAdminActions" style="display:none;margin-top:8px">
+      <div class="profile-section-title">⚡ Admin İşlemleri</div>
+      <div id="pfpAdminButtons" style="display:flex;flex-wrap:wrap;gap:8px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════
+     KLAN DAVET SAYFASI — Discord tarzı
+     ════════════════════════════════════════════════════════ -->
+<div id="clanInvitePage">
+  <div class="clan-invite-card">
+    <div class="clan-invite-banner" id="clanInviteBanner">👥</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:6px">Seni şu klana davet ediyorlar:</div>
+    <div style="font-family:var(--font-head);font-size:22px;font-weight:900;color:var(--text);margin-bottom:4px" id="clanInviteName">—</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:6px" id="clanInviteTag">[—]</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:20px" id="clanInviteDesc"></div>
+    <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:20px;font-size:13px;color:var(--muted)">
+      <span id="clanInviteMemberCount">— üye</span>
+      <span>·</span>
+      <span id="clanInviteScore">Min. — puan</span>
+    </div>
+    <div id="clanInviteMsg" style="font-size:12px;color:#ef4444;margin-bottom:10px;min-height:16px;text-align:center"></div>
+    <div style="display:flex;gap:10px">
+      <button onclick="declineClanInvite()" class="btn ghost" style="flex:1;padding:13px">Reddet</button>
+      <button onclick="acceptClanInvite()" class="btn" style="flex:1;padding:13px" id="clanInviteAcceptBtn">✅ Kabul Et</button>
+    </div>
+  </div>
+</div>
+
+<!-- Level-up tam ekran -->
+<div id="levelUpScreen" style="display:none">
+  <div style="font-size:36px;margin-bottom:8px">🎉</div>
+  <div class="lu-label" data-i18n="level_up">Seviye Atladın!</div>
+  <div class="lu-level" id="luLevelNum">2</div>
+  <div class="lu-sub" id="luSubText"></div>
+  <div style="margin-top:28px;color:var(--muted);font-size:12px">Devam etmek için dokun</div>
+</div>
+<div id="streakBadge" style="display:none;position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:rgba(255,140,0,0.15);border:1px solid rgba(255,140,0,0.4);color:#ff8c00;padding:5px 16px;border-radius:20px;font-size:13px;font-weight:800;z-index:800;backdrop-filter:blur(8px);white-space:nowrap;pointer-events:none">🔥 <span id="streakCount">0</span> seri</div>
+
+<!-- Profil Modalı -->
+<div id="profileModal" style="display:none">
+  <div id="profileCard">
+
+    <!-- Hero — Avatar + İsim + Stats -->
+    <div class="pm-hero" style="position:sticky;top:0;z-index:10">
+      <button class="pm-close-btn" id="pmCloseBtn">✕</button>
+      <div class="pm-avatar-wrap">
+        <div class="pm-avatar-big" id="pmAvatar" onclick="toggleAvatarPicker()" title="Avatar değiştir">?</div>
+        <div class="pm-avatar-edit" onclick="toggleAvatarPicker()">✏️</div>
+      </div>
+      <div class="pm-name" id="pmName">—</div>
+      <div class="pm-email" id="pmEmail">—</div>
+      <div id="pmRoleBadge" style="display:none" class="pm-role-badge">👑 Süper Admin</div>
+    </div>
+
+    <!-- Avatar Picker — hero dışında, scroll edilebilir alanda -->
+    <div id="avatarPickerRow" style="display:none;flex-wrap:wrap;gap:6px;padding:10px 16px;background:rgba(0,0,0,0.3);border-bottom:1px solid var(--border);justify-content:center"></div>
+
+    <!-- İstatistik çubuğu -->
+    <div class="pm-stats-row">
+      <div class="pm-stat">
+        <div class="pm-stat-val" id="pmStatScore">—</div>
+        <div class="pm-stat-lbl" data-i18n="stat_score">Puan</div>
+      </div>
+      <div class="pm-stat">
+        <div class="pm-stat-val" id="pmStatLevel">—</div>
+        <div class="pm-stat-lbl" data-i18n="stat_level">Seviye</div>
+      </div>
+      <div class="pm-stat">
+        <div class="pm-stat-val" id="pmStatStreak">—</div>
+        <div class="pm-stat-lbl" data-i18n="stat_streak">En Seri</div>
+      </div>
+    </div>
+
+    <div style="padding:16px 20px 20px">
+      <div id="pmMsg" class="profile-msg"></div>
+
+      <!-- Profil Bilgileri -->
+      <div class="pm-section-title" style="margin-top:4px">Profil Bilgileri</div>
+
+      <div class="pm-field">
+        <label>Hakkımda <span id="pmBioCount" style="color:var(--muted);font-weight:400;text-transform:none">(120)</span></label>
+        <textarea id="pmBio" placeholder="Kendini kısaca tanıt..." maxlength="120" rows="2"
+          oninput="document.getElementById('pmBioCount').textContent='('+(120-this.value.length)+')'"></textarea>
+      </div>
+
+      <div class="pm-field">
+        <label>Takma Ad</label>
+        <input id="pmDisplayName" type="text" placeholder="Takma adın" maxlength="20" autocomplete="off">
+      </div>
+
+      <div class="pm-field" id="pmEmailField">
+        <label>E-posta</label>
+        <input id="pmEmailInput" type="email" placeholder="E-posta adresin" autocomplete="off">
+      </div>
+
+      <div class="pm-field" id="pmPasswordField">
+        <label>Yeni Şifre <span style="color:var(--muted);text-transform:none;font-weight:400">(boş bırakırsan değişmez)</span></label>
+        <input id="pmPassword" type="password" placeholder="••••••••" autocomplete="new-password">
+      </div>
+
+      <button class="pm-save-btn" id="pmSaveBtn" data-i18n="save_profile">💾 Kaydet</button>
+
+      <div class="pm-divider"></div>
+
+      <!-- Eylemler -->
+      <button class="pm-action-btn superadmin" id="pmAdminBtn" style="display:none">
+        <span class="pm-btn-icon">⚡</span>
+        <span>Admin Paneli</span>
+        <span style="margin-left:auto;font-size:10px;opacity:0.6">→</span>
+      </button>
+
+      <button class="pm-action-btn" id="pmPinBtn" style="display:none">
+        <span class="pm-btn-icon">🔐</span>
+        <span>PIN Belirle / Değiştir</span>
+        <span style="margin-left:auto;font-size:10px;opacity:0.6">→</span>
+      </button>
+
+      <button class="pm-action-btn" id="pmRequestBtn">
+        <span class="pm-btn-icon">📬</span>
+        <span>İstek / Şikayet Gönder</span>
+        <span style="margin-left:auto;font-size:10px;opacity:0.6">→</span>
+      </button>
+
+      <button class="pm-action-btn danger" id="pmLogoutBtn" style="margin-bottom:12px">
+        <span class="pm-btn-icon">🚪</span>
+        <span>Oturumu Kapat</span>
+      </button>
+
+      <button class="pm-action-btn" id="pmDiscordBtn" onclick="connectDiscordOAuth()"
+        style="margin-bottom:20px;background:linear-gradient(135deg,rgba(88,101,242,0.13),rgba(71,82,196,0.20));border-color:rgba(88,101,242,0.38)">
+        <span class="pm-btn-icon">
+          <svg width="18" height="14" viewBox="0 0 127.14 96.36" fill="none">
+            <path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.25,105.25,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74S96.23,46,96.12,53,91.08,65.69,84.69,65.69Z" fill="#5865F2"/>
+          </svg>
+        </span>
+        <span id="pmDiscordLabel">Discord ile Bağlan</span>
+        <span style="margin-left:auto;font-size:10px;opacity:0.6">→</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Auth Modal -->
+
+<!-- PIN Modal -->
+<div id="pinModal" style="display:none">
+  <div id="pinCard">
+    <div style="font-size:40px">🔐</div>
+    <div class="pin-title" id="pinTitle">PIN Belirle</div>
+    <div class="pin-sub" id="pinSub">Google hesabına erişim olmadığında<br>bu PIN ile girebilirsin.</div>
+    <div class="pin-dots">
+      <div class="pin-dot" id="pd0"></div>
+      <div class="pin-dot" id="pd1"></div>
+      <div class="pin-dot" id="pd2"></div>
+      <div class="pin-dot" id="pd3"></div>
+    </div>
+    <div class="pin-msg" id="pinMsg"></div>
+    <div class="pin-numpad">
+      <button class="pin-key" onclick="pinPress('1')">1</button>
+      <button class="pin-key" onclick="pinPress('2')">2</button>
+      <button class="pin-key" onclick="pinPress('3')">3</button>
+      <button class="pin-key" onclick="pinPress('4')">4</button>
+      <button class="pin-key" onclick="pinPress('5')">5</button>
+      <button class="pin-key" onclick="pinPress('6')">6</button>
+      <button class="pin-key" onclick="pinPress('7')">7</button>
+      <button class="pin-key" onclick="pinPress('8')">8</button>
+      <button class="pin-key" onclick="pinPress('9')">9</button>
+      <button class="pin-key pin-link" id="pinSkipBtn" onclick="pinSkip()">Atla</button>
+      <button class="pin-key" onclick="pinPress('0')">0</button>
+      <button class="pin-key del" onclick="pinDel()">⌫</button>
+    </div>
+  </div>
+</div>
+
+<div id="authModal" style="display:none">
+  <div id="authCard">
+    <!-- Logo -->
+    <div style="text-align:center;padding:32px 24px 0">
+      <div style="width:72px;height:72px;background:linear-gradient(135deg,#00ff88,#00cc66);border-radius:24px;display:flex;align-items:center;justify-content:center;font-size:34px;margin:0 auto 20px;box-shadow:0 12px 32px rgba(0,255,136,0.3)">🧮</div>
+      <div style="font-family:'Syne',sans-serif;font-size:26px;font-weight:800;color:var(--text);letter-spacing:-0.5px">MathGame</div>
+      <div style="font-size:13px;color:var(--muted);margin-top:6px">Skorlarını kaydet, dünyayla yarış</div>
+    </div>
+
+    <!-- Google -->
+    <div style="padding:24px 24px 0">
+      <button class="auth-google-btn" id="authGoogleBtn" data-i18n-after="google_login"><svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+        Google ile Devam Et
+      </button>
+    </div>
+
+    <!-- Divider -->
+    <div style="display:flex;align-items:center;gap:12px;padding:16px 24px;color:var(--muted2);font-size:12px">
+      <div style="flex:1;height:1px;background:var(--border)"></div>
+      veya e-posta ile
+      <div style="flex:1;height:1px;background:var(--border)"></div>
+    </div>
+
+    <div id="authMain">
+      <div style="padding:0 24px">
+        <!-- Sekme -->
+        <div class="auth-tabs" style="margin-bottom:14px">
+          <button class="auth-tab active" id="authTabLogin" data-i18n="login">Giriş Yap</button>
+          <button class="auth-tab" id="authTabRegister" data-i18n="register">Kayıt Ol</button>
+          <button class="auth-tab" id="authTabPin">PIN</button>
+        </div>
+
+        <!-- PIN section -->
+        <div id="authPinSection" style="display:none">
+          <div class="auth-error" id="authPinError"></div>
+          <input class="auth-input" id="pinLoginName" type="text" placeholder="Kullanıcı adın" autocomplete="off" maxlength="20">
+          <div style="display:flex;gap:8px;margin-top:4px">
+            <input class="auth-input" id="pinLoginPin" type="password" placeholder="PIN" maxlength="8" inputmode="numeric" style="letter-spacing:6px;font-size:20px;flex:1;text-align:center">
+            <button class="btn primary" id="pinLoginBtn" style="padding:13px 20px">Giriş</button>
+          </div>
+        </div>
+
+        <!-- Email form -->
+        <div class="auth-error" id="authError"></div>
+        <input class="auth-input" id="authEmail" type="email" placeholder="E-posta adresi" autocomplete="email">
+        <input class="auth-input" id="authDisplayName" type="text" placeholder="Kullanıcı adı" style="display:none" autocomplete="off" maxlength="20">
+        <input class="auth-input" id="authPassword" type="password" placeholder="Şifre" autocomplete="current-password">
+        <button class="btn primary full" id="authSubmitBtn" style="margin-top:4px">Giriş Yap</button>
+      </div>
+
+      <!-- Skip -->
+      <div style="text-align:center;padding:16px 24px 32px">
+        <div class="auth-skip" id="authSkipBtn" style="font-size:12px;color:var(--muted2);cursor:pointer;padding:8px">
+          Misafir olarak devam et →
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Proje Şifre Ekranı -->
+<div id="projectLock" style="display:none">
+  <div id="lockCard">
+    <div class="lock-icon">🔐</div>
+    <div class="lock-title">MathGame</div>
+    <div class="lock-sub">Bu proje gizlidir.<br>Devam etmek için şifreyi gir.</div>
+    <div class="lock-input-wrap">
+      <input id="lockInput" type="password" placeholder="Şifre" autocomplete="new-password" spellcheck="false" autocorrect="off" autocapitalize="off" maxlength="40">
+      <button id="lockEyeBtn" tabindex="-1">👁</button>
+    </div>
+    <div id="lockError"></div>
+    <button id="lockSubmitBtn">Giriş Yap →</button>
+    <div class="lock-footer">© SKYDIVEX — Yetkisiz erişim yasaktır</div>
+  </div>
+</div>
+
+<div id="achNotif" style="display:none"><span id="achNotifIcon"></span><span id="achNotifText"></span></div>
+
+<!-- ════════════════════════════════════════════════════
+     MASAÜSTÜ SHELL
+     ════════════════════════════════════════════════════ -->
+<div class="desktop-shell">
+
+<!-- Sol Sidebar (sadece masaüstünde) -->
+<div class="desktop-sidebar">
+  <div class="desktop-sidebar-logo">🧮 <span>Math</span>Game <span style="font-size:11px;color:var(--muted);font-weight:400">v3.5</span></div>
+  <div style="padding:8px 8px 0">
+    <div class="desktop-sidebar-section">Oyun</div>
+    <a class="desktop-nav-item active" onclick="desktopNavTo('home')">
+      <span class="desktop-nav-icon">🏠</span> Ana Menü
+    </a>
+    <a class="desktop-nav-item" onclick="desktopNavTo('play')">
+      <span class="desktop-nav-icon">➕</span> Matematik
+    </a>
+    <a class="desktop-nav-item" onclick="desktopNavTo('absurd')">
+      <span class="desktop-nav-icon">🤪</span> Absürt Mod
+    </a>
+    <a class="desktop-nav-item" onclick="desktopNavTo('challenge')">
+      <span class="desktop-nav-icon">⚔️</span> Meydan Okuma
+    </a>
+    <div class="desktop-sidebar-section">Topluluk</div>
+    <a class="desktop-nav-item" onclick="openPlayerSearch()">
+      <span class="desktop-nav-icon">🔍</span> Oyuncu Ara
+    </a>
+    <a class="desktop-nav-item" onclick="openClanModal()">
+      <span class="desktop-nav-icon">👥</span> Klanlar
+    </a>
+    <div class="desktop-sidebar-section">Hesap</div>
+    <a class="desktop-nav-item" onclick="openQuestModal()">
+      <span class="desktop-nav-icon">📋</span> Görevler
+    </a>
+    <a class="desktop-nav-item" onclick="openShop()">
+      <span class="desktop-nav-icon">🏪</span> Mağaza
+    </a>
+    <a class="desktop-nav-item" onclick="openProfileModal()">
+      <span class="desktop-nav-icon">👤</span> Profil
+    </a>
+    <a class="desktop-nav-item" onclick="openSettingsModal()">
+      <span class="desktop-nav-icon">⚙️</span> Ayarlar
+    </a>
+    <a class="desktop-nav-item" onclick="document.getElementById('openAbout').click()">
+      <span class="desktop-nav-icon">ℹ️</span> Hakkında
+    </a>
+  </div>
+  <div class="desktop-sidebar-footer">
+    <!-- Cüzdan -->
+    <div id="desktopWallet" style="display:flex;gap:6px;margin-bottom:10px">
+      <div style="flex:1;background:rgba(255,215,0,0.08);border:1px solid rgba(255,215,0,0.2);border-radius:10px;padding:6px 10px;cursor:pointer;text-align:center" onclick="openShop()">
+        <div style="font-size:16px">💰</div>
+        <div id="desktopCoin" style="font-size:12px;font-weight:800;color:#ffd700">0</div>
+      </div>
+      <div style="flex:1;background:rgba(99,179,237,0.08);border:1px solid rgba(99,179,237,0.2);border-radius:10px;padding:6px 10px;cursor:pointer;text-align:center" onclick="openShop()">
+        <div style="font-size:16px">💎</div>
+        <div id="desktopDiamond" style="font-size:12px;font-weight:800;color:#63b3ed">0</div>
+      </div>
+    </div>
+    <!-- İndir -->
+    <div class="download-section" style="margin:0 0 10px">
+      <div class="download-title" style="font-size:12px;margin-bottom:8px">📥 Uygulamayı İndir</div>
+      <div class="download-btn-row" style="flex-direction:column;gap:6px">
+        <a id="androidDownloadBtnDesk" href="https://github.com/skydivex/mathgame/releases/latest" target="_blank" class="download-btn android" style="flex-direction:row;justify-content:flex-start;gap:10px;padding:8px 10px">
+          <span class="download-btn-icon" style="font-size:18px">🤖</span>
+          <div style="text-align:left">
+            <div class="download-btn-label" style="font-size:11px">Android APK</div>
+            <div class="download-btn-sub">GitHub Releases</div>
+          </div>
+        </a>
+        <button onclick="installPWA()" class="download-btn pwa pwa-install-btn" style="flex-direction:row;justify-content:flex-start;gap:10px;padding:8px 10px">
+          <span class="download-btn-icon" style="font-size:18px">💜</span>
+          <div style="text-align:left">
+            <div class="download-btn-label" style="font-size:11px">Ana Ekrana Ekle</div>
+            <div class="download-btn-sub">PWA</div>
+          </div>
+        </button>
+      </div>
+    </div>
+    <div style="font-size:10px;color:var(--muted2)">© 2026 SKYDIVEX</div>
+  </div>
+</div>
+
+<!-- Üst Bar (sadece masaüstünde) -->
+<div class="desktop-topbar">
+  <div class="desktop-search-bar">
+    <span class="desktop-search-icon">🔍</span>
+    <input type="text" placeholder="Oyuncu ara..." id="desktopSearchInput" oninput="onDesktopSearchInput(this.value)" onfocus="openPlayerSearch()">
+  </div>
+  <div style="margin-left:auto;display:flex;align-items:center;gap:10px">
+    <div id="desktopTopWallet" style="display:flex;gap:6px">
+      <div style="display:flex;align-items:center;gap:4px;background:rgba(255,215,0,0.08);border:1px solid rgba(255,215,0,0.2);border-radius:8px;padding:4px 10px;cursor:pointer" onclick="openShop()">
+        <span>💰</span><span id="desktopTopCoin" style="font-size:12px;font-weight:800;color:#ffd700">0</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:4px;background:rgba(99,179,237,0.08);border:1px solid rgba(99,179,237,0.2);border-radius:8px;padding:4px 10px;cursor:pointer" onclick="openShop()">
+        <span>💎</span><span id="desktopTopDiamond" style="font-size:12px;font-weight:800;color:#63b3ed">0</span>
+      </div>
+    </div>
+    <button onclick="openPlayerSearch()" style="width:36px;height:36px;border-radius:50%;background:var(--glass2);border:1px solid var(--border);color:var(--muted);font-size:16px;cursor:pointer">🔍</button>
+    <button class="profile-btn" id="desktopProfileBtn" onclick="openProfileModal()" style="display:none">
+      <div id="desktopPbAvatar" style="width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,var(--neon),#00cc66);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#030608">?</div>
+      <span id="desktopPbName" style="font-size:13px;font-weight:700">—</span>
+    </button>
+  </div>
+</div>
+
+<!-- Ana içerik -->
+<div class="desktop-main">
+<div class="app">
+  <!-- Header -->
+  <div class="header" id="stickyHeader">
+    <div class="header-logo">🧮 <span>Math</span>Game</div>
+    <div class="header-right">
+      <!-- Cüzdan -->
+      <div id="walletDisplay" style="display:none;align-items:center;gap:4px">
+        <div style="display:flex;align-items:center;gap:2px;background:rgba(255,215,0,0.1);border:1px solid rgba(255,215,0,0.2);border-radius:8px;padding:3px 7px;cursor:pointer" onclick="openShop()">
+          <span style="font-size:11px">💰</span>
+          <span id="coinDisplay" style="font-size:11px;font-weight:800;color:#ffd700">0</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:2px;background:rgba(99,179,237,0.1);border:1px solid rgba(99,179,237,0.2);border-radius:8px;padding:3px 7px;cursor:pointer" onclick="openShop()">
+          <span style="font-size:11px">💎</span>
+          <span id="diamondDisplay" style="font-size:11px;font-weight:800;color:#63b3ed">0</span>
+        </div>
+      </div>
+      <!-- Oyuncu arama -->
+      <button onclick="openPlayerSearch()" style="width:32px;height:32px;border-radius:50%;background:var(--glass2);border:1px solid var(--border);color:var(--muted);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center" title="Oyuncu Ara">🔍</button>
+      <div style="position:relative">
+        <button id="langBtn" onclick="toggleLangMenu()"
+          style="background:var(--glass2);border:1px solid var(--border);border-radius:10px;color:var(--muted);padding:6px 9px;font-size:13px;cursor:pointer">
+          🌐
+        </button>
+        <div id="langMenu" style="display:none;position:absolute;top:38px;right:0;background:#0d1117;border:1px solid var(--border2);border-radius:14px;padding:6px;z-index:9999;min-width:160px;box-shadow:0 8px 32px rgba(0,0,0,0.6);max-height:320px;overflow-y:auto"></div>
+      </div>
+      <div id="quickActions" style="display:none"></div>
+      <div id="miniInfo" style="display:none"></div>
+      <div id="profileBtnWrap">
+        <button class="profile-btn" id="profileBtn" onclick="openProfileModal()" style="display:none">
+          <div id="pbAvatar">E</div>
+          <span id="pbName">—</span>
+        </button>
+        <button class="btn primary sm" id="loginBtnHeader" onclick="openAuthModal()" style="display:none">Giriş Yap</button>
+      </div>
+    </div>
+  </div>
+      <!-- old profileBtn removed -->
+  <!-- Entry card hidden -->
+  <div id="entryCard" style="display:none">
+    <input id="playerName" style="display:none">
+    <button id="enterBtn" style="display:none"></button>
+    <button id="guestBtn" style="display:none"></button>
   </div>
 
   <!-- Main menu -->
-  <div id="menuCard" class="card" style="margin-top:12px">
-    <div class="main-grid">
-      <div>
-        <div style="display:flex;justify-content:space-between;align-items:center">
-          <div>
-            <div class="small muted">Oyuncu</div>
-            <div id="playerLabel" style="font-weight:800">—</div>
-            <div class="small muted" style="margin-top:6px">Seviye: <span id="levelDisplay">1</span> • Puan: <span id="scoreDisplay">0</span></div>
-          </div>
-          <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end">
-            <button id="startGameBtn" class="btn">Başla</button>
-            <button id="logoutBtn" class="btn ghost">Oturumu Kapat</button>
-          </div>
+  <!-- DUYURU BANDI -->
+  <div id="announcementBanner" style="display:none;margin:8px 0 0;padding:12px 16px;background:linear-gradient(135deg,rgba(245,158,11,0.12),rgba(249,115,22,0.08));border:1px solid rgba(245,158,11,0.25);border-radius:14px">
+    <div style="display:flex;align-items:flex-start;gap:10px">
+      <span id="annBannerIcon" style="font-size:22px;flex-shrink:0">📢</span>
+      <div style="flex:1;min-width:0">
+        <div id="annBannerTitle" style="font-size:13px;font-weight:800;color:#f59e0b;margin-bottom:4px"></div>
+        <div id="annBannerText" style="font-size:12px;color:#e6f7ea;line-height:1.6"></div>
+        <div id="annBannerPoll" style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px"></div>
+      </div>
+      <button onclick="closeAnnouncement()" style="background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;flex-shrink:0;line-height:1">✕</button>
+    </div>
+  </div>
+
+  <div id="menuCard" style="margin-top:8px">
+
+    <!-- Oyuncu şeridi -->
+    <div style="display:flex;align-items:center;gap:12px;padding:16px;background:var(--glass);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:10px">
+      <div id="menuAvatar" style="width:48px;height:48px;border-radius:16px;background:linear-gradient(135deg,var(--neon),#00cc66);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:#030608;flex-shrink:0;overflow:hidden;background-size:cover;background-position:center">E</div>
+      <div style="flex:1;min-width:0">
+        <div id="playerLabel" style="font-family:'Syne',sans-serif;font-size:17px;font-weight:800;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">—</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px">Seviye <span id="levelDisplay" style="color:var(--neon);font-weight:700">1</span> &nbsp;·&nbsp; <span id="scoreDisplay" style="color:var(--neon);font-weight:700">0</span>p</div>
+      </div>
+      <button id="logoutBtn" class="btn ghost sm" data-i18n="logout">Çıkış</button>
+    </div>
+
+    <!-- Event banner -->
+    <div id="eventBanner" style="display:none;margin-bottom:10px">
+      <span id="eventBannerIcon">🎉</span>
+      <div style="flex:1"><div id="eventBannerTitle" style="font-weight:800"></div><div id="eventBannerSub" style="font-size:11px;opacity:0.7"></div></div>
+    </div>
+
+    <!-- Oyun butonları -->
+    <div class="play-grid" style="margin-bottom:10px">
+      <div class="play-card play-card-math" id="startGameBtn">
+        <div class="play-card-icon">➕</div>
+        <div>
+          <div class="play-card-title" data-i18n="math_mode">Matematik</div>
+          <div class="play-card-sub" data-i18n="math_sub">Klasik mod</div>
         </div>
-
-        <hr style="margin:12px 0;border:none;border-top:1px solid rgba(255,255,255,0.03)" />
-
-        <div style="display:flex;gap:8px;margin-top:8px">
-          <button id="openSettings" class="btn ghost">Ayarlar</button>
-          <button id="openAbout" class="btn ghost">Hakkında</button>
-          <button id="resetScores" class="btn ghost">Skorları Sıfırla</button>
+        <div class="play-card-badge">OYNA</div>
+      </div>
+      <div class="play-card play-card-absurd" id="startAbsurdBtn">
+        <div class="play-card-icon">🤪</div>
+        <div>
+          <div class="play-card-title" data-i18n="absurd_mode">Absürt</div>
+          <div class="play-card-sub" data-i18n="absurd_sub">AI sorular</div>
         </div>
+        <div class="play-card-badge">AI</div>
+      </div>
+      <div class="play-card play-card-challenge" id="startChallengeBtn">
+        <div class="play-card-icon">⚔️</div>
+        <div>
+          <div class="play-card-title" data-i18n="challenge_mode">Meydan Okuma</div>
+          <div class="play-card-sub" data-i18n="challenge_sub">Süreye karşı yarış</div>
+        </div>
+        <div class="play-card-badge" style="background:rgba(239,68,68,0.2);color:#ef4444;border-color:rgba(239,68,68,0.3)">YENİ</div>
+      </div>
+    </div>
 
-        <!-- optional settings quick area -->
-        <div id="quickSettings" style="margin-top:12px;display:flex;gap:8px;align-items:center">
-          <label style="color:var(--muted)"><input type="checkbox" id="soundToggle" checked> Ses açık</label>
-          <div style="margin-left:auto;color:var(--muted)">Versiyon: <strong>v1.2.5</strong></div>
+    <!-- Görevler & Mağaza & Klan hızlı erişim -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px">
+      <button onclick="openQuestModal()" style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 8px;border-radius:14px;background:rgba(56,189,248,0.07);border:1px solid rgba(56,189,248,0.2);cursor:pointer;font-family:inherit">
+        <span style="font-size:22px">📋</span>
+        <div style="font-size:12px;font-weight:800;color:#38bdf8">Görevler</div>
+        <div id="questQuickInfo" style="font-size:9px;color:var(--muted)">0 alınabilir</div>
+      </button>
+      <button onclick="openShop()" style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 8px;border-radius:14px;background:rgba(255,215,0,0.07);border:1px solid rgba(255,215,0,0.2);cursor:pointer;font-family:inherit">
+        <span style="font-size:22px">🏪</span>
+        <div style="font-size:12px;font-weight:800;color:#ffd700">Mağaza</div>
+        <div style="font-size:9px;color:var(--muted)">Joker & Kozmetik</div>
+      </button>
+      <button onclick="openClanModal()" style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 8px;border-radius:14px;background:rgba(168,85,247,0.07);border:1px solid rgba(168,85,247,0.2);cursor:pointer;font-family:inherit">
+        <span style="font-size:22px">👥</span>
+        <div style="font-size:12px;font-weight:800;color:#a855f7">Klanlar</div>
+        <div id="clanQuickInfo" style="font-size:9px;color:var(--muted)">Kur veya katıl</div>
+      </button>
+    </div>
+    <button id="chestMenuBtn" style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-radius:14px;background:rgba(251,191,36,0.07);border:1px solid rgba(251,191,36,0.2);cursor:pointer;font-family:inherit;width:100%;margin-bottom:10px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-size:26px">🧳</span>
+        <div style="text-align:left">
+          <div style="font-size:13px;font-weight:800;color:#fbbf24" data-i18n="my_inventory">Sandığım</div>
+          <div id="chestQuickInfo" style="font-size:11px;color:var(--muted)">Jokerler ve eşyalarım</div>
         </div>
       </div>
+      <span style="color:var(--muted);font-size:18px">›</span>
+    </button>
 
-      <div>
-        <div class="card" style="padding:12px">
-          <div class="small muted">Liderlik Tablosu</div>
-          <div id="leaderboard" class="lb" style="margin-top:8px">Henüz kimse yok</div>
-        </div>
-
-        <div class="card" style="padding:12px;margin-top:12px">
-          <div class="small muted">Hızlı Ayarlar</div>
-          <div style="margin-top:8px;display:flex;gap:8px;align-items:center">
-            <label class="small muted">Buton rengi</label>
-            <input type="color" id="btnColor" value="#00ff66">
-            <div style="margin-left:auto" class="small muted">Arka plan</div>
-            <input type="color" id="bgColor" value="#08121a">
-          </div>
-          <div style="margin-top:10px" class="small muted">Arka plan fotoğrafı:</div>
-          <div style="margin-top:6px;display:flex;gap:8px;align-items:center">
-            <button id="bgImageBtn" class="btn ghost">Fotoğraf Yükle</button>
-            <input id="bgImageInput" type="file" accept="image/*" style="display:none">
-            <button id="clearBgBtn" class="btn ghost">Sıfırla</button>
-          </div>
+    <!-- Liderlik tablosu -->
+    <div style="background:var(--glass);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:10px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:800;color:var(--text)">🏆 Liderlik</div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span id="onlineLbStatus" style="font-size:10px;color:var(--muted)"></span>
+          <button onclick="fetchOnlineLeaderboard()" style="background:var(--glass2);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:11px;cursor:pointer;padding:4px 10px;font-family:inherit">↺</button>
         </div>
       </div>
+      <div class="lb-tabs">
+        <button class="lb-tab" id="lbTabLocal" data-i18n="local">📱 Lokal</button>
+        <button class="lb-tab active" id="lbTabOnline" data-i18n="online_tab">🌐 Online</button>
+      </div>
+      <div id="lbOpsRow" style="display:flex;gap:4px;margin-bottom:8px" class="lb-ops-row">
+        <button class="lb-ops-btn active" id="lbOpsAll"   onclick="switchOnlineLbOps('all')">🌍 Tümü</button>
+        <button class="lb-ops-btn"        id="lbOpsMixed" onclick="switchOnlineLbOps('+-*/')">🌀 Karma</button>
+      </div>
+      <div id="leaderboard" class="lb" style="display:none">Henüz kimse yok</div>
+      <div id="onlineLbEl"></div>
+    </div>
+
+
+    <!-- İstatistikler -->
+    <div style="background:var(--glass);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:10px" id="statsPanel">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:800;color:var(--text)">📊 İstatistikler</div>
+        <button onclick="renderStats()" style="background:var(--glass2);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:11px;cursor:pointer;padding:4px 10px;font-family:inherit">↺</button>
+      </div>
+      <div id="statsGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:8px"></div>
+    </div>
+
+    <!-- Başarılar -->
+    <div style="background:var(--glass);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:10px;cursor:pointer" id="achievementsPanel" onclick="openAchModal()">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:800;color:var(--text)">🎖 Başarımlar</div>
+        <div id="achBadgeCount" style="font-size:12px;color:var(--neon);font-weight:700"></div>
+      </div>
+      <div id="achievementsGrid" style="display:flex;flex-wrap:wrap;gap:5px"></div>
+    </div>
+
+    <!-- Ayarlar -->
+    <div style="background:var(--glass);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:800;color:var(--text)">⚙️ Ayarlar</div>
+        <button id="openSettings" onclick="openSettingsModal()" class="btn ghost sm">Tümünü Gör</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <label style="font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;cursor:pointer">
+          <input type="checkbox" id="soundToggle" checked style="width:16px;height:16px;accent-color:var(--neon)"> Ses
+        </label>
+        <div style="margin-left:auto;display:flex;gap:6px">
+          <button class="theme-btn active" data-theme="green"  style="width:24px;height:24px;border-radius:8px;background:#00ff66;border:2px solid transparent;cursor:pointer" title="Yeşil"></button>
+          <button class="theme-btn"        data-theme="purple" style="width:24px;height:24px;border-radius:8px;background:#a855f7;border:2px solid transparent;cursor:pointer" title="Mor"></button>
+          <button class="theme-btn"        data-theme="blue"   style="width:24px;height:24px;border-radius:8px;background:#38bdf8;border:2px solid transparent;cursor:pointer" title="Mavi"></button>
+          <button class="theme-btn"        data-theme="red"    style="width:24px;height:24px;border-radius:8px;background:#ff6b6b;border:2px solid transparent;cursor:pointer" title="Kırmızı"></button>
+          <button class="theme-btn"        data-theme="gold"   style="width:24px;height:24px;border-radius:8px;background:#ffd700;border:2px solid transparent;cursor:pointer" title="Altın"></button>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <button id="bgLibBtn" class="btn ghost sm" style="flex:none">🖼 Arka Plan</button>
+        <button id="bgImageBtn" class="btn ghost sm" style="flex:none">📁 Yükle</button>
+        <button id="openAbout" class="btn ghost sm" style="flex:none">ℹ️ Hakkında</button>
+        <button id="clearBgBtn" class="btn ghost sm" style="flex:none">✕ BG</button>
+      </div>
+      <input id="bgImageInput2" type="file" accept="image/*" style="display:none">
+      <input id="btnColor" type="hidden" value="#00ff66">
+      <input id="bgColor" type="hidden" value="#08121a">
+    </div><!-- /ayarlar -->
+  </div><!-- /menuCard -->
+
+  <!-- ── İNDİRME BÖLÜMÜ (mobile) ─────────────────────── -->
+  <div class="download-section mobile-only" style="margin-bottom:10px">
+    <div class="download-title">📥 Uygulamayı İndir</div>
+    <div class="download-btn-row">
+      <a id="androidDownloadBtn" href="https://github.com/skydivex/mathgame/releases/latest" target="_blank" class="download-btn android" download>
+        <span class="download-btn-icon">🤖</span>
+        <div class="download-btn-label">Android APK</div>
+        <div class="download-btn-sub">GitHub Releases</div>
+      </a>
+      <a href="https://github.com/skydivex/mathgame/releases" target="_blank" class="download-btn ios">
+        <span class="download-btn-icon">🍎</span>
+        <div class="download-btn-label">iOS / Diğer</div>
+        <div class="download-btn-sub">Releases sayfası</div>
+      </a>
+      <button onclick="installPWA()" class="download-btn pwa pwa-install-btn" id="pwaInstallBtn">
+        <span class="download-btn-icon">💜</span>
+        <div class="download-btn-label">Ana Ekrana</div>
+        <div class="download-btn-sub">PWA olarak ekle</div>
+      </button>
     </div>
   </div>
 
   <!-- Game area -->
   <div id="gameArea" class="card" style="margin-top:12px;display:none">
+
+    <!-- LANDSCAPE STAT PANELİ — sadece yatay modda görünür -->
+    <div id="landscapeStatsPanel" style="display:none">
+      <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--muted2);margin-bottom:6px">📊 Stat</div>
+      <div><div class="ls-label">Oyuncu</div><div class="ls-val" id="lsPlayer" style="font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">—</div></div>
+      <div class="ls-div"></div>
+      <div><div class="ls-label">Seviye</div><div class="ls-val" id="lsLevel">1</div></div>
+      <div><div class="ls-label">Puan</div><div class="ls-val" id="lsScore">0</div></div>
+      <div><div class="ls-label">Çarpan</div><div class="ls-val" id="lsMult" style="font-size:13px">1×10</div></div>
+      <div class="ls-div"></div>
+      <div><div class="ls-label">Jokerler</div><div class="ls-jrow" id="lsJokers"></div></div>
+      <div class="ls-div" id="lsClanDiv" style="display:none"></div>
+      <div id="lsClanWrap" style="display:none"><div class="ls-label">Klan</div><div class="ls-val" id="lsClan" style="font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">—</div></div>
+    </div>
+
     <div class="topbar">
       <div>
         <div class="stat">Oyuncu: <strong id="playerDisplay">—</strong></div>
+        <div id="modeBadge" style="display:none;margin-top:6px;font-size:11px;font-weight:800;letter-spacing:1px;padding:4px 12px;border-radius:20px;background:rgba(168,85,247,0.18);color:#c084fc;border:1px solid rgba(168,85,247,0.3);display:inline-block">🤪 ABSÜRT MOD</div>
       </div>
       <div style="text-align:center">
         <div class="stat">Seviye <strong id="levelUI">1</strong></div>
@@ -254,34 +756,72 @@ button{font-family:inherit}
     </div>
 
     <div id="questionBlock">
-      <div id="questionText">—</div>
-      <input id="answerInput" class="input" placeholder="Cevabını yaz..." />
-      <button id="submitAnswerBtn" class="btn">Gönder</button>
+      <div id="levelBadge" style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:6px;letter-spacing:0.05em">Seviye 1</div>
+      <div id="questionText" style="font-size:22px;font-weight:800;line-height:1.4;margin-bottom:12px">—</div>
+      <!-- Math input (shown in math mode) -->
+      <div id="mathInputRow" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <input id="answerInput" class="input" placeholder="Cevabını yaz..." />
+        <button id="submitAnswerBtn" class="btn">Gönder</button>
+      </div>
+      <!-- Absurd choices (shown in absurd mode) -->
+      <div id="absurdChoices" style="display:none;margin-top:8px"></div>
+      <div id="qTimerTxt">⏱ <span id="qTimerCnt">-</span>s</div>
+      <div id="qTimerWrap"><div id="qTimerBar"></div></div>
+      <button id="fbkBtn" class="fbk-btn">💬 Geri bildirim</button>
     </div>
 
-    <div id="resultMsg"></div>
+    <div id="resultMsg" style="min-height:26px;margin-top:10px;font-weight:700;transition:opacity .44s ease"></div>
+
+    <!-- Joker Bar -->
+    <div id="jokerBar"></div>
 
     <div style="margin-top:10px;display:flex;gap:8px;align-items:center">
-      <button id="pauseBtn" class="btn ghost">Duraklat</button>
+      <button id="pauseBtn" class="btn ghost" data-i18n="pause">Duraklat</button>
       <div style="margin-left:auto" class="small muted">Ödül: <strong id="rewardUI">10</strong>p</div>
     </div>
 
     <hr style="margin-top:12px;border:none;border-top:1px solid rgba(255,255,255,0.03)" />
-    <h3 style="margin:8px 0">Puan Tablosu</h3>
+    <h3 style="margin:8px 0" data-i18n="score_board">Puan Tablosu</h3>
     <div id="board" class="lb"></div>
   </div>
 
   <div style="height:8px"></div>
-  <div class="card" style="padding:10px;font-size:12px;color:var(--muted)">
-    <div style="display:flex;justify-content:space-between">
-      <div>Geliştirici: <strong>SKYDIVEX</strong></div>
-      <div>Sürüm: <strong>v1.2.5</strong></div>
+  <div class="card" style="padding:12px 14px;font-size:12px;color:var(--muted)">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <div>Geliştirici: <strong style="color:var(--neon)">SKYDIVEX</strong></div>
+      <div>Sürüm: <strong>v3.5</strong></div>
+    </div>
+    <div style="border-top:1px solid var(--border);padding-top:10px;display:flex;flex-direction:column;gap:10px">
+      <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--muted2)">Katkıda Bulunanlar</div>
+
+      <!-- Esleew -->
+      <div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:12px;padding:10px 12px">
+        <div style="font-size:28px;line-height:1">⭐</div>
+        <div>
+          <div style="font-size:13px;font-weight:800;color:var(--text)">Esleew</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px">Geliştirmedemde kafayı yememi engellemede çok büyük yardımı olan ablam</div>
+        </div>
+      </div>
+
+      <!-- Enes -->
+      <div style="display:flex;align-items:center;gap:10px;background:rgba(0,255,136,0.04);border:1px solid rgba(0,255,136,0.15);border-radius:12px;padding:10px 12px">
+        <div style="font-size:28px;line-height:1">👑</div>
+        <div>
+          <div style="font-size:13px;font-weight:800;color:var(--neon)">Enes ŞEKER</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px">Proje Sahibi — SKYDIVEX</div>
+        </div>
+      </div>
+
     </div>
   </div>
-</div>
+</div><!-- /app -->
+</div><!-- /desktop-main -->
+
+<!-- Toast -->
+<div id="toast" style="display:none"><span id="toast-msg"></span><div id="toast-bar"></div></div>
 
 <!-- Pause overlay -->
-<div id="pauseOverlay">
+<div id="pauseOverlay" style="display:none">
   <div id="pauseCard" class="card" style="width:420px;max-width:94%">
     <div style="display:flex;justify-content:space-between;align-items:center">
       <div>
@@ -289,15 +829,15 @@ button{font-family:inherit}
         <div style="color:var(--muted);font-size:13px;margin-top:6px">Skydivex</div>
       </div>
       <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end">
-        <button id="resumeBtn" class="btn">Devam Et</button>
-        <button id="pauseSettingsBtn" class="btn ghost">Ayarlar</button>
-        <button id="pauseMenuBtn" class="btn ghost">Ana Menü</button>
+        <button id="resumeBtn" class="btn" data-i18n="resume">Devam Et</button>
+        <button id="pauseSettingsBtn" class="btn ghost" data-i18n="settings">Ayarlar</button>
+        <button id="pauseMenuBtn" class="btn ghost" data-i18n="menu">Ana Menü</button>
       </div>
     </div>
 
     <div id="settingsPanel" style="margin-top:14px;display:none">
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-        <label style="color:var(--muted)"><input type="checkbox" id="settingSound"> Ses açık</label>
+        <label style="color:var(--muted)"><input type="checkbox" id="settingSound"><span data-i18n="sound">Ses açık</span></label>
         <label style="color:var(--muted)">Buton renk <input type="color" id="settingBtnColor" value="#00ff66"></label>
         <label style="color:var(--muted)">Arka plan <input type="color" id="settingBgColor" value="#08121a"></label>
       </div>
@@ -305,456 +845,1214 @@ button{font-family:inherit}
   </div>
 </div>
 
-<!-- About modal -->
-<div id="aboutModal">
-  <div id="aboutCard">
-    <div style="display:flex;justify-content:space-between;align-items:center">
+<!-- Settings Modal -->
+<div id="settingsModal" style="display:none">
+  <div id="settingsCard">
+
+    <!-- Header -->
+    <div style="position:sticky;top:0;z-index:10;background:#0a0e16;display:flex;justify-content:space-between;align-items:center;padding:20px 20px 16px;border-bottom:1px solid var(--border)">
       <div>
-        <div style="font-weight:900;font-size:18px">Hakkında — MathGame</div>
-        <div style="color:var(--muted);margin-top:6px">SKYDIVEX</div>
+        <div style="font-family:var(--font-head);font-size:20px;font-weight:900;color:var(--text)">⚙️ Ayarlar</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">MathGame v3.5 — SKYDIVEX</div>
       </div>
-      <div><button id="closeAboutModal" class="btn ghost">Kapat</button></div>
+      <button id="closeSettingsModal" style="width:32px;height:32px;border-radius:50%;background:var(--glass2);border:1px solid var(--border);color:var(--muted);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
     </div>
 
-    <hr style="margin:12px 0;border:none;border-top:1px solid rgba(255,255,255,0.03)" />
-
-    <div style="display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap">
-      <div style="flex:1;min-width:260px">
-        <div style="font-weight:800">Sürüm: v1.2.5</div>
-        <div style="color:var(--muted);margin-top:6px">Tarihçe</div>
-        <div style="font-size:13px;color:var(--muted);margin-top:6px">
-          <p><strong>v1.0</strong> — Temel soru/cevap, puanlama sistemi.</p>
-          <p><strong>v1.1</strong> — Menü animasyonları ve ses efektleri eklendi.</p>
-          <p><strong>v1.2</strong> — Görsel özelleştirme, zorluk dengesi ve çarpan sistemi eklendi.</p>
-          <p><strong>v1.2.5</strong> — Final sürüm: duraklatma/settings animasyonları, kalıcı ayarlar, fotoğraf arka plan düzeltmeleri ve iyileştirilmiş kullanıcı deneyimi.</p>
+    <!-- Performans Modu -->
+    <div style="padding:16px 20px;border-bottom:1px solid var(--border)">
+      <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted2);margin-bottom:12px">⚡ Performans & Grafik</div>
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <span style="font-size:14px;color:var(--text)">Animasyon Ölçeği</span>
+            <span id="animScaleLabel" style="font-size:12px;font-weight:800;color:var(--neon)">1x</span>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
+            <button id="animBtn0" onclick="setAnimScale(0)" style="padding:8px;border-radius:10px;border:1px solid var(--border);background:var(--glass);font-size:12px;font-weight:700;color:var(--muted);cursor:pointer;font-family:inherit">Kapalı</button>
+            <button id="animBtn05" onclick="setAnimScale(0.5)" style="padding:8px;border-radius:10px;border:1px solid var(--border);background:var(--glass);font-size:12px;font-weight:700;color:var(--muted);cursor:pointer;font-family:inherit">0.5x</button>
+            <button id="animBtn1" onclick="setAnimScale(1)" style="padding:8px;border-radius:10px;border:2px solid var(--neon);background:rgba(0,255,136,0.08);font-size:12px;font-weight:800;color:var(--neon);cursor:pointer;font-family:inherit">1x</button>
+          </div>
         </div>
-      </div>
-
-      <div style="width:320px;min-width:240px">
-        <div style="font-weight:800">Puan Çarpanı (Nasıl çalışır)</div>
-        <div style="color:var(--muted);margin-top:6px;font-size:13px">
-          <p>Her seviye için ödül = <strong>Seviye × 10</strong> puan. Örnek: Seviye 1 → 10p, Seviye 5 → 50p. Seviye ilerledikçe soruların büyüklük eşiği artar (ör. Seviye 1 küçük sayılar; Seviye 5 orta, Seviye 10 büyük sayılar).</p>
-          <p>Doğru yanıtlar seviye atlamanı sağlar; yanlışlarda ceza yok ama kazanma fırsatı kaçabilir.</p>
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div>
+            <div style="font-size:14px;color:var(--text)">Düşük Güç Modu</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px">Blur, gölge ve ağır efektleri kapat</div>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="lowPerfToggle" onchange="setLowPerf(this.checked)">
+            <span class="toggle-track"></span>
+          </label>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div>
+            <div style="font-size:14px;color:var(--text)">Konfeti Efekti</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px">Level-up ve ödül animasyonu</div>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="confettiToggle" checked onchange="state.confettiOff=!this.checked;saveState()">
+            <span class="toggle-track"></span>
+          </label>
         </div>
       </div>
     </div>
 
-    <div style="margin-top:12px;color:var(--muted);font-size:13px">
-      Yapımcı: <strong>SKYDIVEX</strong> • 2025
+    <!-- Ses -->
+    <div style="padding:16px 20px;border-bottom:1px solid var(--border)">
+      <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted2);margin-bottom:12px">🔊 Ses & Bildirimler</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <span style="font-size:14px;color:var(--text)">Ses Efektleri</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="settingSoundToggle" checked>
+          <span class="toggle-track"></span>
+        </label>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <div style="font-size:14px;color:var(--text)">Push Bildirimleri</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px">Site kapalıyken de bildirim al</div>
+        </div>
+        <button id="pushToggleBtn" onclick="togglePushNotifications()" style="padding:7px 14px;border-radius:10px;border:1px solid var(--border);background:var(--glass2);color:var(--muted);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">Aç</button>
+      </div>
+    </div>
+
+    <!-- Görünüm -->
+    <div style="padding:16px 20px;border-bottom:1px solid var(--border)">
+      <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted2);margin-bottom:12px">🎨 Görünüm</div>
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <span style="font-size:14px;color:var(--text)">Vurgu Rengi</span>
+          <input type="color" id="settingBtnColor2" value="#00ff66" style="width:44px;height:32px;border:2px solid var(--border);background:none;cursor:pointer;border-radius:10px;padding:2px">
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <span style="font-size:14px;color:var(--text)">Arka Plan Rengi</span>
+          <input type="color" id="settingBgColor2" value="#0b1220" style="width:44px;height:32px;border:2px solid var(--border);background:none;cursor:pointer;border-radius:10px;padding:2px">
+        </div>
+        <div>
+          <div style="font-size:14px;color:var(--text);margin-bottom:8px">Arka Plan Fotoğrafı</div>
+          <div style="display:flex;gap:8px">
+            <button id="settingBgImageBtn" class="btn ghost" style="flex:1">📁 Yükle</button>
+            <input id="settingBgImageInput" type="file" accept="image/*" style="display:none">
+            <button id="settingClearBgBtn" class="btn ghost" style="flex:1">🗑 Temizle</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Kaydet -->
+    <div style="padding:16px 20px;display:flex;gap:10px">
+      <button id="saveSettingsBtn" class="btn" style="flex:1;padding:13px">💾 Kaydet</button>
     </div>
   </div>
 </div>
 
-<script>
-/* --------------------------
-   MathGame v1.2.5 - Logic JS
-   -------------------------- */
+<!-- Görevler Modalı -->
+<div id="questModal" style="display:none">
+  <div id="questCard" style="width:100%;max-width:480px;max-height:88vh;background:#0a0e16;border:1px solid var(--border2);border-radius:28px 28px 0 0;overflow-y:auto;animation:slideUp .35s ease;padding-bottom:40px">
+    <div style="position:sticky;top:0;z-index:10;background:#0a0e16;padding:18px 20px 14px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <div style="font-family:var(--font-head);font-size:20px;font-weight:900">📋 Görevler</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:4px">
+          <span id="dailyTimer" style="font-size:11px;color:var(--muted)"></span>
+          
+        </div>
+      </div>
+      <button onclick="closeModal(document.getElementById('questModal'))" style="width:36px;height:36px;border-radius:50%;background:var(--glass2);border:1px solid var(--border);color:var(--muted);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
+    </div>
+    <!-- Sekmeler -->
+    <div style="position:sticky;top:64px;z-index:9;background:#0a0e16;display:flex;gap:4px;padding:12px 16px;border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none">
+      <button class="quest-tab active" id="qtabDaily"   onclick="switchQuestTab('daily')">📅 Günlük</button>
+      <button class="quest-tab"        id="qtabWeekly"  onclick="switchQuestTab('weekly')">📆 Haftalık</button>
+      <button class="quest-tab"        id="qtabPerm"    onclick="switchQuestTab('perm')">⭐ Kalıcı</button>
+      <button class="quest-tab"        id="qtabAchieve" onclick="switchQuestTab('achieve')">🏆 Başarım</button>
+    </div>
+    <div id="dailyTasksList" style="padding:16px"></div>
+  </div>
+</div>
 
-/* State */
-const LS_KEY = 'mathgame_v1_2_5';
-let state = {
-  player: null,
-  score: 0,
-  level: 1,
-  leaderboard: {},
-  ops: ['+','-'],
-  soundOn: true,
-  btnColor: '#00ff66',
-  bgColor: '#08121a',
-  bgImage: null
-};
+<!-- Mağaza Modalı -->
+<div id="shopModal" style="display:none">
+  <div id="shopCard" style="width:100%;max-width:480px;max-height:88vh;background:#0a0e16;border:1px solid var(--border2);border-radius:28px 28px 0 0;overflow-y:auto;animation:slideUp .35s ease;padding-bottom:40px">
 
-/* DOM refs */
-const bgLayer = document.getElementById('bgLayer');
+    <!-- Header -->
+    <div style="position:sticky;top:0;z-index:10;background:#0a0e16;padding:18px 20px 14px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <div style="font-family:var(--font-head);font-size:20px;font-weight:900">🏪 Mağaza</div>
+        <div style="display:flex;gap:8px;margin-top:6px">
+          <div style="display:flex;align-items:center;gap:4px;background:rgba(255,215,0,0.1);border:1px solid rgba(255,215,0,0.3);border-radius:10px;padding:4px 10px">
+            <span>💰</span><span id="shopCoinBal" style="font-weight:800;color:#ffd700;font-size:13px">0</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:4px;background:rgba(99,179,237,0.1);border:1px solid rgba(99,179,237,0.3);border-radius:10px;padding:4px 10px">
+            <span>💎</span><span id="shopDiaBal" style="font-weight:800;color:#63b3ed;font-size:13px">0</span>
+          </div>
+        </div>
+      </div>
+      <button onclick="closeModal(document.getElementById('shopModal'))" style="width:36px;height:36px;border-radius:50%;background:var(--glass2);border:1px solid var(--border);color:var(--muted);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
+    </div>
 
-const entryCard = document.getElementById('entryCard');
-const playerNameInput = document.getElementById('playerName');
-const enterBtn = document.getElementById('enterBtn');
-const guestBtn = document.getElementById('guestBtn');
+    <!-- Sekme -->
+    <div style="position:sticky;top:64px;z-index:9;background:#0a0e16;display:flex;gap:4px;padding:12px 16px;border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none">
+      <button class="shop-tab active" onclick="switchShopTab('jokers')" id="shopTabJokers">🃏 Jokerler</button>
+      <button class="shop-tab" onclick="switchShopTab('avatars')" id="shopTabAvatars">🖼️ Avatarlar</button>
+      <button class="shop-tab" onclick="switchShopTab('badges')" id="shopTabBadges">🏅 Rozetler</button>
+      <button class="shop-tab" onclick="switchShopTab('clans')" id="shopTabClans">👥 Klan</button>
+    </div>
 
-const menuCard = document.getElementById('menuCard');
-const playerLabel = document.getElementById('playerLabel');
-const startGameBtn = document.getElementById('startGameBtn');
-const logoutBtn = document.getElementById('logoutBtn');
-const openSettings = document.getElementById('openSettings');
-const openAbout = document.getElementById('openAbout');
-const resetScores = document.getElementById('resetScores');
+    <!-- İçerik -->
+    <div id="shopContent" style="padding:16px"></div>
+  </div>
+</div>
 
-const leaderboardEl = document.getElementById('leaderboard');
-const boardDiv = document.getElementById('board');
+<!-- Klan Modalı -->
+<div id="clanModal" style="display:none">
+  <div id="clanCard" style="width:100%;max-width:480px;max-height:88vh;background:#0a0e16;border:1px solid var(--border2);border-radius:28px 28px 0 0;overflow-y:auto;animation:slideUp .35s ease;padding-bottom:40px">
+    <div style="position:sticky;top:0;z-index:10;background:#0a0e16;padding:18px 20px 14px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+      <div style="font-family:var(--font-head);font-size:20px;font-weight:900">👥 Klanlar</div>
+      <button onclick="closeModal(document.getElementById('clanModal'))" style="width:36px;height:36px;border-radius:50%;background:var(--glass2);border:1px solid var(--border);color:var(--muted);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
+    </div>
+    <div style="position:sticky;top:64px;z-index:9;background:#0a0e16;display:flex;gap:4px;padding:12px 16px;border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none">
+      <button class="shop-tab active" onclick="switchClanTab('my')"         id="clanTabMy">👤 Klanım</button>
+      <button class="shop-tab"        onclick="switchClanTab('search')"      id="clanTabSearch">🔍 Ara</button>
+      <button class="shop-tab"        onclick="switchClanTab('create')"      id="clanTabCreate">➕ Kur</button>
+      <button class="shop-tab"        onclick="switchClanTab('ranking')"     id="clanTabRanking">🏆 Sıralama</button>
+      <button class="shop-tab"        onclick="switchClanTab('tournament')"  id="clanTabTournament">⚔️ Turnuva</button>
+      <button class="shop-tab"        onclick="switchClanTab('settings')"    id="clanTabSettings">⚙️ Ayarlar</button>
+    </div>
+    <div id="clanContent" style="padding:16px"></div>
+  </div>
+</div>
 
-const scoreDisplay = document.getElementById('scoreDisplay');
-const levelDisplay = document.getElementById('levelDisplay');
+<!-- Confirm Modal -->
+<div id="confirmModal" style="display:none">
+  <div id="confirmCard">
+    <div style="font-weight:800;font-size:16px" id="confirmTitle">Emin misin?</div>
+    <div class="confirm-msg" id="confirmMsg"></div>
+    <div class="confirm-btns">
+      <button id="confirmOk" class="btn">Evet</button>
+      <button id="confirmCancel" class="btn ghost">İptal</button>
+    </div>
+  </div>
+</div>
 
-const btnColorInput = document.getElementById('btnColor');
-const bgColorInput = document.getElementById('bgColor');
-const bgImageBtn = document.getElementById('bgImageBtn');
-const bgImageInput = document.getElementById('bgImageInput');
-const clearBgBtn = document.getElementById('clearBgBtn');
+<!-- About modal -->
+<div id="aboutModal" style="display:none">
+  <div id="aboutCard">
 
-const gameArea = document.getElementById('gameArea');
-const playerDisplay = document.getElementById('playerDisplay');
-const levelUI = document.getElementById('levelUI');
-const scoreUI = document.getElementById('scoreUI');
-const multiplierUI = document.getElementById('multiplierUI');
-const rewardUI = document.getElementById('rewardUI');
+    <!-- Hero başlık -->
+    <div class="about-hero" style="position:sticky;top:0;z-index:10">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <div class="about-hero-title">MathGame</div>
+          <div class="about-hero-sub">Skydivex Edition — v3.5</div>
+          <div class="about-badge">⚡ v3.5</div>
+        </div>
+        <button id="closeAboutModal" class="btn ghost" style="padding:7px 14px;font-size:13px">✕</button>
+      </div>
+    </div>
 
-const questionText = document.getElementById('questionText');
-const answerInput = document.getElementById('answerInput');
-const submitAnswerBtn = document.getElementById('submitAnswerBtn');
-const resultMsg = document.getElementById('resultMsg');
+    <div class="about-body">
 
-const pauseOverlay = document.getElementById('pauseOverlay');
-const resumeBtn = document.getElementById('resumeBtn');
-const pauseSettingsBtn = document.getElementById('pauseSettingsBtn');
-const pauseMenuBtn = document.getElementById('pauseMenuBtn');
-const settingsPanel = document.getElementById('settingsPanel');
-const settingSound = document.getElementById('settingSound');
-const settingBtnColor = document.getElementById('settingBtnColor');
-const settingBgColor = document.getElementById('settingBgColor');
+      <!-- Nasıl Oynanır -->
+      <div class="about-section">
+        <div class="about-section-title">🎮 <span data-i18n="how_to_play">Nasıl Oynanır</span></div>
+        <div class="about-how-grid">
+          <div class="about-how-item">
+            <div class="how-icon">🧮</div>
+            <div class="how-title">Matematik Modu</div>
+            <div class="how-desc">Gelen soruyu cevapla, seviye atla. Ödül = Seviye × 5p.</div>
+          </div>
+          <div class="about-how-item">
+            <div class="how-icon">🤪</div>
+            <div class="how-title">Absürt Mod</div>
+            <div class="how-desc">AI tarafından üretilen eğlenceli sorular. Puan yok, sadece eğlence!</div>
+          </div>
+          <div class="about-how-item">
+            <div class="how-icon">📈</div>
+            <div class="how-title">Artan Zorluk</div>
+            <div class="how-desc">Seviye 5'ten itibaren eksik sayı, seviye 15'ten denklem soruları çıkar.</div>
+          </div>
+          <div class="about-how-item">
+            <div class="how-icon">💥</div>
+            <div class="how-title">Ceza Sistemi</div>
+            <div class="how-desc">Yanlış cevapta puan kesilir: max(10, Seviye × 8) puan.</div>
+          </div>
+          <div class="about-how-item">
+            <div class="how-icon">🌐</div>
+            <div class="how-title">Online Liderlik</div>
+            <div class="how-desc">Kategoriye göre ayrı tablolar: Toplama, Çıkarma, Çarpma, Bölme, Karma.</div>
+          </div>
+          <div class="about-how-item">
+            <div class="how-icon">🔐</div>
+            <div class="how-title">Hesap Sistemi</div>
+            <div class="how-desc">Google veya e-posta ile giriş yap. PIN belirle — Google olmadan da giriş yap.</div>
+          </div>
+          <div class="about-how-item">
+            <div class="how-icon">🏆</div>
+            <div class="how-title">Başarılar</div>
+            <div class="how-desc">32 farklı başarı rozeti — seri, seviye, puan ve daha fazlası.</div>
+          </div>
+          <div class="about-how-item">
+            <div class="how-icon">📅</div>
+            <div class="how-title">Günlük Görevler</div>
+            <div class="how-desc">Her gün 3 yeni görev. Tamamla, bonus puan kazan.</div>
+          </div>
+        </div>
+      </div>
 
-const aboutModal = document.getElementById('aboutModal');
-const openAboutBtn = document.getElementById('openAbout');
-const closeAboutModal = document.getElementById('closeAboutModal');
+      <!-- Versiyon geçmişi -->
+      <div class="about-section">
+        <div class="about-section-title">📋 <span data-i18n="version_history">Versiyon Geçmişi</span></div>
+        <div id="changelogAccordion">
 
-const quickSoundToggle = document.getElementById('soundToggle');
-const opCheckboxes = document.querySelectorAll('.opType');
-const resetBtn = document.getElementById('resetScores');
+          <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+              <div style="display:flex;align-items:center;gap:10px">
+                <span style="font-size:11px;font-weight:800;background:rgba(255,255,255,0.08);border-radius:8px;padding:3px 8px;color:var(--muted)">v1.0</span>
+                <span style="font-size:13px;color:var(--muted)">Temel motor</span>
+              </div>
+              <span class="accordion-arrow">▼</span>
+            </div>
+            <div class="accordion-body">Temel soru/cevap motoru, puanlama sistemi ve giriş ekranı.</div>
+          </div>
 
-/* Audio (WebAudio, short UI tones) */
-const AudioCtx = window.AudioContext || window.webkitAudioContext;
-let audioCtx = null;
-let masterGain = null;
+          <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+              <div style="display:flex;align-items:center;gap:10px">
+                <span style="font-size:11px;font-weight:800;background:rgba(255,255,255,0.08);border-radius:8px;padding:3px 8px;color:var(--muted)">v1.1</span>
+                <span style="font-size:13px;color:var(--muted)">Animasyonlar</span>
+              </div>
+              <span class="accordion-arrow">▼</span>
+            </div>
+            <div class="accordion-body">Menü animasyonları, WebAudio ses efektleri, localStorage kayıt.</div>
+          </div>
 
-function initAudio(){
-  if(audioCtx) return;
-  try{
-    audioCtx = new AudioCtx();
-    masterGain = audioCtx.createGain(); masterGain.gain.value = 0; masterGain.connect(audioCtx.destination);
-  }catch(e){
-    audioCtx = null;
-    console.warn('Audio not supported');
-  }
-}
-function playTone(type='sine', freq=880, dur=0.12, gain=0.5){
-  if(!state.soundOn) return;
-  initAudio();
-  if(!audioCtx) return;
-  const o = audioCtx.createOscillator();
-  const g = audioCtx.createGain();
-  o.type = type; o.frequency.value = freq;
-  o.connect(g); g.connect(masterGain);
-  const now = audioCtx.currentTime;
-  g.gain.setValueAtTime(0.0001, now);
-  g.gain.linearRampToValueAtTime(gain*state.soundOn, now+0.003);
-  g.gain.exponentialRampToValueAtTime(0.0001, now+dur);
-  o.start(now); o.stop(now+dur+0.02);
-}
+          <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+              <div style="display:flex;align-items:center;gap:10px">
+                <span style="font-size:11px;font-weight:800;background:rgba(255,255,255,0.08);border-radius:8px;padding:3px 8px;color:var(--muted)">v1.2</span>
+                <span style="font-size:13px;color:var(--muted)">Özelleştirme</span>
+              </div>
+              <span class="accordion-arrow">▼</span>
+            </div>
+            <div class="accordion-body">Görsel özelleştirme, operatör seçimi, liderlik tablosu iyileştirmeleri.</div>
+          </div>
 
-/* Click/success/fail convenience */
-function clickSound(){ playTone('sine', 1100, 0.08, 0.35); }
-function successSound(){ playTone('triangle', 660, 0.22, 0.9); }
-function failSound(){ playTone('sawtooth', 160, 0.36, 0.6); }
+          <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+              <div style="display:flex;align-items:center;gap:10px">
+                <span style="font-size:11px;font-weight:800;background:rgba(255,255,255,0.08);border-radius:8px;padding:3px 8px;color:var(--muted)">v1.3</span>
+                <span style="font-size:13px;color:var(--muted)">Ayarlar</span>
+              </div>
+              <span class="accordion-arrow">▼</span>
+            </div>
+            <div class="accordion-body">Ayarlar paneli, confirm modal, navigasyon düzeltmeleri, güvenli eval.</div>
+          </div>
 
-/* Persist state */
-function loadState(){
-  try{
-    const raw = JSON.parse(localStorage.getItem(LS_KEY) || '{}');
-    state = Object.assign(state, raw || {});
-  }catch(e){}
-}
-function saveState(){
-  try{ localStorage.setItem(LS_KEY, JSON.stringify(state)); }catch(e){}
-}
+          <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+              <div style="display:flex;align-items:center;gap:10px">
+                <span style="font-size:11px;font-weight:800;background:rgba(255,255,255,0.08);border-radius:8px;padding:3px 8px;color:var(--muted)">v2.0</span>
+                <span style="font-size:13px;color:var(--muted)">Absürt Mod</span>
+              </div>
+              <span class="accordion-arrow">▼</span>
+            </div>
+            <div class="accordion-body">Absürt Mod (AI/Groq), başarı sistemi (32 rozet), günlük görevler, 5 tema, arka plan kütüphanesi, partikül &amp; konfeti, level-up ekranı, istatistik paneli.</div>
+          </div>
 
-/* Leaderboard render */
-function renderLeaderboard(){
-  const arr = Object.entries(state.leaderboard).sort((a,b)=>b[1]-a[1]);
-  if(arr.length===0){ leaderboardEl.innerHTML='<i style="color:var(--muted)">Henüz kimse yok</i>'; boardDiv.innerHTML=''; return; }
-  leaderboardEl.innerHTML = arr.map((e,i)=>`<div class="lbItem"><div>${i+1}. ${escapeHtml(e[0])}</div><div>${e[1]}p</div></div>`).join('');
-  boardDiv.innerHTML = arr.map(e=>`<div style="display:flex;justify-content:space-between;padding:6px;border-radius:6px;background:rgba(255,255,255,0.02);margin-bottom:6px">${escapeHtml(e[0])}<strong>${e[1]}p</strong></div>`).join('');
-}
+          <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+              <div style="display:flex;align-items:center;gap:10px">
+                <span style="font-size:11px;font-weight:800;background:rgba(255,255,255,0.08);border-radius:8px;padding:3px 8px;color:var(--muted)">v2.1</span>
+                <span style="font-size:13px;color:var(--muted)">Online &amp; Auth</span>
+              </div>
+              <span class="accordion-arrow">▼</span>
+            </div>
+            <div class="accordion-body">Google + e-posta girişi, oyuna özel PIN sistemi, online liderlik tablosu, istatistik &amp; başarım bulut kaydı, admin paneli, artan zorluk sistemi.</div>
+          </div>
 
-/* helpers */
-function escapeHtml(s=''){ return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"})[m]); }
-function randInt(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
+          <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+              <div style="display:flex;align-items:center;gap:10px">
+                <span style="font-size:11px;font-weight:800;background:rgba(255,255,255,0.08);border-radius:8px;padding:3px 8px;color:var(--muted)">v2.5</span>
+                <span style="font-size:13px;color:var(--muted)">i18n &amp; SA</span>
+              </div>
+              <span class="accordion-arrow">▼</span>
+            </div>
+            <div class="accordion-body">fb3_ token sistemi, süper admin paneli, online durum, absürt soru cache, hile önleme, GA4, i18n çoklu dil (20 dil), puan bulut senkronizasyonu, günlük giriş ödülleri.</div>
+          </div>
 
-/* UI initial apply */
-loadState();
-document.documentElement.style.setProperty('--accent', state.btnColor || '#00ff66');
-document.documentElement.style.setProperty('--neon', state.btnColor || '#00ff66');
-document.documentElement.style.setProperty('--bg-mid', state.bgColor || '#08121a');
-if(state.bgImage) bgLayer.style.backgroundImage = `url(${state.bgImage}), radial-gradient(circle at 50% 40%, rgba(0,255,102,0.02), transparent 18%), linear-gradient(180deg,var(--bg-dark),var(--bg-mid))`;
+          <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+              <div style="display:flex;align-items:center;gap:10px">
+                <span style="font-size:11px;font-weight:800;background:rgba(255,255,255,0.08);border-radius:8px;padding:3px 8px;color:var(--muted)">v2.6</span>
+                <span style="font-size:13px;color:var(--muted)">Ekonomi &amp; Klan</span>
+              </div>
+              <span class="accordion-arrow">▼</span>
+            </div>
+            <div class="accordion-body">Ekonomi sistemi (💰 Coin + 💎 Elmas), 4 joker türü, Mağaza, Klan sistemi, Görev modalı (100+ görev), Groq AI görev üretimi, 15 günlük giriş ödül takvimi.</div>
+          </div>
 
-/* Setup UI from state */
-quickSoundToggle.checked = !!state.soundOn;
-btnColorInput.value = state.btnColor || '#00ff66';
-bgColorInput.value = state.bgColor || '#08121a';
-settingBtnColor.value = state.btnColor || '#00ff66';
-settingBgColor.value = state.bgColor || '#08121a';
-settingSound.checked = !!state.soundOn;
+          <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+              <div style="display:flex;align-items:center;gap:10px">
+                <span style="font-size:11px;font-weight:800;background:rgba(255,255,255,0.08);border-radius:8px;padding:3px 8px;color:var(--muted)">v3.1</span>
+                <span style="font-size:13px;color:var(--muted)">Masaüstü &amp; Bildirimler</span>
+              </div>
+              <span class="accordion-arrow">▼</span>
+            </div>
+            <div class="accordion-body">Masaüstü tasarımı (sidebar layout), oyuncu arama sayfası (tam sayfa), Discord webhook klan entegrasyonu, klan davet linki (?clan-invite=ID), Web Push bildirimleri, APK indirme butonu, SA klan görüntüleme, RAM optimizasyonu, sürüm accordion.</div>
+          </div>
 
-/* Flow: entry -> menu */
-enterBtn.addEventListener('click', ()=>{
-  const name = (playerNameInput.value || '').trim();
-  if(!name){ alert('Adını gir!'); return; }
-  startSession(name);
-});
-guestBtn.addEventListener('click', ()=> startSession('Misafir-'+randInt(1000,9999)));
+          <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+              <div style="display:flex;align-items:center;gap:10px">
+                <span style="font-size:11px;font-weight:800;background:rgba(255,255,255,0.08);border-radius:8px;padding:3px 8px;color:var(--muted)">v3.2</span>
+                <span style="font-size:13px;color:var(--muted)">Discord &amp; Topluluk</span>
+              </div>
+              <span class="accordion-arrow">▼</span>
+            </div>
+            <div class="accordion-body">Discord OAuth2 entegrasyonu, resmi sunucu butonu, klan Discord linki, profil Discord bağlantısı, webhook sistemi kaldırıldı, slash komut listesi genişletildi (28 komut), yönetici izin sistemi.</div>
+          </div>
 
-function startSession(name){
-  state.player = name;
-  state.score = state.leaderboard[name] || 0;
-  state.level = state.level || 1;
-  saveState();
-  playerLabel.innerText = name;
-  document.getElementById('playerDisplay').innerText = name;
-  document.getElementById('scoreDisplay').innerText = state.score;
-  document.getElementById('levelDisplay').innerText = state.level;
-  menuCard.classList.add('show');
-  entryCard.style.display = 'none';
-  clickSound();
-  renderLeaderboard();
-  updateMiniInfo();
-}
+          <div class="accordion-item" style="border-color:rgba(0,255,136,0.25)">
+            <div class="accordion-header open" onclick="toggleAccordion(this)" style="background:rgba(0,255,136,0.06)">
+              <div style="display:flex;align-items:center;gap:10px">
+                <span style="font-size:11px;font-weight:800;background:rgba(0,255,136,0.15);border-radius:8px;padding:3px 8px;color:var(--neon)">v3.5 ✦ Şu An</span>
+                <span style="font-size:13px;color:var(--text)">AI Destek &amp; Klan Senkronizasyonu</span>
+              </div>
+              <span class="accordion-arrow" style="color:var(--neon)">▼</span>
+            </div>
+            <div class="accordion-body open">
+              Akıllı Destek Sistemi (FAQ KV + Groq AI + eskalasyon butonu), admin öğrenme mekanizması (bot cevabı FAQ'a kaydeder), /admin-sync-clans komutu (eski klanları Discord'a aktarır — kanal+rol+üye atama), Discord hesabı bağlandığında klan rolü otomatik atanır, Otomatik Veri Yedeği (Cron Trigger → Discord), landscape yatay ekran modu (side-by-side).
+            </div>
+          </div>
 
-/* menu buttons */
-startGameBtn.addEventListener('click', ()=>{
-  clickSound();
-  menuCard.classList.remove('show');
-  setTimeout(()=> menuCard.style.display='none',420);
-  gameArea.style.display = 'block';
-  loadGameUI();
-  nextQuestion(true);
-});
-logoutBtn.addEventListener('click', ()=>{
-  if(!confirm('Oturumu kapatmak istiyor musun?')) return;
-  clickSound();
-  state.player = null; state.score = 0;
-  saveState();
-  entryCard.style.display='block';
-  menuCard.classList.remove('show'); menuCard.style.display='none';
-});
+        </div>
+      </div>
 
-/* open settings & about */
-openSettings.addEventListener('click', ()=> {
-  clickSound();
-  settingsPanel.style.display = (settingsPanel.style.display==='block') ? 'none' : 'block';
-});
-openAbout.addEventListener('click', ()=> {
-  clickSound();
-  aboutModal.classList.add('show');
-});
-document.getElementById('closeAboutModal').addEventListener('click', ()=> { aboutModal.classList.remove('show'); clickSound(); });
+    </div>
 
-resetScores.addEventListener('click', ()=> {
-  if(!confirm('Skorları sıfırlamak istiyor musun?')) return;
-  state.leaderboard = {}; saveState(); renderLeaderboard(); clickSound();
-});
+    <div class="about-footer">
+      <div style="font-size:12px;color:var(--muted)">Yapımcı: <strong style="color:var(--neon)">SKYDIVEX</strong> • 2026</div>
+      <div style="font-size:11px;color:var(--muted2);margin-top:4px">Proje Sahibi: <strong style="color:var(--text)">Enes ŞEKER</strong></div>
+      <div style="font-size:11px;color:var(--muted2);margin-top:2px">Ablam: <strong style="color:var(--text)">Esleew</strong></div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.3)">Tüm hakları saklıdır</div>
+    </div>
 
-/* quick settings */
-quickSoundToggle.addEventListener('change', (e)=> { state.soundOn = e.target.checked; saveState(); clickSound(); });
-opCheckboxes.forEach(cb=> cb.addEventListener('change', ()=> {
-  const types = Array.from(opCheckboxes).filter(x=>x.checked).map(x=>x.value);
-  state.ops = types.length ? types : ['+'];
-  saveState();
-}));
+  </div>
+</div>
 
-/* bg & button color */
-btnColorInput.addEventListener('input', e=> {
-  state.btnColor = e.target.value; document.documentElement.style.setProperty('--neon', state.btnColor); saveState(); clickSound();
-});
-bgColorInput.addEventListener('input', e=> {
-  state.bgColor = e.target.value; document.documentElement.style.setProperty('--bg-mid', state.bgColor); saveState(); clickSound();
-});
-bgImageBtn.addEventListener('click', ()=> bgImageInput.click());
-bgImageInput.addEventListener('change', (ev)=>{
-  const f = ev.target.files[0]; if(!f) return;
-  const r = new FileReader();
-  r.onload = (e)=> {
-    state.bgImage = e.target.result;
-    bgLayer.style.backgroundImage = `url(${state.bgImage}), radial-gradient(circle at 50% 40%, rgba(0,255,102,0.02), transparent 18%), linear-gradient(180deg,var(--bg-dark),var(--bg-mid))`;
-    bgLayer.style.backgroundSize = 'cover'; bgLayer.style.backgroundPosition='center center';
-    saveState();
-  };
-  r.readAsDataURL(f);
-});
-clearBgBtn.addEventListener('click', ()=> {
-  state.bgImage = null; bgLayer.style.backgroundImage = ''; saveState(); clickSound();
-});
 
-/* game engine */
-let correctAnswer = null;
-let questionCount = 0;
+<script src="js/config.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/economy.js"></script>
+<script src="js/clan.js"></script>
+<script src="js/effects.js"></script>
+<script src="js/achievements.js"></script>
+<script src="js/admin.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/game.js"></script>
 
-function loadGameUI(){
-  document.getElementById('playerDisplay').innerText = state.player;
-  document.getElementById('levelUI').innerText = state.level;
-  document.getElementById('scoreUI').innerText = state.score;
-  multiplierUI.innerText = `${state.level} × 10`;
-  rewardUI.innerText = state.level*10;
-}
 
-/* difficulty base - bigger level -> larger numbers */
-function difficultyBase(level){
-  return Math.min(10 + Math.floor(level * 3), 300); // keeps growth reasonable
-}
+<!-- Başarı Detay Popup -->
+<div id="achPopup">
+  <div id="achPopupCard">
+    <div class="ach-popup-shine"></div>
+    <div class="ach-popup-icon" id="achPopupIcon">🏆</div>
+    <div class="ach-popup-body">
+      <div class="ach-popup-label" data-i18n="ach_unlocked">🎉 Başarım Açıldı!</div>
+      <div class="ach-popup-name" id="achPopupName">—</div>
+      <div class="ach-popup-desc" id="achPopupDesc">—</div>
+    </div>
+  </div>
+</div>
 
-function nextQuestion(reset=false){
-  if(reset){
-    state.level = state.level || 1; questionCount = 0;
-  }
-  questionCount++;
-  const lvl = state.level || 1;
-  const base = difficultyBase(lvl);
-  const ops = state.ops && state.ops.length ? state.ops : ['+'];
-  const op = ops[randInt(0, ops.length-1)];
-  let a = randInt(1, Math.max(2, Math.floor(base/2)));
-  let b = randInt(1, Math.max(1, Math.floor(base/2)));
-  if(op === '/') { // ensure clean-ish division or allow decimals
-    b = randInt(1, Math.max(1,Math.floor(base/4)));
-    a = b * randInt(1, Math.max(1,Math.floor(base/6)));
-  } else if(op === '-' && b > a){ [a,b] = [b,a]; }
-  correctAnswer = Math.round(eval(a + op + b) * 100) / 100;
-  questionText.innerText = `Seviye ${lvl}: ${a} ${op} ${b} = ?`;
-  rewardUI.innerText = (lvl * 10);
-  multiplierUI.innerText = `${lvl} × 10`;
-  resultMsg.style.opacity = 0;
-  answerInput.value = '';
-  answerInput.focus();
-}
+<!-- Başarılar Modal -->
 
-/* answer check */
-submitAnswerBtn.addEventListener('click', checkAnswer);
-answerInput.addEventListener('keydown', (e)=> { if(e.key==='Enter') checkAnswer(); });
 
-function checkAnswer(){
-  const raw = answerInput.value.trim();
-  if(raw === '') { resultMsg.style.color = '#f59e0b'; resultMsg.innerText = 'Cevap gir!'; resultMsg.style.opacity=1; failSound(); return; }
-  const user = parseFloat(raw.replace(',','.'));
-  if(Number.isNaN(user)) { resultMsg.style.color = '#f59e0b'; resultMsg.innerText = 'Sayı gir!'; resultMsg.style.opacity=1; failSound(); return; }
+<!-- Admin Panel Modal -->
 
-  if(Math.abs(user - correctAnswer) < 0.01){
-    // correct
-    successSound();
-    resultMsg.style.color = '#00ff66';
-    const gained = state.level * 10;
-    state.score = (state.score || 0) + gained;
-    state.leaderboard[state.player] = state.score;
-    state.correctStreak = (state.correctStreak || 0) + 1;
-    resultMsg.innerText = ['Aferin!','Süper!','Bravo!','Harika!'][randInt(0,3)];
-    // level up every 4 corrects
-    if(state.correctStreak > 0 && state.correctStreak % 4 === 0) {
-      state.level = Math.min(99, state.level + 1);
-    }
-    saveState();
-    loadGameUI();
-    renderLeaderboard();
-    setTimeout(()=> nextQuestion(false), 900);
-  } else {
-    // wrong
-    failSound();
-    resultMsg.style.color = '#ff6b6b';
-    resultMsg.innerText = 'Yanlış...';
-    state.correctStreak = 0;
-    saveState();
-    setTimeout(()=> { resultMsg.style.color = '#ffd166'; resultMsg.innerText = 'Doğrusu: ' + correctAnswer; }, 900);
-    setTimeout(()=> nextQuestion(false), 2000);
-  }
-}
 
-/* pause overlay + animation logic (settings slide interplay) */
-const pauseOverlayEl = document.getElementById('pauseOverlay');
-const pauseCard = document.getElementById('pauseCard');
 
-document.getElementById('pauseBtn').addEventListener('click', ()=>{
-  clickSound();
-  pauseOverlayEl.classList.add('show');
-  // blur background gradually
-  bgLayer.style.filter = 'blur(3px)';
-});
+<!-- İstek Gönder Modalı -->
+<div id="requestModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:9500;background:rgba(2,4,10,0.97);align-items:center;justify-content:center;padding:20px;box-sizing:border-box">
+  <div style="background:#0b1220;border:1.5px solid #1a2f28;border-radius:20px;padding:22px 18px;width:100%;max-width:400px;display:flex;flex-direction:column;gap:12px;box-sizing:border-box">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div style="font-size:16px;font-weight:900;color:#e6f7ea">📬 İstek / Şikayet</div>
+      <button id="closeRequestModal" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer">✕</button>
+    </div>
+    <div style="display:flex;gap:6px">
+      <button id="reqTabNew" onclick="switchReqTab('new')" style="flex:1;padding:8px;border-radius:8px;border:1px solid #00ff6644;background:rgba(0,255,102,0.1);color:#00ff66;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer">✏️ Yeni İstek</button>
+      <button id="reqTabMy"  onclick="switchReqTab('my')"  style="flex:1;padding:8px;border-radius:8px;border:1px solid #1a2f28;background:transparent;color:var(--muted);font-size:12px;font-weight:700;font-family:inherit;cursor:pointer">📋 İsteklerim</button>
+    </div>
+    <div id="reqPanelNew">
+    <select id="reqType" style="background:#060c18;border:1.5px solid #1a2f28;border-radius:10px;color:#e6f7ea;font-size:14px;padding:10px 14px;font-family:inherit;width:100%;box-sizing:border-box">
+      <option value="bug">🐛 Bug / Hata</option>
+      <option value="suggestion">💡 Öneri</option>
+      <option value="report">⚠️ Kullanıcı Şikayet</option>
+      <option value="unban">🔓 Ban İtiraz</option>
+      <option value="other">📝 Diğer</option>
+    </select>
+    <textarea id="reqMessage" placeholder="Mesajını yaz... (min 5 karakter)" maxlength="500" style="background:#060c18;border:1.5px solid #1a2f28;border-radius:10px;color:#e6f7ea;font-size:14px;padding:10px 14px;font-family:inherit;width:100%;box-sizing:border-box;min-height:100px;resize:none;outline:none"></textarea>
+    <div id="reqMsg" style="font-size:12px;text-align:center;min-height:16px"></div>
+    <button id="reqSendBtn" style="background:#00ff66;color:#030608;border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:800;font-family:inherit;cursor:pointer;width:100%">Gönder</button>
+    </div>
+    <div id="reqPanelMy" style="display:none">
+      <div id="myRequestList" style="display:flex;flex-direction:column;gap:8px;max-height:300px;overflow-y:auto"></div>
+      <button onclick="loadMyRequests()" style="margin-top:8px;width:100%;background:rgba(255,255,255,0.05);border:1px solid #1a2f28;border-radius:10px;color:var(--muted);font-size:12px;padding:8px;font-family:inherit;cursor:pointer">&#x1F504; Yenile</button>
+    </div>
 
-resumeBtn.addEventListener('click', ()=>{
-  clickSound();
-  pauseOverlayEl.classList.remove('show');
-  bgLayer.style.filter = 'blur(0px)';
-});
+    <div style="border-top:1px solid #1a2f28;padding-top:12px">
+      <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:8px">🔑 Şifremi Unuttum (e-posta girişi)</div>
+      <div style="display:flex;gap:8px">
+        <input id="resetUsername" placeholder="Kullanıcı adın" style="background:#060c18;border:1.5px solid #1a2f28;border-radius:10px;color:#e6f7ea;font-size:13px;padding:9px 12px;font-family:inherit;flex:1;outline:none;box-sizing:border-box">
+        <button id="resetRequestBtn" style="background:rgba(45,212,191,0.1);border:1.5px solid rgba(45,212,191,0.3);color:#2dd4bf;border-radius:10px;padding:9px 14px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;white-space:nowrap">Kod İste</button>
+      </div>
+      <div style="margin-top:8px;display:flex;gap:8px">
+        <input id="resetCode" placeholder="6 haneli kod" maxlength="6" style="background:#060c18;border:1.5px solid #1a2f28;border-radius:10px;color:#e6f7ea;font-size:13px;padding:9px 12px;font-family:inherit;width:100px;outline:none;box-sizing:border-box">
+        <input id="resetNewPass" placeholder="Yeni şifre" type="password" style="background:#060c18;border:1.5px solid #1a2f28;border-radius:10px;color:#e6f7ea;font-size:13px;padding:9px 12px;font-family:inherit;flex:1;outline:none;box-sizing:border-box">
+        <button id="resetConfirmBtn" style="background:rgba(45,212,191,0.1);border:1.5px solid rgba(45,212,191,0.3);color:#2dd4bf;border-radius:10px;padding:9px 14px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer">✓</button>
+      </div>
+      <div id="resetMsg" style="font-size:12px;text-align:center;min-height:16px;margin-top:4px"></div>
+    </div>
+  </div>
+</div>
 
-pauseSettingsBtn.addEventListener('click', ()=>{
-  // open settings panel inside pause card with animation
-  clickSound();
-  settingsPanel.style.display = settingsPanel.style.display==='block' ? 'none' : 'block';
-});
 
-pauseMenuBtn.addEventListener('click', ()=>{
-  if(!confirm('Ana menüye dönülsün mü? (oyun durumu kaydedilir)')) return;
-  clickSound();
-  pauseOverlayEl.classList.remove('show');
-  bgLayer.style.filter = 'blur(0px)';
-  gameArea.style.display = 'none';
-  menuCard.style.display = '';
-  menuCard.classList.add('show');
-});
 
-/* settings inside pause panel */
-settingSound.addEventListener('change', ()=> {
-  state.soundOn = settingSound.checked;
-  saveState();
-  clickSound();
-});
-settingBtnColor.addEventListener('input', ()=> {
-  state.btnColor = settingBtnColor.value; document.documentElement.style.setProperty('--neon', state.btnColor); saveState(); clickSound();
-});
-settingBgColor.addEventListener('input', ()=> {
-  state.bgColor = settingBgColor.value; document.documentElement.style.setProperty('--bg-mid', state.bgColor); saveState(); clickSound();
-});
+<!-- Genel Profil Modalı -->
+<div id="publicProfileModal" style="display:none">
+  <div id="pubProfileCard">
 
-/* About modal open/close */
-openAbout.addEventListener('click', ()=>{
-  aboutModal.classList.add('show');
-});
-document.getElementById('closeAboutModal').addEventListener('click', ()=>{
-  aboutModal.classList.remove('show');
-  clickSound();
-});
+    <!-- Hero -->
+    <div class="pub-header-bg">
+      <button onclick="closePublicProfile()" style="position:absolute;top:14px;right:14px;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,0.12);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.15);color:var(--text);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:2">✕</button>
+      <div class="pub-avatar" id="pubAvatar">?</div>
+      <div class="pub-name" id="pubName">—</div>
+      <div id="pubOnlineStatus" style="margin-top:5px;min-height:22px"></div>
+      <!-- Rozetler -->
+      <div class="pub-badges" id="pubBadges" style="margin-top:8px;display:flex;flex-wrap:wrap;gap:4px;justify-content:center"></div>
+      <!-- UID — küçük, kopyalanabilir -->
+      <div id="pubUid" onclick="copyPubUid()" title="UID'yi kopyala"
+        style="margin-top:8px;font-size:9px;color:rgba(255,255,255,0.2);font-family:var(--font-mono);cursor:pointer;letter-spacing:0.5px;padding:3px 8px;border-radius:6px;border:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.03)">—</div>
+    </div>
 
-/* mini UI info */
-function updateMiniInfo(){
-  const el = document.getElementById('miniInfo');
-  el.innerText = state.player ? `${state.player} • ${state.score}p` : '';
-}
+    <!-- Stat grid — 4 kart -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border-bottom:1px solid var(--border)">
+      <div style="background:#0d1117;padding:14px 6px;text-align:center">
+        <div style="font-family:var(--font-head);font-size:16px;font-weight:800;color:var(--neon);line-height:1" id="pubScore">0</div>
+        <div style="font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-top:3px">Puan</div>
+      </div>
+      <div style="background:#0d1117;padding:14px 6px;text-align:center">
+        <div style="font-family:var(--font-head);font-size:16px;font-weight:800;color:var(--neon);line-height:1" id="pubLevel">1</div>
+        <div style="font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-top:3px">Seviye</div>
+      </div>
+      <div style="background:#0d1117;padding:14px 6px;text-align:center">
+        <div style="font-family:var(--font-head);font-size:16px;font-weight:800;color:var(--neon);line-height:1" id="pubRank">—</div>
+        <div style="font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-top:3px">Sıra</div>
+      </div>
+      <div style="background:#0d1117;padding:14px 6px;text-align:center">
+        <div style="font-family:var(--font-head);font-size:14px;font-weight:800;color:var(--neon);line-height:1" id="pubJoined">—</div>
+        <div style="font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-top:3px">Kayıt</div>
+      </div>
+    </div>
 
-/* helper: save & render leaderboard every change */
-function updateLeaderboard(){
-  renderLeaderboard();
-  // also populate boardDiv
-  boardDiv.innerHTML = Object.entries(state.leaderboard).sort((a,b)=>b[1]-a[1]).map((e,i)=>`<div style="display:flex;justify-content:space-between;padding:6px;border-radius:6px;background:rgba(255,255,255,0.02);margin-bottom:6px">${i+1}. ${escapeHtml(e[0])}<strong>${e[1]}p</strong></div>`).join('');
-}
+    <!-- Body -->
+    <div class="pub-body" style="padding:14px 16px">
 
-/* expose quick debug */
-window._mathgame = { state, nextQuestion, checkAnswer };
+      <!-- Giriş yöntemi -->
+      <div id="pubProvider" style="font-size:11px;color:var(--muted);text-align:center;margin-bottom:10px"></div>
 
-/* initial render */
-renderLeaderboard();
-updateMiniInfo();
+      <!-- Bio -->
+      <div id="pubBioSection" style="display:none;padding:10px 14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:12px;font-size:13px;color:#c8dcd8;line-height:1.6;font-style:italic;margin-bottom:10px"></div>
 
-/* small utility to ensure audio resume on user gesture */
-document.addEventListener('click', function resumeAudioOnce(){
-  if(audioCtx && audioCtx.state==='suspended') audioCtx.resume().catch(()=>{});
-  document.removeEventListener('click', resumeAudioOnce);
-});
+      <!-- Başarımlar -->
+      <div id="pubAchSection" style="display:none;margin-bottom:10px">
+        <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--muted2);margin-bottom:8px" data-i18n="achievements">🏆 Başarımlar</div>
+        <div id="pubAchGrid" style="display:flex;flex-wrap:wrap;gap:5px"></div>
+        <div id="pubAchEmpty" style="font-size:12px;color:var(--muted);text-align:center;display:none">Henüz başarım yok</div>
+      </div>
 
-/* keyboard: esc toggles pause */
-document.addEventListener('keydown', (e)=>{
-  if(e.key==='Escape'){
-    if(pauseOverlayEl.classList.contains('show')) { resumeBtn.click(); }
-    else { document.getElementById('pauseBtn').click(); }
-  }
-});
+      <!-- Admin bölümü -->
+      <div id="pubAdminActions" style="display:none;margin-top:4px;padding:14px;background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:14px">
+        <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--muted2);margin-bottom:10px">⚡ Admin İşlemleri</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px">
+          <button onclick="pubAdminBan()" style="padding:10px 6px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:10px;color:#ef4444;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer">🚫 Ban</button>
+          <button onclick="pubAdminUnban()" style="padding:10px 6px;background:rgba(0,255,136,0.06);border:1px solid rgba(0,255,136,0.2);border-radius:10px;color:var(--neon);font-size:12px;font-weight:700;font-family:inherit;cursor:pointer">✅ Banı Kaldır</button>
+          <button onclick="pubAdminSetScore()" style="padding:10px 6px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:10px;color:#f59e0b;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer">🏆 Skor Ayarla</button>
+          <button onclick="pubAdminRemove()" style="padding:10px 6px;background:rgba(56,189,248,0.06);border:1px solid rgba(56,189,248,0.2);border-radius:10px;color:#38bdf8;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer">🗑 Tablodan Çıkar</button>
+          <button onclick="pubAdminGiveAdmin()" style="padding:10px 6px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);border-radius:10px;color:#f59e0b;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer">👑 Admin Ver</button>
+          <button onclick="pubAdminRemoveAdmin()" style="padding:10px 6px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:10px;color:var(--muted);font-size:12px;font-weight:700;font-family:inherit;cursor:pointer">❌ Admin Al</button>
+        </div>
+        <div id="pubBanInfo" style="display:none;padding:8px 12px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:8px;font-size:11px;color:#ef4444"></div>
+        <div id="pubCurrentBadges" style="display:none;margin-top:6px;padding:8px;background:var(--glass);border-radius:8px;font-size:11px;color:var(--muted)"></div>
+      </div>
 
-/* expose save to localstorage when window closed */
-window.addEventListener('beforeunload', ()=> saveState());
+    </div>
+  </div>
+</div>
 
-</script>
+<!-- Mesajlaşma Modalı -->
+<div id="chatModal" style="display:none">
+  <div id="chatBox">
+    <div id="chatHeader">
+      <div>
+        <div id="chatTitle">💬 Mesajlar</div>
+        <div id="chatSubtitle">Admin ile iletişim</div>
+      </div>
+      <button id="chatClosBtn" onclick="closeChatModal()">✕</button>
+    </div>
+    <div id="chatMessages">
+      <div class="chat-msg from-system">Admin ile yazışabilirsin. Mesajların güvende.</div>
+    </div>
+    <div id="chatInputRow">
+      <textarea id="chatInput" placeholder="Mesajını yaz..." rows="1" maxlength="500"></textarea>
+      <button id="chatSendBtn" onclick="sendChatMsg()">➤</button>
+    </div>
+  </div>
+</div>
+
+<!-- Arka Plan Kütüphanesi Modal -->
+
+
+
+
+
+
+
+<div id="bgLibModal" style="display:none">
+  <div id="bgLibInner">
+    <div class="bglib-close">
+      <h2>🖼 Arka Plan Kütüphanesi</h2>
+      <button id="bgLibClose" class="btn ghost" style="padding:6px 14px">✕ Kapat</button>
+    </div>
+    <div id="bgLibContent"></div>
+  </div>
+</div>
+
+<div id="achModal" style="display:none">
+  <div id="achModalCard">
+    <div class="ach-modal-hero" style="position:sticky;top:0;z-index:10">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div style="flex:1">
+          <div class="ach-modal-title">🏆 Başarımlar</div>
+          <div class="ach-modal-sub">
+            <span id="achUnlockedCount">0</span> / <span id="achTotalCount">0</span> rozet kazanıldı
+          </div>
+          <div class="ach-progress-bar-wrap" style="margin-top:10px">
+            <div class="ach-progress-bar-fill" id="achProgressFill" style="width:0%"></div>
+          </div>
+        </div>
+        <button id="closeAchModal" class="btn ghost sm" style="flex-shrink:0;margin-left:12px">✕</button>
+      </div>
+    </div>
+    <div class="ach-modal-body" id="achModalBody" style="flex:1;overflow-y:auto;min-height:0"></div>
+    <div class="ach-modal-footer">
+      <div style="font-size:11px;color:var(--muted);text-align:center">Rozete tıkla → detay ve nadirlik gör</div>
+    </div>
+  </div>
+</div>
+
+<!-- Başarım Detay Modal -->
+<div id="achDetailModal">
+  <div id="achDetailCard">
+    <div class="ach-detail-hero" id="achDetailHero">
+      <span class="ach-detail-icon" id="achDetailIcon">🏆</span>
+      <div id="achDetailRarityBadge" style="display:none;margin-bottom:8px"></div>
+      <div class="ach-detail-name" id="achDetailName">—</div>
+      <div class="ach-detail-cat" id="achDetailCat">—</div>
+    </div>
+    <div class="ach-detail-body">
+      <div class="ach-detail-row">
+        <span style="font-size:18px">📋</span>
+        <div>
+          <div class="ach-detail-lbl">Görev</div>
+          <div class="ach-detail-val" id="achDetailDesc">—</div>
+        </div>
+      </div>
+      <div class="ach-detail-row" id="achDetailStatusRow">
+        <span style="font-size:18px" id="achDetailStatusIcon">🔒</span>
+        <div>
+          <div class="ach-detail-lbl">Durum</div>
+          <div class="ach-detail-val" id="achDetailStatus">Henüz kazanılmadı</div>
+        </div>
+      </div>
+      <div class="ach-detail-row" id="achDetailDateRow" style="display:none">
+        <span style="font-size:18px">📅</span>
+        <div>
+          <div class="ach-detail-lbl">Kazanıldı</div>
+          <div class="ach-detail-val" id="achDetailDate">—</div>
+        </div>
+      </div>
+      <div class="ach-detail-row" id="achDetailRarityRow" style="display:none">
+        <span style="font-size:18px" id="achDetailRarityIcon">⭐</span>
+        <div>
+          <div class="ach-detail-lbl">Nadirlik</div>
+          <div class="ach-detail-val" id="achDetailRarity">—</div>
+        </div>
+      </div>
+    </div>
+    <button class="ach-detail-close" onclick="document.getElementById('achDetailModal').classList.remove('show')">Kapat</button>
+  </div>
+</div>
+
+<!-- Süper Admin Modal -->
+<div id="superAdminModal">
+  <div id="superAdminCard">
+    <div class="sa-hero">
+      <div>
+        <div class="sa-title">👑 Süper Admin Paneli</div>
+        <div class="sa-sub">Benimle Eslem ablama özeldir canum ablacum</div>
+      </div>
+      <button onclick="document.getElementById('superAdminModal').classList.remove('show')"
+        style="width:30px;height:30px;border-radius:50%;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);color:#f59e0b;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
+    </div>
+    <div class="sa-body">
+
+      <!-- GA4 Analytics Dashboard -->
+      <div class="sa-section-title">📊 Google Analytics (Son 7 Gün)</div>
+      <button class="admin-btn" onclick="loadGA4Stats()" style="width:100%;background:rgba(245,158,11,0.12);color:#f59e0b;border:1px solid rgba(245,158,11,0.3);margin-bottom:8px">
+        📈 Analytics Verilerini Getir
+      </button>
+      <div id="ga4Dashboard" style="display:none">
+        <!-- Özet kartlar -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px" id="ga4Cards"></div>
+        <!-- Günlük grafik -->
+        <div style="background:#060a10;border:1px solid rgba(245,158,11,0.15);border-radius:10px;padding:10px;margin-bottom:8px">
+          <div style="font-size:10px;font-weight:800;color:rgba(245,158,11,0.6);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Günlük Aktif Kullanıcı (7 gün)</div>
+          <div id="ga4Chart" style="display:flex;align-items:flex-end;gap:4px;height:60px"></div>
+          <div id="ga4ChartLabels" style="display:flex;gap:4px;margin-top:4px"></div>
+        </div>
+        <!-- Top events -->
+        <div style="background:#060a10;border:1px solid rgba(245,158,11,0.15);border-radius:10px;padding:10px;margin-bottom:8px">
+          <div style="font-size:10px;font-weight:800;color:rgba(245,158,11,0.6);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">🎯 Top Event'ler (7 gün)</div>
+          <div id="ga4Events"></div>
+        </div>
+        <!-- Ülkeler -->
+        <div style="background:#060a10;border:1px solid rgba(245,158,11,0.15);border-radius:10px;padding:10px;margin-bottom:10px">
+          <div style="font-size:10px;font-weight:800;color:rgba(245,158,11,0.6);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">🌍 Ülke Dağılımı (30 gün)</div>
+          <div id="ga4Countries"></div>
+        </div>
+      </div>
+      <div id="ga4Error" style="display:none;font-size:12px;color:#ef4444;padding:8px;background:rgba(239,68,68,0.08);border-radius:8px;margin-bottom:8px"></div>
+
+      <!-- Derin Bilgi -->
+      <div class="sa-section-title">🔍 Derin Kullanıcı Bilgisi</div>
+      <div class="admin-row" style="margin-bottom:8px">
+        <input class="admin-input" id="saTargetName" placeholder="Kullanıcı adı" style="flex:1;margin-bottom:0;border-color:rgba(245,158,11,0.2)">
+        <button class="admin-btn" style="background:rgba(245,158,11,0.12);color:#f59e0b;border:1px solid rgba(245,158,11,0.3)" onclick="adminDeepInfo()">🔍 Getir</button>
+      </div>
+      <div class="sa-result-box" id="saResultBox"></div>
+
+      <!-- Süper Admin Yönetimi -->
+      <div class="sa-section-title" style="margin-top:14px">⭐ Süper Admin Yönetimi</div>
+      <div class="admin-row" style="margin-bottom:6px">
+        <input class="admin-input" id="adminSuperAdminName" placeholder="Kullanıcı adı" style="flex:1;margin-bottom:0;border-color:rgba(245,158,11,0.2)">
+        <button class="admin-btn" style="background:rgba(245,158,11,0.12);color:#f59e0b;border:1px solid rgba(245,158,11,0.3)" onclick="adminGiveSuperAdmin()">Ver</button>
+        <button class="admin-btn admin-btn-red" onclick="adminRemoveSuperAdmin()">Al</button>
+      </div>
+      <button class="admin-btn admin-btn-gray" onclick="adminLoadSuperAdmins()" style="width:100%;margin-bottom:4px">👑 Süper Admin Listesi</button>
+      <div id="adminSuperAdminList" style="margin-top:6px;display:flex;flex-direction:column;gap:4px"></div>
+
+      <!-- Şüpheli Aktivite -->
+      <div class="sa-section-title" style="margin-top:14px">⚠️ Şüpheli Skor Logları</div>
+      <button class="admin-btn admin-btn-gray" onclick="saLoadSuspiciousLogs()" style="width:100%">📋 Logları Getir</button>
+      <div id="saSuspiciousLogs" style="margin-top:8px"></div>
+
+      <!-- SA Klan Görüntüle -->
+      <div class="sa-section-title" style="margin-top:14px">🏰 Klan Görüntüle (SA)</div>
+      <div class="admin-row" style="margin-bottom:6px">
+        <input class="admin-input" id="saViewClanId" placeholder="Klan ID" style="flex:1;margin-bottom:0;border-color:rgba(245,158,11,0.2)">
+        <button class="admin-btn" style="background:rgba(245,158,11,0.12);color:#f59e0b;border:1px solid rgba(245,158,11,0.3)" onclick="saViewAnyClan()">👁 Görüntüle</button>
+      </div>
+      <div id="saViewClanResult" style="margin-top:6px"></div>
+
+    </div>
+  </div>
+</div>
+
+<div id="adminModal" style="display:none">
+  <div id="adminCard">
+    <div class="admin-hero">
+      <div>
+        <div class="admin-title">⚡ Admin Paneli</div>
+        <div class="admin-sub" id="adminHeroSub">SKYDIVEX — <span id="adminRoleBadge">yetkili erişim</span></div>
+      </div>
+      <button id="closeAdminModal" class="btn ghost" style="padding:6px 12px;font-size:12px">✕</button>
+    </div>
+
+    <!-- Sekmeler — body dışında, sabit kalır -->
+    <div class="admin-tabs">
+      <button class="admin-tab-btn active" onclick="adminSwitchTab('stats')">📊</button>
+      <button class="admin-tab-btn" onclick="adminSwitchTab('players')">👥</button>
+      <button class="admin-tab-btn" onclick="adminSwitchTab('bans')">🚫</button>
+      <button class="admin-tab-btn" onclick="adminSwitchTab('requests')">📬</button>
+      <button class="admin-tab-btn" onclick="adminSwitchTab('logs')">📜</button>
+      <button class="admin-tab-btn" id="adminTabSystem" onclick="adminSwitchTab('system')">⚙️</button>
+      <button class="admin-tab-btn" onclick="adminSwitchTab('clans')">🏰</button>
+    </div>
+
+    <div class="admin-body">
+
+      <!-- GENEL BAKIŞ -->
+      <div class="admin-tab-panel active" id="adminTab-stats">
+        <div class="admin-stat-grid" id="adminStatGrid">
+          <div class="admin-stat-card"><div class="admin-stat-num" id="statPlayers">—</div><div class="admin-stat-label">Oyuncu</div></div>
+          <div class="admin-stat-card"><div class="admin-stat-num" id="statBans">—</div><div class="admin-stat-label">Banlı</div></div>
+          <div class="admin-stat-card"><div class="admin-stat-num" id="statRequests">—</div><div class="admin-stat-label">İstek</div></div>
+          <div class="admin-stat-card"><div class="admin-stat-num" id="statOpenReqs">—</div><div class="admin-stat-label">Açık İstek</div></div>
+        </div>
+        <button class="admin-btn admin-btn-gray" onclick="adminLoadStats()" style="width:100%;margin-bottom:8px">🔄 Yenile</button>
+
+        <!-- Süper Admin giriş butonu — sadece kurucu -->
+        <div id="superAdminEntrySection" style="display:none;margin-bottom:10px">
+          <button onclick="openSuperAdminModal()" style="width:100%;padding:13px;background:linear-gradient(135deg,rgba(245,158,11,0.15),rgba(251,191,36,0.05));color:#f59e0b;border:1.5px solid rgba(245,158,11,0.35);border-radius:14px;font-size:14px;font-weight:800;font-family:inherit;cursor:pointer;letter-spacing:0.3px">
+            👑 Süper Admin Paneli →
+          </button>
+        </div>
+
+        <div class="admin-section-title">Kullanıcı Listeleri</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+          <button class="admin-btn admin-btn-orange" onclick="adminShowUserList('admin')" style="font-size:11px">👑 Adminler</button>
+          <button class="admin-btn admin-btn-blue"   onclick="adminShowUserList('moderator')" style="font-size:11px">🛡 Moderatörler</button>
+          <button class="admin-btn admin-btn-gray"   onclick="adminShowUserList('all')" style="font-size:11px">👥 Tüm Oyuncular</button>
+          <button class="admin-btn admin-btn-red"    onclick="adminShowUserList('banned')" style="font-size:11px">🚫 Banlılar</button>
+        </div>
+        <div id="adminUserListBox" style="display:none;margin-top:8px;display:flex;flex-direction:column;gap:4px;max-height:250px;overflow-y:auto"></div>
+      </div>
+
+      <!-- OYUNCU YÖNETİMİ -->
+      <div class="admin-tab-panel" id="adminTab-players">
+        <div class="admin-section-title">Oyuncu Ara / Detay</div>
+        <div class="admin-row">
+          <input class="admin-input" id="adminTargetName" placeholder="Oyuncu adı">
+          <button class="admin-btn admin-btn-gray" onclick="adminPlayerInfo()">Detay</button>
+        </div>
+        <div id="adminPlayerInfoBox" style="display:none;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:12px;font-size:12px;color:var(--muted);line-height:1.8"></div>
+
+
+        <div class="admin-section-title" style="margin-top:4px">Skor & Tablo</div>
+        <div class="admin-row">
+          <input class="admin-input" id="adminScore" placeholder="Yeni skor" type="number">
+          <button class="admin-btn admin-btn-green" onclick="adminSetScore()">Skor Ayarla</button>
+        </div>
+        <div class="admin-row">
+          <input class="admin-input" id="adminOps" placeholder="Ops (boş=hepsi)">
+          <button class="admin-btn admin-btn-red" onclick="adminRemovePlayer()">Tablodan Çıkar</button>
+        </div>
+        <button class="admin-btn admin-btn-gray" onclick="adminListPlayers()" style="width:100%">📋 Tüm Oyuncuları Listele</button>
+
+        <div class="admin-section-title" style="margin-top:4px">Ban</div>
+        <div class="admin-row">
+          <input class="admin-input" id="adminBanReason" placeholder="Ban sebebi">
+          <button class="admin-btn admin-btn-red" onclick="adminBan()">🚫 Banla</button>
+        </div>
+        <button class="admin-btn admin-btn-green" onclick="adminUnban()" style="width:100%">✅ Banı Kaldır</button>
+
+        <div class="admin-section-title" style="margin-top:4px">Şifre Sıfırla</div>
+        <div class="admin-row">
+          <input class="admin-input" id="adminNewPass" placeholder="Yeni şifre (min 6)" type="password">
+          <button class="admin-btn admin-btn-gray" onclick="adminResetPass()">Sıfırla</button>
+        </div>
+
+        <div class="admin-section-title" style="margin-top:4px">🏅 Badge Ver</div>
+        <div id="adminBadgePickerList" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px"></div>
+        <div style="display:flex;gap:6px">
+          <button class="admin-btn admin-btn-gray" onclick="adminLoadBadgeLibrary()" style="flex:1">🔄 Kütüphaneyi Yükle</button>
+          <button class="admin-btn admin-btn-red" onclick="adminRemoveBadgePrompt()" style="flex:1">❌ Kaldır</button>
+        </div>
+
+        <div class="admin-section-title" style="margin-top:4px">🔑 PIN Sıfırla</div>
+        <button class="admin-btn admin-btn-gray" onclick="adminResetPin()" style="width:100%">PIN Sıfırla</button>
+      </div>
+
+      <!-- BAN LİSTESİ -->
+      <div class="admin-tab-panel" id="adminTab-bans">
+        <button class="admin-btn admin-btn-gray" onclick="adminLoadBans()" style="width:100%">🔄 Ban Listesini Yükle</button>
+        <div id="adminBanList" style="display:flex;flex-direction:column;gap:8px;margin-top:4px"></div>
+      </div>
+
+      <!-- İSTEK HAVUZU -->
+      <div class="admin-tab-panel" id="adminTab-requests">
+        <div style="display:flex;gap:6px">
+          <button class="admin-btn admin-btn-gray" onclick="adminLoadRequests('open')" style="flex:1">📬 Açık</button>
+          <button class="admin-btn admin-btn-gray" onclick="adminLoadRequests('all')" style="flex:1">📁 Hepsi</button>
+        </div>
+        <div id="adminRequestList" style="display:flex;flex-direction:column;gap:8px;margin-top:4px"></div>
+      </div>
+
+      <!-- LOG -->
+      <div class="admin-tab-panel" id="adminTab-logs">
+        <div style="display:flex;gap:6px">
+          <button class="admin-btn admin-btn-gray" onclick="adminLoadLogs()" style="flex:1">🔄 Logları Yükle</button>
+          <button class="admin-btn admin-btn-red"  onclick="adminClearLogs()" style="flex:1">🗑 Temizle</button>
+        </div>
+        <div id="adminLogList" style="display:flex;flex-direction:column;gap:6px;margin-top:4px;max-height:300px;overflow-y:auto"></div>
+      </div>
+
+      <!-- SİSTEM -->
+      <div class="admin-tab-panel" id="adminTab-system">
+        <div class="admin-section-title">📢 Duyuru / Anket</div>
+        <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px">
+          <div style="display:flex;gap:6px">
+            <input class="admin-input" id="annIcon" placeholder="📢" style="width:48px;flex:none">
+            <input class="admin-input" id="annTitle" placeholder="Duyuru başlığı">
+          </div>
+          <textarea id="annText" placeholder="Duyuru metni..." style="width:100%;box-sizing:border-box;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;color:#e6f7ea;font-size:13px;padding:9px 12px;font-family:inherit;resize:none;outline:none;min-height:60px"></textarea>
+          <div style="display:flex;gap:6px">
+            <select id="annType" style="flex:1;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;color:#e6f7ea;font-size:13px;padding:9px 12px;font-family:inherit;outline:none">
+              <option value="info">📢 Duyuru</option>
+              <option value="warning">⚠️ Uyarı</option>
+              <option value="poll">📊 Çoktan Seçmeli Anket</option>
+              <option value="text-poll">✏️ Serbest Metin Anketi</option>
+            </select>
+            <input class="admin-input" id="annExpires" placeholder="Süre (saat, boş=süresiz)" type="number" style="width:100px;flex:none">
+          </div>
+          <div id="annPollOptions" style="display:none;flex-direction:column;gap:4px">
+            <input class="admin-input" id="annOpt1" placeholder="Seçenek 1">
+            <input class="admin-input" id="annOpt2" placeholder="Seçenek 2">
+            <input class="admin-input" id="annOpt3" placeholder="Seçenek 3 (isteğe bağlı)">
+          </div>
+          <div id="annTextPollOptions" style="display:none;flex-direction:column;gap:4px">
+            <div style="font-size:11px;color:var(--muted)">Oyuncular kendi cevaplarını yazacak. Maks karakter sınırı:</div>
+            <div style="display:flex;gap:6px;align-items:center">
+              <input class="admin-input" id="annTextMaxLen" type="number" value="60" min="10" max="200" style="width:80px">
+              <span style="font-size:11px;color:var(--muted)">karakter (önerilen: 30-80)</span>
+            </div>
+            <div style="font-size:11px;color:#f59e0b;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:8px;padding:6px 10px">
+              ⚠️ Sıradan/küfürlü cevaplar worker tarafında filtrelenir. Sonuçları admin panelinden görürsün.
+            </div>
+          </div>
+          <div style="display:flex;gap:6px">
+            <button class="admin-btn admin-btn-green" onclick="adminPublishAnnouncement()" style="flex:1">📢 Yayınla</button>
+            <button class="admin-btn admin-btn-red" onclick="adminClearAnnouncement()" style="flex:1">🗑 Kaldır</button>
+          </div>
+          <button class="admin-btn admin-btn-gray" onclick="adminViewTextPollResults()" style="width:100%;margin-top:2px">📊 Serbest Anket Sonuçları</button>
+        </div>
+
+        <div class="admin-section-title">🎉 Event Oluştur</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <input class="admin-input" id="eventTitle" placeholder="Event adı (ör: 2x Puan Haftası)">
+          <input class="admin-input" id="eventDesc" placeholder="Açıklama (isteğe bağlı)">
+          <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:2px">Başlangıç</div>
+          <div style="display:flex;gap:6px">
+            <input class="admin-input" id="eventStart" type="date" style="flex:2">
+            <input class="admin-input" id="eventStartTime" type="time" value="00:00" style="flex:1">
+          </div>
+          <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Bitiş</div>
+          <div style="display:flex;gap:6px">
+            <input class="admin-input" id="eventEnd" type="date" style="flex:2">
+            <input class="admin-input" id="eventEndTime" type="time" value="23:59" style="flex:1">
+          </div>
+          <div style="display:flex;gap:6px;align-items:center">
+            <label style="font-size:12px;color:var(--muted)">Çarpan:</label>
+            <input class="admin-input" id="eventMult" type="number" value="2" min="1" max="10" style="width:60px">
+            <button class="admin-btn admin-btn-green" onclick="adminCreateEvent()" style="flex:1">🎉 Oluştur</button>
+          </div>
+        </div>
+        <div id="adminEventList" style="margin-top:6px;display:flex;flex-direction:column;gap:4px"></div>
+        <button class="admin-btn admin-btn-gray" onclick="adminLoadEvents()" style="width:100%;margin-top:4px">📋 Eventleri Listele</button>
+
+        <div class="admin-section-title" style="margin-top:12px">🛡 Yetkili</div>
+        <div style="display:flex;gap:6px;margin-bottom:6px">
+          <input class="admin-input" id="adminModName" placeholder="Kullanıcı adı">
+          <button class="admin-btn admin-btn-blue" onclick="adminGiveMod()">🛡 Ver</button>
+          <button class="admin-btn admin-btn-gray" onclick="adminRemoveMod()">❌ Al</button>
+        </div>
+        <div class="admin-section-title">🏅 Badge Kütüphanesi</div>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:8px">
+          <!-- İkon seçici -->
+          <div>
+            <div style="font-size:11px;color:var(--muted);margin-bottom:4px">İkon seç:</div>
+            <div style="display:flex;flex-wrap:wrap;gap:4px" id="libIconPicker">
+              <span onclick="selectLibIcon(this)" style="font-size:20px;cursor:pointer;padding:4px;border-radius:6px;border:2px solid transparent">🏅</span>
+              <span onclick="selectLibIcon(this)" style="font-size:20px;cursor:pointer;padding:4px;border-radius:6px;border:2px solid transparent">⭐</span>
+              <span onclick="selectLibIcon(this)" style="font-size:20px;cursor:pointer;padding:4px;border-radius:6px;border:2px solid transparent">🌟</span>
+              <span onclick="selectLibIcon(this)" style="font-size:20px;cursor:pointer;padding:4px;border-radius:6px;border:2px solid transparent">👑</span>
+              <span onclick="selectLibIcon(this)" style="font-size:20px;cursor:pointer;padding:4px;border-radius:6px;border:2px solid transparent">💎</span>
+              <span onclick="selectLibIcon(this)" style="font-size:20px;cursor:pointer;padding:4px;border-radius:6px;border:2px solid transparent">🔥</span>
+              <span onclick="selectLibIcon(this)" style="font-size:20px;cursor:pointer;padding:4px;border-radius:6px;border:2px solid transparent">⚡</span>
+              <span onclick="selectLibIcon(this)" style="font-size:20px;cursor:pointer;padding:4px;border-radius:6px;border:2px solid transparent">🎯</span>
+              <span onclick="selectLibIcon(this)" style="font-size:20px;cursor:pointer;padding:4px;border-radius:6px;border:2px solid transparent">🚀</span>
+              <span onclick="selectLibIcon(this)" style="font-size:20px;cursor:pointer;padding:4px;border-radius:6px;border:2px solid transparent">🏆</span>
+              <span onclick="selectLibIcon(this)" style="font-size:20px;cursor:pointer;padding:4px;border-radius:6px;border:2px solid transparent">🎖️</span>
+              <span onclick="selectLibIcon(this)" style="font-size:20px;cursor:pointer;padding:4px;border-radius:6px;border:2px solid transparent">🛡️</span>
+              <span onclick="selectLibIcon(this)" style="font-size:20px;cursor:pointer;padding:4px;border-radius:6px;border:2px solid transparent">✨</span>
+              <span onclick="selectLibIcon(this)" style="font-size:20px;cursor:pointer;padding:4px;border-radius:6px;border:2px solid transparent">🎪</span>
+              <span onclick="selectLibIcon(this)" style="font-size:20px;cursor:pointer;padding:4px;border-radius:6px;border:2px solid transparent">🦁</span>
+              <label style="width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center;background:var(--glass2);border:1px solid var(--border2);border-radius:8px;cursor:pointer;font-size:16px" title="Medyadan seç">
+                📷<input type="file" accept="image/*" style="display:none" onchange="loadLibIconFromMedia(this)">
+              </label>
+            </div>
+            <input id="libBadgeIcon" type="text" value="🏅" style="display:none">
+          </div>
+          <!-- Badge adı -->
+          <input class="admin-input" id="libBadgeLabel" placeholder="Badge adı (ör: Matematik Ustası)" oninput="updateLibPreview()">
+          <!-- Renk paleti -->
+          <div>
+            <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Renk seç:</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap" id="libColorPicker">
+              <div onclick="selectLibColor(this,'251,191,36','fbbf24')" style="width:28px;height:28px;border-radius:8px;background:#fbbf24;cursor:pointer;border:2px solid transparent" title="Altın"></div>
+              <div onclick="selectLibColor(this,'0,255,102','00ff66')" style="width:28px;height:28px;border-radius:8px;background:#00ff66;cursor:pointer;border:2px solid transparent" title="Yeşil"></div>
+              <div onclick="selectLibColor(this,'56,189,248','38bdf8')" style="width:28px;height:28px;border-radius:8px;background:#38bdf8;cursor:pointer;border:2px solid transparent" title="Mavi"></div>
+              <div onclick="selectLibColor(this,'167,139,250','a78bfa')" style="width:28px;height:28px;border-radius:8px;background:#a78bfa;cursor:pointer;border:2px solid transparent" title="Mor"></div>
+              <div onclick="selectLibColor(this,'249,115,22','f97316')" style="width:28px;height:28px;border-radius:8px;background:#f97316;cursor:pointer;border:2px solid transparent" title="Turuncu"></div>
+              <div onclick="selectLibColor(this,'239,68,68','ef4444')" style="width:28px;height:28px;border-radius:8px;background:#ef4444;cursor:pointer;border:2px solid transparent" title="Kırmızı"></div>
+              <div onclick="selectLibColor(this,'236,72,153','ec4899')" style="width:28px;height:28px;border-radius:8px;background:#ec4899;cursor:pointer;border:2px solid transparent" title="Pembe"></div>
+              <div onclick="selectLibColor(this,'20,184,166','14b8a6')" style="width:28px;height:28px;border-radius:8px;background:#14b8a6;cursor:pointer;border:2px solid transparent" title="Turkuaz"></div>
+            </div>
+            <!-- Seçili renk önizleme -->
+            <div id="libBadgePreview" style="margin-top:8px;display:inline-flex;align-items:center;gap:4px;padding:5px 12px;border-radius:20px;background:rgba(251,191,36,0.15);border:1px solid rgba(251,191,36,0.3);color:#fbbf24;font-size:12px;font-weight:800">🏅 Önizleme</div>
+            <input id="libBadgeColor" type="hidden" value="251,191,36">
+            <input id="libBadgeTextColor" type="hidden" value="fbbf24">
+          </div>
+          <button class="admin-btn admin-btn-green" onclick="adminAddBadgeToLibrary()" style="width:100%">➕ Kütüphaneye Ekle</button>
+        </div>
+        <div id="adminLibraryList" style="display:flex;flex-direction:column;gap:6px;max-height:200px;overflow-y:auto"></div>
+        <button class="admin-btn admin-btn-gray" onclick="adminLoadBadgeLibraryFull()" style="width:100%;margin-top:4px">🔄 Listeyi Yenile</button>
+
+        <div class="admin-section-title" style="margin-top:10px">👑 Admin</div>
+        <div class="admin-row">
+          <input class="admin-input" id="adminNewAdminName" placeholder="Kullanıcı adı">
+          <button class="admin-btn admin-btn-green" onclick="adminGiveAdmin()">Admin Ver</button>
+          <button class="admin-btn admin-btn-red" onclick="adminRemoveAdmin()">Al</button>
+        </div>
+
+        <!-- Süper Admin Paneli butonu — sadece kurucu görür -->
+        <div id="superAdminSection" style="display:none;margin-top:10px">
+          <button class="admin-btn" onclick="openSuperAdminModal()"
+            style="width:100%;padding:12px;background:linear-gradient(135deg,rgba(245,158,11,0.15),rgba(251,191,36,0.05));color:#f59e0b;border:1px solid rgba(245,158,11,0.3);border-radius:12px;font-size:13px;font-weight:800">
+            👑 Süper Admin Paneli →
+          </button>
+        </div>
+
+        <div class="admin-section-title" style="margin-top:14px">Liderlik Tablosu</div>
+        <div class="admin-row">
+          <input class="admin-input" id="adminClearOps" placeholder="Ops (boş=hepsi)">
+          <button class="admin-btn admin-btn-red" onclick="adminClearLb()">🗑 Tabloyu Sıfırla</button>
+        </div>
+        <button class="admin-btn admin-btn-green" onclick="adminMakeFirst()" style="width:100%">🥇 Beni Birinci Yap (Test)</button>
+      </div>
+
+      <!-- LOG -->
+      <div class="admin-log" id="adminLog">Hazır.</div>
+
+      <!-- KLAN YÖNETİMİ -->
+      <div class="admin-tab-panel" id="adminTab-clans">
+        <div class="admin-section-title">🏰 Klan Yönetimi</div>
+
+        <!-- Klan Modalını Aç -->
+        <button class="admin-btn admin-btn-green" onclick="closeModal(document.getElementById('adminModal'));openClanModal()" style="width:100%;margin-bottom:12px">👥 Klan Sayfasını Aç</button>
+
+        <!-- Para/Elmas Ver -->
+        <div style="background:rgba(255,215,0,0.04);border:1px solid rgba(255,215,0,0.2);border-radius:12px;padding:12px;margin-bottom:10px">
+          <div class="admin-section-title" style="margin-top:0;color:#ffd700">💰 Oyuncuya Para/Elmas Ver</div>
+          <div class="admin-row"><input class="admin-input" id="adminGiftTarget" placeholder="Oyuncu adı"></div>
+          <div class="admin-row">
+            <input type="number" class="admin-input" id="adminGiftCoins" placeholder="Coin miktarı" min="0">
+            <input type="number" class="admin-input" id="adminGiftDiamonds" placeholder="Elmas miktarı" min="0">
+          </div>
+          <button class="admin-btn admin-btn-green" onclick="adminGiftCurrency()" style="width:100%">🎁 Gönder</button>
+        </div>
+
+        <!-- Klan Ara -->
+        <div class="admin-row" style="margin-bottom:6px">
+          <input class="admin-input" id="adminClanSearch" placeholder="Klan tag veya adı ara...">
+          <button class="admin-btn admin-btn-green" onclick="adminSearchClan()">🔍 Ara</button>
+        </div>
+        <div id="adminClanResults" style="margin-bottom:12px;font-size:12px;color:var(--muted)"></div>
+
+        <!-- Seçili klan işlemleri -->
+        <div style="background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:10px">
+          <div class="admin-section-title" style="margin-top:0">Seçili Klan İşlemleri</div>
+          <div class="admin-row" style="margin-bottom:6px">
+            <input class="admin-input" id="adminClanId" placeholder="Klan ID gir">
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+            <button class="admin-btn admin-btn-green" onclick="adminViewClan()">👁 Klan Bilgisi</button>
+            <button class="admin-btn admin-btn-red" onclick="adminDeleteClan()">🗑 Klana Sil</button>
+            <button class="admin-btn" onclick="adminResetClanScore()">🔄 Puanı Sıfırla</button>
+            <button class="admin-btn" onclick="adminViewClanMembers()">👥 Üyeler</button>
+          </div>
+        </div>
+
+        <!-- Üye Ekle/Çıkar -->
+        <div style="background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:10px">
+          <div class="admin-section-title" style="margin-top:0">👤 Üye Ekle / Çıkar</div>
+          <div class="admin-row"><input class="admin-input" id="adminClanMemberClanId" placeholder="Klan ID"></div>
+          <div class="admin-row"><input class="admin-input" id="adminClanMemberName" placeholder="Oyuncu adı"></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+            <button class="admin-btn admin-btn-green" onclick="adminAddClanMember()">➕ Ekle</button>
+            <button class="admin-btn admin-btn-red" onclick="adminRemoveClanMember()">➖ Çıkar</button>
+          </div>
+        </div>
+
+        <!-- Klan Ödülü Ver -->
+        <div style="background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:10px">
+          <div class="admin-section-title" style="margin-top:0">🏆 Klan Ödülü Ver</div>
+          <div class="admin-row"><input class="admin-input" id="adminClanBadgeId" placeholder="Klan ID"></div>
+          <div class="admin-row">
+            <input class="admin-input" id="adminClanBadgeLabel" placeholder="Rozet adı (örn: Şampiyon)">
+            <input class="admin-input" id="adminClanBadgeIcon" placeholder="İkon (emoji)">
+          </div>
+          <div class="admin-row">
+            <input type="number" class="admin-input" id="adminClanBadgeCoins" placeholder="Coin ödülü" min="0">
+            <input type="number" class="admin-input" id="adminClanBadgeDiamonds" placeholder="Elmas ödülü" min="0">
+          </div>
+          <button class="admin-btn admin-btn-green" onclick="adminGiveClanReward()" style="width:100%">🎁 Ödül Ver (Tüm Üyelere)</button>
+        </div>
+
+        <!-- Turnuva Yönetimi -->
+        <div style="background:rgba(255,215,0,0.04);border:1px solid rgba(255,215,0,0.2);border-radius:12px;padding:12px">
+          <div class="admin-section-title" style="margin-top:0;color:#ffd700">⚔️ Turnuva Yönetimi</div>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <input class="admin-input" id="adminTournName" placeholder="Turnuva adı">
+            <button class="admin-btn admin-btn-green" onclick="adminCreateTournament()" style="width:100%">➕ Turnuva Oluştur</button>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+              <button class="admin-btn" onclick="adminStartTournament()">▶ Başlat</button>
+              <button class="admin-btn admin-btn-red" onclick="adminFinishTournament()">✅ Bitir</button>
+              <button class="admin-btn" onclick="adminTournamentInfo()">📋 Turnuva Durumu</button>
+              <button class="admin-btn admin-btn-red" onclick="adminCancelTournament()">🗑 İptal Et</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- MEYDAN OKUMA -->
+<div id="challengeModal" style="position:fixed;inset:0;z-index:9100;display:none;align-items:center;justify-content:center;padding:12px;background:rgba(0,0,0,0.75);backdrop-filter:blur(6px)">
+  <div class="card" style="width:100%;max-width:420px;max-height:90vh;overflow-y:auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <div style="font-family:var(--font-head);font-size:18px;font-weight:800" data-i18n="challenge_mode">Meydan Okuma</div>
+      <button onclick="closeChallengeModal()" style="width:34px;height:34px;border-radius:50%;background:var(--glass2);border:1px solid var(--border);color:var(--muted);font-size:15px;cursor:pointer">✕</button>
+    </div>
+    <div style="display:flex;gap:6px;margin-bottom:14px">
+      <button id="chlTP" class="btn" style="flex:1;font-size:12px;padding:8px" onclick="chlTab('play')">🎮 Oyna</button>
+      <button id="chlTL" class="btn ghost" style="flex:1;font-size:12px;padding:8px" onclick="chlTab('lb')">🏆 Liderlik</button>
+    </div>
+    <div id="chlContent"></div>
+  </div>
+</div>
+<div id="chlGA" style="display:none;position:fixed;inset:0;z-index:9050;background:var(--bg);overflow-y:auto;padding:16px">
+  <div class="card" style="max-width:520px;margin:0 auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div><div id="chlDL" style="font-size:11px;font-weight:800;letter-spacing:1px;color:#ef4444">MEYDAN OKUMA</div>
+      <div style="font-size:13px;color:var(--muted)">Soru <span id="chlQN">1</span>/20</div></div>
+      <div style="text-align:right"><div id="chlTT" style="font-size:20px;font-weight:800;color:var(--neon);font-family:var(--font-mono)">00:00</div>
+      <div style="font-size:11px;color:var(--muted)">Toplam süre</div></div>
+    </div>
+    <div style="font-size:11px;color:var(--muted);text-align:right;margin-bottom:2px">⏱ <span id="chlTC">-</span>s</div>
+    <div style="height:5px;background:rgba(255,255,255,0.06);border-radius:99px;overflow:hidden;margin-bottom:14px">
+      <div id="chlTB" style="height:100%;border-radius:99px;background:linear-gradient(90deg,#ef4444,#f97316);width:100%;transition:width 0.1s linear"></div>
+    </div>
+    <div id="chlQT" style="font-size:24px;font-weight:800;line-height:1.4;margin-bottom:16px;min-height:60px">—</div>
+    <div id="chlChoices"></div>
+    <div id="chlRM" style="min-height:24px;margin-top:10px;font-weight:700;text-align:center;font-size:14px;opacity:0"></div>
+    <div style="margin-top:12px;border-top:1px solid var(--border);padding-top:10px;display:flex;justify-content:space-between;align-items:center">
+      <div style="font-size:13px;color:var(--muted)">✅ <strong id="chlCC" style="color:var(--neon)">0</strong>/20</div>
+      <button onclick="exitChallenge()" class="btn ghost" style="font-size:12px;padding:6px 12px">✕ Çık</button>
+    </div>
+  </div>
+</div>
+
+<!-- GERİ BİLDİRİM -->
+<div id="fbModal" style="position:fixed;inset:0;z-index:9200;display:none;align-items:center;justify-content:center;padding:12px;background:rgba(0,0,0,0.75);backdrop-filter:blur(6px)">
+  <div class="card" style="width:100%;max-width:400px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <div style="font-family:var(--font-head);font-size:16px;font-weight:800">💬 Geri Bildirim</div>
+      <button onclick="closeFbModal()" style="width:34px;height:34px;border-radius:50%;background:var(--glass2);border:1px solid var(--border);color:var(--muted);font-size:15px;cursor:pointer">✕</button>
+    </div>
+    <div id="fbInfoBox" style="background:var(--glass);border:1px solid var(--border2);border-radius:10px;padding:10px;margin-bottom:12px;font-size:12px;color:var(--muted)"></div>
+    <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px">Şikayet / Öneri:</label>
+    <textarea id="fbText" rows="4" class="admin-input" style="width:100%;resize:vertical;margin-bottom:8px" placeholder="Soru hatalıysa, cevap yanlışsa yaz..."></textarea>
+    <button onclick="submitFb()" class="btn" style="width:100%">📤 Gönder</button>
+  </div>
+</div>
+
+<!-- SANDIK -->
+<div id="chestModal" style="position:fixed;inset:0;z-index:9000;display:none;align-items:center;justify-content:center;padding:12px;background:rgba(0,0,0,0.75);backdrop-filter:blur(6px)">
+  <div class="card" style="width:100%;max-width:440px;max-height:92vh;overflow-y:auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <div style="font-family:var(--font-head);font-size:18px;font-weight:800" data-i18n="my_inventory">Sandığım</div>
+      <button onclick="closeChestModal()" style="width:34px;height:34px;border-radius:50%;background:var(--glass2);border:1px solid var(--border);color:var(--muted);font-size:15px;cursor:pointer">✕</button>
+    </div>
+    <div id="chestContent">Yükleniyor...</div>
+  </div>
+</div>
+
+<!-- KLAN SOHBET -->
+<div id="clanChatModal" style="position:fixed;inset:0;z-index:9300;display:none;align-items:flex-end;justify-content:center;background:rgba(0,0,0,0.75);backdrop-filter:blur(6px)">
+  <div class="card" style="width:100%;max-width:520px;height:72vh;display:flex;flex-direction:column;border-radius:20px 20px 0 0;padding:0;overflow:hidden">
+    <div style="padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;background:var(--bg2)">
+      <div style="font-family:var(--font-head);font-size:16px;font-weight:800">💬 Klan Sohbeti</div>
+      <button onclick="closeClanChat()" style="width:34px;height:34px;border-radius:50%;background:var(--glass2);border:1px solid var(--border);color:var(--muted);font-size:15px;cursor:pointer">✕</button>
+    </div>
+    <div id="ccMsgs" style="flex:1;overflow-y:auto;padding:12px 10px;display:flex;flex-direction:column;gap:2px"></div>
+    <div style="padding:10px 12px;border-top:1px solid var(--border);display:flex;gap:8px;flex-shrink:0;background:var(--bg2);align-items:center">
+      <input id="ccInp" class="input" style="flex:1;font-size:14px;border-radius:20px;padding:8px 14px" placeholder="Mesaj yaz..." maxlength="300">
+      <button onclick="sendCC()" class="btn" style="padding:0 14px;border-radius:20px;flex-shrink:0">➤</button>
+    </div>
+  </div>
+</div>
+
+<!-- BİLDİRİM -->
+<div id="notifEl" class="notif-wrap"></div>
+
+
+<script src="js/features.js"></script>
+
+<!-- ════════════════════════════════════════════════════
+     DESKTOP SAĞ PANEL
+     ════════════════════════════════════════════════════ -->
+<div class="desktop-right-panel">
+  <!-- Mini oyuncu profili -->
+  <div class="desktop-widget" id="desktopProfileWidget" style="display:none">
+    <div class="desktop-widget-title">Profil</div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+      <div id="desktopWidgetAvatar" style="width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,var(--neon),#00cc66);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:#030608;flex-shrink:0">?</div>
+      <div style="flex:1;min-width:0">
+        <div id="desktopWidgetName" style="font-size:14px;font-weight:800;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">—</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Seviye <span id="desktopWidgetLevel" style="color:var(--neon);font-weight:700">1</span></div>
+      </div>
+    </div>
+    <div style="display:flex;gap:6px">
+      <button onclick="openProfileModal()" class="btn ghost" style="flex:1;font-size:12px;padding:8px">👤 Profil</button>
+      <button id="desktopLogoutBtn" class="btn ghost" style="flex:1;font-size:12px;padding:8px">Çıkış</button>
+    </div>
+  </div>
+
+  <!-- Hızlı istatistik -->
+  <div class="desktop-widget">
+    <div class="desktop-widget-title">İstatistikler</div>
+    <div id="desktopStatsGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:8px"></div>
+  </div>
+
+  <!-- Online liderlik -->
+  <div class="desktop-widget">
+    <div class="desktop-widget-title">Liderlik Tablosu</div>
+    <div id="desktopLbList" style="font-size:12px;color:var(--muted)">Yükleniyor...</div>
+    <button onclick="fetchOnlineLeaderboard()" style="width:100%;margin-top:8px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:11px;cursor:pointer;padding:6px;font-family:inherit">↺ Yenile</button>
+  </div>
+
+  <!-- Bildirim izni -->
+  <div class="desktop-widget" id="desktopPushWidget">
+    <div class="desktop-widget-title">Bildirimler</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:8px">Site kapalıyken de bildirim al</div>
+    <button onclick="togglePushNotifications()" id="desktopPushBtn" style="width:100%;padding:8px;border-radius:10px;border:1px solid rgba(0,255,136,0.3);background:rgba(0,255,136,0.08);color:var(--neon);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">🔔 Bildirimleri Aç</button>
+  </div>
+</div><!-- /desktop-right-panel -->
+
+</div><!-- /desktop-shell -->
+
+<!-- ════════════════════════════════════════════════════
+     v3.1 — YENİ JS FONKSİYONLARI
+     ════════════════════════════════════════════════════ -->
+<!-- ════════════════════════════════════════════════════
+     v3.2 — CORE PATCH BLOĞU
+     ════════════════════════════════════════════════════ -->
+
+<script src="js/app.js"></script>
 </body>
 </html>
