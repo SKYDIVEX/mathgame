@@ -3482,8 +3482,7 @@ input, textarea, select {
         <button class="lb-tab active" id="lbTabOnline" data-i18n="online_tab">🌐 Online</button>
       </div>
       <div id="lbOpsRow" style="display:flex;gap:4px;margin-bottom:8px" class="lb-ops-row">
-        <button class="lb-ops-btn active" id="lbOpsAll"   onclick="switchOnlineLbOps('all')">🌍 Tümü</button>
-        <button class="lb-ops-btn"        id="lbOpsMixed" onclick="switchOnlineLbOps('+-*/')">🌀 Karma</button>
+        <button class="lb-ops-btn active" id="lbOpsAll" onclick="switchOnlineLbOps('all')">🌍 Tümü</button>
       </div>
       <div id="leaderboard" class="lb" style="display:none">Henüz kimse yok</div>
       <div id="onlineLbEl"></div>
@@ -4637,9 +4636,7 @@ function markSettingsChanged() {
 }
 
 function openSettingsModal(){
-  /* Draft'ı state'in anlık kopyasıyla başlat */
   settingsDraft = {
-    ops:         [...(state.ops || ['+','-','*','/'])],
     levelUpEvery: state.levelUpEvery || 4,
     soundOn:      !!state.soundOn,
     btnColor:     state.btnColor || '#00ff66',
@@ -4647,15 +4644,11 @@ function openSettingsModal(){
   };
   settingsChanged = false;
 
-  /* UI'ı draft'a göre sync et */
-  opBtns.forEach(b => {
-    b.classList.toggle('active', settingsDraft.ops.includes(b.dataset.op));
-  });
-  levelUpSlider.value  = settingsDraft.levelUpEvery;
-  levelUpVal.innerText = settingsDraft.levelUpEvery;
-  settingSoundToggle.checked  = settingsDraft.soundOn;
-  settingBtnColorNew.value    = settingsDraft.btnColor;
-  settingBgColorNew.value     = settingsDraft.bgColor;
+  if (levelUpSlider)      { levelUpSlider.value       = settingsDraft.levelUpEvery; }
+  if (levelUpVal)         { levelUpVal.innerText       = settingsDraft.levelUpEvery; }
+  if (settingSoundToggle) { settingSoundToggle.checked = settingsDraft.soundOn; }
+  if (settingBtnColorNew) { settingBtnColorNew.value   = settingsDraft.btnColor; }
+  if (settingBgColorNew)  { settingBgColorNew.value    = settingsDraft.bgColor; }
 
   settingsModal.classList.add('show');
 }
@@ -4695,26 +4688,7 @@ function _closeSettingsForReal() {
 
 if(closeSettingsBtn) closeSettingsBtn.addEventListener('click', tryCloseSettings);
 
-/* Op toggle butonları — SADECE draft'ı değiştirir */
-opBtns.forEach(b => {
-  b.addEventListener('click', ()=>{
-    const op     = b.dataset.op;
-    const active = settingsDraft.ops.includes(op);
-    if (active && settingsDraft.ops.length === 1) {
-      showToast('⚠️ En az bir işlem türü seçili olmalı!', '#f59e0b');
-      return;
-    }
-    if (active) {
-      settingsDraft.ops = settingsDraft.ops.filter(x => x !== op);
-      b.classList.remove('active');
-    } else {
-      settingsDraft.ops = [...settingsDraft.ops, op];
-      b.classList.add('active');
-    }
-    markSettingsChanged();
-    clickSound();
-  });
-});
+/* Op toggle kaldırıldı — ops artık sabit ['+','-','*','/'] */
 
 /* Seviye hızı — sadece draft */
 if(levelUpSlider) levelUpSlider.addEventListener('input', ()=>{
@@ -6083,14 +6057,8 @@ function showToast(msg, color){if(!color)color='#00ff66';
 
 /* ── SETTINGS SAVE ─────────────────────────────────── */
 document.getElementById('saveSettingsBtn').addEventListener('click', ()=>{
-  /* Draft geçerlilik kontrolü */
-  if (!settingsDraft.ops || settingsDraft.ops.length === 0) {
-    showToast('⚠️ En az bir işlem türü seçili olmalı!', '#f59e0b');
-    return;
-  }
-
-  /* Draft → State'e yaz */
-  state.ops          = [...settingsDraft.ops];
+  /* Draft → State'e yaz — ops artık sabit, her zaman 4 işlem */
+  state.ops          = ['+', '-', '*', '/'];
   state.levelUpEvery = settingsDraft.levelUpEvery;
   state.soundOn      = settingsDraft.soundOn;
   state.btnColor     = settingsDraft.btnColor;
@@ -6469,7 +6437,7 @@ function nextQuestion(reset=false){
   questionCount++;
   const lvl = state.level||1;
   const max  = difficultyMax(lvl);
-  const ops  = state.ops&&state.ops.length ? state.ops : ['+'];
+  const ops  = ['+', '-', '*', '/'];  /* her zaman 4 işlem — sabit */
   let a, b, op, key;
   let attempts = 0;
   let questionStr = '';
@@ -9584,7 +9552,7 @@ async function pushScoreToWorker() {
   _lastPushScore = state.score;
   _lastPushTime  = now;
   try {
-    var ops = state.ops ? opsKey(state.ops) : 'all';
+    var ops = 'all'; /* ops kaldırıldı — her zaman 'all' */
     var result = await workerPost('score', {
       token: authUser.token,
       score: state.score,
@@ -11110,6 +11078,8 @@ window.addEventListener('load', function() {
           showScreen('menu');
           refreshMenuPanels();
           saveState();
+          /* Günlük ödül — fallback auth sonrası da tetikle */
+          setTimeout(function() { try { checkDailyLogin(); } catch(e) {} }, 1500);
         }, 2000);
         return; /* Auth kaydı var — openAuthModal çağırma */
       }
