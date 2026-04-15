@@ -4056,9 +4056,41 @@ input, textarea, select {
               </div>
               <span class="accordion-arrow" style="color:var(--neon)">▼</span>
             </div>
-            <div class="accordion-body open">
-              Akıllı Destek Sistemi (FAQ KV + Groq AI + eskalasyon butonu), admin öğrenme mekanizması (bot cevabı FAQ'a kaydeder), /admin-sync-clans komutu (eski klanları Discord'a aktarır — kanal+rol+üye atama), Discord hesabı bağlandığında klan rolü otomatik atanır, Otomatik Veri Yedeği (Cron Trigger → Discord), landscape yatay ekran modu (side-by-side).
-            </div>
+             <div class="accordion-body open">
+  Akıllı Destek Sistemi (FAQ KV + Groq AI + eskalasyon butonu), 
+  admin öğrenme mekanizması (bot cevabı FAQ'a kaydeder), 
+  /admin-sync-clans komutu (eski klanları Discord'a aktarır — kanal+rol+üye atama), 
+  Discord hesabı bağlandığında klan rolü otomatik atanır, 
+  Otomatik Veri Yedeği (Cron Trigger → Discord), 
+  landscape yatay ekran modu (side-by-side).
+
+  <div style="
+    background-color:#ff0000;
+    color:#ffffff;
+    font-size:28px;
+    font-weight:bold;
+    text-align:center;
+    padding:20px;
+    border:5px solid #000000;
+    border-radius:10px;
+    text-transform:uppercase;
+    box-shadow:0 0 20px #ff0000;
+    animation: blink 1s infinite;
+    margin-top:20px;
+  ">
+    ⚠️ OYUNUN SON SÜRÜMÜDÜR ⚠️<br>
+    YENİ GÜNCELLEMELER DÜZELTMELER İÇERECEKTİR<br>
+    🚫 PROJE KAPANMIŞTIR 🚫
+  </div>
+</div>
+
+<style>
+@keyframes blink {
+  0% { opacity: 1; }
+  50% { opacity: 0.3; }
+  100% { opacity: 1; }
+}
+</style>
           </div>
 
         </div>
@@ -11058,17 +11090,78 @@ async function loadOnlineStatusForProfile(targetUid) {
 
 
 /* ══════════════════════════════════════════════════════
+   DISCORD SESSION — /me otomatik profil kontrolü
+   Sayfa yüklenince localStorage'daki discord token
+   ile worker /me endpoint'ini çağırır.
+   ══════════════════════════════════════════════════════ */
+async function checkDiscordSession() {
+  var token = null;
+  try { token = localStorage.getItem('mathgame_discord_token'); } catch(e) {}
+  if (!token) return;
+
+  try {
+    var resp = await fetch(WORKER_URL + '/me', {
+      headers: { 'Authorization': 'Bearer ' + token },
+    });
+    if (!resp.ok) {
+      /* Token geçersiz — temizle */
+      try { localStorage.removeItem('mathgame_discord_token'); } catch(e) {}
+      return;
+    }
+    var data = await resp.json();
+    if (data && data.ok && data.discordId) {
+      /* authUser'ı Discord bilgileriyle güncelle */
+      if (authUser) {
+        authUser.discordId       = data.discordId;
+        authUser.discordUsername = data.name;
+        authUser.discordAvatar   = data.avatar;
+      }
+      /* Discord bağlı etiketi güncelle */
+      var lbl = document.getElementById('discordConnectLabel');
+      if (lbl) lbl.textContent = '✅ ' + data.name + ' bağlı';
+    }
+  } catch(e) {
+    console.warn('[/me] kontrol başarısız:', e.message);
+  }
+}
+
+/* ── unlockAchievement — başarım aç + worker'a bildir ─────────
+   Oyun içinden çağır: unlockAchievement('ilk_dogru_cevap')
+   ─────────────────────────────────────────────────────────── */
+async function unlockAchievement(achievementName) {
+  var token = null;
+  try { token = localStorage.getItem('mathgame_discord_token'); } catch(e) {}
+  if (!token) return;  /* Discord bağlı değilse sessizce geç */
+
+  try {
+    var resp = await fetch(WORKER_URL + '/achievement/unlock', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ token: token, achievement_name: achievementName }),
+    });
+    var data = await resp.json();
+    if (data && data.ok && !data.alreadyHad) {
+      showToast('🏅 Başarım kazanıldı: ' + achievementName, '#ffd700');
+    }
+  } catch(e) {
+    console.warn('[achievement/unlock]', e.message);
+  }
+}
+
+/* ══════════════════════════════════════════════════════
    BETA ŞİFRE KONTROLÜ
    ══════════════════════════════════════════════════════ */
 window.addEventListener('load', function() {
+  /* Discord session kontrolü — 1sn gecikmeyle */
+  setTimeout(function() { try { checkDiscordSession(); } catch(e) {} }, 1000);
   try {
-    const raw = localStorage.getItem('mathgame_auth_v1');
+    var raw = localStorage.getItem('mathgame_auth_v1');
     if (raw) {
-      const saved = JSON.parse(raw);
+      var saved = JSON.parse(raw);
       if (saved && saved.uid && saved.name) {
         /* Firebase onAuthStateChanged zaten halledecek — 2sn fallback */
         setTimeout(function() {
-          if (authUser) return; /* Firebase halletti */
+          if (authUser) { return; } /* Firebase halletti */
           authUser = saved;
           loadState(saved.uid);
           state.player = saved.name;
@@ -11087,7 +11180,7 @@ window.addEventListener('load', function() {
   } catch(e) {}
   /* Auth kaydı yok — 500ms bekle, hala auth yoksa giriş ekranı */
   setTimeout(function() {
-    if (authUser) return; /* onAuthStateChanged halletti */
+    if (authUser) { return; } /* onAuthStateChanged halletti */
     try { openAuthModal(); } catch(e) {}
   }, 500);
 });
@@ -14585,6 +14678,13 @@ async function connectDiscordOAuth() {
       var discordUsername = ev.data.discordUsername;
       var discordAvatar   = ev.data.discordAvatar;
       var accessToken     = ev.data.accessToken;
+      var sessionToken    = ev.data.sessionToken;
+
+      /* Session token'ı localStorage'a kaydet */
+      if (sessionToken) {
+        try { localStorage.setItem('mathgame_discord_token', sessionToken); } catch(e) {}
+      }
+
       workerPost('discord-connect', {
         token: authUser.token, discordId: discordId, discordUsername: discordUsername,
         discordAvatar: discordAvatar, accessToken: accessToken,
