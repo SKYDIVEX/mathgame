@@ -2866,203 +2866,6 @@ input, textarea, select {
 
 
 /* ══════════════════════════════════════════════════════════════
-   v4.0 — iOS KONTROL MERKEZİ (Control Center) PANELİ
-   ══════════════════════════════════════════════════════════════ */
-#ccOverlay {
-  position: fixed;
-  inset: 0;
-  z-index: 9800;
-  display: none;
-}
-#ccOverlay.cc-open { display: block; }
-#ccBackdrop {
-  position: absolute;
-  inset: 0;
-  background: rgba(0,0,0,0.4);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-}
-#ccPanel {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  width: 320px;
-  max-width: calc(100vw - 24px);
-  background: rgba(18,22,34,0.88);
-  backdrop-filter: blur(40px) saturate(180%);
-  -webkit-backdrop-filter: blur(40px) saturate(180%);
-  border-radius: 24px;
-  border: 1px solid rgba(255,255,255,0.13);
-  box-shadow: 0 24px 64px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.06);
-  padding: 18px 16px 20px;
-  max-height: calc(100vh - 80px);
-  overflow-y: auto;
-  animation: ccSlideIn 0.28s cubic-bezier(0.34,1.56,0.64,1);
-}
-@keyframes ccSlideIn {
-  from { opacity: 0; transform: translateY(-16px) scale(0.94); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
-}
-.cc-sec-title {
-  font-size: 9px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-  color: rgba(255,255,255,0.28);
-  margin: 14px 0 8px;
-}
-.cc-sec-title:first-child { margin-top: 0; }
-
-/* Hızlı butonlar 2×2 grid */
-.cc-quick-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 7px;
-  margin-bottom: 2px;
-}
-.cc-quick-btn {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  padding: 11px 5px;
-  border-radius: 16px;
-  background: rgba(255,255,255,0.07);
-  border: 1px solid rgba(255,255,255,0.06);
-  cursor: pointer;
-  aspect-ratio: 1;
-  transition: background 0.15s;
-}
-.cc-quick-btn:active { background: rgba(255,255,255,0.12); }
-.cc-quick-btn.cc-active { background: rgba(0,255,136,0.18); border-color: rgba(0,255,136,0.3); }
-.cc-quick-icon { font-size: 20px; line-height: 1; }
-.cc-quick-label { font-size: 8px; font-weight: 700; color: rgba(255,255,255,0.45); text-align: center; text-transform: uppercase; letter-spacing: 0.3px; }
-.cc-quick-btn.cc-active .cc-quick-label { color: var(--neon); }
-
-/* Renk şeridi */
-.cc-color-strip {
-  display: flex;
-  gap: 7px;
-  align-items: center;
-  padding: 10px 12px;
-  background: rgba(255,255,255,0.05);
-  border-radius: 14px;
-  margin-bottom: 8px;
-}
-.cc-swatch {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  cursor: pointer;
-  border: 2px solid transparent;
-  flex-shrink: 0;
-  transition: transform 0.15s;
-}
-.cc-swatch:active { transform: scale(0.88); }
-.cc-swatch.cc-swatch-sel { border-color: #fff; box-shadow: 0 0 0 3px rgba(255,255,255,0.2); }
-.cc-custom-color {
-  flex: 1;
-  height: 28px;
-  border-radius: 10px;
-  background: rgba(255,255,255,0.07);
-  border: 1px solid rgba(255,255,255,0.12);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  font-size: 10px;
-  font-weight: 700;
-  color: rgba(255,255,255,0.4);
-  gap: 3px;
-  position: relative;
-  overflow: hidden;
-}
-.cc-custom-color input[type=color] {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  cursor: pointer;
-  width: 100%;
-  height: 100%;
-}
-
-/* Slider satır */
-.cc-slider-row {
-  background: rgba(255,255,255,0.05);
-  border-radius: 14px;
-  padding: 11px 13px;
-  margin-bottom: 8px;
-}
-.cc-slider-hdr {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--text);
-}
-.cc-slider-hdr span:last-child { color: var(--muted); font-size: 10px; }
-input[type=range].cc-range {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 100%;
-  height: 4px;
-  border-radius: 2px;
-  background: rgba(255,255,255,0.12);
-  outline: none;
-}
-input[type=range].cc-range::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 20px; height: 20px;
-  border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.35);
-  cursor: pointer;
-}
-
-/* Arka plan URL girişi */
-.cc-bg-row {
-  background: rgba(255,255,255,0.05);
-  border-radius: 14px;
-  padding: 11px 13px;
-  margin-bottom: 8px;
-}
-.cc-bg-input {
-  width: 100%;
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 10px;
-  padding: 9px 11px;
-  color: var(--text);
-  font-size: 12px;
-  font-family: var(--font-body);
-  outline: none;
-  margin: 8px 0 0;
-}
-.cc-bg-input:focus { border-color: rgba(0,255,136,0.35); }
-.cc-btn-row { display: flex; gap: 7px; margin-top: 8px; }
-.cc-sm-btn {
-  flex: 1;
-  padding: 8px;
-  border-radius: 10px;
-  border: 1px solid rgba(255,255,255,0.1);
-  background: rgba(255,255,255,0.06);
-  color: var(--muted);
-  font-size: 11px;
-  font-weight: 700;
-  cursor: pointer;
-  font-family: var(--font-body);
-  text-align: center;
-}
-.cc-sm-btn.cc-sm-primary {
-  background: rgba(0,255,136,0.15);
-  border-color: rgba(0,255,136,0.3);
-  color: var(--neon);
-}
-
-/* ══════════════════════════════════════════════════════════════
    v4.0 — HESAP GEÇİŞİ ALANI
    ══════════════════════════════════════════════════════════════ */
 .acct-item {
@@ -3874,6 +3677,20 @@ input[type=range].cc-range::-webkit-slider-thumb {
         <div id="clanQuickInfo" style="font-size:9px;color:var(--muted)">Kur veya katıl</div>
       </button>
     </div>
+
+    <!-- Discord Sunucu Davet Linki -->
+    <a id="discordInviteBtn" href="#" target="_blank" rel="noopener"
+       onclick="v4OpenDiscordInvite(event)"
+       style="display:flex;align-items:center;gap:12px;padding:13px 16px;border-radius:16px;background:rgba(88,101,242,0.1);border:1.5px solid rgba(88,101,242,0.3);cursor:pointer;text-decoration:none;margin-bottom:10px;width:100%;box-sizing:border-box">
+      <div style="width:40px;height:40px;border-radius:12px;background:#5865F2;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>
+      </div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:14px;font-weight:800;color:#fff">Discord Sunucumuza Katıl</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:1px">Klan sohbeti, duyurular, destek</div>
+      </div>
+      <span style="color:rgba(255,255,255,0.3);font-size:18px;flex-shrink:0">›</span>
+    </a>
     <button id="chestMenuBtn" style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-radius:14px;background:rgba(251,191,36,0.07);border:1px solid rgba(251,191,36,0.2);cursor:pointer;font-family:inherit;width:100%;margin-bottom:10px">
       <div style="display:flex;align-items:center;gap:10px">
         <span style="font-size:26px">🧳</span>
@@ -3952,6 +3769,17 @@ input[type=range].cc-range::-webkit-slider-thumb {
       <input id="btnColor" type="hidden" value="#00ff66">
       <input id="bgColor" type="hidden" value="#08121a">
     </div><!-- /ayarlar -->
+
+    <!-- ── v4.0: KAYDET BUTONU ───────────────────────── -->
+    <div id="fullSaveRow" style="margin-top:10px">
+      <button id="fullSaveBtn" onclick="v4FullSave()" style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;border-radius:16px;background:linear-gradient(135deg,rgba(0,255,136,0.15),rgba(0,204,102,0.1));border:1.5px solid rgba(0,255,136,0.35);color:var(--neon);font-size:14px;font-weight:800;cursor:pointer;font-family:var(--font-body);position:relative;overflow:hidden">
+        <span id="fullSaveIcon">☁️</span>
+        <span id="fullSaveLabel">Hesabı Kaydet</span>
+        <span id="fullSaveSub" style="font-size:10px;color:var(--muted);font-weight:600;margin-left:4px">— tüm veri Turso'ya yazılır</span>
+      </button>
+      <div id="fullSaveStatus" style="text-align:center;font-size:11px;color:var(--muted);margin-top:5px;display:none"></div>
+    </div>
+
   </div><!-- /menuCard -->
 
   <!-- ── İNDİRME BÖLÜMÜ (mobile) ─────────────────────── -->
@@ -4274,73 +4102,6 @@ input[type=range].cc-range::-webkit-slider-thumb {
 </div>
 
 <!-- Confirm Modal -->
-<!-- ══════════════════════════════════════════════════════
-     v4.0 — iOS KONTROL MERKEZİ PANELİ
-     ══════════════════════════════════════════════════════ -->
-<div id="ccOverlay">
-  <div id="ccBackdrop" onclick="ccClose()"></div>
-  <div id="ccPanel">
-
-    <div class="cc-sec-title">Hızlı Ayarlar</div>
-    <div class="cc-quick-grid">
-      <button class="cc-quick-btn" id="ccBtnPerf" onclick="ccTogglePerf()">
-        <span class="cc-quick-icon">⚡</span>
-        <span class="cc-quick-label">Hız Modu</span>
-      </button>
-      <button class="cc-quick-btn" id="ccBtnSound" onclick="ccToggleSound()">
-        <span class="cc-quick-icon" id="ccSoundIcon">🔊</span>
-        <span class="cc-quick-label">Ses</span>
-      </button>
-      <button class="cc-quick-btn" id="ccBtnNotif" onclick="ccToggleNotif()">
-        <span class="cc-quick-icon">🔔</span>
-        <span class="cc-quick-label">Bildirim</span>
-      </button>
-      <button class="cc-quick-btn" onclick="ccClose();openStyleMarket()">
-        <span class="cc-quick-icon">🎨</span>
-        <span class="cc-quick-label">Temalar</span>
-      </button>
-    </div>
-
-    <div class="cc-sec-title">Tema Rengi</div>
-    <div class="cc-color-strip">
-      <div class="cc-swatch cc-swatch-sel" style="background:#00ff88" data-c="#00ff88" onclick="ccSetNeon(this)"></div>
-      <div class="cc-swatch" style="background:#7c6fff" data-c="#7c6fff" onclick="ccSetNeon(this)"></div>
-      <div class="cc-swatch" style="background:#f59e0b" data-c="#f59e0b" onclick="ccSetNeon(this)"></div>
-      <div class="cc-swatch" style="background:#ef4444" data-c="#ef4444" onclick="ccSetNeon(this)"></div>
-      <div class="cc-swatch" style="background:#38bdf8" data-c="#38bdf8" onclick="ccSetNeon(this)"></div>
-      <div class="cc-swatch" style="background:#a855f7" data-c="#a855f7" onclick="ccSetNeon(this)"></div>
-      <div class="cc-custom-color">
-        <span>+</span><span style="font-size:9px">Özel</span>
-        <input type="color" id="ccColorPicker" value="#00ff88" onchange="ccSetNeonHex(this.value)"/>
-      </div>
-    </div>
-
-    <div class="cc-sec-title">Arka Plan</div>
-    <div class="cc-bg-row">
-      <div style="font-size:11px;font-weight:700;color:var(--muted)">Resim URL'si</div>
-      <input class="cc-bg-input" id="ccBgInput" type="url" placeholder="https://... resim linki"/>
-      <div class="cc-btn-row">
-        <button class="cc-sm-btn cc-sm-primary" onclick="ccSaveBg()">✓ Uygula</button>
-        <button class="cc-sm-btn" onclick="ccClearBg()">🗑 Temizle</button>
-      </div>
-    </div>
-
-    <div class="cc-sec-title">Ses Seviyesi</div>
-    <div class="cc-slider-row">
-      <div class="cc-slider-hdr">
-        <span>🎵 Ses</span>
-        <span id="ccVolLabel">50%</span>
-      </div>
-      <input type="range" class="cc-range" id="ccVolRange" min="0" max="100" value="50" oninput="ccSetVol(this.value)"/>
-    </div>
-
-    <div class="cc-sec-title">Hesap Geçişi</div>
-    <div id="ccAccountsList"></div>
-    <button class="cc-sm-btn" style="width:100%;margin-top:4px" onclick="ccClose();openProfileModal&&openProfileModal()">👤 Profil</button>
-
-  </div>
-</div>
-
 <!-- ══════════════════════════════════════════════════════
      v4.0 — TEMA MARKET MODAL
      ══════════════════════════════════════════════════════ -->
@@ -16059,165 +15820,6 @@ function v4lsSetJSON(key, val) {
 /* Kayıtlı hesaplar listesi — { token, uid, name, avatar, level } */
 var _v4Accounts = v4lsGetJSON('mg_accounts_v4', []);
 
-/* ── 1. iOS KONTROL MERKEZİ ─────────────────────────────────────────── */
-
-var _ccSettings = {
-  lowPerf:  false,
-  soundOn:  true,
-  notifOn:  false,
-  volume:   50,
-  neonColor:'#00ff88',
-  bgUrl:    '',
-};
-
-/* Kaydedilmiş CC ayarları yükle */
-(function() {
-  var saved = v4lsGetJSON('mg_cc_settings', null);
-  if (saved) {
-    Object.assign(_ccSettings, saved);
-    /* Temayı uygula */
-    if (_ccSettings.neonColor) document.documentElement.style.setProperty('--neon', _ccSettings.neonColor);
-    if (_ccSettings.bgUrl) {
-      document.body.style.backgroundImage = 'url(' + _ccSettings.bgUrl + ')';
-      document.body.style.backgroundSize  = 'cover';
-      document.body.style.backgroundAttachment = 'fixed';
-    }
-    if (_ccSettings.lowPerf) document.body.classList.add('low-perf');
-  }
-})();
-
-function ccOpen() {
-  var panel = document.getElementById('ccOverlay');
-  if (!panel) return;
-  panel.classList.add('cc-open');
-  /* Mevcut değerleri panele yansıt */
-  var bgIn = document.getElementById('ccBgInput');
-  if (bgIn) bgIn.value = _ccSettings.bgUrl || '';
-  var volR = document.getElementById('ccVolRange');
-  if (volR) { volR.value = _ccSettings.volume; }
-  var volL = document.getElementById('ccVolLabel');
-  if (volL) volL.textContent = _ccSettings.volume + '%';
-  /* Düğme durumları */
-  var bPerf = document.getElementById('ccBtnPerf');
-  if (bPerf) bPerf.classList.toggle('cc-active', _ccSettings.lowPerf);
-  var bSnd = document.getElementById('ccBtnSound');
-  if (bSnd) bSnd.classList.toggle('cc-active', _ccSettings.soundOn);
-  var bNtf = document.getElementById('ccBtnNotif');
-  if (bNtf) bNtf.classList.toggle('cc-active', _ccSettings.notifOn);
-  /* Renk swatchlarını güncelle */
-  document.querySelectorAll('.cc-swatch').forEach(function(sw) {
-    sw.classList.toggle('cc-swatch-sel', sw.dataset.c === _ccSettings.neonColor);
-  });
-  /* Hesap listesini çiz */
-  ccRenderAccounts();
-}
-
-function ccClose() {
-  var panel = document.getElementById('ccOverlay');
-  if (panel) panel.classList.remove('cc-open');
-}
-
-function ccTogglePerf() {
-  _ccSettings.lowPerf = !_ccSettings.lowPerf;
-  document.body.classList.toggle('low-perf', _ccSettings.lowPerf);
-  var btn = document.getElementById('ccBtnPerf');
-  if (btn) btn.classList.toggle('cc-active', _ccSettings.lowPerf);
-  ccSaveSettings();
-  showToast(_ccSettings.lowPerf ? '⚡ Düşük güç modu açık' : '⚡ Düşük güç modu kapalı', '#f59e0b');
-}
-
-function ccToggleSound() {
-  _ccSettings.soundOn = !_ccSettings.soundOn;
-  /* Orijinal state varsa da güncelle */
-  if (typeof state !== 'undefined') state.soundOn = _ccSettings.soundOn;
-  var btn = document.getElementById('ccBtnSound');
-  if (btn) btn.classList.toggle('cc-active', _ccSettings.soundOn);
-  var icon = document.getElementById('ccSoundIcon');
-  if (icon) icon.textContent = _ccSettings.soundOn ? '🔊' : '🔇';
-  ccSaveSettings();
-}
-
-function ccToggleNotif() {
-  _ccSettings.notifOn = !_ccSettings.notifOn;
-  var btn = document.getElementById('ccBtnNotif');
-  if (btn) btn.classList.toggle('cc-active', _ccSettings.notifOn);
-  ccSaveSettings();
-  showToast(_ccSettings.notifOn ? '🔔 Bildirimler açık' : '🔕 Bildirimler kapalı', '#7c6fff');
-}
-
-function ccSetNeon(el) {
-  var color = el.dataset.c;
-  if (!color) return;
-  ccSetNeonHex(color);
-  document.querySelectorAll('.cc-swatch').forEach(function(sw) {
-    sw.classList.toggle('cc-swatch-sel', sw.dataset.c === color);
-  });
-}
-
-function ccSetNeonHex(color) {
-  _ccSettings.neonColor = color;
-  document.documentElement.style.setProperty('--neon', color);
-  /* Orijinal state varsa da güncelle */
-  if (typeof state !== 'undefined') state.btnColor = color;
-  /* Renk picker'ı da güncelle */
-  var picker = document.getElementById('ccColorPicker');
-  if (picker) picker.value = color;
-  ccSaveSettings();
-  /* Buluta kaydet */
-  ccSyncToCloud();
-}
-
-function ccSetVol(val) {
-  _ccSettings.volume = parseInt(val, 10);
-  var lbl = document.getElementById('ccVolLabel');
-  if (lbl) lbl.textContent = _ccSettings.volume + '%';
-  ccSaveSettings();
-}
-
-function ccSaveBg() {
-  var input = document.getElementById('ccBgInput');
-  var url   = input ? input.value.trim() : '';
-  _ccSettings.bgUrl = url;
-  if (url) {
-    document.body.style.backgroundImage  = 'url(' + url + ')';
-    document.body.style.backgroundSize   = 'cover';
-    document.body.style.backgroundAttachment = 'fixed';
-    if (typeof state !== 'undefined') state.bgImage = url;
-  } else {
-    document.body.style.backgroundImage = '';
-    if (typeof state !== 'undefined') state.bgImage = null;
-  }
-  ccSaveSettings();
-  ccSyncToCloud();
-  showToast('🖼 Arka plan kaydedildi', '#00ff88');
-}
-
-function ccClearBg() {
-  _ccSettings.bgUrl = '';
-  document.body.style.backgroundImage = '';
-  var input = document.getElementById('ccBgInput');
-  if (input) input.value = '';
-  if (typeof state !== 'undefined') state.bgImage = null;
-  ccSaveSettings();
-  ccSyncToCloud();
-  showToast('🗑 Arka plan temizlendi', '#f59e0b');
-}
-
-function ccSaveSettings() {
-  v4lsSetJSON('mg_cc_settings', _ccSettings);
-}
-
-function ccSyncToCloud() {
-  /* Mevcut token ve workerPost varsa profili buluta kaydet */
-  var token = v4GetCurrentToken();
-  if (!token || typeof workerPost !== 'function') return;
-  workerPost('save-profile', {
-    token:      token,
-    bg:         _ccSettings.bgUrl || null,
-    settings:   { neonColor: _ccSettings.neonColor, bgUrl: _ccSettings.bgUrl, lowPerf: _ccSettings.lowPerf, volume: _ccSettings.volume },
-  }).catch(function() {});
-}
-
 /* ── 2. HESAP GEÇİŞİ ────────────────────────────────────────────────── */
 
 function v4GetCurrentToken() {
@@ -16558,24 +16160,254 @@ async function smPublishCurrentTheme() {
   }
 }
 
-/* ── CC Header Butonunu Başlığa Ekle ────────────────────────────────── */
+/* ── Discord Davet Linki ─────────────────────────────────────────────── */
+var _discordInviteUrl = null;
+
+async function v4OpenDiscordInvite(e) {
+  if (e) e.preventDefault();
+  /* Zaten biliyorsak direkt aç */
+  if (_discordInviteUrl) { window.open(_discordInviteUrl, '_blank'); return; }
+
+  /* Worker'dan çek */
+  try {
+    var resp = await fetch(WORKER_URL + '/discord-invite');
+    var data = await resp.json();
+    _discordInviteUrl = (data && data.inviteUrl) ? data.inviteUrl : null;
+  } catch(err) {
+    _discordInviteUrl = null;
+  }
+
+  if (_discordInviteUrl) {
+    var btn = document.getElementById('discordInviteBtn');
+    if (btn) btn.href = _discordInviteUrl;
+    window.open(_discordInviteUrl, '_blank');
+  } else {
+    showToast('⚠️ Davet linki alınamadı', '#f59e0b');
+  }
+}
+
+/* Sayfa yüklenince davet linkini önceden çek ve butona yaz */
 (function() {
   document.addEventListener('DOMContentLoaded', function() {
-    var headerRight = document.querySelector('.header-right');
-    if (headerRight) {
-      var ccBtn = document.createElement('button');
-      ccBtn.innerHTML = '⚙️';
-      ccBtn.title = 'Kontrol Merkezi';
-      ccBtn.style.cssText = 'width:36px;height:36px;border-radius:50%;background:var(--glass2);border:1px solid var(--border2);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;color:var(--text);flex-shrink:0;vertical-align:middle';
-      ccBtn.onclick = function() { ccOpen(); };
-      /* Güvenli ekleme — insertBefore yerine prepend/appendChild */
-      headerRight.insertBefore(ccBtn, headerRight.firstChild);
-    }
+    fetch(WORKER_URL + '/discord-invite')
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data && data.inviteUrl) {
+          _discordInviteUrl = data.inviteUrl;
+          var btn = document.getElementById('discordInviteBtn');
+          if (btn) btn.href = data.inviteUrl;
+        }
+      })
+      .catch(function() {});
   });
 })();
 
 /* authGoogleBtn mevcut fonksiyonla çalışıyor — dokunmuyoruz */
 /* authDiscordBtn v4DiscordLogin'e bağlı */
+
+/* ══════════════════════════════════════════════════════════════════════
+   v4.0 — ANA MENÜ KAYDET BUTONU (full-save)
+   Tüm profil + başarım + market + klan verilerini tek istekte Turso'ya yazar
+   ══════════════════════════════════════════════════════════════════════ */
+
+async function v4FullSave() {
+  var btn   = document.getElementById('fullSaveBtn');
+  var icon  = document.getElementById('fullSaveIcon');
+  var label = document.getElementById('fullSaveLabel');
+  var sub   = document.getElementById('fullSaveSub');
+  var status= document.getElementById('fullSaveStatus');
+
+  /* Token al */
+  var token = v4GetCurrentToken();
+  if (!token) {
+    showToast('⚠️ Kaydetmek için giriş yapmalısın', '#f59e0b');
+    return;
+  }
+
+  /* Buton yükleniyor durumu */
+  if (btn) btn.disabled = true;
+  if (icon) icon.textContent = '⏳';
+  if (label) label.textContent = 'Kaydediliyor...';
+  if (sub) sub.textContent = '';
+  if (status) { status.style.display = 'none'; }
+
+  try {
+    /* Mevcut state'ten veri topla */
+    var profileData = {};
+    if (typeof state !== 'undefined') {
+      profileData = {
+        score:         state.score        || 0,
+        level:         state.level        || 1,
+        ops:           state.ops          || ['+','-','*','/'],
+        coins:         state.coins        || 0,
+        diamonds:      state.diamonds     || 0,
+        jokers:        state.jokers       || {},
+        inventory:     state.inventory    || [],
+        loginStreak:   state.loginStreak  || 0,
+        lastLoginDate: state.lastLoginDate|| null,
+        clanId:        state.clanId       || null,
+        stats:         state.stats        || {},
+        achievements:  state.achievements || {},
+        bio:           state.bio          || '',
+        avatar:        state.avatar       || '',
+        theme:         state.theme        || '',
+        bg:            state.bgImage      || state.bg || null,
+        backgroundUrl: state.bgImage      || state.bg || null,
+        settings: {
+          neonColor: state.btnColor || '#00ff66',
+          bgUrl:     state.bgImage  || null,
+          soundOn:   state.soundOn  !== false,
+        },
+        permTasks:     state.permTasks     || null,
+        achieveTasks:  state.achieveTasks  || null,
+        dailyTasksKey: state.dailyTasksKey || null,
+        dailyTasksData:state.dailyTasksData|| null,
+        _shopBuys:     state._shopBuys     || 0,
+        _jokersUsed:   state._jokersUsed   || 0,
+        _economyV26:   true,
+      };
+    }
+
+    /* Klan verisi */
+    var clanData = null;
+    if (typeof state !== 'undefined' && state.clanId && typeof authUser !== 'undefined' && authUser) {
+      clanData = {
+        id: state.clanId,
+        memberData: { name: authUser.name || '', lastSeen: Date.now() },
+      };
+    }
+
+    /* Shop items — mağaza alımları */
+    var shopItemsData = null;
+    if (typeof state !== 'undefined' && state._shopBuys) {
+      shopItemsData = { _shopBuys: state._shopBuys, jokers: state.jokers || {}, inventory: state.inventory || [] };
+    }
+
+    var payload = {
+      token:      token,
+      profile:    profileData,
+      score:      profileData.score,
+      level:      profileData.level,
+      ops:        'all',
+    };
+    if (clanData)      payload.clan      = clanData;
+    if (shopItemsData) payload.shopItems = shopItemsData;
+    if (profileData.achievements && Object.keys(profileData.achievements).length > 0) {
+      payload.achievements = profileData.achievements;
+    }
+
+    var resp = await fetch(WORKER_URL + '/full-save', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify(payload),
+    });
+    var data = await resp.json();
+
+    if (data.ok) {
+      if (icon)  icon.textContent  = '✅';
+      if (label) label.textContent = 'Kaydedildi!';
+      if (sub)   sub.textContent   = '';
+      if (status) {
+        status.style.display = 'block';
+        status.style.color   = 'var(--neon)';
+        status.textContent   = '✓ Tüm veriler Turso\'ya yazıldı — ' + new Date().toLocaleTimeString('tr-TR');
+      }
+      showToast('✅ Hesap kaydedildi', '#00ff88');
+      /* 3 saniye sonra butonu normale döndür */
+      setTimeout(function() {
+        if (btn)   btn.disabled      = false;
+        if (icon)  icon.textContent  = '☁️';
+        if (label) label.textContent = 'Hesabı Kaydet';
+        if (sub)   sub.textContent   = '— tüm veri Turso\'ya yazılır';
+      }, 3000);
+    } else {
+      throw new Error(data.error || 'Sunucu hatası');
+    }
+  } catch(e) {
+    if (btn)   btn.disabled      = false;
+    if (icon)  icon.textContent  = '❌';
+    if (label) label.textContent = 'Kayıt Başarısız';
+    if (sub)   sub.textContent   = '';
+    if (status) {
+      status.style.display = 'block';
+      status.style.color   = 'var(--warn)';
+      status.textContent   = e.message;
+    }
+    showToast('❌ Kayıt hatası: ' + e.message, '#ef4444');
+    setTimeout(function() {
+      if (btn)   btn.disabled      = false;
+      if (icon)  icon.textContent  = '☁️';
+      if (label) label.textContent = 'Hesabı Kaydet';
+      if (sub)   sub.textContent   = '— tüm veri Turso\'ya yazılır';
+    }, 4000);
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   v4.0 — BAŞARIM UNLOCK TURSO ENTEGRASYONU
+   Orijinal unlockAchievement fonksiyonu çağrısını yakala,
+   Turso'ya da yaz.
+   ══════════════════════════════════════════════════════════════════════ */
+(function() {
+  /* Orijinal fonksiyonu yoksa bekle */
+  var _patchInterval = setInterval(function() {
+    if (typeof unlockAchievement !== 'function') return;
+    clearInterval(_patchInterval);
+
+    var _origUnlock = unlockAchievement;
+    window.unlockAchievement = function(achKey) {
+      /* Önce orijinali çalıştır */
+      _origUnlock.apply(this, arguments);
+
+      /* Sonra Turso'ya yaz */
+      var token = v4GetCurrentToken();
+      if (!token || !achKey) return;
+      fetch(WORKER_URL + '/achievement/unlock', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ token: token, achievement_name: String(achKey) }),
+      }).catch(function() {});
+    };
+  }, 500);
+})();
+
+/* ══════════════════════════════════════════════════════════════════════
+   v4.0 — MAĞAZA ALIMI TURSO ENTEGRASYONU
+   buyShopItem / completePurchase gibi fonksiyonları yakala
+   ══════════════════════════════════════════════════════════════════════ */
+(function() {
+  var _shopPatchInterval = setInterval(function() {
+    /* completePurchase veya buyItem fonksiyonu bekle */
+    var fnName = typeof completePurchase === 'function' ? 'completePurchase'
+               : typeof buyShopItem     === 'function' ? 'buyShopItem'
+               : null;
+    if (!fnName) return;
+    clearInterval(_shopPatchInterval);
+
+    var _origFn = window[fnName];
+    window[fnName] = function() {
+      _origFn.apply(this, arguments);
+      /* Alım sonrası Turso'ya shop verisi yaz */
+      setTimeout(function() {
+        var token = v4GetCurrentToken();
+        if (!token) return;
+        var shopPayload = {
+          token: token,
+          shopItems: {
+            _shopBuys:  (typeof state !== 'undefined' ? (state._shopBuys  || 0) : 0),
+            jokers:     (typeof state !== 'undefined' ? (state.jokers     || {}) : {}),
+            inventory:  (typeof state !== 'undefined' ? (state.inventory  || []) : []),
+          },
+        };
+        fetch(WORKER_URL + '/full-save', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify(shopPayload),
+        }).catch(function() {});
+      }, 300);
+    };
+  }, 800);
+})();
 
 </script>
 </body>
