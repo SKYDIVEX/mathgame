@@ -1,0 +1,357 @@
+/* ══ MathGame · css/modals-misc.css ══ */
+/* ── BG Library ──────────────────────────────────────── */
+#bgLibModal {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  background: rgba(8,11,18,0.95);
+  backdrop-filter: blur(20px);
+  align-items: flex-end;
+  justify-content: center;
+}
+#bgLibInner {
+  width: 100%;
+  max-width: 480px;
+  max-height: 85vh;
+  background: #0d1117;
+  border-top: 1px solid var(--border2);
+  border-radius: 28px 28px 0 0;
+  overflow-y: auto;
+  padding: 20px 16px 40px;
+  animation: slideUp .3s ease;
+}
+.bglib-cat-title {
+  font-family: var(--font-head);
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--muted);
+  margin: 14px 0 8px;
+}
+.bglib-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.bglib-item {
+  position: relative;
+  height: 90px;
+  border-radius: 12px;
+  cursor: pointer;
+  border: 2px solid transparent;
+  overflow: hidden;
+  background: var(--glass2);
+}
+.bglib-item::after { content: ''; position: absolute; inset: 0; background: rgba(255,255,255,0); transition: background 0.15s; }
+.bglib-item:active::after { background: rgba(255,255,255,0.15); }
+.bglib-item.active { border-color: var(--neon); }
+.bglib-item img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 10px; }
+.bg-fallback { position: absolute; inset: 0; border-radius: 10px; }
+.bglib-item-name {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  padding: 4px 6px;
+  background: linear-gradient(transparent, rgba(0,0,0,0.7));
+  font-size: 9px; font-weight: 700; color: white;
+  border-radius: 0 0 10px 10px;
+}
+
+/* ── About Modal ─────────────────────────────────────── */
+#aboutModal {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  background: rgba(8,11,18,0.92);
+  backdrop-filter: blur(20px);
+  align-items: flex-end;
+  justify-content: center;
+}
+#aboutCard {
+  width: 100%;
+  max-width: 480px;
+  max-height: 90vh;
+  background: #0d1117;
+  border: 1px solid var(--border2);
+  border-radius: 24px 24px 0 0;
+  overflow-y: auto;
+  padding: 24px 20px 40px;
+  animation: slideUp .35s ease;
+}
+.about-hero { margin-bottom: 20px; }
+.about-hero-title { font-family: var(--font-head); font-size: 24px; font-weight: 900; }
+.about-hero-sub { font-size: 13px; color: var(--muted); margin-top: 4px; }
+.about-badge { display: inline-flex; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; background: var(--neon-dim); color: var(--neon); border: 1px solid rgba(0,255,136,0.25); margin-top: 8px; }
+.cl-text { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+/* ── Hakkında Modal İçerik ── */
+.how-title {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+.how-desc {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+.how-icon {
+  font-size: 22px;
+  margin-bottom: 6px;
+}
+.about-how-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.about-how-item {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px;
+}
+.about-section {
+  margin-bottom: 20px;
+}
+.about-section-title {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: var(--muted2);
+  margin-bottom: 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+.about-changelog {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.about-changelog-item {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 10px 12px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+.cl-ver {
+  flex-shrink: 0;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 8px;
+  background: var(--glass2);
+  color: var(--muted);
+  letter-spacing: 0.5px;
+  margin-top: 2px;
+}
+
+/* ── Quest Sekmeleri ── */
+.quest-tab {
+  padding: 6px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--glass);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  font-family: var(--font-body);
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all 0.15s;
+}
+.quest-tab.active {
+  background: var(--neon-dim);
+  border-color: var(--neon);
+  color: var(--neon);
+}
+
+/* ── Mağaza ── */
+.shop-tab {
+  padding: 7px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--glass);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  font-family: var(--font-body);
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all 0.15s;
+}
+.shop-tab.active {
+  background: var(--neon-dim);
+  border-color: var(--neon);
+  color: var(--neon);
+}
+.shop-item {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+  transition: border-color 0.2s;
+}
+.shop-item:active { border-color: var(--neon); }
+.shop-item-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.06);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  flex-shrink: 0;
+}
+.shop-item-info { flex: 1; min-width: 0; }
+.shop-item-name { font-size: 14px; font-weight: 800; color: var(--text); }
+.shop-item-desc { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.shop-buy-btn {
+  padding: 8px 14px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  border: none;
+  font-family: var(--font-body);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.shop-buy-coin { background: rgba(255,215,0,0.15); color: #ffd700; border: 1px solid rgba(255,215,0,0.3); }
+.shop-buy-dia  { background: rgba(99,179,237,0.15); color: #63b3ed; border: 1px solid rgba(99,179,237,0.3); }
+.shop-buy-owned { background: rgba(0,255,136,0.1); color: var(--neon); border: 1px solid rgba(0,255,136,0.25); }
+
+/* ── Float ödül animasyonu ── */
+@keyframes floatUp {
+  0%   { opacity:1; transform:translateX(-50%) translateY(0); }
+  100% { opacity:0; transform:translateX(-50%) translateY(-60px); }
+}
+
+/* ── Joker Bar ── */
+#jokerBar {
+  display: none;
+  gap: 8px;
+  padding: 8px 0;
+  justify-content: center;
+}
+
+/* ── Günlük Giriş ── */
+.login-day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 6px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.02);
+  flex: 1;
+  min-width: 0;
+}
+.login-day.claimed { background: rgba(0,255,136,0.06); border-color: rgba(0,255,136,0.2); }
+.login-day.today   { background: rgba(255,215,0,0.08); border-color: rgba(255,215,0,0.35); }
+.login-day.locked  { opacity: 0.45; }
+.daily-task-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  margin-bottom: 8px;
+  transition: border-color 0.2s;
+}
+.daily-task-card.completed {
+  background: rgba(0,255,136,0.05);
+  border-color: rgba(0,255,136,0.2);
+}
+.daily-task-icon { font-size: 20px; flex-shrink: 0; }
+.daily-task-info { flex: 1; min-width: 0; }
+.daily-task-title { font-size: 13px; font-weight: 700; color: var(--text); }
+.daily-task-desc  { font-size: 11px; color: var(--muted); margin-top: 1px; }
+.daily-task-progress {
+  height: 4px;
+  background: var(--glass2);
+  border-radius: 4px;
+  margin-top: 6px;
+  overflow: hidden;
+}
+.daily-task-progress-fill {
+  height: 100%;
+  background: var(--neon);
+  border-radius: 4px;
+  transition: width 0.4s;
+}
+.daily-task-bonus {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--neon);
+  flex-shrink: 0;
+}
+
+/* ── Chat Modal ──────────────────────────────────────── */
+#chatModal {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  background: rgba(8,11,18,0.92);
+  backdrop-filter: blur(20px);
+  align-items: flex-end;
+  justify-content: center;
+}
+#chatBox {
+  width: 100%;
+  max-width: 480px;
+  height: 65vh;
+  background: #0d1117;
+  border: 1px solid var(--border2);
+  border-radius: 24px 24px 0 0;
+  display: flex;
+  flex-direction: column;
+  animation: slideUp .35s ease;
+}
+#chatHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+#chatMessages { flex: 1; overflow-y: auto; padding: 12px 16px; display: flex; flex-direction: column; gap: 8px; }
+.chat-msg {
+  max-width: 85%;
+  padding: 8px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  line-height: 1.4;
+}
+.chat-msg.from-user { background: var(--neon-dim); border: 1px solid rgba(0,255,136,0.2); align-self: flex-end; }
+.chat-msg.from-admin { background: var(--glass2); border: 1px solid var(--border); align-self: flex-start; }
+.chat-msg.from-system { background: transparent; color: var(--muted); font-size: 11px; text-align: center; align-self: center; }
+#chatInputRow { display: flex; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--border); flex-shrink: 0; }
+#chatInput { flex: 1; padding: 10px 14px; background: var(--glass2); border: 1px solid var(--border); border-radius: 10px; color: var(--text); font-size: 14px; font-family: var(--font-body); outline: none; resize: none; }
+#chatSendBtn { padding: 10px 16px; background: var(--neon); color: #030608; border: none; border-radius: 10px; font-weight: 800; cursor: pointer; }
+
+/* ── Request Modal ───────────────────────────────────── */
+#requestModal {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  background: rgba(8,11,18,0.92);
+  backdrop-filter: blur(20px);
+  align-items: flex-end;
+  justify-content: center;
+}

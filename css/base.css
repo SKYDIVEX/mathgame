@@ -1,0 +1,158 @@
+/* ══ MathGame · css/base.css ══ */
+/* ═══════════════════════════════════════════════════════
+   MathGame CSS — v4.0 SKYDIVEX
+   BUTON BÜYÜME: transform KULLANILMIYOR, ASLA
+   ═══════════════════════════════════════════════════════ */
+
+/* ── Reset & Zoom Engeli ─────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0; padding: 0;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+}
+/* Input/textarea seçime izin ver */
+input, textarea, [contenteditable] {
+  -webkit-user-select: text !important;
+  user-select: text !important;
+}
+
+/* ── Düşük Performans Modu ───────────────────────────── */
+body.low-perf *, body.low-perf *::before, body.low-perf *::after {
+  animation-duration: 0.001ms !important;
+  transition-duration: 0.001ms !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
+}
+body.low-perf .confetti-piece, body.low-perf .particle { display:none!important; }
+
+/* ── Animasyon değişkenleri ─────────────────────────── */
+:root { --anim-scale:1; --anim-speed:1; }
+
+/* ── FC Mobile Takvim Kartları ─────────────────────── */
+.fc-cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:5px; padding:4px 0; }
+.fc-cal-card { position:relative; border-radius:12px; padding:6px 2px; text-align:center; min-height:68px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; overflow:hidden; }
+.fc-cal-card.past  { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.05); opacity:0.55; }
+.fc-cal-card.today { background:rgba(0,255,136,0.09); border:2px solid var(--neon); animation:fcGlow 2s ease-in-out infinite alternate; }
+.fc-cal-card.future { background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); opacity:0.45; }
+.fc-cal-card.admin-editable { cursor:pointer; }
+.fc-cal-card.admin-editable:hover { background:rgba(255,215,0,0.08)!important; border-color:rgba(255,215,0,0.3)!important; opacity:1!important; }
+@keyframes fcGlow { from { box-shadow:0 0 8px rgba(0,255,136,0.2); } to { box-shadow:0 0 22px rgba(0,255,136,0.5); } }
+.fc-cal-day-num { font-size:8px; font-weight:800; letter-spacing:0.5px; }
+.fc-cal-icon { font-size:18px; line-height:1; position:relative; }
+.fc-cal-card.past .fc-cal-icon::after { content:'✔️'; position:absolute; inset:-2px; display:flex; align-items:center; justify-content:center; font-size:18px; background:rgba(0,0,0,0.55); border-radius:4px; }
+.fc-cal-label { font-size:7px; font-weight:700; color:var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; width:100%; padding:0 2px; }
+.fc-cal-claim-btn { margin-top:3px; padding:3px 6px; border-radius:6px; background:linear-gradient(135deg,#ffd700,#f59e0b); border:none; color:#000; font-size:8px; font-weight:900; cursor:pointer; font-family:inherit; width:100%; }
+.fc-cal-lock { font-size:14px; opacity:0.35; margin-top:4px; }
+
+/* Admin takvim popup */
+.cal-day-popup { position:fixed; inset:0; z-index:99999; background:rgba(4,6,12,0.96); display:flex; align-items:center; justify-content:center; padding:20px; backdrop-filter:blur(20px); }
+.cal-day-popup-card { background:#0d1117; border:1px solid rgba(255,215,0,0.25); border-radius:20px; padding:24px 20px; width:100%; max-width:340px; }
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  font-size: 16px;
+}
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overscroll-behavior: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── CSS Değişkenleri ────────────────────────────────── */
+:root {
+  --neon: #00ff88;
+  --accent: #7c6fff;
+  --bg: #080b12;
+  --bg2: #0d1117;
+  --bg3: #111827;
+  --text: #e8f4f0;
+  --muted: rgba(232,244,240,0.5);
+  --muted2: rgba(232,244,240,0.25);
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.12);
+  --glass: rgba(255,255,255,0.04);
+  --glass2: rgba(255,255,255,0.08);
+  --warn: #ff6b6b;
+  --gold: #ffd700;
+  --neon-dim: rgba(0,255,136,0.08);
+  --radius: 18px;
+  --radius-sm: 12px;
+  --radius-xs: 8px;
+  --font-head: 'Syne', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+  --font-mono: 'DM Mono', monospace;
+}
+
+/* ── Butonlar — TRANSFORM YOK ────────────────────────── */
+button, [role="button"], .btn, .play-card, .admin-btn,
+.lb-tab, .lb-ops-btn, .auth-google-btn, .profile-btn,
+.profile-save-btn, .pin-key, .ach-card, .absurd-choice,
+.admin-tab-btn, .theme-btn, [onclick] {
+  touch-action: manipulation !important;
+  -webkit-user-select: none !important;
+  user-select: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+  /* TRANSFORM ASLA YOK */
+}
+/* Ripple için şart: position:relative + overflow:hidden */
+button:not([style*="position"]):not(.lock-input-wrap button) {
+  position: relative;
+  overflow: hidden;
+}
+input, textarea, select {
+  font-size: 16px !important;
+  touch-action: manipulation;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 11px 18px;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: linear-gradient(135deg, var(--neon), #00cc66);
+  color: #030608;
+  font-size: 13px;
+  font-weight: 800;
+  font-family: var(--font-body);
+  cursor: pointer;
+  white-space: nowrap;
+  outline: none;
+  position: relative;
+  overflow: hidden;
+}
+.btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0);
+  transition: background 0.15s;
+  border-radius: inherit;
+}
+.btn:active::after { background: rgba(0,0,0,0.2); }
+
+.btn.ghost {
+  background: var(--glass2);
+  color: var(--text);
+  border: 1px solid var(--border2);
+}
+.btn.ghost:active::after { background: rgba(255,255,255,0.1); }
+.btn.primary {
+  background: linear-gradient(135deg, var(--neon), #00cc66);
+  color: #030608;
+}
+.btn.danger {
+  background: rgba(255,107,107,0.15);
+  color: var(--warn);
+  border: 1px solid rgba(255,107,107,0.3);
+}
+.btn.sm { padding: 7px 12px; font-size: 12px; }
+.btn.full { width: 100%; }

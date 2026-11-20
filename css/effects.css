@@ -1,0 +1,243 @@
+/* ══ MathGame · css/effects.css ══ */
+/* ── Combo & streak ──────────────────────────────────── */
+#comboDisplay {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%,-50%) scale(0);
+  z-index: 500;
+  font-family: var(--font-head);
+  font-size: 32px;
+  font-weight: 900;
+  color: var(--neon);
+  text-shadow: 0 0 20px var(--neon);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+#comboDisplay.show { opacity: 1; transform: translate(-50%,-50%) scale(1); }
+#streakDisplay {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%,-50%) scale(0);
+  z-index: 500;
+  pointer-events: none;
+  opacity: 0;
+  text-align: center;
+}
+#streakDisplay.show { transform: translate(-50%,-50%) scale(1); opacity: 1; }
+
+/* ── Başarım popup ───────────────────────────────────── */
+#achPopup {
+  position: fixed;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  width: calc(100% - 32px);
+  max-width: 400px;
+  pointer-events: none;
+  display: none;
+}
+#achPopup.show {
+  display: block !important;
+  animation: achSlideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+#achPopup.hide {
+  animation: achSlideDown 0.3s ease forwards;
+}
+@keyframes achSlideUp {
+  from { opacity: 0; transform: translateX(-50%) translateY(40px) scale(0.9); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0)    scale(1); }
+}
+@keyframes achSlideDown {
+  from { opacity: 1; transform: translateX(-50%) translateY(0)    scale(1); }
+  to   { opacity: 0; transform: translateX(-50%) translateY(20px) scale(0.95); }
+}
+#achPopupCard {
+  background: linear-gradient(135deg, #0f1a2e, #0d1117);
+  border: 1.5px solid rgba(0,255,136,0.4);
+  border-radius: 20px;
+  padding: 16px 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.6), 0 0 30px rgba(0,255,136,0.15);
+  pointer-events: auto;
+  position: relative;
+  overflow: hidden;
+}
+#achPopupCard::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(0,255,136,0.06), transparent 60%);
+  pointer-events: none;
+}
+.ach-popup-icon {
+  font-size: 38px;
+  flex-shrink: 0;
+  filter: drop-shadow(0 0 8px rgba(255,215,0,0.5));
+  animation: achIconPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s both;
+}
+@keyframes achIconPop {
+  from { transform: scale(0) rotate(-20deg); }
+  to   { transform: scale(1) rotate(0deg); }
+}
+.ach-popup-body { flex: 1; min-width: 0; }
+.ach-popup-label {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--neon);
+  margin-bottom: 3px;
+}
+.ach-popup-name {
+  font-family: var(--font-head);
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--text);
+  line-height: 1.2;
+}
+.ach-popup-desc {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+.ach-popup-shine {
+  position: absolute;
+  top: -50%;
+  left: -60%;
+  width: 40%;
+  height: 200%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent);
+  transform: skewX(-15deg);
+  animation: achShine 1.2s ease 0.2s forwards;
+}
+@keyframes achShine {
+  from { left: -60%; }
+  to   { left: 120%; }
+}
+
+/* ── Konfeti ─────────────────────────────────────────── */
+
+/* ── Partikül efekti ── */
+.particle {
+  position: fixed;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 8000;
+  animation: particleBurst var(--dur, 0.8s) ease-out forwards;
+}
+@keyframes particleBurst {
+  0%   { transform: translate(0,0) scale(1); opacity: 1; }
+  100% { transform: translate(var(--tx,50px),var(--ty,-80px)) scale(0); opacity: 0; }
+}
+.confetti-piece {
+  position: fixed;
+  pointer-events: none;
+  z-index: 9998;
+  animation: confettiFall var(--dur, 1.5s) ease-in var(--delay, 0s) forwards;
+}
+@keyframes confettiFall {
+  0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(var(--ty, 400px)) translateX(var(--tx, 50px)) rotate(var(--rot, 360deg)); opacity: 0; }
+}
+
+/* ── Duyuru banner ───────────────────────────────────── */
+#announcementBanner {
+  background: linear-gradient(135deg, rgba(245,158,11,0.15), rgba(251,191,36,0.08));
+  border: 1px solid rgba(245,158,11,0.25);
+  border-radius: 14px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13px;
+}
+#eventBanner {
+  background: linear-gradient(135deg, rgba(255,215,0,0.12), rgba(255,165,0,0.08));
+  border: 1px solid rgba(255,215,0,0.25);
+  border-radius: 14px;
+  padding: 10px 14px;
+  margin-bottom: 10px;
+  font-size: 13px;
+  color: var(--gold);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ── Misc ────────────────────────────────────────────── */
+.small { font-size: 12px; }
+.muted { color: var(--muted); }
+.title { font-family: var(--font-head); font-size: 20px; font-weight: 800; }
+.subtitle { font-size: 12px; color: var(--muted); }
+#bgLayer { position: fixed; inset: 0; z-index: -1; background: linear-gradient(180deg, #080b12, #0d1220); }
+#bgLayer.has-image { background-size: cover; background-position: center; filter: brightness(0.35); }
+.pub-admin-section { border-top: 1px solid var(--border); margin-top: 12px; padding-top: 12px; }
+
+/* ── Ayar paneli ─────────────────────────────────────── */
+#settingsPanel {
+  background: var(--glass);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px;
+  margin-top: 10px;
+}
+
+/* ── Project lock ────────────────────────────────────── */
+#projectLock {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: #080b12;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+#projectLock.show { display: flex !important; }
+#lockCard {
+  text-align: center;
+  padding: 40px 32px;
+  background: #0d1117;
+  border: 1px solid var(--border2);
+  border-radius: 24px;
+  width: calc(100% - 40px);
+  max-width: 360px;
+}
+.lock-icon { font-size: 48px; margin-bottom: 16px; }
+.lock-title { font-family: var(--font-head); font-size: 24px; font-weight: 900; }
+.lock-sub { font-size: 13px; color: var(--muted); margin-top: 8px; line-height: 1.5; }
+.lock-input-wrap { position: relative; margin: 20px 0 8px; }
+.lock-input-wrap input { width: 100%; padding: 14px 50px 14px 16px; background: var(--glass2); border: 1.5px solid var(--border2); border-radius: 12px; color: var(--text); font-size: 16px; font-family: var(--font-body); outline: none; }
+.lock-input-wrap button { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 18px; }
+#lockError { font-size: 13px; color: var(--warn); min-height: 20px; margin-bottom: 8px; }
+#lockSubmitBtn { width: 100%; padding: 14px; background: linear-gradient(135deg, var(--neon), #00cc66); color: #030608; border: none; border-radius: 12px; font-size: 15px; font-weight: 800; font-family: var(--font-body); cursor: pointer; }
+.lock-footer { font-size: 11px; color: var(--muted2); margin-top: 16px; }
+
+/* ── Animasyonlar ────────────────────────────────────── */
+@keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@keyframes dropIn { from { transform: translateY(-10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* ── Liquid Ripple — BUTON BÜYÜME ÖNLEYICI ───────────── */
+/* position:absolute + pointer-events:none olmadan span
+   inline-block gibi davranıp butonu dışarıdan büyütüyor! */
+.liquid-ripple {
+  position: absolute !important;
+  border-radius: 50% !important;
+  background: rgba(255,255,255,0.22);
+  transform: scale(0);
+  animation: rippleAnim 0.55s linear forwards;
+  pointer-events: none !important;
+  display: block !important;
+  z-index: 0;
+}
+@keyframes rippleAnim {
+  to { transform: scale(2.2); opacity: 0; }
+}
